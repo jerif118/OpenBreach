@@ -33,7 +33,9 @@ type ReportAiChatExecutorInput = {
   systemPrompts: string[];
 };
 
-type ReportAiChatExecutor = (input: ReportAiChatExecutorInput) => Promise<string>;
+type ReportAiChatExecutor = (
+  input: ReportAiChatExecutorInput,
+) => Promise<string>;
 
 export type CreateReportAiAdapterOptions = {
   chat?: ReportAiChatExecutor;
@@ -58,7 +60,10 @@ function getConfiguredModel() {
   return process.env.AI_PROVIDER_MODEL ?? "anthropic/claude-sonnet-4";
 }
 
-function buildProviderPrompt(input: GenerateRemediationReportInput, variant: ReportAudience) {
+function buildProviderPrompt(
+  input: GenerateRemediationReportInput,
+  variant: ReportAudience,
+) {
   const normalized = normalizeReportInput(input);
 
   return JSON.stringify(
@@ -86,14 +91,46 @@ function buildProviderPrompt(input: GenerateRemediationReportInput, variant: Rep
         findings: "array matching the supplied normalized finding shape",
         sections: {
           scope: { title: "string", narrative: "string", bullets: ["string"] },
-          authorization: { title: "string", narrative: "string", bullets: ["string"] },
-          methodology: { title: "string", narrative: "string", bullets: ["string"] },
-          findingsOverview: { title: "string", narrative: "string", bullets: ["string"] },
-          skippedTests: { title: "string", narrative: "string", bullets: ["string"] },
-          validationStatus: { title: "string", narrative: "string", bullets: ["string"] },
-          limitations: { title: "string", narrative: "string", bullets: ["string"] },
-          remediationChecklist: { title: "string", narrative: "string", bullets: ["string"] },
-          verificationGuidance: { title: "string", narrative: "string", bullets: ["string"] },
+          authorization: {
+            title: "string",
+            narrative: "string",
+            bullets: ["string"],
+          },
+          methodology: {
+            title: "string",
+            narrative: "string",
+            bullets: ["string"],
+          },
+          findingsOverview: {
+            title: "string",
+            narrative: "string",
+            bullets: ["string"],
+          },
+          skippedTests: {
+            title: "string",
+            narrative: "string",
+            bullets: ["string"],
+          },
+          validationStatus: {
+            title: "string",
+            narrative: "string",
+            bullets: ["string"],
+          },
+          limitations: {
+            title: "string",
+            narrative: "string",
+            bullets: ["string"],
+          },
+          remediationChecklist: {
+            title: "string",
+            narrative: "string",
+            bullets: ["string"],
+          },
+          verificationGuidance: {
+            title: "string",
+            narrative: "string",
+            bullets: ["string"],
+          },
         },
         generatedBy: "ai-provider",
       },
@@ -106,7 +143,8 @@ function buildProviderPrompt(input: GenerateRemediationReportInput, variant: Rep
 
 function parseProviderReport(content: string): RemediationReport {
   const trimmed = content.trim();
-  const json = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/)?.[1] ?? trimmed;
+  const json =
+    trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/)?.[1] ?? trimmed;
 
   return remediationReportSchema.parse(JSON.parse(json));
 }
@@ -118,8 +156,15 @@ async function runTanStackChat({
   providerKey,
   systemPrompts,
 }: ReportAiChatExecutorInput) {
-  const adapters: Record<ReportAiAdapterProvider, () => ReturnType<typeof createOpenRouterText>> = {
-    openrouter: () => createOpenRouterText(model as Parameters<typeof createOpenRouterText>[0], providerKey),
+  const adapters: Record<
+    ReportAiAdapterProvider,
+    () => ReturnType<typeof createOpenRouterText>
+  > = {
+    openrouter: () =>
+      createOpenRouterText(
+        model as Parameters<typeof createOpenRouterText>[0],
+        providerKey,
+      ),
   };
 
   return await chat({
@@ -151,7 +196,9 @@ async function generateProviderBackedVariants({
       provider,
       providerKey,
       systemPrompts: [
-        variant === "technical" ? reportAgent.instructions : plainLanguageReportAgent.instructions,
+        variant === "technical"
+          ? reportAgent.instructions
+          : plainLanguageReportAgent.instructions,
         "Return only valid JSON that matches the requested contract.",
       ],
       messages: [
@@ -178,11 +225,21 @@ export function createReportAiAdapter(
   const deterministicReportAdapter: ReportAiAdapter = {
     provider: "deterministic-fallback",
     async generateRemediationReport(input): Promise<RemediationReport> {
-      return (await deterministicReportAdapter.generateRemediationReportVariants(input)).technical;
+      return (
+        await deterministicReportAdapter.generateRemediationReportVariants(
+          input,
+        )
+      ).technical;
     },
-    async generateRemediationReportVariants(input): Promise<RemediationReportVariants> {
+    async generateRemediationReportVariants(
+      input,
+    ): Promise<RemediationReportVariants> {
       const normalized = normalizeReportInput(input);
-      return buildDeterministicReportVariants(normalized, "deterministic-fallback", normalized.generatedAt);
+      return buildDeterministicReportVariants(
+        normalized,
+        "deterministic-fallback",
+        normalized.generatedAt,
+      );
     },
   };
 
@@ -199,7 +256,9 @@ export function createReportAiAdapter(
     async generateRemediationReport(input): Promise<RemediationReport> {
       return (await this.generateRemediationReportVariants(input)).technical;
     },
-    async generateRemediationReportVariants(input): Promise<RemediationReportVariants> {
+    async generateRemediationReportVariants(
+      input,
+    ): Promise<RemediationReportVariants> {
       try {
         return await generateProviderBackedVariants({
           chatExecutor,
@@ -209,7 +268,9 @@ export function createReportAiAdapter(
           providerKey,
         });
       } catch {
-        return await deterministicReportAdapter.generateRemediationReportVariants(input);
+        return await deterministicReportAdapter.generateRemediationReportVariants(
+          input,
+        );
       }
     },
   };

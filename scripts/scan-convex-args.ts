@@ -15,14 +15,18 @@ const log = (message: string) => {
 };
 
 const fromFixture = process.env.SCAN_FROM_FIXTURE === "1";
-const fixturePath = process.env.SCAN_FIXTURE_PATH ?? "data/scans/latest.scan-results.json";
+const fixturePath =
+  process.env.SCAN_FIXTURE_PATH ?? "data/scans/latest.scan-results.json";
 
 const allRecords = municipalitySchema.array().parse(municipalities);
 const idFilter = (process.env.MUNICIPALITY_IDS ?? "")
   .split(",")
   .map((id) => id.trim())
   .filter(Boolean);
-const records = idFilter.length === 0 ? allRecords : allRecords.filter((m) => idFilter.includes(m.id));
+const records =
+  idFilter.length === 0
+    ? allRecords
+    : allRecords.filter((m) => idFilter.includes(m.id));
 
 if (idFilter.length > 0 && records.length === 0) {
   log(`No municipalities matched MUNICIPALITY_IDS=${idFilter.join(",")}.`);
@@ -44,7 +48,9 @@ if (fromFixture) {
     results = parsed.filter((r) => allowedIds.has(r.municipalityId));
   }
 
-  log(`Loaded ${results.length} fixture scan result${results.length === 1 ? "" : "s"}.`);
+  log(
+    `Loaded ${results.length} fixture scan result${results.length === 1 ? "" : "s"}.`,
+  );
 } else {
   const concurrency = Math.max(1, Number(process.env.SCAN_CONCURRENCY ?? "5"));
   const controls = {
@@ -58,15 +64,26 @@ if (fromFixture) {
       records.length === 1 ? "y" : "ies"
     } (concurrency=${concurrency}, timeoutMs=${controls.timeoutMs}, retries=${controls.retries}).`,
   );
-  log("Set SCAN_FROM_FIXTURE=1 to skip the network and reuse data/scans/latest.scan-results.json.");
+  log(
+    "Set SCAN_FROM_FIXTURE=1 to skip the network and reuse data/scans/latest.scan-results.json.",
+  );
 
-  results = await runWithConcurrency(records, concurrency, async (municipality, index) => {
-    const startedAt = Date.now();
-    const result = await scanWebsite(municipality, { source: "fixture", controls });
-    const elapsedMs = Date.now() - startedAt;
-    log(`[${index + 1}/${records.length}] ${municipality.id} ${describeOutcome(result)} in ${elapsedMs}ms`);
-    return result;
-  });
+  results = await runWithConcurrency(
+    records,
+    concurrency,
+    async (municipality, index) => {
+      const startedAt = Date.now();
+      const result = await scanWebsite(municipality, {
+        source: "convex",
+        controls,
+      });
+      const elapsedMs = Date.now() - startedAt;
+      log(
+        `[${index + 1}/${records.length}] ${municipality.id} ${describeOutcome(result)} in ${elapsedMs}ms`,
+      );
+      return result;
+    },
+  );
 
   const reachableCount = results.filter((r) => r.reachable).length;
   log(`Live scan complete: ${reachableCount}/${results.length} reachable.`);

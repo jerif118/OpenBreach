@@ -10,7 +10,9 @@ import {
 
 const municipalitiesSource = readFileSync("convex/municipalities.ts", "utf8");
 
-const getQueryMatch = municipalitiesSource.match(/export const get = query\([\s\S]*?\n}\);/);
+const getQueryMatch = municipalitiesSource.match(
+  /export const get = query\([\s\S]*?\n}\);/,
+);
 
 if (!getQueryMatch) {
   throw new Error("municipalities.get query must exist.");
@@ -32,12 +34,16 @@ const requiredSnippets = [
 
 for (const snippet of requiredSnippets) {
   if (!getQuerySource.includes(snippet)) {
-    throw new Error(`municipalities.get is missing required detail aggregate behavior: ${snippet}`);
+    throw new Error(
+      `municipalities.get is missing required detail aggregate behavior: ${snippet}`,
+    );
   }
 }
 
 if (getQuerySource.includes("externalId: v.string()")) {
-  throw new Error("municipalities.get must accept the public { id } argument, not { externalId }.");
+  throw new Error(
+    "municipalities.get must accept the public { id } argument, not { externalId }.",
+  );
 }
 
 if (getQuerySource.includes(".filter(")) {
@@ -101,7 +107,9 @@ const detail = municipalityDetailSchema.parse({
 });
 
 if (detail.municipality.id !== "CA-LOS-ANGELES") {
-  throw new Error("municipality detail contract did not preserve the public external municipality id.");
+  throw new Error(
+    "municipality detail contract did not preserve the public external municipality id.",
+  );
 }
 
 municipalityDetailSchema.parse({
@@ -115,39 +123,72 @@ for (const mockDetail of municipalityDetailMockItems) {
 }
 
 if (getMunicipalityDetailSource(undefined) !== "mock") {
-  throw new Error("municipality detail adapter must use mock data when Convex is not configured.");
+  throw new Error(
+    "municipality detail adapter must use mock data when Convex is not configured.",
+  );
 }
 
 if (getMunicipalityDetailSource("https://example.convex.cloud") !== "convex") {
-  throw new Error("municipality detail adapter must use Convex when VITE_CONVEX_URL is configured.");
+  throw new Error(
+    "municipality detail adapter must use Convex when VITE_CONVEX_URL is configured.",
+  );
 }
 
 const pdfMockState = getMockMunicipalityDetailState("mx-bcn-tijuana");
-if (pdfMockState.status !== "ready" || pdfMockState.reportStatus !== "available") {
-  throw new Error("municipality detail mock data must include a PDF-present report state.");
+if (
+  pdfMockState.status !== "ready" ||
+  pdfMockState.reportStatus !== "available"
+) {
+  throw new Error(
+    "municipality detail mock data must include a PDF-present report state.",
+  );
 }
 
-const noReportMockState = getMockMunicipalityDetailState("mx-jalisco-guadalajara");
-if (noReportMockState.status !== "ready" || noReportMockState.reportStatus !== "missing") {
-  throw new Error("municipality detail mock data must include a report-missing state.");
+const noReportMockState = getMockMunicipalityDetailState(
+  "mx-jalisco-guadalajara",
+);
+if (
+  noReportMockState.status !== "ready" ||
+  noReportMockState.reportStatus !== "missing"
+) {
+  throw new Error(
+    "municipality detail mock data must include a report-missing state.",
+  );
 }
 
 const noScanMockState = getMockMunicipalityDetailState("mx-nl-monterrey");
-if (noScanMockState.status !== "ready" || noScanMockState.scanStatus !== "missing") {
-  throw new Error("municipality detail mock data must include a scan-missing state.");
+if (
+  noScanMockState.status !== "ready" ||
+  noScanMockState.scanStatus !== "missing"
+) {
+  throw new Error(
+    "municipality detail mock data must include a scan-missing state.",
+  );
 }
 
 const missingMockState = getMockMunicipalityDetailState("missing-municipality");
 if (missingMockState.status !== "not-found") {
-  throw new Error("municipality detail adapter must return not-found for an unknown mock id.");
+  throw new Error(
+    "municipality detail adapter must return not-found for an unknown mock id.",
+  );
 }
 
-const loadingState = toMunicipalityDetailState(undefined, "convex", "mx-bcn-tijuana");
+const loadingState = toMunicipalityDetailState(
+  undefined,
+  "convex",
+  "mx-bcn-tijuana",
+);
 if (loadingState.status !== "loading") {
-  throw new Error("municipality detail adapter must preserve Convex loading state.");
+  throw new Error(
+    "municipality detail adapter must preserve Convex loading state.",
+  );
 }
 
-const errorState = toMunicipalityDetailState(new Error("detail unavailable"), "convex", "mx-bcn-tijuana");
+const errorState = toMunicipalityDetailState(
+  new Error("detail unavailable"),
+  "convex",
+  "mx-bcn-tijuana",
+);
 if (errorState.status !== "error") {
   throw new Error("municipality detail adapter must preserve error state.");
 }
@@ -194,7 +235,9 @@ const routeRequiredSnippets = [
 
 for (const snippet of routeRequiredSnippets) {
   if (!routeSource.includes(snippet)) {
-    throw new Error(`municipality detail route is missing adapter integration: ${snippet}`);
+    throw new Error(
+      `municipality detail route is missing adapter integration: ${snippet}`,
+    );
   }
 }
 
@@ -207,11 +250,16 @@ const forbiddenProtectedActionSnippets = [
 
 for (const snippet of forbiddenProtectedActionSnippets) {
   if (routeSource.includes(snippet)) {
-    throw new Error(`municipality detail route must not add mutation-triggering protected controls in Task 5: ${snippet}`);
+    throw new Error(
+      `municipality detail route must not add mutation-triggering protected controls in Task 5: ${snippet}`,
+    );
   }
 }
 
-const reportDownloadRouteSource = readFileSync("src/routes/reports/$fileName.ts", "utf8");
+const reportDownloadRouteSource = readFileSync(
+  "src/routes/reports/$fileName.ts",
+  "utf8",
+);
 const reportDownloadRouteRequiredSnippets = [
   'createFileRoute("/reports/$fileName")',
   "safePdfFileNamePattern",
@@ -225,7 +273,9 @@ const reportDownloadRouteRequiredSnippets = [
 
 for (const snippet of reportDownloadRouteRequiredSnippets) {
   if (!reportDownloadRouteSource.includes(snippet)) {
-    throw new Error(`report download route is missing required safe download behavior: ${snippet}`);
+    throw new Error(
+      `report download route is missing required safe download behavior: ${snippet}`,
+    );
   }
 }
 

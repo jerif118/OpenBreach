@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
-import { rawScanEvidenceSchema, type RawScanEvidence } from "../src/shared/contracts.ts";
+import { readFileSync } from "node:fs";
+import {
+  rawScanEvidenceSchema,
+  type RawScanEvidence,
+} from "../src/shared/contracts.ts";
 import { toRawScanPersistenceArgs } from "../src/scanner/persistence.ts";
+
+const scanConvexArgsSource = readFileSync(
+  "scripts/scan-convex-args.ts",
+  "utf8",
+);
 
 const rawEvidence: RawScanEvidence = rawScanEvidenceSchema.parse({
   municipalityId: "mx-yuc-merida",
@@ -50,5 +59,10 @@ assert.equal("score" in args.results[0]!, false);
 assert.equal("findings" in args.results[0]!, false);
 assert.equal("riskScore" in args.results[0]!, false);
 assert.equal("riskLevel" in args.results[0]!, false);
+
+assert.match(
+  scanConvexArgsSource,
+  /scanWebsite\(municipality, \{\s*source: "convex"/,
+);
 
 console.log("Scan persistence validation passed.");

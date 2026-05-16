@@ -35,13 +35,17 @@ export const list = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
-    const municipalities = await ctx.db.query("municipalities").take(MAX_LIST_LIMIT);
+    const municipalities = await ctx.db
+      .query("municipalities")
+      .take(MAX_LIST_LIMIT);
     const items = [];
 
     for (const municipality of municipalities) {
       const latestScans = await ctx.db
         .query("scanResults")
-        .withIndex("by_municipalityId_and_scannedAt", (q) => q.eq("municipalityId", municipality._id))
+        .withIndex("by_municipalityId_and_scannedAt", (q) =>
+          q.eq("municipalityId", municipality._id),
+        )
         .order("desc")
         .take(1);
 
@@ -58,16 +62,22 @@ function normalizeListLimit(limit: number | undefined) {
   }
 
   if (!Number.isInteger(limit) || limit < 1 || limit > MAX_LIST_LIMIT) {
-    throw new Error(`municipalities.list limit must be an integer from 1 to ${MAX_LIST_LIMIT}.`);
+    throw new Error(
+      `municipalities.list limit must be an integer from 1 to ${MAX_LIST_LIMIT}.`,
+    );
   }
 
   return limit;
 }
 
-function toListItem(municipality: Doc<"municipalities">, scan: Doc<"scanResults"> | null) {
+function toListItem(
+  municipality: Doc<"municipalities">,
+  scan: Doc<"scanResults"> | null,
+) {
   return {
     ...toMunicipalityContract(municipality),
-    riskScore: riskScoreFromScan(scan) ?? fallbackRiskScoreByTier[municipality.riskTier],
+    riskScore:
+      riskScoreFromScan(scan) ?? fallbackRiskScoreByTier[municipality.riskTier],
     riskLevel: scan?.riskLevel ?? municipality.riskTier,
   };
 }
@@ -86,7 +96,10 @@ function toMunicipalityContract(municipality: Doc<"municipalities">) {
   };
 }
 
-function toScanResultContract(municipality: Doc<"municipalities">, scan: Doc<"scanResults"> | null) {
+function toScanResultContract(
+  municipality: Doc<"municipalities">,
+  scan: Doc<"scanResults"> | null,
+) {
   if (scan === null) {
     return null;
   }
@@ -104,7 +117,8 @@ function toScanResultContract(municipality: Doc<"municipalities">, scan: Doc<"sc
     cms: scan.cms,
     adminExposure: scan.adminExposure,
     errors: scan.errors,
-    riskScore: riskScoreFromScan(scan) ?? fallbackRiskScoreByTier[municipality.riskTier],
+    riskScore:
+      riskScoreFromScan(scan) ?? fallbackRiskScoreByTier[municipality.riskTier],
     riskLevel: scan.riskLevel ?? municipality.riskTier,
     findings: scan.findings,
     score: scan.score,
@@ -147,7 +161,11 @@ function riskScoreFromScan(scan: Doc<"scanResults"> | null) {
     return null;
   }
 
-  if (!Number.isFinite(scan.riskScore) || scan.riskScore < 0 || scan.riskScore > 100) {
+  if (
+    !Number.isFinite(scan.riskScore) ||
+    scan.riskScore < 0 ||
+    scan.riskScore > 100
+  ) {
     return null;
   }
 
@@ -179,13 +197,17 @@ export const get = query({
 
     const latestScans = await ctx.db
       .query("scanResults")
-      .withIndex("by_municipalityId_and_scannedAt", (q) => q.eq("municipalityId", municipality._id))
+      .withIndex("by_municipalityId_and_scannedAt", (q) =>
+        q.eq("municipalityId", municipality._id),
+      )
       .order("desc")
       .take(1);
 
     const latestReports = await ctx.db
       .query("remediationReports")
-      .withIndex("by_municipalityId_and_generatedAt", (q) => q.eq("municipalityId", municipality._id))
+      .withIndex("by_municipalityId_and_generatedAt", (q) =>
+        q.eq("municipalityId", municipality._id),
+      )
       .order("desc")
       .take(1);
 

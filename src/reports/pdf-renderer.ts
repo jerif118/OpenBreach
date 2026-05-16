@@ -92,12 +92,17 @@ const themeByVariant: Record<RemediationReport["variant"], PdfTheme> = {
 };
 
 function sanitizePdfFileStem(value: string) {
-  const sanitized = value.replace(/[^A-Za-z0-9._-]+/g, "_").replace(/^[._-]+|[._-]+$/g, "");
+  const sanitized = value
+    .replace(/[^A-Za-z0-9._-]+/g, "_")
+    .replace(/^[._-]+|[._-]+$/g, "");
   return sanitized || "municipality-report";
 }
 
 function escapePdfText(value: string) {
-  return value.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+  return value
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
 }
 
 function colorCommand([red, green, blue]: RgbColor) {
@@ -121,12 +126,21 @@ function stripInlineMarkdown(value: string) {
   );
 }
 
-function estimateTextWidth(text: string, fontSize: number, fontKey: "F1" | "F2" | "F3") {
+function estimateTextWidth(
+  text: string,
+  fontSize: number,
+  fontKey: "F1" | "F2" | "F3",
+) {
   const weightFactor = fontKey === "F2" ? 0.58 : fontKey === "F3" ? 0.54 : 0.52;
   return text.length * fontSize * weightFactor;
 }
 
-function wrapTextToWidth(text: string, maxWidth: number, fontSize: number, fontKey: "F1" | "F2" | "F3") {
+function wrapTextToWidth(
+  text: string,
+  maxWidth: number,
+  fontSize: number,
+  fontKey: "F1" | "F2" | "F3",
+) {
   const normalized = stripInlineMarkdown(text);
 
   if (!normalized) {
@@ -198,7 +212,9 @@ function pushFilledRect({
   width: number;
   height: number;
 }) {
-  commands.push(`q ${colorCommand(color)} rg ${x} ${y} ${width} ${height} re f Q`);
+  commands.push(
+    `q ${colorCommand(color)} rg ${x} ${y} ${width} ${height} re f Q`,
+  );
 }
 
 function pushStrokeRect({
@@ -218,7 +234,9 @@ function pushStrokeRect({
   height: number;
   lineWidth?: number;
 }) {
-  commands.push(`q ${lineWidth} w ${colorCommand(color)} RG ${x} ${y} ${width} ${height} re S Q`);
+  commands.push(
+    `q ${lineWidth} w ${colorCommand(color)} RG ${x} ${y} ${width} ${height} re S Q`,
+  );
 }
 
 function createPageState(theme: PdfTheme, number: number): PdfPageState {
@@ -325,7 +343,10 @@ function parseMarkdown(markdown: string): MarkdownBlock[] {
       flushParagraph();
       const quoteLines = [trimmed.slice(2)];
 
-      while (index + 1 < lines.length && lines[index + 1].trim().startsWith("> ")) {
+      while (
+        index + 1 < lines.length &&
+        lines[index + 1].trim().startsWith("> ")
+      ) {
         index += 1;
         quoteLines.push(lines[index].trim().slice(2));
       }
@@ -338,7 +359,10 @@ function parseMarkdown(markdown: string): MarkdownBlock[] {
       flushParagraph();
       const items = [trimmed.slice(2)];
 
-      while (index + 1 < lines.length && lines[index + 1].trim().startsWith("- ")) {
+      while (
+        index + 1 < lines.length &&
+        lines[index + 1].trim().startsWith("- ")
+      ) {
         index += 1;
         items.push(lines[index].trim().slice(2));
       }
@@ -351,7 +375,10 @@ function parseMarkdown(markdown: string): MarkdownBlock[] {
       flushParagraph();
       const items = [trimmed.replace(/^\d+\.\s+/, "")];
 
-      while (index + 1 < lines.length && /^\d+\.\s+/.test(lines[index + 1].trim())) {
+      while (
+        index + 1 < lines.length &&
+        /^\d+\.\s+/.test(lines[index + 1].trim())
+      ) {
         index += 1;
         items.push(lines[index].trim().replace(/^\d+\.\s+/, ""));
       }
@@ -385,11 +412,21 @@ function ensureSpace({
   return addPage(pages, theme);
 }
 
-function renderHeading1(text: string, currentPage: PdfPageState, pages: PdfPageState[], theme: PdfTheme) {
+function renderHeading1(
+  text: string,
+  currentPage: PdfPageState,
+  pages: PdfPageState[],
+  theme: PdfTheme,
+) {
   const fontSize = 24;
   const lineHeight = 30;
   const lines = wrapTextToWidth(text, CONTENT_WIDTH, fontSize, "F2");
-  currentPage = ensureSpace({ currentPage, pages, requiredHeight: lines.length * lineHeight + 18, theme });
+  currentPage = ensureSpace({
+    currentPage,
+    pages,
+    requiredHeight: lines.length * lineHeight + 18,
+    theme,
+  });
 
   for (const line of lines) {
     pushText({
@@ -416,7 +453,12 @@ function renderHeading1(text: string, currentPage: PdfPageState, pages: PdfPageS
   return currentPage;
 }
 
-function renderHeading2(text: string, currentPage: PdfPageState, pages: PdfPageState[], theme: PdfTheme) {
+function renderHeading2(
+  text: string,
+  currentPage: PdfPageState,
+  pages: PdfPageState[],
+  theme: PdfTheme,
+) {
   currentPage = ensureSpace({ currentPage, pages, requiredHeight: 34, theme });
   pushFilledRect({
     commands: currentPage.commands,
@@ -439,9 +481,19 @@ function renderHeading2(text: string, currentPage: PdfPageState, pages: PdfPageS
   return currentPage;
 }
 
-function renderHeading3(text: string, currentPage: PdfPageState, pages: PdfPageState[], theme: PdfTheme) {
+function renderHeading3(
+  text: string,
+  currentPage: PdfPageState,
+  pages: PdfPageState[],
+  theme: PdfTheme,
+) {
   const lines = wrapTextToWidth(text, CONTENT_WIDTH, 12, "F2");
-  currentPage = ensureSpace({ currentPage, pages, requiredHeight: lines.length * 16 + 8, theme });
+  currentPage = ensureSpace({
+    currentPage,
+    pages,
+    requiredHeight: lines.length * 16 + 8,
+    theme,
+  });
 
   for (const line of lines) {
     pushText({
@@ -460,9 +512,19 @@ function renderHeading3(text: string, currentPage: PdfPageState, pages: PdfPageS
   return currentPage;
 }
 
-function renderStrongLine(text: string, currentPage: PdfPageState, pages: PdfPageState[], theme: PdfTheme) {
+function renderStrongLine(
+  text: string,
+  currentPage: PdfPageState,
+  pages: PdfPageState[],
+  theme: PdfTheme,
+) {
   const lines = wrapTextToWidth(text, CONTENT_WIDTH, 10.5, "F2");
-  currentPage = ensureSpace({ currentPage, pages, requiredHeight: lines.length * 14 + 4, theme });
+  currentPage = ensureSpace({
+    currentPage,
+    pages,
+    requiredHeight: lines.length * 14 + 4,
+    theme,
+  });
 
   for (const line of lines) {
     pushText({
@@ -481,9 +543,19 @@ function renderStrongLine(text: string, currentPage: PdfPageState, pages: PdfPag
   return currentPage;
 }
 
-function renderParagraph(text: string, currentPage: PdfPageState, pages: PdfPageState[], theme: PdfTheme) {
+function renderParagraph(
+  text: string,
+  currentPage: PdfPageState,
+  pages: PdfPageState[],
+  theme: PdfTheme,
+) {
   const lines = wrapTextToWidth(text, CONTENT_WIDTH, 10.5, "F1");
-  currentPage = ensureSpace({ currentPage, pages, requiredHeight: lines.length * 14 + 8, theme });
+  currentPage = ensureSpace({
+    currentPage,
+    pages,
+    requiredHeight: lines.length * 14 + 8,
+    theme,
+  });
 
   for (const line of lines) {
     pushText({
@@ -502,10 +574,20 @@ function renderParagraph(text: string, currentPage: PdfPageState, pages: PdfPage
   return currentPage;
 }
 
-function renderQuote(text: string, currentPage: PdfPageState, pages: PdfPageState[], theme: PdfTheme) {
+function renderQuote(
+  text: string,
+  currentPage: PdfPageState,
+  pages: PdfPageState[],
+  theme: PdfTheme,
+) {
   const lines = wrapTextToWidth(text, CONTENT_WIDTH - 34, 10, "F3");
   const boxHeight = lines.length * 14 + 18;
-  currentPage = ensureSpace({ currentPage, pages, requiredHeight: boxHeight + 8, theme });
+  currentPage = ensureSpace({
+    currentPage,
+    pages,
+    requiredHeight: boxHeight + 8,
+    theme,
+  });
 
   pushFilledRect({
     commands: currentPage.commands,
@@ -599,7 +681,10 @@ function renderList({
   return currentPage;
 }
 
-function buildStyledPdfDocument(markdown: string, variant: RemediationReport["variant"]) {
+function buildStyledPdfDocument(
+  markdown: string,
+  variant: RemediationReport["variant"],
+) {
   const theme = themeByVariant[variant];
   const blocks = parseMarkdown(markdown);
   const pages: PdfPageState[] = [];
@@ -653,20 +738,31 @@ function buildStyledPdfDocument(markdown: string, variant: RemediationReport["va
       continue;
     }
 
-    currentPage = renderParagraph(stripInlineMarkdown(block.text), currentPage, pages, theme);
+    currentPage = renderParagraph(
+      stripInlineMarkdown(block.text),
+      currentPage,
+      pages,
+      theme,
+    );
   }
 
-  const pageObjectStart = 5;
+  const pageObjectStart = 6;
   const pageCount = pages.length;
   const pageObjectIds = pages.map((_, index) => pageObjectStart + index);
-  const contentObjectIds = pages.map((_, index) => pageObjectStart + pageCount + index);
+  const contentObjectIds = pages.map(
+    (_, index) => pageObjectStart + pageCount + index,
+  );
   const objects: string[] = [];
 
   objects.push("<< /Type /Catalog /Pages 2 0 R >>");
-  objects.push(`<< /Type /Pages /Kids [${pageObjectIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageCount} >>`);
+  objects.push(
+    `<< /Type /Pages /Kids [${pageObjectIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageCount} >>`,
+  );
   objects.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
   objects.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
-  objects.push("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>");
+  objects.push(
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>",
+  );
 
   for (const [index] of pages.entries()) {
     objects.push(
@@ -676,7 +772,9 @@ function buildStyledPdfDocument(markdown: string, variant: RemediationReport["va
 
   for (const page of pages) {
     const stream = page.commands.join("\n");
-    objects.push(`<< /Length ${Buffer.byteLength(stream, "latin1")} >>\nstream\n${stream}\nendstream`);
+    objects.push(
+      `<< /Length ${Buffer.byteLength(stream, "latin1")} >>\nstream\n${stream}\nendstream`,
+    );
   }
 
   let body = "%PDF-1.4\n";

@@ -9,25 +9,52 @@ const requiredSchemaSnippets = [
   "pdf: v.optional(reportPdfReference)",
   "artifacts: v.optional(reportArtifacts)",
   "error: v.optional(v.string())",
-  '.index("by_municipalityId_and_generatedAt", ["municipalityId", "generatedAt"])',
+];
+
+const requiredSchemaPatterns = [
+  {
+    label:
+      '.index("by_municipalityId_and_generatedAt", ["municipalityId", "generatedAt"])',
+    pattern:
+      /\.index\(\s*"by_municipalityId_and_generatedAt"\s*,\s*\[\s*"municipalityId"\s*,\s*"generatedAt"\s*,?\s*\]\s*\)/,
+  },
 ];
 
 for (const snippet of requiredSchemaSnippets) {
   if (!schemaSource.includes(snippet)) {
-    throw new Error(`Report schema is missing required persistence metadata: ${snippet}`);
+    throw new Error(
+      `Report schema is missing required persistence metadata: ${snippet}`,
+    );
+  }
+}
+
+for (const { label, pattern } of requiredSchemaPatterns) {
+  if (!pattern.test(schemaSource)) {
+    throw new Error(
+      `Report schema is missing required persistence metadata: ${label}`,
+    );
   }
 }
 
 if (!reportsSource.includes("export const persistGenerated = mutation")) {
-  throw new Error("reports.persistGenerated mutation must persist generated report status metadata.");
+  throw new Error(
+    "reports.persistGenerated mutation must persist generated report status metadata.",
+  );
 }
 
 if (!reportsSource.includes("requireOperatorOrAdmin")) {
-  throw new Error("Report persistence writes must require operator or admin authorization.");
+  throw new Error(
+    "Report persistence writes must require operator or admin authorization.",
+  );
 }
 
-if (reportsSource.includes("userId: v.") || reportsSource.includes("userIdentifier: v.")) {
-  throw new Error("Report persistence mutations must not accept user identifiers for authorization.");
+if (
+  reportsSource.includes("userId: v.") ||
+  reportsSource.includes("userIdentifier: v.")
+) {
+  throw new Error(
+    "Report persistence mutations must not accept user identifiers for authorization.",
+  );
 }
 
 const getForMunicipalityMatch = reportsSource.match(
@@ -53,12 +80,19 @@ for (const snippet of latestLookupRequirements) {
   }
 }
 
-if (getForMunicipalitySource.includes("limit") || getForMunicipalitySource.includes("take(args.limit")) {
-  throw new Error("Latest report lookup must return one latest report or null, not a caller-sized list.");
+if (
+  /\bargs\s*\.\s*limit\b/.test(getForMunicipalitySource) ||
+  /\.take\(\s*args\s*\.\s*limit\s*\)/.test(getForMunicipalitySource)
+) {
+  throw new Error(
+    "Latest report lookup must return one latest report or null, not a caller-sized list.",
+  );
 }
 
 if (getForMunicipalitySource.includes(".filter(")) {
-  throw new Error("Latest report lookup must use an index, not Convex filters.");
+  throw new Error(
+    "Latest report lookup must use an index, not Convex filters.",
+  );
 }
 
 console.log("Report persistence validation passed.");

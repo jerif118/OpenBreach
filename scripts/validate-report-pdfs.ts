@@ -10,6 +10,34 @@ import {
   scanResultSchema,
 } from "../src/shared/contracts.ts";
 
+function assertPageTreeReferencesPageObjects(pdfContent: string): void {
+  const objects = new Map<number, string>();
+
+  for (const match of pdfContent.matchAll(
+    /^(\d+) 0 obj\n([\s\S]*?)\nendobj/gm,
+  )) {
+    objects.set(Number(match[1]), match[2]);
+  }
+
+  const pagesObject = objects.get(2);
+  const kidsMatch = pagesObject?.match(/\/Kids \[([^\]]+)\]/);
+
+  if (!kidsMatch) {
+    throw new Error("Generated PDF page tree is missing /Kids references.");
+  }
+
+  for (const pageRef of kidsMatch[1].matchAll(/(\d+) 0 R/g)) {
+    const pageObjectId = Number(pageRef[1]);
+    const pageObject = objects.get(pageObjectId);
+
+    if (!pageObject || !/\/Type\s+\/Page\b/.test(pageObject)) {
+      throw new Error(
+        `Generated PDF /Kids references non-page object ${pageObjectId}.`,
+      );
+    }
+  }
+}
+
 const selectedAt = "2026-01-01T00:00:00.000Z";
 const contexts = selectTopRiskReportContexts({
   municipalities: municipalitySchema.array().parse(municipalitiesFixture),
@@ -20,7 +48,9 @@ const contexts = selectTopRiskReportContexts({
 });
 
 if (contexts.length !== 2) {
-  throw new Error(`Expected 2 selected contexts for PDF validation, received ${contexts.length}.`);
+  throw new Error(
+    `Expected 2 selected contexts for PDF validation, received ${contexts.length}.`,
+  );
 }
 
 for (const templatePath of [
@@ -30,18 +60,33 @@ for (const templatePath of [
 ]) {
   const templateSource = await readFile(templatePath, "utf8");
 
-  if (templatePath.endsWith(".md") && !templatePath.endsWith("README.md") && !templateSource.includes("{{title}}")) {
-    throw new Error(`Report template is missing required placeholders: ${templatePath}`);
+  if (
+    templatePath.endsWith(".md") &&
+    !templatePath.endsWith("README.md") &&
+    !templateSource.includes("{{title}}")
+  ) {
+    throw new Error(
+      `Report template is missing required placeholders: ${templatePath}`,
+    );
   }
 
-  if (templatePath.endsWith("README.md") && !templateSource.includes("technical-report.md")) {
-    throw new Error("Report template README must document the editable template files.");
+  if (
+    templatePath.endsWith("README.md") &&
+    !templateSource.includes("technical-report.md")
+  ) {
+    throw new Error(
+      "Report template README must document the editable template files.",
+    );
   }
 }
 
 for (const context of contexts) {
-  await rm(`data/reports/${context.municipality.id}-technical.pdf`, { force: true });
-  await rm(`data/reports/${context.municipality.id}-friendly.pdf`, { force: true });
+  await rm(`data/reports/${context.municipality.id}-technical.pdf`, {
+    force: true,
+  });
+  await rm(`data/reports/${context.municipality.id}-friendly.pdf`, {
+    force: true,
+  });
 }
 
 const output = await renderReportBatchPdfs({
@@ -51,12 +96,19 @@ const output = await renderReportBatchPdfs({
   providerKey: "",
 });
 
-if (output.summary.completed !== contexts.length || output.summary.failed !== 0) {
-  throw new Error("PDF validation batch must complete all selected fixture reports.");
+if (
+  output.summary.completed !== contexts.length ||
+  output.summary.failed !== 0
+) {
+  throw new Error(
+    "PDF validation batch must complete all selected fixture reports.",
+  );
 }
 
 if (output.results.length !== contexts.length) {
-  throw new Error("PDF validation batch must preserve one result per selected context.");
+  throw new Error(
+    "PDF validation batch must preserve one result per selected context.",
+  );
 }
 
 for (const record of output.results) {
@@ -68,16 +120,29 @@ for (const record of output.results) {
   const artifacts = record.result.metadata.artifacts;
 
   if (pdf.fileName !== `${record.municipalityId}-technical.pdf`) {
-    throw new Error("Technical PDF filenames must be based on municipality IDs.");
+    throw new Error(
+      "Technical PDF filenames must be based on municipality IDs.",
+    );
   }
 
   if (!artifacts?.technical || !artifacts.friendly) {
-    throw new Error("Rendered report metadata must include both technical and friendly artifacts.");
+    throw new Error(
+      "Rendered report metadata must include both technical and friendly artifacts.",
+    );
   }
 
   const technicalPdfContent = await readFile(pdf.storagePath, "latin1");
-  const friendlyPdfContent = await readFile(artifacts.friendly.pdf.storagePath, "latin1");
-  const context = contexts.find((candidate) => candidate.municipality.id === record.municipalityId);
+  const friendlyPdfContent = await readFile(
+    artifacts.friendly.pdf.storagePath,
+    "latin1",
+  );
+
+  assertPageTreeReferencesPageObjects(technicalPdfContent);
+  assertPageTreeReferencesPageObjects(friendlyPdfContent);
+
+  const context = contexts.find(
+    (candidate) => candidate.municipality.id === record.municipalityId,
+  );
 
   if (!context) {
     throw new Error(`Missing selected context for ${record.municipalityId}.`);
@@ -99,7 +164,11 @@ for (const record of output.results) {
     }
   }
 
-  for (const snippet of [context.municipality.name, "Friendly Remediation Report", "Quick summary"]) {
+  for (const snippet of [
+    context.municipality.name,
+    "Friendly Remediation Report",
+    "Quick summary",
+  ]) {
     if (!friendlyPdfContent.includes(snippet)) {
       throw new Error(`Friendly PDF is missing expected content: ${snippet}`);
     }
@@ -127,19 +196,30 @@ if (!unsafeRecord || unsafeRecord.result.status !== "completed") {
   throw new Error("Unsafe filename validation record must complete.");
 }
 
-const unsafePdf = reportPdfReferenceSchema.parse(unsafeRecord.result.metadata.pdf);
+const unsafePdf = reportPdfReferenceSchema.parse(
+  unsafeRecord.result.metadata.pdf,
+);
 
 if (unsafePdf.fileName !== "Unsafe_City_2026-technical.pdf") {
-  throw new Error(`Expected sanitized unsafe filename, received ${unsafePdf.fileName}.`);
+  throw new Error(
+    `Expected sanitized unsafe filename, received ${unsafePdf.fileName}.`,
+  );
 }
 
 await rm(unsafePdf.storagePath, { force: true });
 await rm("data/reports/Unsafe_City_2026-friendly.pdf", { force: true });
 
-const storageDoc = (await readFile("docs/report-mvp-storage.md", "utf8")).toLowerCase();
+const storageDoc = (
+  await readFile("docs/report-mvp-storage.md", "utf8")
+).toLowerCase();
 
-if (!storageDoc.includes("data/reports/") || !storageDoc.includes("/reports/$filename")) {
-  throw new Error("MVP storage documentation must describe the local path and the route used to serve report downloads.");
+if (
+  !storageDoc.includes("data/reports/") ||
+  !storageDoc.includes("/reports/$filename")
+) {
+  throw new Error(
+    "MVP storage documentation must describe the local path and the route used to serve report downloads.",
+  );
 }
 
 console.log("Report PDF validation passed.");

@@ -19,13 +19,17 @@ export async function getCurrentUserProfile(ctx: AuthCtx) {
 
   const profile = await ctx.db
     .query("userProfiles")
-    .withIndex("by_tokenIdentifier", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+    .withIndex("by_tokenIdentifier", (q) =>
+      q.eq("tokenIdentifier", identity.tokenIdentifier),
+    )
     .unique();
 
   return { identity, profile };
 }
 
-export async function requireAuthenticatedProfile(ctx: AuthCtx): Promise<Doc<"userProfiles">> {
+export async function requireAuthenticatedProfile(
+  ctx: AuthCtx,
+): Promise<Doc<"userProfiles">> {
   const current = await getCurrentUserProfile(ctx);
 
   if (!current) {
@@ -39,7 +43,10 @@ export async function requireAuthenticatedProfile(ctx: AuthCtx): Promise<Doc<"us
   return current.profile;
 }
 
-export async function requireAnyRole(ctx: AuthCtx, allowedRoles: readonly Role[]) {
+export async function requireAnyRole(
+  ctx: AuthCtx,
+  allowedRoles: readonly Role[],
+) {
   const profile = await requireAuthenticatedProfile(ctx);
 
   if (!profile.roles.some((role) => allowedRoles.includes(role))) {

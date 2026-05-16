@@ -33,11 +33,19 @@ type ReportPersistenceArgs = {
   generatedAt: string;
   summary: string;
   priorityActions: string[];
-  findings: GenerateRemediationReportResult & { status: "completed" } extends { report: { findings: infer Findings } }
+  findings: GenerateRemediationReportResult & { status: "completed" } extends {
+    report: { findings: infer Findings };
+  }
     ? Findings
     : never;
   generatedBy: "deterministic-fallback" | "ai-provider";
-  pdf: NonNullable<GenerateRemediationReportResult & { status: "completed" } extends { metadata: { pdf?: infer Pdf } } ? Pdf : never>;
+  pdf: NonNullable<
+    GenerateRemediationReportResult & { status: "completed" } extends {
+      metadata: { pdf?: infer Pdf };
+    }
+      ? Pdf
+      : never
+  >;
   artifacts: NonNullable<
     GenerateRemediationReportResult & { status: "completed" } extends {
       metadata: { artifacts?: infer Artifacts };
@@ -87,7 +95,11 @@ function readCliOptions(argv: string[]): CliOptions {
     }
   }
 
-  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > MAX_LIMIT) {
+  if (
+    !Number.isInteger(options.limit) ||
+    options.limit < 1 ||
+    options.limit > MAX_LIMIT
+  ) {
     throw new Error(`--limit must be an integer between 1 and ${MAX_LIMIT}.`);
   }
 
@@ -102,7 +114,9 @@ function toPersistenceArgs({
   context: SelectedMunicipalityReportContext;
 }): ReportPersistenceArgs {
   if (!result.metadata.pdf || !result.metadata.artifacts) {
-    throw new Error(`Completed report ${result.report.id} is missing PDF metadata.`);
+    throw new Error(
+      `Completed report ${result.report.id} is missing PDF metadata.`,
+    );
   }
 
   return {
@@ -132,7 +146,9 @@ const selected = selectTopRiskReportContexts({
 });
 
 if (selected.length === 0) {
-  throw new Error("No reportable fixture records were selected for report generation.");
+  throw new Error(
+    "No reportable fixture records were selected for report generation.",
+  );
 }
 
 const batch = await renderReportBatchPdfs({
@@ -143,24 +159,32 @@ const batch = await renderReportBatchPdfs({
 });
 
 if (batch.summary.completed !== selected.length || batch.summary.failed !== 0) {
-  throw new Error("Fixture report generation must complete all selected records.");
+  throw new Error(
+    "Fixture report generation must complete all selected records.",
+  );
 }
 
-const selectedByMunicipalityId = new Map(selected.map((context) => [context.municipality.id, context]));
-const convexPersistenceArgs: ReportPersistenceArgs[] = batch.results.map((record) => {
-  const result = generateRemediationReportResultSchema.parse(record.result);
-  const context = selectedByMunicipalityId.get(record.municipalityId);
+const selectedByMunicipalityId = new Map(
+  selected.map((context) => [context.municipality.id, context]),
+);
+const convexPersistenceArgs: ReportPersistenceArgs[] = batch.results.map(
+  (record) => {
+    const result = generateRemediationReportResultSchema.parse(record.result);
+    const context = selectedByMunicipalityId.get(record.municipalityId);
 
-  if (!context) {
-    throw new Error(`Missing selected context for ${record.municipalityId}.`);
-  }
+    if (!context) {
+      throw new Error(`Missing selected context for ${record.municipalityId}.`);
+    }
 
-  if (result.status !== "completed") {
-    throw new Error(`Expected completed report for ${record.municipalityId}.`);
-  }
+    if (result.status !== "completed") {
+      throw new Error(
+        `Expected completed report for ${record.municipalityId}.`,
+      );
+    }
 
-  return toPersistenceArgs({ result, context });
-});
+    return toPersistenceArgs({ result, context });
+  },
+);
 
 const artifact = {
   id: batch.id,

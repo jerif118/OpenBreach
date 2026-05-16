@@ -66,7 +66,12 @@ const rawScanTls = v.object({
 });
 
 const rawScanCms = v.object({
-  name: v.union(v.literal("wordpress"), v.literal("joomla"), v.literal("drupal"), v.literal("unknown")),
+  name: v.union(
+    v.literal("wordpress"),
+    v.literal("joomla"),
+    v.literal("drupal"),
+    v.literal("unknown"),
+  ),
   version: v.optional(v.string()),
   confidence: v.number(),
   evidence: v.array(v.string()),
@@ -81,7 +86,12 @@ const rawScanAdminExposure = v.object({
 });
 
 const rawScanError = v.object({
-  stage: v.union(v.literal("http"), v.literal("tls"), v.literal("cms"), v.literal("admin-exposure")),
+  stage: v.union(
+    v.literal("http"),
+    v.literal("tls"),
+    v.literal("cms"),
+    v.literal("admin-exposure"),
+  ),
   message: v.string(),
 });
 
@@ -92,7 +102,11 @@ const riskLevel = v.union(
   v.literal("critical"),
 );
 
-const reportStatus = v.union(v.literal("pending"), v.literal("completed"), v.literal("failed"));
+const reportStatus = v.union(
+  v.literal("pending"),
+  v.literal("completed"),
+  v.literal("failed"),
+);
 
 const reportPdfReference = v.object({
   storagePath: v.string(),
@@ -182,18 +196,25 @@ export default defineSchema({
     summary: v.optional(v.string()),
     priorityActions: v.optional(v.array(v.string())),
     findings: v.optional(v.array(reportFinding)),
-    generatedBy: v.optional(v.union(v.literal("deterministic-fallback"), v.literal("ai-provider"))),
+    generatedBy: v.optional(
+      v.union(v.literal("deterministic-fallback"), v.literal("ai-provider")),
+    ),
     pdf: v.optional(reportPdfReference),
     artifacts: v.optional(reportArtifacts),
     error: v.optional(v.string()),
   })
     .index("by_externalId", ["externalId"])
     .index("by_municipalityId", ["municipalityId"])
-    .index("by_municipalityId_and_generatedAt", ["municipalityId", "generatedAt"]),
+    .index("by_municipalityId_and_generatedAt", [
+      "municipalityId",
+      "generatedAt",
+    ]),
   userProfiles: defineTable({
     tokenIdentifier: v.string(),
     email: v.optional(v.string()),
     name: v.optional(v.string()),
-    roles: v.array(v.union(v.literal("viewer"), v.literal("operator"), v.literal("admin"))),
+    roles: v.array(
+      v.union(v.literal("viewer"), v.literal("operator"), v.literal("admin")),
+    ),
   }).index("by_tokenIdentifier", ["tokenIdentifier"]),
 });

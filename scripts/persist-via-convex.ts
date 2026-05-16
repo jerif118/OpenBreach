@@ -8,7 +8,9 @@ import { spawnSync } from "node:child_process";
 
 const functionName = process.argv[2];
 if (!functionName) {
-  process.stderr.write("Usage: node scripts/persist-via-convex.ts <function-name> [batch-size]\n");
+  process.stderr.write(
+    "Usage: node scripts/persist-via-convex.ts <function-name> [batch-size]\n",
+  );
   process.exit(2);
 }
 
@@ -67,16 +69,22 @@ for (let batchIndex = 0; batchIndex < batchCount; batchIndex += 1) {
   });
 
   if (result.error) {
-    process.stderr.write(`Failed to spawn npx convex run: ${result.error.message}\n`);
+    process.stderr.write(
+      `Failed to spawn npx convex run: ${result.error.message}\n`,
+    );
     process.exit(1);
   }
   if (typeof result.status === "number" && result.status !== 0) {
-    process.stderr.write(`Batch ${batchIndex + 1} failed with exit code ${result.status}; aborting.\n`);
+    process.stderr.write(
+      `Batch ${batchIndex + 1} failed with exit code ${result.status}; aborting.\n`,
+    );
     process.exit(result.status);
   }
 }
 
-process.stderr.write(`Forwarded ${total} result${total === 1 ? "" : "s"} successfully.\n`);
+process.stderr.write(
+  `Forwarded ${total} result${total === 1 ? "" : "s"} successfully.\n`,
+);
 
 async function readStdin(): Promise<string> {
   let buffer = "";

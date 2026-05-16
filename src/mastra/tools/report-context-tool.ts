@@ -9,7 +9,10 @@ export type ReportContext = {
   scan: ScanResult;
 };
 
-export function buildReportContext(municipality: Municipality, scan: ScanResult): ReportContext {
+export function buildReportContext(
+  municipality: Municipality,
+  scan: ScanResult,
+): ReportContext {
   return { municipality, scan };
 }
 

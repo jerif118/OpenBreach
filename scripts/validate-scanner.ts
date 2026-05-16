@@ -3,7 +3,10 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import municipalities from "../data/municipalities/municipalities.seed.json" with { type: "json" };
-import { municipalitySchema, rawScanEvidenceSchema } from "../src/shared/contracts.ts";
+import {
+  municipalitySchema,
+  rawScanEvidenceSchema,
+} from "../src/shared/contracts.ts";
 import { exportScanFixture } from "../src/scanner/fixtures.ts";
 import {
   ADMIN_EXPOSURE_PATHS,
@@ -29,7 +32,11 @@ assert.deepEqual(resolveScannerControls({ timeoutMs: 750 }), {
 
 function makeResponse(
   body: string,
-  init: { status?: number; url?: string; headers?: Record<string, string> } = {},
+  init: {
+    status?: number;
+    url?: string;
+    headers?: Record<string, string>;
+  } = {},
 ): Response {
   const response = new Response(body, {
     status: init.status ?? 200,
@@ -70,7 +77,9 @@ const evidence = await scanWebsite(
     now: () => scannedAt,
     fetch: async (input, init) => {
       fetchCalls += 1;
-      const requestUrl = new URL(input instanceof URL ? input.toString() : String(input));
+      const requestUrl = new URL(
+        input instanceof URL ? input.toString() : String(input),
+      );
       requestedUrls.push({
         method: init?.method,
         path: requestUrl.pathname,
@@ -145,18 +154,60 @@ assert.deepEqual(
   evidence.adminExposure.map((entry) => entry.path),
   ["/wp-login.php", "/wp-admin/", "/administrator/", "/admin/", "/user/login"],
 );
-assert.equal(evidence.adminExposure.find((entry) => entry.path === "/wp-login.php")?.reachable, true);
-assert.equal(evidence.adminExposure.find((entry) => entry.path === "/wp-login.php")?.method, "HEAD");
-assert.equal(evidence.adminExposure.find((entry) => entry.path === "/wp-admin/")?.method, "GET");
-assert.deepEqual(evidence.adminExposure.map((entry) => entry.path), [...ADMIN_EXPOSURE_PATHS]);
-assert.equal(requestedUrls.every((request) => request.credentials === "omit"), true);
-assert.equal(requestedAdminPaths.every((request) => request.method === "HEAD" || request.method === "GET"), true);
-assert.equal(requestedAdminPaths.every((request) => allowedAdminPaths.has(request.path)), true);
-assert.equal(requestedAdminPaths.every((request) => request.search === ""), true);
-assert.equal(requestedAdminPaths.every((request) => request.body == null), true);
-assert.equal(requestedAdminPaths.every((request) => request.credentials === "omit"), true);
-assert.equal(requestedAdminPaths.some((request) => request.method === "POST"), false);
-assert.equal(requestedAdminPaths.some((request) => /password|credential|payload|exploit|brute/i.test(request.path)), false);
+assert.equal(
+  evidence.adminExposure.find((entry) => entry.path === "/wp-login.php")
+    ?.reachable,
+  true,
+);
+assert.equal(
+  evidence.adminExposure.find((entry) => entry.path === "/wp-login.php")
+    ?.method,
+  "HEAD",
+);
+assert.equal(
+  evidence.adminExposure.find((entry) => entry.path === "/wp-admin/")?.method,
+  "GET",
+);
+assert.deepEqual(
+  evidence.adminExposure.map((entry) => entry.path),
+  [...ADMIN_EXPOSURE_PATHS],
+);
+assert.equal(
+  requestedUrls.every((request) => request.credentials === "omit"),
+  true,
+);
+assert.equal(
+  requestedAdminPaths.every(
+    (request) => request.method === "HEAD" || request.method === "GET",
+  ),
+  true,
+);
+assert.equal(
+  requestedAdminPaths.every((request) => allowedAdminPaths.has(request.path)),
+  true,
+);
+assert.equal(
+  requestedAdminPaths.every((request) => request.search === ""),
+  true,
+);
+assert.equal(
+  requestedAdminPaths.every((request) => request.body == null),
+  true,
+);
+assert.equal(
+  requestedAdminPaths.every((request) => request.credentials === "omit"),
+  true,
+);
+assert.equal(
+  requestedAdminPaths.some((request) => request.method === "POST"),
+  false,
+);
+assert.equal(
+  requestedAdminPaths.some((request) =>
+    /password|credential|payload|exploit|brute/i.test(request.path),
+  ),
+  false,
+);
 
 let retryAttempts = 0;
 let retryDelayCalls = 0;
@@ -188,15 +239,26 @@ const failureEvidence = await scanWebsite(
 
 rawScanEvidenceSchema.parse(failureEvidence);
 assert.equal(failureEvidence.reachable, false);
-assert.equal(failureEvidence.errors.some((error) => error.stage === "http"), true);
-assert.equal(failureEvidence.errors.some((error) => error.stage === "tls"), true);
+assert.equal(
+  failureEvidence.errors.some((error) => error.stage === "http"),
+  true,
+);
+assert.equal(
+  failureEvidence.errors.some((error) => error.stage === "tls"),
+  true,
+);
 assert.equal(failureEvidence.adminExposure.length, 5);
-assert.equal(failureEvidence.errors.some((error) => error.stage === "admin-exposure"), true);
+assert.equal(
+  failureEvidence.errors.some((error) => error.stage === "admin-exposure"),
+  true,
+);
 assert.equal(retryAttempts, 18);
 assert.equal(tlsRetryAttempts, 3);
 assert.equal(retryDelayCalls, 14);
 
-const fixtureMunicipalities = municipalitySchema.array().parse(municipalities.slice(0, 10));
+const fixtureMunicipalities = municipalitySchema
+  .array()
+  .parse(municipalities.slice(0, 10));
 const batchResults = await scanMunicipalities(fixtureMunicipalities, {
   now: () => scannedAt,
   fetch: async () => makeResponse("<html><body>plain site</body></html>"),
@@ -247,7 +309,9 @@ try {
   assert.equal(exported.endsWith("\n"), true);
   assert.equal(exported, `${JSON.stringify(JSON.parse(exported), null, 2)}\n`);
 
-  const parsedExport = rawScanEvidenceSchema.array().parse(JSON.parse(exported));
+  const parsedExport = rawScanEvidenceSchema
+    .array()
+    .parse(JSON.parse(exported));
   assert.deepEqual(
     parsedExport.map((result) => result.municipalityId),
     ["mx-a-first", "mx-z-last"],
