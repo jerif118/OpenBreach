@@ -1,5 +1,5 @@
 import { chat } from "@tanstack/ai";
-import { createOpenaiChat, type OpenAIChatModel } from "@tanstack/ai-openai";
+import { createOpenRouterText } from "@tanstack/ai-openrouter";
 import { remediationReportSchema } from "../shared/contracts.ts";
 import type { GenerateRemediationReport, RemediationReport, ScanFinding } from "~/shared";
 
@@ -10,7 +10,7 @@ export type ReportAiAdapter = {
   generateRemediationReport: GenerateRemediationReport;
 };
 
-type ReportAiAdapterProvider = "openai";
+type ReportAiAdapterProvider = "openrouter";
 
 type ReportAiChatExecutorInput = {
   model: string;
@@ -86,18 +86,18 @@ function buildFallbackAction(finding: ScanFinding, index: number) {
 function getConfiguredProviderKey() {
   return (
     process.env.AI_PROVIDER_KEY ??
-    process.env.OPENAI_API_KEY ??
+    process.env.OPENROUTER_API_KEY ??
     process.env.VITE_AI_PROVIDER_KEY ??
     import.meta.env?.VITE_AI_PROVIDER_KEY
   );
 }
 
 function getConfiguredProvider(): ReportAiAdapterProvider {
-  return process.env.AI_PROVIDER === "openai" ? "openai" : "openai";
+  return process.env.AI_PROVIDER === "openrouter" ? "openrouter" : "openrouter";
 }
 
 function getConfiguredModel() {
-  return process.env.AI_PROVIDER_MODEL ?? "gpt-5.2";
+  return process.env.AI_PROVIDER_MODEL ?? "anthropic/claude-sonnet-4";
 }
 
 function buildProviderPrompt({ municipality, scan }: Parameters<GenerateRemediationReport>[0]) {
@@ -140,8 +140,8 @@ async function runTanStackChat({
   providerKey,
   systemPrompts,
 }: ReportAiChatExecutorInput) {
-  const adapters: Record<ReportAiAdapterProvider, () => ReturnType<typeof createOpenaiChat>> = {
-    openai: () => createOpenaiChat(model as OpenAIChatModel, providerKey),
+  const adapters: Record<ReportAiAdapterProvider, () => ReturnType<typeof createOpenRouterText>> = {
+    openrouter: () => createOpenRouterText(model as Parameters<typeof createOpenRouterText>[0], providerKey),
   };
 
   return await chat({

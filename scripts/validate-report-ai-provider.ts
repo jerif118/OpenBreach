@@ -45,8 +45,8 @@ const aiAdapter = createReportAiAdapter("test-provider-key", {
     chatCalls += 1;
     return JSON.stringify(providerReport);
   },
-  provider: "openai",
-  model: "gpt-5.2",
+  provider: "openrouter",
+  model: "anthropic/claude-sonnet-4",
 });
 
 if (aiAdapter.provider !== "tanstack-ai") {
@@ -70,8 +70,8 @@ if (aiReport.generatedBy !== "ai-provider") {
 
 const invalidAdapter = createReportAiAdapter("test-provider-key", {
   chat: async () => "not valid json",
-  provider: "openai",
-  model: "gpt-5.2",
+  provider: "openrouter",
+  model: "anthropic/claude-sonnet-4",
 });
 const fallbackReport = await invalidAdapter.generateRemediationReport({
   municipality: context.municipality,
@@ -87,7 +87,17 @@ const dependencies = {
   ...packageJson.devDependencies,
 };
 
-for (const excludedDependency of ["ai", "@ai-sdk/openai", "@vercel/ai", "@aws/bedrock-agentcore"]) {
+if (!("@tanstack/ai-openrouter" in dependencies)) {
+  throw new Error("Expected @tanstack/ai-openrouter dependency to be present.");
+}
+
+for (const excludedDependency of [
+  "ai",
+  "@ai-sdk/openai",
+  "@tanstack/ai-openai",
+  "@vercel/ai",
+  "@aws/bedrock-agentcore",
+]) {
   if (excludedDependency in dependencies) {
     throw new Error(`Excluded AI dependency must not be present: ${excludedDependency}`);
   }
@@ -95,8 +105,12 @@ for (const excludedDependency of ["ai", "@ai-sdk/openai", "@vercel/ai", "@aws/be
 
 const adapterSource = await readFile(new URL("../src/ai/report-adapter.ts", import.meta.url), "utf8");
 
-if (!adapterSource.includes("@tanstack/ai-openai")) {
+if (!adapterSource.includes("@tanstack/ai-openrouter")) {
   throw new Error("Provider adapter package should be imported inside src/ai/report-adapter.ts.");
+}
+
+if (adapterSource.includes("@tanstack/ai-openai")) {
+  throw new Error("OpenAI adapter package should not be used for report generation.");
 }
 
 for (const path of [
@@ -106,7 +120,7 @@ for (const path of [
 ]) {
   const source = await readFile(new URL(path, import.meta.url), "utf8");
 
-  if (source.includes("@tanstack/ai-openai")) {
+  if (source.includes("@tanstack/ai-openrouter") || source.includes("@tanstack/ai-openai")) {
     throw new Error(`Provider package detail leaked outside the adapter boundary: ${path}`);
   }
 }

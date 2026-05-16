@@ -568,8 +568,10 @@ Suggested environment variables:
 | `VITE_CLERK_PUBLISHABLE_KEY`   | Yes for auth UI                   | Clerk publishable key for client-side Clerk provider setup.                                           |
 | `CLERK_SECRET_KEY`             | Yes for protected server routes   | Clerk secret key for server-side request authentication when needed.                                  |
 | `CLERK_JWT_ISSUER_DOMAIN`      | Yes for Convex auth               | Clerk issuer/domain configured in `convex/auth.config.ts` so Convex can validate Clerk-issued auth.   |
-| `AI_MODEL_PROVIDER`            | No                                | Provider selected for TanStack AI adapters, for example `openai`, `anthropic`, `gemini`, or `ollama`. |
-| `OPENAI_API_KEY`               | No                                | Provider key if OpenAI is selected.                                                                   |
+| `AI_PROVIDER`                  | No                                | Provider selected for TanStack AI report generation. The MVP provider-backed path uses `openrouter`.  |
+| `AI_PROVIDER_MODEL`            | No                                | OpenRouter model id, for example `anthropic/claude-sonnet-4`.                                         |
+| `AI_PROVIDER_KEY`              | No                                | Generic provider key used by the server-side report adapter.                                          |
+| `OPENROUTER_API_KEY`           | No                                | OpenRouter key used when `AI_PROVIDER_KEY` is unset.                                                   |
 | `ANTHROPIC_API_KEY`            | No                                | Provider key if Anthropic is selected.                                                                |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | No                                | Provider key if Gemini is selected.                                                                   |
 | `SCAN_CONCURRENCY`             | No                                | Limits simultaneous passive requests.                                                                 |
