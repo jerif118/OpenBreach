@@ -1,0 +1,3302 @@
+[
+  {
+    "municipalityId": "mx-aguascalientes-aguascalientes",
+    "source": "fixture",
+    "requestedUrl": "https://www.ags.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.ags.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.ags.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.ags.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.ags.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.ags.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.ags.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-bcn-tijuana",
+    "source": "fixture",
+    "requestedUrl": "https://www.tijuana.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.tijuana.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.tijuana.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tijuana.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tijuana.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tijuana.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tijuana.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-bcs-la-paz",
+    "source": "fixture",
+    "requestedUrl": "https://www.lapaz.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.lapaz.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.lapaz.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.lapaz.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.lapaz.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.lapaz.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.lapaz.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-cdmx-alvaro-obregon",
+    "source": "fixture",
+    "requestedUrl": "https://www.aao.cdmx.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.aao.cdmx.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.aao.cdmx.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.aao.cdmx.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.aao.cdmx.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.aao.cdmx.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.aao.cdmx.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-cdmx-coyoacan",
+    "source": "fixture",
+    "requestedUrl": "https://coyoacan.cdmx.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://coyoacan.cdmx.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://coyoacan.cdmx.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://coyoacan.cdmx.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://coyoacan.cdmx.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://coyoacan.cdmx.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://coyoacan.cdmx.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-cdmx-cuauhtemoc",
+    "source": "fixture",
+    "requestedUrl": "https://alcaldiacuauhtemoc.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://alcaldiacuauhtemoc.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://alcaldiacuauhtemoc.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://alcaldiacuauhtemoc.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://alcaldiacuauhtemoc.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://alcaldiacuauhtemoc.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://alcaldiacuauhtemoc.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-cdmx-gustavo-a-madero",
+    "source": "fixture",
+    "requestedUrl": "https://www.gamadero.cdmx.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.gamadero.cdmx.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.gamadero.cdmx.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.gamadero.cdmx.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.gamadero.cdmx.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.gamadero.cdmx.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.gamadero.cdmx.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-cdmx-iztapalapa",
+    "source": "fixture",
+    "requestedUrl": "https://www.iztapalapa.cdmx.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.iztapalapa.cdmx.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.iztapalapa.cdmx.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.iztapalapa.cdmx.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.iztapalapa.cdmx.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.iztapalapa.cdmx.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.iztapalapa.cdmx.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-cdmx-tlalpan",
+    "source": "fixture",
+    "requestedUrl": "https://www.tlalpan.cdmx.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.tlalpan.cdmx.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.tlalpan.cdmx.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlalpan.cdmx.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlalpan.cdmx.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlalpan.cdmx.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlalpan.cdmx.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-chiapas-tuxtla-gutierrez",
+    "source": "fixture",
+    "requestedUrl": "https://www.tuxtla.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.tuxtla.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.tuxtla.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tuxtla.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tuxtla.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tuxtla.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tuxtla.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-chihuahua-chihuahua",
+    "source": "fixture",
+    "requestedUrl": "https://www.municipiochihuahua.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.municipiochihuahua.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.municipiochihuahua.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiochihuahua.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiochihuahua.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiochihuahua.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiochihuahua.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-chihuahua-juarez",
+    "source": "fixture",
+    "requestedUrl": "https://www.juarez.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.juarez.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.juarez.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.juarez.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.juarez.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.juarez.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.juarez.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-coahuila-saltillo",
+    "source": "fixture",
+    "requestedUrl": "https://www.saltillo.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.saltillo.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.saltillo.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.saltillo.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.saltillo.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.saltillo.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.saltillo.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-coahuila-torreon",
+    "source": "fixture",
+    "requestedUrl": "https://www.torreon.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.torreon.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.torreon.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.torreon.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.torreon.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.torreon.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.torreon.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-durango-durango",
+    "source": "fixture",
+    "requestedUrl": "https://www.municipiodurango.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.municipiodurango.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.municipiodurango.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiodurango.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiodurango.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiodurango.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiodurango.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-edomex-atizapan-de-zaragoza",
+    "source": "fixture",
+    "requestedUrl": "https://www.atizapan.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.atizapan.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.atizapan.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.atizapan.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.atizapan.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.atizapan.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.atizapan.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-edomex-chimalhuacan",
+    "source": "fixture",
+    "requestedUrl": "https://www.chimalhuacan.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.chimalhuacan.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.chimalhuacan.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.chimalhuacan.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.chimalhuacan.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.chimalhuacan.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.chimalhuacan.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-edomex-ecatepec-de-morelos",
+    "source": "fixture",
+    "requestedUrl": "https://www.ecatepec.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.ecatepec.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.ecatepec.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.ecatepec.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.ecatepec.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.ecatepec.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.ecatepec.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-edomex-naucalpan-de-juarez",
+    "source": "fixture",
+    "requestedUrl": "https://naucalpan.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://naucalpan.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://naucalpan.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://naucalpan.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://naucalpan.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://naucalpan.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://naucalpan.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-edomex-nezahualcoyotl",
+    "source": "fixture",
+    "requestedUrl": "https://www.neza.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.neza.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.neza.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.neza.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.neza.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.neza.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.neza.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-edomex-tlalnepantla-de-baz",
+    "source": "fixture",
+    "requestedUrl": "https://www.tlalnepantla.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.tlalnepantla.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.tlalnepantla.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlalnepantla.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlalnepantla.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlalnepantla.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlalnepantla.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-edomex-toluca",
+    "source": "fixture",
+    "requestedUrl": "https://www2.toluca.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www2.toluca.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www2.toluca.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www2.toluca.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www2.toluca.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www2.toluca.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www2.toluca.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-guanajuato-celaya",
+    "source": "fixture",
+    "requestedUrl": "https://www.celaya.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.celaya.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.celaya.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.celaya.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.celaya.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.celaya.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.celaya.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-guanajuato-irapuato",
+    "source": "fixture",
+    "requestedUrl": "https://www.irapuato.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.irapuato.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.irapuato.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.irapuato.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.irapuato.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.irapuato.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.irapuato.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-guanajuato-leon",
+    "source": "fixture",
+    "requestedUrl": "https://www.leon.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.leon.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.leon.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.leon.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.leon.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.leon.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.leon.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-guerrero-acapulco-de-juarez",
+    "source": "fixture",
+    "requestedUrl": "https://acapulco.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://acapulco.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://acapulco.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://acapulco.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://acapulco.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://acapulco.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://acapulco.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-hidalgo-pachuca-de-soto",
+    "source": "fixture",
+    "requestedUrl": "https://www.pachuca.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.pachuca.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.pachuca.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.pachuca.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.pachuca.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.pachuca.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.pachuca.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-jalisco-guadalajara",
+    "source": "fixture",
+    "requestedUrl": "https://guadalajara.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://guadalajara.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://guadalajara.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://guadalajara.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://guadalajara.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://guadalajara.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://guadalajara.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-jalisco-tlaquepaque",
+    "source": "fixture",
+    "requestedUrl": "https://www.tlaquepaque.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.tlaquepaque.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.tlaquepaque.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlaquepaque.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlaquepaque.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlaquepaque.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.tlaquepaque.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-jalisco-tonala",
+    "source": "fixture",
+    "requestedUrl": "https://tonala.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://tonala.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://tonala.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://tonala.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://tonala.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://tonala.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://tonala.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-jalisco-zapopan",
+    "source": "fixture",
+    "requestedUrl": "https://www.zapopan.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.zapopan.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.zapopan.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.zapopan.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.zapopan.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.zapopan.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.zapopan.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-michoacan-morelia",
+    "source": "fixture",
+    "requestedUrl": "https://www.morelia.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.morelia.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.morelia.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.morelia.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.morelia.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.morelia.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.morelia.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-morelos-cuernavaca",
+    "source": "fixture",
+    "requestedUrl": "https://cuernavaca.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://cuernavaca.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://cuernavaca.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://cuernavaca.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://cuernavaca.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://cuernavaca.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://cuernavaca.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-nl-apodaca",
+    "source": "fixture",
+    "requestedUrl": "https://www.apodaca.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.apodaca.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.apodaca.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.apodaca.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.apodaca.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.apodaca.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.apodaca.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-nl-guadalupe",
+    "source": "fixture",
+    "requestedUrl": "https://www.guadalupe.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.guadalupe.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.guadalupe.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.guadalupe.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.guadalupe.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.guadalupe.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.guadalupe.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-nl-monterrey",
+    "source": "fixture",
+    "requestedUrl": "https://www.monterrey.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.monterrey.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.monterrey.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.monterrey.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.monterrey.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.monterrey.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.monterrey.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-oaxaca-oaxaca-de-juarez",
+    "source": "fixture",
+    "requestedUrl": "https://www.municipiodeoaxaca.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.municipiodeoaxaca.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.municipiodeoaxaca.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiodeoaxaca.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiodeoaxaca.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiodeoaxaca.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.municipiodeoaxaca.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-puebla-puebla",
+    "source": "fixture",
+    "requestedUrl": "https://pueblacapital.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://pueblacapital.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://pueblacapital.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://pueblacapital.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://pueblacapital.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://pueblacapital.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://pueblacapital.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-queretaro-queretaro",
+    "source": "fixture",
+    "requestedUrl": "https://municipiodequeretaro.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://municipiodequeretaro.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://municipiodequeretaro.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://municipiodequeretaro.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://municipiodequeretaro.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://municipiodequeretaro.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://municipiodequeretaro.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-quintana-roo-benito-juarez",
+    "source": "fixture",
+    "requestedUrl": "https://cancun.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://cancun.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://cancun.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://cancun.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://cancun.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://cancun.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://cancun.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-sinaloa-culiacan",
+    "source": "fixture",
+    "requestedUrl": "https://www.culiacan.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.culiacan.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.culiacan.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.culiacan.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.culiacan.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.culiacan.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.culiacan.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-sl-san-luis-potosi",
+    "source": "fixture",
+    "requestedUrl": "https://sanluis.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://sanluis.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://sanluis.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://sanluis.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://sanluis.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://sanluis.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://sanluis.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-sonora-hermosillo",
+    "source": "fixture",
+    "requestedUrl": "https://www.hermosillo.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.hermosillo.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.hermosillo.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.hermosillo.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.hermosillo.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.hermosillo.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.hermosillo.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-tabasco-centro",
+    "source": "fixture",
+    "requestedUrl": "https://www.villahermosa.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.villahermosa.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.villahermosa.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.villahermosa.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.villahermosa.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.villahermosa.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.villahermosa.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-tamaulipas-matamoros",
+    "source": "fixture",
+    "requestedUrl": "https://www.matamoros.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.matamoros.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.matamoros.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.matamoros.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.matamoros.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.matamoros.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.matamoros.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-tamaulipas-nuevo-laredo",
+    "source": "fixture",
+    "requestedUrl": "https://www.nld.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.nld.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.nld.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.nld.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.nld.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.nld.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.nld.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-tamaulipas-reynosa",
+    "source": "fixture",
+    "requestedUrl": "https://www.reynosa.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.reynosa.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.reynosa.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.reynosa.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.reynosa.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.reynosa.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.reynosa.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-veracruz-veracruz",
+    "source": "fixture",
+    "requestedUrl": "https://www.veracruzmunicipio.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.veracruzmunicipio.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.veracruzmunicipio.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.veracruzmunicipio.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.veracruzmunicipio.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.veracruzmunicipio.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.veracruzmunicipio.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-veracruz-xalapa",
+    "source": "fixture",
+    "requestedUrl": "https://ayuntamiento.xalapa.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://ayuntamiento.xalapa.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://ayuntamiento.xalapa.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://ayuntamiento.xalapa.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://ayuntamiento.xalapa.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://ayuntamiento.xalapa.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://ayuntamiento.xalapa.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "municipalityId": "mx-yucatan-merida",
+    "source": "fixture",
+    "requestedUrl": "https://www.merida.gob.mx",
+    "scannedAt": "2026-01-01T00:00:00.000Z",
+    "reachable": true,
+    "finalUrl": "https://www.merida.gob.mx/",
+    "httpStatus": 200,
+    "headers": {
+      "server": "deff-acc-fixture",
+      "content-type": "text/html; charset=utf-8",
+      "x-frame-options": "SAMEORIGIN"
+    },
+    "tls": {
+      "valid": true,
+      "expiresAt": "2026-06-01T00:00:00.000Z",
+      "issuer": "DEFF-ACC Fixture CA"
+    },
+    "cms": {
+      "name": "wordpress",
+      "version": "6.4",
+      "confidence": 0.8,
+      "evidence": [
+        "generator:WordPress 6.4",
+        "marker:wordpress"
+      ]
+    },
+    "adminExposure": [
+      {
+        "path": "/wp-login.php",
+        "method": "HEAD",
+        "reachable": true,
+        "httpStatus": 200,
+        "finalUrl": "https://www.merida.gob.mx/wp-login.php"
+      },
+      {
+        "path": "/wp-admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.merida.gob.mx/wp-admin/"
+      },
+      {
+        "path": "/administrator/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.merida.gob.mx/administrator/"
+      },
+      {
+        "path": "/admin/",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.merida.gob.mx/admin/"
+      },
+      {
+        "path": "/user/login",
+        "method": "HEAD",
+        "reachable": false,
+        "httpStatus": 404,
+        "finalUrl": "https://www.merida.gob.mx/user/login"
+      }
+    ],
+    "errors": []
+  }
+]
