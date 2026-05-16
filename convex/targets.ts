@@ -244,19 +244,19 @@ export const getDemo = query({
         .take(100),
       ctx.db
         .query("approvalGates")
-        .withIndex("by_hypothesisId", (q) => q.eq("hypothesisId", ""))
+        .withIndex("by_hypothesisId", (q) => q.eq("hypothesisId", latestRun?.hypothesisId ?? ""))
         .take(100),
     ]);
 
     return {
       target: {
         targetId: target.targetId,
-        targetType: "domain",
+        targetType: "domain", // TODO: add targetType field to schema when needed
         canonicalUrl: target.canonicalUrl,
         organizationName: target.organizationName,
         outOfScope: target.outOfScope ?? false,
-        createdAt: target._creationTime.toString(),
-        updatedAt: target._creationTime.toString(),
+        createdAt: new Date(target._creationTime).toISOString(),
+        updatedAt: new Date(target._creationTime).toISOString(),
       },
       latestRun: latestRun ? toLatestRunDTO(latestRun) : null,
       evidenceSummary: toEvidenceSummaryDTO(evidence),
@@ -302,7 +302,7 @@ export const upsert = internalMutation({
         canonicalUrl: args.target.canonicalUrl,
         outOfScope: args.target.outOfScope ?? false,
       });
-      return { success: true, targetId: existing._id };
+      return { success: true, docId: existing._id, targetId: existing.targetId };
     } else {
       // Insert new document
       const id = await ctx.db.insert("targets", {
@@ -312,7 +312,7 @@ export const upsert = internalMutation({
         canonicalUrl: args.target.canonicalUrl,
         outOfScope: args.target.outOfScope ?? false,
       });
-      return { success: true, targetId: id };
+      return { success: true, docId: id, targetId: args.target.targetId };
     }
   },
 });

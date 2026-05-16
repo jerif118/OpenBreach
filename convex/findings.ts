@@ -30,7 +30,7 @@ function toFindingDTO(finding: Doc<"findings">): FindingDTO {
     description: finding.description,
     evidence: finding.evidenceIds?.join(", ") ?? "",
     remediationHint: "", // findings table doesn't have remediationHint field in current schema
-    createdAt: finding._creationTime.toString(),
+    createdAt: finding.createdAt,
   };
 }
 

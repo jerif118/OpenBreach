@@ -53,6 +53,6 @@ export const append = internalMutation({
       metadata: args.event.metadata,
     });
 
-    return { success: true, eventId: id };
+    return { success: true, eventId };
   },
 });

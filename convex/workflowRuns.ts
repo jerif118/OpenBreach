@@ -64,8 +64,8 @@ type RunStatus =
   | "rejected";
 
 const VALID_TRANSITIONS: Record<RunStatus, RunStatus[]> = {
-  hypothesis: ["approved", "halted", "rejected"],
-  approved: ["confirmed", "halted", "rejected"],
+  hypothesis: ["approved", "halted", "rejected", "skipped"],
+  approved: ["confirmed", "halted", "rejected", "skipped"],
   confirmed: [], // terminal
   skipped: [], // terminal
   halted: ["approved"], // can restart
@@ -73,6 +73,8 @@ const VALID_TRANSITIONS: Record<RunStatus, RunStatus[]> = {
 };
 
 function validateTransition(current: RunStatus, next: RunStatus): void {
+  // Allow idempotent same-status updates
+  if (current === next) return;
   const allowed = VALID_TRANSITIONS[current];
   if (!allowed.includes(next)) {
     throw new Error(

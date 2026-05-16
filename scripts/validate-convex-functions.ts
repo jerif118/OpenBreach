@@ -191,17 +191,21 @@ for (const { file, transitions, states } of stateMachines) {
   const filePath = resolve(CONVEX_DIR, file);
   const content = readFileSync(filePath, "utf-8");
 
-  // Verify VALID_TRANSITIONS exists
+  // Verify VALID_TRANSITIONS exists (structural check: const NAME = { ... } with optional type annotation)
+  // Note: [\s\S]*? instead of . to match across \r\n line endings
+  const transitionsPattern = new RegExp(`\\bconst\\s+${transitions}\\s*[=:][\\s\\S]*?\\{`);
   assert.ok(
-    content.includes(`const ${transitions}`),
+    transitionsPattern.test(content),
     `${file} missing ${transitions} state machine`,
   );
   console.log(`  ✓ ${file} — ${transitions} defined`);
 
   // Verify expected states exist
+  // Keys can be unquoted (identifier) or quoted (string key) — match both forms
   for (const state of states) {
+    const statePattern = new RegExp(`['"]?${state}['"]?\\s*:`);
     assert.ok(
-      content.includes(state),
+      statePattern.test(content),
       `${file} state machine missing state "${state}"`,
     );
   }
@@ -275,11 +279,56 @@ const expectedTables = [
 ];
 
 for (const table of expectedTables) {
+  // Structural check: tableName: defineTable( (not just the word in a comment)
+  const tablePattern = new RegExp(`\\b${table}\\s*:\\s*defineTable\\s*\\(`);
   assert.ok(
-    schemaContent.includes(table),
-    `Table "${table}" not found in schema.ts`,
+    tablePattern.test(schemaContent),
+    `Table "${table}" not found as defineTable key in schema.ts`,
   );
   console.log(`  ✓ schema.ts defines ${table} table`);
+}
+
+// Phase 4.6 continued: verify mutations have validator args
+const mutationFiles = [
+  resolve(CONVEX_DIR, "targets.ts"),
+  resolve(CONVEX_DIR, "workflowRuns.ts"),
+  resolve(CONVEX_DIR, "evidence.ts"),
+  resolve(CONVEX_DIR, "hypotheses.ts"),
+  resolve(CONVEX_DIR, "approvals.ts"),
+  resolve(CONVEX_DIR, "validations.ts"),
+  resolve(CONVEX_DIR, "findings.ts"),
+  resolve(CONVEX_DIR, "auditEvents.ts"),
+];
+
+let validatorsFound = 0;
+let mutationsMissingValidator = [];
+
+for (const filePath of mutationFiles) {
+  const content = readFileSync(filePath, "utf-8");
+  const fileName = filePath.split("/").pop();
+
+  // Find all internalMutation or mutation exports
+  const mutationExportPattern = /export\s+const\s+(\w+)\s*=\s*(?:internalMutation|mutation)\s*\(/g;
+  let match;
+  while ((match = mutationExportPattern.exec(content)) !== null) {
+    const mutationName = match[1];
+    // Check if this mutation has an args: { ... } block (validator)
+    // Look for the pattern: args: { ... } inside the mutation definition
+    const fnStart = match.index;
+    const fnBody = content.slice(fnStart, fnStart + 2000);
+    const hasArgsValidator = /args\s*:\s*\{/.test(fnBody);
+    if (hasArgsValidator) {
+      validatorsFound++;
+    } else {
+      mutationsMissingValidator.push(`${fileName}::${mutationName}`);
+    }
+  }
+}
+
+if (mutationsMissingValidator.length > 0) {
+  console.log(`  ⚠️  Mutations missing validator args: ${mutationsMissingValidator.join(", ")}`);
+} else {
+  console.log(`  ✓ All ${validatorsFound} mutations have validator args`);
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -297,6 +346,9 @@ console.log("  • 4 queries have fixture fallback (!process.env.CONVEX_URL)");
 console.log("  • 2 state machines verified (workflowRuns, approvalGates)");
 console.log("  • 11 DTO types verified (display-ready, no raw Doc types)");
 console.log("  • 9 OpenBreach tables defined in schema.ts");
-console.log("  • All mutations have validators");
+console.log(`  • ${validatorsFound} mutations have validator args checked`);
+if (mutationsMissingValidator.length > 0) {
+  console.log(`  ⚠️  Mutations missing validator args: ${mutationsMissingValidator.join(", ")}`);
+}
 console.log("");
 console.log("Ready for sdd-verify phase.");
