@@ -1,0 +1,31 @@
+{
+  "municipalityId": "mx-yuc-merida",
+  "source": "fixture",
+  "requestedUrl": "https://www.merida.gob.mx",
+  "scannedAt": "2026-01-01T00:00:00.000Z",
+  "reachable": true,
+  "finalUrl": "https://www.merida.gob.mx/",
+  "httpStatus": 200,
+  "headers": {
+    "server": "fixture-server",
+    "contentType": "text/html; charset=utf-8"
+  },
+  "tls": {
+    "valid": true,
+    "expiresAt": "2026-06-01T00:00:00.000Z",
+    "issuer": "Fixture CA"
+  },
+  "cms": {
+    "name": "unknown",
+    "confidence": 0,
+    "evidence": []
+  },
+  "adminExposure": [
+    {
+      "path": "/wp-login.php",
+      "reachable": false,
+      "httpStatus": 404
+    }
+  ],
+  "errors": []
+}

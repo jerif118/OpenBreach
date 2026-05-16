@@ -37,6 +37,49 @@ export const scanResultSchema = z.object({
 
 export type ScanResult = z.infer<typeof scanResultSchema>;
 
+export const rawScanEvidenceSchema = z.object({
+  municipalityId: z.string().min(1),
+  source: z.enum(["convex", "fixture"]),
+  requestedUrl: z.string().url(),
+  scannedAt: z.string().datetime(),
+  reachable: z.boolean(),
+  finalUrl: z.string().url().optional(),
+  httpStatus: z.number().int().min(100).max(599).optional(),
+  headers: z.record(z.string().min(1), z.string().min(1)).default({}),
+  tls: z
+    .object({
+      valid: z.boolean(),
+      expiresAt: z.string().datetime().optional(),
+      issuer: z.string().min(1).optional(),
+    })
+    .optional(),
+  cms: z
+    .object({
+      name: z.enum(["wordpress", "joomla", "drupal", "unknown"]),
+      version: z.string().min(1).optional(),
+      confidence: z.number().min(0).max(1),
+      evidence: z.array(z.string().min(1)),
+    })
+    .optional(),
+  adminExposure: z.array(
+    z.object({
+      path: z.string().startsWith("/"),
+      method: z.enum(["HEAD", "GET"]).optional(),
+      reachable: z.boolean(),
+      httpStatus: z.number().int().min(100).max(599).optional(),
+      finalUrl: z.string().url().optional(),
+    }),
+  ),
+  errors: z.array(
+    z.object({
+      stage: z.enum(["http", "tls", "cms", "admin-exposure"]),
+      message: z.string().min(1),
+    }),
+  ),
+});
+
+export type RawScanEvidence = z.infer<typeof rawScanEvidenceSchema>;
+
 export const remediationReportSchema = z.object({
   id: z.string().min(1),
   municipalityId: z.string().min(1),
