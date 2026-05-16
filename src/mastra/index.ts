@@ -4,7 +4,11 @@ import { reportWorkflow } from "./workflows/report-workflow";
 
 export { reportAgent } from "./agents/report-agent";
 export { buildReportContext } from "./tools/report-context-tool";
-export { generateRemediationReport, reportWorkflow } from "./workflows/report-workflow";
+export {
+  generateRemediationReport,
+  generateRemediationReportBatch,
+  reportWorkflow,
+} from "./workflows/report-workflow";
 
 export const mastra = new Mastra({
   logger: false,
