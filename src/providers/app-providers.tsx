@@ -1,5 +1,5 @@
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
-import { ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
+import { ConvexProvider, ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
 import type { ReactNode } from "react";
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL;
@@ -30,6 +30,10 @@ function ConvexAuthProvider({ children }: { children: ReactNode }) {
 
 export function AppProviders({ children }: { children: ReactNode }) {
   if (!clerkPublishableKey) {
+    if (convexClient) {
+      return <ConvexProvider client={convexClient}>{children}</ConvexProvider>;
+    }
+
     return <>{children}</>;
   }
 
