@@ -143,7 +143,6 @@ export const rawScanEvidenceSchema = z.object({
 
 export type RawScanEvidence = z.infer<typeof rawScanEvidenceSchema>;
 
-<<<<<<< HEAD
 export const reportFindingSchema = scanFindingSchema
   .extend({
     confidence: z.enum(["low", "medium", "high"]).default("medium"),
@@ -164,22 +163,21 @@ export const reportSectionSchema = z.object({
   bullets: z.array(z.string().min(1)).default([]),
 });
 
-=======
->>>>>>> 0f8895e (feat(contracts): add OpenBreach contract layer for generic security-validation)
 export const remediationReportSchema = z.object({
   id: z.string().min(1),
   municipalityId: z.string().min(1),
+  variant: z.enum(["technical", "friendly"]),
   generatedAt: z.string().datetime(),
   summary: z.string().min(1),
   priorityActions: z.array(z.string().min(1)),
-  findings: z.array(scanFindingSchema),
+  findings: z.array(reportFindingSchema),
   generatedBy: z.enum(["deterministic-fallback", "ai-provider"]),
 });
 
 export type RemediationReport = z.infer<typeof remediationReportSchema>;
-<<<<<<< HEAD
+
 export type ReportFinding = RemediationReport["findings"][number];
-export type ReportAudience = RemediationReport["variant"];
+export type ReportAudience = "technical" | "friendly";
 
 export const remediationReportVariantsSchema = z.object({
   technical: remediationReportSchema,
@@ -189,8 +187,6 @@ export const remediationReportVariantsSchema = z.object({
 export type RemediationReportVariants = z.infer<
   typeof remediationReportVariantsSchema
 >;
-=======
->>>>>>> 0f8895e (feat(contracts): add OpenBreach contract layer for generic security-validation)
 
 export const reportGenerationStatusSchema = z.enum([
   "pending",
@@ -224,7 +220,6 @@ export const reportPdfReferenceSchema = z.object({
 
 export type ReportPdfReference = z.infer<typeof reportPdfReferenceSchema>;
 
-<<<<<<< HEAD
 export const reportArtifactReferenceSchema = z.object({
   variant: z.enum(["technical", "friendly"]),
   label: z.string().min(1),
@@ -241,8 +236,6 @@ export type ReportArtifactReference = z.infer<
 >;
 export type ReportArtifacts = z.infer<typeof reportArtifactsSchema>;
 
-=======
->>>>>>> 0f8895e (feat(contracts): add OpenBreach contract layer for generic security-validation)
 const reportMetadataBaseSchema = z.object({
   reportId: z.string().min(1),
   municipalityId: z.string().min(1),
@@ -253,6 +246,7 @@ const reportMetadataBaseSchema = z.object({
 
 const completedReportMetadataSchema = reportMetadataBaseSchema.extend({
   status: z.literal("completed"),
+  artifacts: reportArtifactsSchema.optional(),
 });
 
 const pendingReportMetadataSchema = reportMetadataBaseSchema.extend({
@@ -292,7 +286,6 @@ export type SelectedMunicipalityReportContext = z.infer<
   typeof selectedMunicipalityReportContextSchema
 >;
 
-<<<<<<< HEAD
 export const generateRemediationReportResultSchema = z.discriminatedUnion(
   "status",
   [
@@ -313,24 +306,6 @@ export const generateRemediationReportResultSchema = z.discriminatedUnion(
     }),
   ],
 );
-=======
-export const generateRemediationReportResultSchema = z.discriminatedUnion("status", [
-  z.object({
-    status: z.literal("pending"),
-    metadata: pendingReportMetadataSchema,
-  }),
-  z.object({
-    status: z.literal("completed"),
-    report: remediationReportSchema,
-    metadata: completedReportMetadataSchema,
-  }),
-  z.object({
-    status: z.literal("failed"),
-    metadata: failedReportMetadataSchema,
-    error: z.string().min(1),
-  }),
-]);
->>>>>>> 0f8895e (feat(contracts): add OpenBreach contract layer for generic security-validation)
 
 export type GenerateRemediationReportResult = z.infer<
   typeof generateRemediationReportResultSchema
@@ -346,7 +321,6 @@ export const userProfileSchema = z.object({
 
 export type UserProfile = z.infer<typeof userProfileSchema>;
 
-<<<<<<< HEAD
 export const generateRemediationReportInputSchema = z
   .object({
     municipality: municipalitySchema.optional(),
@@ -364,12 +338,6 @@ export const generateRemediationReportInputSchema = z
       });
     }
   });
-=======
-export const generateRemediationReportInputSchema = z.object({
-  municipality: municipalitySchema,
-  scan: scanResultSchema,
-});
->>>>>>> 0f8895e (feat(contracts): add OpenBreach contract layer for generic security-validation)
 
 export type GenerateRemediationReportInput = z.infer<
   typeof generateRemediationReportInputSchema
@@ -378,6 +346,10 @@ export type GenerateRemediationReportInput = z.infer<
 export type GenerateRemediationReport = (
   input: GenerateRemediationReportInput,
 ) => Promise<RemediationReport>;
+
+export type GenerateRemediationReportVariants = (
+  input: GenerateRemediationReportInput,
+) => Promise<RemediationReportVariants>;
 
 // ============================================================
 // OpenBreach Contract Layer — Phase 1: Schemas
