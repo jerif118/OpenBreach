@@ -74,7 +74,7 @@ if (fromFixture) {
     async (municipality, index) => {
       const startedAt = Date.now();
       const result = await scanWebsite(municipality, {
-        source: "fixture",
+        source: "convex",
         controls,
       });
       const elapsedMs = Date.now() - startedAt;
