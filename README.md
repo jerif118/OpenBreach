@@ -19,6 +19,9 @@ The project must stay passive. It only uses information any browser or normal HT
 - `pnpm fixtures:validate`: validate sample fixture JSON against shared contracts.
 - `pnpm scanner:validate`: validate passive scanner behavior with offline mocked HTTP/TLS checks.
 - `pnpm scanner:fixture`: export `data/scans/latest.scan-results.json` as a deterministic raw scan fixture for demos and downstream development.
+- `pnpm risk:fixture`: export `data/scans/latest.enriched-scan-results.json` with deterministic findings, `riskScore`, and `riskLevel`.
+- `pnpm risk:validate`: validate score thresholds, high-risk findings, enriched fixture coverage, and Convex mutation args.
+- `pnpm risk:persist`: upsert enriched scan results into the configured Convex deployment.
 - `pnpm scanner:persistence:validate`: validate raw scanner output can be converted to Convex mutation args without scored findings.
 - `pnpm scanner:persist`: run the passive scanner against the seed dataset and upsert raw evidence into the configured Convex deployment.
 - `pnpm municipalities:validate`: validate the 50-record Mexican municipality seed dataset.
@@ -111,6 +114,46 @@ to `rawScanResults:upsertMany` arguments without downstream scoring fields.
 `pnpm scanner:fixture` refreshes the deterministic JSON fixture at
 `data/scans/latest.scan-results.json`; use `pnpm fixtures:validate` after export
 to confirm committed fixtures still satisfy shared contracts.
+
+### Risk Scoring And Enrichment
+
+Issue #4 enrichment lives in `src/scanner/risk.ts`. It maps passive evidence to
+deterministic findings, clamps `riskScore` to `0-100`, and assigns levels as
+`low=0-24`, `medium=25-49`, `high=50-74`, and `critical=75-100`. The scoring
+weights are intentionally transparent and conservative: unreachable sites,
+invalid or expired TLS, missing baseline browser security headers, reachable
+public admin paths, CMS fingerprints, and high-confidence local CMS/version
+matches add bounded points. The output keeps `riskScore` canonical; `score`
+remains only as a temporary compatibility alias for older consumers.
+
+The local CMS knowledge base is a small deterministic MVP list in
+`src/scanner/vulnerableCmsKnowledgeBase.ts`. It only creates a known-vulnerability
+finding when the scanner observed a known CMS name, an explicit version string,
+and confidence `>= 0.8`. Findings describe exposure to known risk and remediation
+steps; they do not claim exploitation or compromise.
+
+Generate and validate enriched demo data with:
+
+```bash
+pnpm scanner:fixture
+pnpm risk:fixture
+pnpm risk:validate
+pnpm fixtures:validate
+```
+
+`pnpm risk:fixture` reads `data/scans/latest.scan-results.json`, enriches the
+raw evidence, and writes `data/scans/latest.enriched-scan-results.json`. The
+exporter keeps the fixture deterministic and ensures demo coverage includes at
+least one low, medium, high, and critical municipality. To persist enriched
+results after municipalities have been seeded in Convex, run:
+
+```bash
+pnpm risk:persist
+```
+
+The command builds validated `scanResults:upsertEnrichedMany` mutation arguments
+from the raw fixture/scanner evidence, preserving original scan context alongside
+findings, `riskScore`, and `riskLevel`.
 
 ## Current Repository State
 
