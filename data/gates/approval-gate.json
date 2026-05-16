@@ -1,0 +1,12 @@
+{
+  "gateId": "gpl_hyp_approval_001",
+  "hypothesisId": "hyp_tls_weak_001",
+  "scopeId": "scp_001",
+  "status": "approved",
+  "requestedAt": "2026-05-16T10:10:00.000Z",
+  "reviewedAt": "2026-05-16T10:15:00.000Z",
+  "reviewerId": "reviewer-sec-ops-01",
+  "reviewNotes": "Valid hypothesis, approved for validation.",
+  "validUntil": "2026-05-23T10:15:00.000Z",
+  "sourceAgent": "agent-scanner-01"
+}
