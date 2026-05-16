@@ -64,7 +64,10 @@ function asArray(value: unknown) {
 }
 
 function normalizeWhitespace(value: string) {
-  return value.replace(/[\r\n\t]+/g, " ").replace(/\s{2,}/g, " ").trim();
+  return value
+    .replace(/[\r\n\t]+/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 function toSentence(value: string) {
@@ -175,7 +178,13 @@ function slugify(value: string) {
 }
 
 function uniqueStrings(values: Array<string | undefined | null>) {
-  return [...new Set(values.map((value) => (value ? normalizeWhitespace(value) : "")).filter(Boolean))];
+  return [
+    ...new Set(
+      values
+        .map((value) => (value ? normalizeWhitespace(value) : ""))
+        .filter(Boolean),
+    ),
+  ];
 }
 
 function normalizeSeverity(value: unknown): ReportFinding["severity"] {
@@ -228,7 +237,12 @@ function normalizeRiskLevel(value: unknown, score: number): RiskLevel {
   if (typeof value === "string") {
     const normalized = value.toLowerCase();
 
-    if (normalized === "critical" || normalized === "high" || normalized === "medium" || normalized === "low") {
+    if (
+      normalized === "critical" ||
+      normalized === "high" ||
+      normalized === "medium" ||
+      normalized === "low"
+    ) {
       return normalized;
     }
   }
@@ -248,7 +262,10 @@ function normalizeRiskLevel(value: unknown, score: number): RiskLevel {
   return "low";
 }
 
-function normalizeCategory(value: unknown, fallbackText: string): ReportFinding["category"] {
+function normalizeCategory(
+  value: unknown,
+  fallbackText: string,
+): ReportFinding["category"] {
   if (typeof value === "string") {
     const normalized = value.toLowerCase();
 
@@ -267,15 +284,28 @@ function normalizeCategory(value: unknown, fallbackText: string): ReportFinding[
 
   const text = fallbackText.toLowerCase();
 
-  if (text.includes("tls") || text.includes("certificate") || text.includes("ssl")) {
+  if (
+    text.includes("tls") ||
+    text.includes("certificate") ||
+    text.includes("ssl")
+  ) {
     return "tls";
   }
 
-  if (text.includes("header") || text.includes("csp") || text.includes("hsts")) {
+  if (
+    text.includes("header") ||
+    text.includes("csp") ||
+    text.includes("hsts")
+  ) {
     return "headers";
   }
 
-  if (text.includes("wordpress") || text.includes("drupal") || text.includes("joomla") || text.includes("cms")) {
+  if (
+    text.includes("wordpress") ||
+    text.includes("drupal") ||
+    text.includes("joomla") ||
+    text.includes("cms")
+  ) {
     return "cms";
   }
 
@@ -283,18 +313,29 @@ function normalizeCategory(value: unknown, fallbackText: string): ReportFinding[
     return "admin-exposure";
   }
 
-  if (text.includes("availability") || text.includes("reachable") || text.includes("timeout")) {
+  if (
+    text.includes("availability") ||
+    text.includes("reachable") ||
+    text.includes("timeout")
+  ) {
     return "availability";
   }
 
-  if (text.includes("vulnerability") || text.includes("cve") || text.includes("outdated")) {
+  if (
+    text.includes("vulnerability") ||
+    text.includes("cve") ||
+    text.includes("outdated")
+  ) {
     return "known-vulnerability";
   }
 
   return "exposure";
 }
 
-function normalizeConfidence(value: unknown, severity: ReportFinding["severity"]): ReportFinding["confidence"] {
+function normalizeConfidence(
+  value: unknown,
+  severity: ReportFinding["severity"],
+): ReportFinding["confidence"] {
   if (typeof value === "number" && Number.isFinite(value)) {
     if (value >= 0.75) {
       return "high";
@@ -310,7 +351,11 @@ function normalizeConfidence(value: unknown, severity: ReportFinding["severity"]
   if (typeof value === "string") {
     const normalized = value.toLowerCase();
 
-    if (normalized === "high" || normalized === "medium" || normalized === "low") {
+    if (
+      normalized === "high" ||
+      normalized === "medium" ||
+      normalized === "low"
+    ) {
       return normalized;
     }
   }
@@ -337,7 +382,11 @@ function normalizeFindingStatus(value: unknown): ReportFinding["status"] {
     return "confirmed";
   }
 
-  if (normalized === "likely" || normalized === "probable" || normalized === "hypothesis") {
+  if (
+    normalized === "likely" ||
+    normalized === "probable" ||
+    normalized === "hypothesis"
+  ) {
     return "likely";
   }
 
@@ -345,7 +394,11 @@ function normalizeFindingStatus(value: unknown): ReportFinding["status"] {
     return "skipped";
   }
 
-  if (normalized === "unresolved" || normalized === "halted" || normalized === "error") {
+  if (
+    normalized === "unresolved" ||
+    normalized === "halted" ||
+    normalized === "error"
+  ) {
     return "unresolved";
   }
 
@@ -355,24 +408,34 @@ function normalizeFindingStatus(value: unknown): ReportFinding["status"] {
 function buildVerificationSteps(title: string, affectedAssets: string[]) {
   const steps = [
     "Re-run the same bounded check after the mitigation is applied.",
-    affectedAssets[0] ? `Confirm the public-facing asset still works as expected: ${affectedAssets[0]}.` : null,
+    affectedAssets[0]
+      ? `Confirm the public-facing asset still works as expected: ${affectedAssets[0]}.`
+      : null,
     `Record the post-change result for ${title.toLowerCase()} and compare it with the current evidence.`,
   ];
 
   return uniqueStrings(steps);
 }
 
-function buildRemediationSteps(remediationHint: string, affectedAssets: string[]) {
+function buildRemediationSteps(
+  remediationHint: string,
+  affectedAssets: string[],
+) {
   const normalizedHint = toSentence(remediationHint);
 
   return uniqueStrings([
     normalizedHint,
-    affectedAssets[0] ? `Review the change on the affected asset: ${affectedAssets[0]}.` : null,
+    affectedAssets[0]
+      ? `Review the change on the affected asset: ${affectedAssets[0]}.`
+      : null,
     "Assign an owner and due date before treating the item as resolved.",
   ]);
 }
 
-function normalizeFinding(candidate: unknown, index: number): ReportFinding | null {
+function normalizeFinding(
+  candidate: unknown,
+  index: number,
+): ReportFinding | null {
   const source = asObject(candidate);
 
   if (!source) {
@@ -386,24 +449,52 @@ function normalizeFinding(candidate: unknown, index: number): ReportFinding | nu
     pickString(source, ["description", "details", "context", "summary"]) ??
     `Structured input indicates ${title.toLowerCase()} requires review.`;
   const evidenceSummary =
-    pickString(source, ["evidenceSummary", "evidence", "proof", "signal", "observation"]) ??
+    pickString(source, [
+      "evidenceSummary",
+      "evidence",
+      "proof",
+      "signal",
+      "observation",
+    ]) ??
     "The normalized input included a reportable signal, but the original evidence summary was not explicit.";
   const remediationHint =
-    pickString(source, ["remediationHint", "remediation", "recommendation", "nextAction", "action"]) ??
+    pickString(source, [
+      "remediationHint",
+      "remediation",
+      "recommendation",
+      "nextAction",
+      "action",
+    ]) ??
     `Review ${title.toLowerCase()} with the responsible team and apply the standard mitigation.`;
   const severity = normalizeSeverity(
     source.severity ?? source.priority ?? source.riskLevel ?? source.score,
   );
   const confidence = normalizeConfidence(source.confidence, severity);
   const affectedAssets = uniqueStrings([
-    pickString(source, ["asset", "target", "url", "endpoint", "host", "path", "resource"]),
-    ...pickArray(source, ["affectedAssets", "assets", "targets"])
-      .map((entry) => (typeof entry === "string" ? entry : pickString(asObject(entry), ["name", "url", "path"]))),
+    pickString(source, [
+      "asset",
+      "target",
+      "url",
+      "endpoint",
+      "host",
+      "path",
+      "resource",
+    ]),
+    ...pickArray(source, ["affectedAssets", "assets", "targets"]).map((entry) =>
+      typeof entry === "string"
+        ? entry
+        : pickString(asObject(entry), ["name", "url", "path"]),
+    ),
   ]);
 
   return reportFindingSchema.parse({
-    id: pickString(source, ["id", "slug", "key", "externalId"]) ?? `finding-${index + 1}-${slugify(title)}`,
-    category: normalizeCategory(source.category, `${title} ${description} ${evidenceSummary}`),
+    id:
+      pickString(source, ["id", "slug", "key", "externalId"]) ??
+      `finding-${index + 1}-${slugify(title)}`,
+    category: normalizeCategory(
+      source.category,
+      `${title} ${description} ${evidenceSummary}`,
+    ),
     severity,
     title,
     description: toSentence(description),
@@ -452,7 +543,12 @@ function deriveSubject(input: GenerateRemediationReportInput) {
   const name =
     input.municipality?.name ??
     pickString(target, ["name", "displayName", "label"]) ??
-    pickString(source, ["municipalityName", "targetName", "subjectName", "name"]) ??
+    pickString(source, [
+      "municipalityName",
+      "targetName",
+      "subjectName",
+      "name",
+    ]) ??
     input.municipality?.state ??
     "Approved target";
   const websiteUrl =
@@ -466,7 +562,9 @@ function deriveSubject(input: GenerateRemediationReportInput) {
   return {
     id,
     name,
-    kind: pickString(target, ["kind", "category", "type"]) ?? "public-facing target",
+    kind:
+      pickString(target, ["kind", "category", "type"]) ??
+      "public-facing target",
     websiteUrl,
     state:
       input.municipality?.state ??
@@ -489,16 +587,27 @@ function collectFindingCandidates(input: GenerateRemediationReportInput) {
   return candidates
     .map((candidate, index) => normalizeFinding(candidate, index))
     .filter((finding): finding is ReportFinding => finding !== null)
-    .sort((left, right) => severityScore[right.severity] - severityScore[left.severity]);
+    .sort(
+      (left, right) =>
+        severityScore[right.severity] - severityScore[left.severity],
+    );
 }
 
-function deriveRiskScore(findings: ReportFinding[], input: GenerateRemediationReportInput) {
+function deriveRiskScore(
+  findings: ReportFinding[],
+  input: GenerateRemediationReportInput,
+) {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
   const directScore =
     scan?.riskScore ??
     scan?.score ??
-    pickNumber(source, ["riskScore", "score", "priorityScore", "severityScore"]);
+    pickNumber(source, [
+      "riskScore",
+      "score",
+      "priorityScore",
+      "severityScore",
+    ]);
 
   if (directScore !== undefined) {
     return Math.max(0, Math.min(100, directScore));
@@ -508,18 +617,31 @@ function deriveRiskScore(findings: ReportFinding[], input: GenerateRemediationRe
     return 0;
   }
 
-  const total = findings.reduce((sum, finding) => sum + severityScore[finding.severity], 0);
+  const total = findings.reduce(
+    (sum, finding) => sum + severityScore[finding.severity],
+    0,
+  );
   return Math.min(100, Math.round(total / findings.length));
 }
 
-function deriveRiskLevel(score: number, findings: ReportFinding[], input: GenerateRemediationReportInput) {
+function deriveRiskLevel(
+  score: number,
+  findings: ReportFinding[],
+  input: GenerateRemediationReportInput,
+) {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
 
-  return normalizeRiskLevel(scan?.riskLevel ?? pickString(source, ["riskLevel", "tier"]), score);
+  return normalizeRiskLevel(
+    scan?.riskLevel ?? pickString(source, ["riskLevel", "tier"]),
+    score,
+  );
 }
 
-function deriveScopeSection(subject: NormalizedSubject, input: GenerateRemediationReportInput) {
+function deriveScopeSection(
+  subject: NormalizedSubject,
+  input: GenerateRemediationReportInput,
+) {
   const source = asObject(input.sourceData);
   const scope = pickObject(source, ["scope", "authorizationScope"]);
   const scopeBullets = uniqueStrings([
@@ -527,7 +649,9 @@ function deriveScopeSection(subject: NormalizedSubject, input: GenerateRemediati
     subject.state ? `Region or state reference: ${subject.state}` : null,
     pickString(scope, ["targetType", "assetType", "scopeType"]),
     ...pickArray(scope, ["allowedAssets", "targets", "inScope"]).map((entry) =>
-      typeof entry === "string" ? entry : pickString(asObject(entry), ["name", "url", "path"]),
+      typeof entry === "string"
+        ? entry
+        : pickString(asObject(entry), ["name", "url", "path"]),
     ),
   ]);
 
@@ -539,20 +663,34 @@ function deriveScopeSection(subject: NormalizedSubject, input: GenerateRemediati
     bullets:
       scopeBullets.length > 0
         ? scopeBullets
-        : ["The source input did not provide an explicit asset inventory beyond the main target context."],
+        : [
+            "The source input did not provide an explicit asset inventory beyond the main target context.",
+          ],
   };
 }
 
 function deriveAuthorizationSection(input: GenerateRemediationReportInput) {
   const source = asObject(input.sourceData);
   const scope = pickObject(source, ["authorizationScope", "scope"]);
-  const authorized = pickBoolean(scope, ["authorized", "approved", "isApproved"]);
+  const authorized = pickBoolean(scope, [
+    "authorized",
+    "approved",
+    "isApproved",
+  ]);
   const bullets = uniqueStrings([
     ...pickArray(scope, ["allowedActions", "validationClasses"]).map((entry) =>
-      typeof entry === "string" ? entry : pickString(asObject(entry), ["name", "label"]),
+      typeof entry === "string"
+        ? entry
+        : pickString(asObject(entry), ["name", "label"]),
     ),
-    ...pickArray(scope, ["forbiddenActions", "deniedActions", "outOfScope"]).map((entry) =>
-      typeof entry === "string" ? entry : pickString(asObject(entry), ["name", "label"]),
+    ...pickArray(scope, [
+      "forbiddenActions",
+      "deniedActions",
+      "outOfScope",
+    ]).map((entry) =>
+      typeof entry === "string"
+        ? entry
+        : pickString(asObject(entry), ["name", "label"]),
     ),
     pickString(scope, ["timeWindow", "approvalWindow"]),
     pickString(scope, ["rateLimit", "rateLimits"]),
@@ -571,20 +709,30 @@ function deriveAuthorizationSection(input: GenerateRemediationReportInput) {
     bullets:
       bullets.length > 0
         ? bullets
-        : ["No detailed authorization fields were supplied in the current input payload."],
+        : [
+            "No detailed authorization fields were supplied in the current input payload.",
+          ],
   };
 }
 
 function deriveMethodologySection(input: GenerateRemediationReportInput) {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
-  const explicitMethodology = pickArray(source, ["methodology", "steps", "workflow"]).map((entry) =>
-    typeof entry === "string" ? entry : pickString(asObject(entry), ["title", "summary", "description"]),
+  const explicitMethodology = pickArray(source, [
+    "methodology",
+    "steps",
+    "workflow",
+  ]).map((entry) =>
+    typeof entry === "string"
+      ? entry
+      : pickString(asObject(entry), ["title", "summary", "description"]),
   );
 
   const bullets = uniqueStrings([
     ...explicitMethodology,
-    scan?.requestedUrl ? `Reviewed structured scan evidence for ${scan.requestedUrl}.` : null,
+    scan?.requestedUrl
+      ? `Reviewed structured scan evidence for ${scan.requestedUrl}.`
+      : null,
     "Normalized flexible structured input into a consistent report contract before generating the PDFs.",
     "Preserved only evidence-backed observations and did not add new findings without source support.",
     "Excluded exploit payloads, credential use, and operational attack instructions from the output.",
@@ -602,8 +750,15 @@ function deriveMethodologySection(input: GenerateRemediationReportInput) {
 function deriveSkippedTests(input: GenerateRemediationReportInput) {
   const source = asObject(input.sourceData);
   const explicitSkipped = [
-    ...pickArray(source, ["skippedTests", "skipped", "deniedTests", "notTested"]).map((entry) =>
-      typeof entry === "string" ? entry : pickString(asObject(entry), ["summary", "reason", "name"]),
+    ...pickArray(source, [
+      "skippedTests",
+      "skipped",
+      "deniedTests",
+      "notTested",
+    ]).map((entry) =>
+      typeof entry === "string"
+        ? entry
+        : pickString(asObject(entry), ["summary", "reason", "name"]),
     ),
   ];
 
@@ -616,15 +771,22 @@ function deriveSkippedTests(input: GenerateRemediationReportInput) {
 function deriveValidationStatus(input: GenerateRemediationReportInput) {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
-  const validations = pickArray(source, ["validationResults", "validations", "results"]).map((entry, index) => {
+  const validations = pickArray(source, [
+    "validationResults",
+    "validations",
+    "results",
+  ]).map((entry, index) => {
     const candidate = asObject(entry);
 
     if (!candidate) {
       return undefined;
     }
 
-    const label = pickString(candidate, ["title", "name"]) ?? `Validation ${index + 1}`;
-    const outcome = pickString(candidate, ["status", "result", "outcome"]) ?? "status not provided";
+    const label =
+      pickString(candidate, ["title", "name"]) ?? `Validation ${index + 1}`;
+    const outcome =
+      pickString(candidate, ["status", "result", "outcome"]) ??
+      "status not provided";
     const detail = pickString(candidate, ["summary", "details", "reason"]);
 
     return toSentence(`${label}: ${outcome}${detail ? `. ${detail}` : ""}`);
@@ -632,26 +794,43 @@ function deriveValidationStatus(input: GenerateRemediationReportInput) {
 
   return uniqueStrings([
     ...validations,
-    scan?.reachable === true ? "The passive target appeared reachable during the supplied observation window." : null,
-    scan?.reachable === false ? "The passive target did not appear reachable during the supplied observation window." : null,
+    scan?.reachable === true
+      ? "The passive target appeared reachable during the supplied observation window."
+      : null,
+    scan?.reachable === false
+      ? "The passive target did not appear reachable during the supplied observation window."
+      : null,
     scan?.httpStatus ? `Observed HTTP status: ${scan.httpStatus}.` : null,
-    validations.length === 0 ? "No explicit controlled validation result was supplied in the structured input." : null,
+    validations.length === 0
+      ? "No explicit controlled validation result was supplied in the structured input."
+      : null,
   ]);
 }
 
-function deriveLimitations(input: GenerateRemediationReportInput, findings: ReportFinding[]) {
+function deriveLimitations(
+  input: GenerateRemediationReportInput,
+  findings: ReportFinding[],
+) {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
   const errors = pickArray(source, ["errors", "limitations"]).map((entry) =>
-    typeof entry === "string" ? entry : pickString(asObject(entry), ["message", "summary", "reason"]),
+    typeof entry === "string"
+      ? entry
+      : pickString(asObject(entry), ["message", "summary", "reason"]),
   );
   const missingSections = [
-    pickObject(source, ["authorizationScope", "scope"]) ? null : "Authorization scope details were not fully supplied.",
+    pickObject(source, ["authorizationScope", "scope"])
+      ? null
+      : "Authorization scope details were not fully supplied.",
     pickArray(source, ["validationResults", "validations"]).length > 0
       ? null
       : "No explicit validation result set was supplied, so unresolved uncertainty remains.",
-    findings.length > 0 ? null : "No structured findings were supplied; the report is limited to contextual guidance.",
-    scan ? null : "No scan-shaped object was supplied, so some transport details were inferred from generic input.",
+    findings.length > 0
+      ? null
+      : "No structured findings were supplied; the report is limited to contextual guidance.",
+    scan
+      ? null
+      : "No scan-shaped object was supplied, so some transport details were inferred from generic input.",
   ];
 
   return uniqueStrings([
@@ -670,7 +849,9 @@ function deriveRemediationChecklist(findings: ReportFinding[]) {
   return uniqueStrings(
     checklist.length > 0
       ? checklist
-      : ["Review the normalized input with the responsible team and define the next bounded remediation step."],
+      : [
+          "Review the normalized input with the responsible team and define the next bounded remediation step.",
+        ],
   ).slice(0, 10);
 }
 
@@ -680,11 +861,15 @@ function deriveVerificationGuidance(findings: ReportFinding[]) {
   return uniqueStrings(
     guidance.length > 0
       ? guidance
-      : ["After the next change, repeat the same bounded observation path and compare the result with this report."],
+      : [
+          "After the next change, repeat the same bounded observation path and compare the result with this report.",
+        ],
   ).slice(0, 10);
 }
 
-export function normalizeReportInput(rawInput: GenerateRemediationReportInput): NormalizedReportInput {
+export function normalizeReportInput(
+  rawInput: GenerateRemediationReportInput,
+): NormalizedReportInput {
   const input = generateRemediationReportInputSchema.parse(rawInput);
   const findings = collectFindingCandidates(input);
   const riskScore = deriveRiskScore(findings, input);
@@ -721,7 +906,9 @@ export function normalizeReportInput(rawInput: GenerateRemediationReportInput): 
 export function summarizeFindingsBySeverity(findings: ReportFinding[]) {
   return severityLabels
     .map((severity) => {
-      const count = findings.filter((finding) => finding.severity === severity).length;
+      const count = findings.filter(
+        (finding) => finding.severity === severity,
+      ).length;
       return count > 0 ? `${severity}: ${count}` : null;
     })
     .filter((entry): entry is string => entry !== null);
