@@ -22,7 +22,9 @@
     "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts",
     "format": "oxfmt --write",
     "format:check": "oxfmt --check",
+    "lint": "run-p --continue-on-error \"lint:*\"",
     "lint:oxfmt": "oxfmt --check",
+    "lint:types": "tsc --build --pretty",
     "municipalities:detail:validate": "node scripts/validate-municipality-detail.ts",
     "municipalities:list:validate": "node scripts/validate-municipality-list.ts",
     "municipalities:seed": "convex run municipalities:seed \"$(node scripts/municipality-seed-args.ts)\"",
@@ -49,8 +51,7 @@
     "scanner:persist:args": "node scripts/scan-convex-args.ts",
     "scanner:persistence:validate": "node scripts/validate-scan-persistence.ts",
     "scanner:validate": "node scripts/validate-scanner.ts",
-    "start": "node .output/server/index.mjs",
-    "typecheck": "tsc --noEmit"
+    "start": "node .output/server/index.mjs"
   },
   "dependencies": {
     "@clerk/tanstack-react-start": "1.2.5",
