@@ -14,6 +14,9 @@
     "clean:soft": "node scripts/soft-clean.ts"
   },
   "dependencies": {
+    "@clerk/tanstack-react-start": "1.2.4",
+    "@mastra/core": "1.34.0",
+    "@tanstack/ai": "0.17.0",
     "@tanstack/react-router": "^1.170.1",
     "@tanstack/react-router-devtools": "^1.167.0",
     "@tanstack/react-start": "^1.168.1",
@@ -36,6 +39,9 @@
   },
   "engines": {
     "node": "24.15.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@clerk/shared"]
   },
   "packageManager": "pnpm@11.1.2+sha224.6d287705d0efa6c2ba7a74795dc72a7800f64840f2bc0961cedba029"
 }
