@@ -1,0 +1,13 @@
+{
+  "resultId": "rslt_hyp_tls_001",
+  "hypothesisId": "hyp_tls_weak_001",
+  "gateId": "gpl_hyp_approval_001",
+  "runId": "run_001",
+  "status": "confirmed",
+  "executedAt": "2026-05-16T10:20:00.000Z",
+  "completedAt": "2026-05-16T10:25:00.000Z",
+  "evidenceIds": ["evd_passive_001"],
+  "findings": ["fnd_tls_weak_001"],
+  "agentId": "agent-validator-01",
+  "notes": "TLS 1.0/1.1 confirmed via openssl s_client test."
+}

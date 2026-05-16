@@ -1,0 +1,7 @@
+{
+  "targetId": "tgt_openbreach_001",
+  "assetId": "ast_cdn_production_01",
+  "organizationName": "Acme Corp",
+  "canonicalUrl": "https://www.acme.com",
+  "outOfScope": false
+}

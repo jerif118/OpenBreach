@@ -1,0 +1,7 @@
+{
+  "targetId": "tgt_openbreach_rejected",
+  "assetId": "ast_internal_legacy",
+  "organizationName": "Acme Internal",
+  "canonicalUrl": "https://internal.acme.com",
+  "outOfScope": true
+}
