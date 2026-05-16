@@ -25,6 +25,34 @@ const finding = v.object({
   remediationHint: v.string(),
 });
 
+const rawScanHeaders = v.record(v.string(), v.string());
+
+const rawScanTls = v.object({
+  valid: v.boolean(),
+  expiresAt: v.optional(v.string()),
+  issuer: v.optional(v.string()),
+});
+
+const rawScanCms = v.object({
+  name: v.union(v.literal("wordpress"), v.literal("joomla"), v.literal("drupal"), v.literal("unknown")),
+  version: v.optional(v.string()),
+  confidence: v.number(),
+  evidence: v.array(v.string()),
+});
+
+const rawScanAdminExposure = v.object({
+  path: v.string(),
+  method: v.optional(v.union(v.literal("HEAD"), v.literal("GET"))),
+  reachable: v.boolean(),
+  httpStatus: v.optional(v.number()),
+  finalUrl: v.optional(v.string()),
+});
+
+const rawScanError = v.object({
+  stage: v.union(v.literal("http"), v.literal("tls"), v.literal("cms"), v.literal("admin-exposure")),
+  message: v.string(),
+});
+
 export default defineSchema({
   municipalities: defineTable({
     externalId: v.string(),
@@ -53,6 +81,24 @@ export default defineSchema({
   })
     .index("by_externalId", ["externalId"])
     .index("by_municipalityId", ["municipalityId"]),
+  rawScanResults: defineTable({
+    externalId: v.string(),
+    municipalityId: v.id("municipalities"),
+    source: v.union(v.literal("convex"), v.literal("fixture")),
+    requestedUrl: v.string(),
+    scannedAt: v.string(),
+    reachable: v.boolean(),
+    finalUrl: v.optional(v.string()),
+    httpStatus: v.optional(v.number()),
+    headers: rawScanHeaders,
+    tls: v.optional(rawScanTls),
+    cms: v.optional(rawScanCms),
+    adminExposure: v.array(rawScanAdminExposure),
+    errors: v.array(rawScanError),
+  })
+    .index("by_externalId", ["externalId"])
+    .index("by_municipalityId", ["municipalityId"])
+    .index("by_scannedAt", ["scannedAt"]),
   remediationReports: defineTable({
     externalId: v.string(),
     municipalityId: v.id("municipalities"),

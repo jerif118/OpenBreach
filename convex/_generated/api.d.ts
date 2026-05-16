@@ -9,6 +9,7 @@
  */
 
 import type * as municipalities from "../municipalities.js";
+import type * as rawScanResults from "../rawScanResults.js";
 import type * as reports from "../reports.js";
 
 import type {
@@ -19,6 +20,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   municipalities: typeof municipalities;
+  rawScanResults: typeof rawScanResults;
   reports: typeof reports;
 }>;
 
