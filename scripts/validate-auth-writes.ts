@@ -23,8 +23,12 @@ for (const snippet of requiredAuthSnippets) {
   }
 }
 
-if (!municipalitiesSource.includes("await requireAdmin(ctx)")) {
-  throw new Error("municipalities.seed must require an admin profile before writes.");
+// municipalities.seed is an internalMutation: it is not reachable from the
+// public client surface, so it does not need an additional `requireAdmin`
+// runtime check. This matches the pattern used by rawScanResults.upsertMany
+// and scanResults.upsertEnrichedMany below.
+if (!municipalitiesSource.includes("export const seed = internalMutation")) {
+  throw new Error("municipalities.seed must remain internal-only unless a protected public wrapper is added.");
 }
 
 for (const mutationName of ["persistGenerated", "createPlaceholder"]) {
@@ -61,7 +65,13 @@ for (const forbiddenSnippet of ["userId: v.", "userIdentifier: v.", "clerkUserId
   }
 }
 
-if (!authConfigSource.includes('applicationID: "convex"') || !authConfigSource.includes("clerk.accounts.dev")) {
+// The Clerk provider must keep its Convex applicationID and read the issuer
+// domain from the environment so each deployment (dev, prod, fixture) can wire
+// a different Clerk instance without code changes. See README.md > Environment.
+if (
+  !authConfigSource.includes('applicationID: "convex"') ||
+  !authConfigSource.includes("process.env.CLERK_JWT_ISSUER_DOMAIN")
+) {
   throw new Error("Convex auth config must retain the Clerk provider shape for environment-specific issuer setup.");
 }
 

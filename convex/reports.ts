@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { internalMutation, query, mutation } from "./_generated/server";
 import { requireOperatorOrAdmin } from "./auth";
 
 const severity = v.union(v.literal("info"), v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("critical"));
@@ -115,6 +115,93 @@ export const persistGenerated = mutation({
       artifacts: args.artifacts,
       error: args.error,
     });
+  },
+});
+
+// Dev-only seed path: looks up live `municipalities` and `scanResults` rows by
+// their fixture externalIds and upserts a `remediationReports` row keyed by
+// `externalId`. Internal mutation so it bypasses Clerk auth and can only be
+// invoked from `npx convex run`, not from the public client. Use the operator
+// path (`reports.persistGenerated`) in production.
+export const seedFromFixture = internalMutation({
+  args: {
+    results: v.array(
+      v.object({
+        externalId: v.string(),
+        municipalityExternalId: v.string(),
+        scanResultExternalId: v.optional(v.string()),
+        status: reportStatus,
+        generatedAt: v.string(),
+        summary: v.optional(v.string()),
+        priorityActions: v.optional(v.array(v.string())),
+        findings: v.optional(v.array(finding)),
+        generatedBy: v.optional(generatedBy),
+        pdf: v.optional(reportPdfReference),
+        error: v.optional(v.string()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    let inserted = 0;
+    let updated = 0;
+    const missingMunicipalities: string[] = [];
+    const now = new Date().toISOString();
+
+    for (const result of args.results) {
+      const municipality = await ctx.db
+        .query("municipalities")
+        .withIndex("by_externalId", (q) => q.eq("externalId", result.municipalityExternalId))
+        .unique();
+
+      if (!municipality) {
+        missingMunicipalities.push(result.municipalityExternalId);
+        continue;
+      }
+
+      const latestScans = await ctx.db
+        .query("scanResults")
+        .withIndex("by_municipalityId_and_scannedAt", (q) =>
+          q.eq("municipalityId", municipality._id),
+        )
+        .order("desc")
+        .take(1);
+
+      const document = {
+        externalId: result.externalId,
+        municipalityId: municipality._id,
+        scanResultId: latestScans[0]?._id,
+        status: result.status,
+        generatedAt: result.generatedAt,
+        updatedAt: now,
+        summary: result.summary,
+        priorityActions: result.priorityActions,
+        findings: result.findings,
+        generatedBy: result.generatedBy,
+        pdf: result.pdf,
+        error: result.error,
+      };
+
+      const existing = await ctx.db
+        .query("remediationReports")
+        .withIndex("by_externalId", (q) => q.eq("externalId", result.externalId))
+        .unique();
+
+      if (existing) {
+        await ctx.db.replace(existing._id, document);
+        updated += 1;
+      } else {
+        await ctx.db.insert("remediationReports", document);
+        inserted += 1;
+      }
+    }
+
+    return {
+      inserted,
+      updated,
+      skippedMissingMunicipalities: missingMunicipalities.length,
+      missingMunicipalities,
+      total: args.results.length,
+    };
   },
 });
 

@@ -17,6 +17,8 @@ import {
 const DEFAULT_OUTPUT_PATH = "data/reports/latest.report-generation.json";
 const DEFAULT_GENERATED_AT = new Date().toISOString();
 
+const MAX_LIMIT = 1_000;
+
 type CliOptions = {
   generatedAt: string;
   limit: number;
@@ -74,6 +76,10 @@ function readCliOptions(argv: string[]): CliOptions {
       continue;
     }
 
+    if (flag === "--all") {
+      options.limit = MAX_LIMIT;
+    }
+
     if (flag === "--output" && value) {
       options.outputPath = value;
       index += 1;
@@ -81,8 +87,8 @@ function readCliOptions(argv: string[]): CliOptions {
     }
   }
 
-  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 10) {
-    throw new Error("--limit must be an integer between 1 and 10.");
+  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > MAX_LIMIT) {
+    throw new Error(`--limit must be an integer between 1 and ${MAX_LIMIT}.`);
   }
 
   return options;

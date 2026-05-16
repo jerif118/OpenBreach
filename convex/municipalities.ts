@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
-import { mutation, query } from "./_generated/server";
-import { requireAdmin } from "./auth";
+import { internalMutation, query } from "./_generated/server";
 
 const DEFAULT_LIST_LIMIT = 50;
 const MAX_LIST_LIMIT = 50;
@@ -198,11 +197,12 @@ export const get = query({
   },
 });
 
-export const seed = mutation({
+// Internal seed function: callable only from `npx convex run` or other Convex
+// functions, not exposed to the app's public API. App-level admin checks are
+// unnecessary here because internal functions can't be reached from the client.
+export const seed = internalMutation({
   args: { municipalities: v.array(seedMunicipality) },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
-
     let inserted = 0;
     let updated = 0;
 

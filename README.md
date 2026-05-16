@@ -345,6 +345,34 @@ pnpm convex:dev
 pnpm convex:codegen
 ```
 
+Convex seed and persistence commands (require a configured deployment and, for
+the persistence ones, a seeded `municipalities` table):
+
+```bash
+pnpm municipalities:seed       # internal mutation, runnable from CLI
+pnpm scanner:persist           # live passive scan -> rawScanResults
+pnpm risk:persist              # enriched results -> scanResults (feeds the UI)
+```
+
+Both `*:persist` scripts pipe their JSON payload into
+`scripts/persist-via-convex.ts`, which chunks it and invokes `convex run` per
+batch. This is required because Linux caps a single argv element at
+`MAX_ARG_STRLEN` (128 KB), well below the size of a full enriched-scan payload;
+the old `convex run … "$(...)"` form failed with `Argument list too long`.
+Override the batch size with `PERSIST_BATCH_SIZE` (default `10`).
+
+`pnpm scanner:persist` defaults to a live scan with concurrency=5 and visible
+per-municipality progress on stderr. Useful env overrides understood by
+`scripts/scan-convex-args.ts`:
+
+```bash
+SCAN_FROM_FIXTURE=1 pnpm scanner:persist                # reuse data/scans/latest.scan-results.json
+SCAN_FIXTURE_PATH=path/to/file.json pnpm scanner:persist
+MUNICIPALITY_IDS=mx-aguascalientes-aguascalientes,mx-bcn-tijuana pnpm scanner:persist
+SCAN_TIMEOUT_MS=4000 SCAN_RETRIES=0 SCAN_CONCURRENCY=8 pnpm scanner:persist
+PERSIST_BATCH_SIZE=5 pnpm scanner:persist               # smaller convex-run batches
+```
+
 Do not edit generated files under `convex/_generated/` by hand. Run `pnpm convex:codegen` or `pnpm convex:dev` when Convex API files need to refresh.
 
 ## Environment
@@ -365,8 +393,14 @@ Copy `.env.example` for local setup. The current repository recognizes these var
 | `OPENROUTER_API_KEY` | No | OpenRouter key when used. |
 | `ANTHROPIC_API_KEY` | No | Anthropic key when used. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | No | Gemini key when used. |
-| `SCAN_CONCURRENCY` | No | Passive scan concurrency limit. |
-| `SCAN_TIMEOUT_MS` | No | Passive check timeout. |
+| `SCAN_CONCURRENCY` | No | Passive scan concurrency limit. Default `5` in `scripts/scan-convex-args.ts`. |
+| `SCAN_TIMEOUT_MS` | No | Passive check timeout. Default `5000` ms. |
+| `SCAN_RETRIES` | No | Per-request retry budget for the passive scanner. Default `1`. |
+| `SCAN_DELAY_MS` | No | Delay between scan retries. Default `250` ms. |
+| `SCAN_FROM_FIXTURE` | No | When set to `1`, `pnpm scanner:persist` reads `data/scans/latest.scan-results.json` instead of hitting the network. |
+| `SCAN_FIXTURE_PATH` | No | Overrides the fixture file path used when `SCAN_FROM_FIXTURE=1`. |
+| `MUNICIPALITY_IDS` | No | Comma-separated `municipality.id` allowlist consumed by `pnpm scanner:persist` to scope live or fixture-backed runs. |
+| `PERSIST_BATCH_SIZE` | No | Number of `results` items forwarded per `convex run` invocation by `scripts/persist-via-convex.ts`. Default `10`; lower this if Convex rejects an oversized argument. |
 
 ## Development Workflow
 
