@@ -4,11 +4,36 @@ import municipalitiesFixture from "../data/municipalities/municipalities.seed.js
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
 import { renderReportBatchPdfs } from "../src/mastra/workflows/report-workflow.ts";
 import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-tool.ts";
+import { pushText } from "../src/reports/pdf-document.ts";
 import {
   municipalitySchema,
   reportPdfReferenceSchema,
   scanResultSchema,
 } from "../src/shared/contracts.ts";
+
+function assertPdfTextEscapesLiteralControls(): void {
+  const commands: string[] = [];
+
+  pushText({
+    commands,
+    fontKey: "F1",
+    fontSize: 12,
+    color: [0, 0, 0],
+    x: 1,
+    y: 2,
+    text: "Line\nBreak\rReturn (path\\value)",
+  });
+
+  const [command] = commands;
+  const expected =
+    "BT /F1 12 Tf 0.000 0.000 0.000 rg 1.00 2.00 Td (Line\\nBreak\\rReturn \\(path\\\\value\\)) Tj ET";
+
+  if (command !== expected) {
+    throw new Error(
+      "PDF text escaping must escape newlines, carriage returns, backslashes, and parentheses.",
+    );
+  }
+}
 
 function assertPageTreeReferencesPageObjects(pdfContent: string): void {
   const objects = new Map<number, string>();
@@ -39,6 +64,8 @@ function assertPageTreeReferencesPageObjects(pdfContent: string): void {
 }
 
 const selectedAt = "2026-01-01T00:00:00.000Z";
+assertPdfTextEscapesLiteralControls();
+
 const contexts = selectTopRiskReportContexts({
   municipalities: municipalitySchema.array().parse(municipalitiesFixture),
   scans: scanResultSchema.array().parse(enrichedScanFixture),
