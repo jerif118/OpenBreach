@@ -1,0 +1,12 @@
+{
+  "scopeId": "scp_openbreach_001",
+  "targetId": "tgt_openbreach_001",
+  "authorizedUrls": ["https://www.acme.com"],
+  "authorizedMethods": ["GET", "HEAD", "OPTIONS"],
+  "authorizedCategories": ["tls", "headers", "cms", "exposure", "availability", "known-vulnerability"],
+  "maxDepth": 3,
+  "validFrom": "2026-05-16T10:00:00.000Z",
+  "validUntil": "2026-05-23T10:00:00.000Z",
+  "agentId": "agent-scanner-01",
+  "legalBasis": "Authorized penetration test contract #12345"
+}

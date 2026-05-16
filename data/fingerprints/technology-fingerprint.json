@@ -1,0 +1,12 @@
+{
+  "fingerprintId": "fpt_openbreach_001",
+  "targetId": "tgt_openbreach_001",
+  "runId": "run_openbreach_001",
+  "technology": "nginx",
+  "version": "1.24.0",
+  "category": "server",
+  "evidenceIds": ["evd_passive_001"],
+  "confidence": "high",
+  "identifiedAt": "2026-05-16T10:05:00.000Z",
+  "sourceAgent": "agent-scanner-01"
+}

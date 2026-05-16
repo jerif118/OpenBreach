@@ -1,0 +1,29 @@
+{
+  "id": "report-sample-001",
+  "municipalityId": "mun-sample-001",
+  "variant": "technical",
+  "generatedAt": "2026-05-16T10:00:00.000Z",
+  "summary": "Sample remediation report for backward compatibility testing.",
+  "priorityActions": [
+    "Enable HTTPS redirect",
+    "Update TLS configuration"
+  ],
+  "findings": [
+    {
+      "id": "fnd-sample-001",
+      "category": "tls",
+      "severity": "high",
+      "title": "Deprecated TLS version",
+      "description": "The target accepts TLS 1.0 and 1.1.",
+      "evidence": "openssl s_client output",
+      "remediationHint": "Disable TLS 1.0 and 1.1.",
+      "confidence": "medium",
+      "status": "confirmed",
+      "affectedAssets": ["www.acme.com"],
+      "evidenceSummary": "TLS handshake accepted deprecated protocols.",
+      "remediationSteps": ["Update server config"],
+      "verificationSteps": ["Re-run SSL Labs scan"]
+    }
+  ],
+  "generatedBy": "deterministic-fallback"
+}

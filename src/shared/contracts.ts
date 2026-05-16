@@ -163,14 +163,80 @@ export const reportSectionSchema = z.object({
   bullets: z.array(z.string().min(1)).default([]),
 });
 
+const defaultReportSection = {
+  title: "",
+  narrative: "",
+  bullets: [] as string[],
+};
+
+const reportSectionsSchema = z.object({
+  scope: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+  authorization: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+  methodology: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+  findingsOverview: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+  skippedTests: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+  validationStatus: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+  limitations: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+  remediationChecklist: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+  verificationGuidance: z.object({
+    title: z.string().default(""),
+    narrative: z.string().default(""),
+    bullets: z.array(z.string()).default([]),
+  }).default(defaultReportSection),
+}).optional().default({
+  scope: defaultReportSection,
+  authorization: defaultReportSection,
+  methodology: defaultReportSection,
+  findingsOverview: defaultReportSection,
+  skippedTests: defaultReportSection,
+  validationStatus: defaultReportSection,
+  limitations: defaultReportSection,
+  remediationChecklist: defaultReportSection,
+  verificationGuidance: defaultReportSection,
+});
+
 export const remediationReportSchema = z.object({
   id: z.string().min(1),
   municipalityId: z.string().min(1),
   variant: z.enum(["technical", "friendly"]),
   generatedAt: z.string().datetime(),
+  title: z.string().optional().default("Remediation Report"),
   summary: z.string().min(1),
   priorityActions: z.array(z.string().min(1)),
   findings: z.array(reportFindingSchema),
+  sections: reportSectionsSchema,
   generatedBy: z.enum(["deterministic-fallback", "ai-provider"]),
 });
 

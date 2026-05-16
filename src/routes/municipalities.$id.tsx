@@ -578,11 +578,19 @@ function getReportMetadataSummary(report: ReportMetadata) {
   const generated = report.generatedAt
     ? `Generated ${formatDateTime(report.generatedAt)}`
     : "Generation time unavailable";
-  const artifactSummary = report.artifacts
-    ? `${Object.values(report.artifacts).filter(Boolean).length} PDF variants`
-    : report.pdf
+
+  let artifactSummary: string;
+  if (report.status === "completed") {
+    artifactSummary = report.artifacts
+      ? `${Object.values(report.artifacts).filter(Boolean).length} PDF variants`
+      : report.pdf
+        ? `File: ${report.pdf.fileName}`
+        : "No PDF file metadata";
+  } else {
+    artifactSummary = report.pdf
       ? `File: ${report.pdf.fileName}`
       : "No PDF file metadata";
+  }
 
   return `${generated}. ${artifactSummary}. Status: ${report.status}.`;
 }

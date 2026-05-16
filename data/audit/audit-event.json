@@ -1,0 +1,13 @@
+{
+  "eventId": "evt_openbreach_001",
+  "timestamp": "2026-05-16T10:00:00.000Z",
+  "eventType": "scope_created",
+  "agentId": "agent-scanner-01",
+  "targetId": "tgt_openbreach_001",
+  "runId": "run_openbreach_001",
+  "entityId": "scp_openbreach_001",
+  "entityType": "authorizationScope",
+  "metadata": {
+    "authorizedUrls": ["https://www.acme.com"]
+  }
+}

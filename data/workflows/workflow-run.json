@@ -1,0 +1,12 @@
+{
+  "runId": "run_openbreach_001",
+  "scopeId": "scp_openbreach_001",
+  "targetId": "tgt_openbreach_001",
+  "status": "hypothesis",
+  "hypothesisId": "hyp_tls_weak_001",
+  "testPlanId": "tpl_openbreach_001",
+  "startedAt": "2026-05-16T10:00:00.000Z",
+  "completedAt": "2026-05-16T10:30:00.000Z",
+  "agentId": "agent-scanner-01",
+  "evidenceEnvelopeId": "env_openbreach_001"
+}

@@ -1,0 +1,21 @@
+{
+  "testPlanId": "tpl_openbreach_001",
+  "runId": "run_openbreach_001",
+  "scopeId": "scp_openbreach_001",
+  "strategy": "passive-only",
+  "plannedCategories": ["tls", "headers", "cms"],
+  "plannedChecks": [
+    {
+      "checkId": "chk_tls_001",
+      "category": "tls",
+      "description": "Verify TLS version and certificate validity"
+    },
+    {
+      "checkId": "chk_headers_001",
+      "category": "headers",
+      "description": "Check security headers presence and values"
+    }
+  ],
+  "createdAt": "2026-05-16T10:00:00.000Z",
+  "agentId": "agent-scanner-01"
+}

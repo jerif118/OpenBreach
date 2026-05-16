@@ -1,0 +1,15 @@
+{
+  "artifactId": "art_openbreach_001",
+  "runId": "run_openbreach_001",
+  "targetId": "tgt_openbreach_001",
+  "artifactType": "summary",
+  "format": "markdown",
+  "content": {
+    "title": "Executive Summary",
+    "body": "No significant issues detected."
+  },
+  "findingIds": ["fnd_tls_weak_001"],
+  "generatedAt": "2026-05-16T10:30:00.000Z",
+  "generatedBy": "agent-reporter-01",
+  "version": "1.0.0"
+}
