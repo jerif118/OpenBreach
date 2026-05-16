@@ -1,4 +1,9 @@
 import { spawnSync } from "node:child_process";
+import {
+  enrichedScanPersistenceArgsSchema,
+  rawScanPersistenceArgsSchema,
+  reportPersistencePayloadSchema,
+} from "../src/shared/contracts.ts";
 
 // Stream `{ "results": [...] }` JSON on stdin and forward it to a Convex
 // mutation in chunks via the Convex CLI. Required because Linux enforces a
@@ -14,6 +19,19 @@ if (!functionName) {
   process.exit(2);
 }
 
+const payloadSchemas = {
+  "rawScanResults:upsertMany": rawScanPersistenceArgsSchema,
+  "scanResults:upsertEnrichedMany": enrichedScanPersistenceArgsSchema,
+  "reports:seedFromFixture": reportPersistencePayloadSchema,
+} as const;
+
+const payloadSchema =
+  payloadSchemas[functionName as keyof typeof payloadSchemas];
+if (!payloadSchema) {
+  process.stderr.write(`No payload schema configured for ${functionName}.\n`);
+  process.exit(2);
+}
+
 const batchSize = Math.max(
   1,
   Number(process.argv[3] ?? process.env.PERSIST_BATCH_SIZE ?? "10"),
@@ -25,9 +43,9 @@ if (stdin.trim().length === 0) {
   process.exit(2);
 }
 
-let payload: unknown;
+let parsedPayload: unknown;
 try {
-  payload = JSON.parse(stdin);
+  parsedPayload = JSON.parse(stdin);
 } catch (error) {
   process.stderr.write(
     `Failed to parse stdin as JSON: ${error instanceof Error ? error.message : String(error)}\n`,
@@ -35,8 +53,13 @@ try {
   process.exit(2);
 }
 
-if (!isPayloadWithResults(payload)) {
-  process.stderr.write('Expected payload shape `{ "results": [...] }`.\n');
+let payload: { results: unknown[] };
+try {
+  payload = payloadSchema.parse(parsedPayload);
+} catch (error) {
+  process.stderr.write(
+    `Payload failed validation for ${functionName}: ${error instanceof Error ? error.message : String(error)}\n`,
+  );
   process.exit(2);
 }
 
@@ -93,12 +116,4 @@ async function readStdin(): Promise<string> {
     buffer += chunk;
   }
   return buffer;
-}
-
-function isPayloadWithResults(value: unknown): value is { results: unknown[] } {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    Array.isArray((value as { results?: unknown }).results)
-  );
 }
