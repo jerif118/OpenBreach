@@ -17,6 +17,7 @@
     "dashboard:shell:validate": "node scripts/validate-dashboard-shell.ts",
     "dashboard:verify": "node scripts/validate-dashboard-verification.ts",
     "dev": "vite dev",
+    "fix": "run-s --continue-on-error \"fix:*\"",
     "fix:oxfmt": "oxfmt --write",
     "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts",
     "format": "oxfmt --write",
