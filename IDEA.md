@@ -20,6 +20,10 @@ Para el MVP podemos enfocarnos en México, analizamos los 500 más grandes y arm
 
 - https://tanstack.com/ai/latest
 
+- https://www.convex.dev/
+
+- https://clerk.com/
+
 - Reference pattern: https://github.com/ataschz/tanstack-start-mastra-example
 
-We want to keep TypeScript across the client, server, and agent workflow. The app should be deployable to platform-agnostic hosting such as Vercel or Netlify, so the agent runtime should not depend on AWS-specific services. Python can be added later only if a specific passive scanning library clearly justifies it.
+We want to keep TypeScript across the client, server, data layer, auth boundary, and agent workflow. Convex should provide the database, backend functions, and real-time synchronization so the map, detail pages, scan status, scores, and report metadata can update without custom polling. Clerk should provide authentication and authorization, with Convex configured to trust Clerk-issued auth for protected mutations and operator/admin workflows. The app should be deployable to platform-agnostic hosting such as Vercel or Netlify, so the agent runtime should not depend on AWS-specific services. Python can be added later only if a specific passive scanning library clearly justifies it.
