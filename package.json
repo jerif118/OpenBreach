@@ -11,7 +11,10 @@
     "typecheck": "tsc --noEmit",
     "convex:dev": "convex dev",
     "convex:codegen": "convex codegen",
-    "fixtures:validate": "node scripts/validate-fixtures.ts",
+    "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts",
+    "municipalities:validate": "node scripts/validate-municipality-seed.ts",
+    "municipalities:seed:args": "node scripts/municipality-seed-args.ts",
+    "municipalities:seed": "convex run municipalities:seed \"$(node scripts/municipality-seed-args.ts)\"",
     "report:smoke": "node scripts/report-smoke.ts",
     "clean:hard": "node scripts/hard-clean.ts",
     "clean:soft": "node scripts/soft-clean.ts"

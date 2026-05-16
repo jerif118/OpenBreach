@@ -17,6 +17,8 @@ The project must stay passive. It only uses information any browser or normal HT
 - `pnpm convex:dev`: start Convex after configuring `VITE_CONVEX_URL`.
 - `pnpm convex:codegen`: refresh generated Convex API files from source functions.
 - `pnpm fixtures:validate`: validate sample fixture JSON against shared contracts.
+- `pnpm municipalities:validate`: validate the 50-record Mexican municipality seed dataset.
+- `pnpm municipalities:seed`: import the validated municipality seed into the configured Convex development deployment.
 - `pnpm report:smoke`: generate a deterministic `RemediationReport` from fixtures.
 
 ## Environment
@@ -37,7 +39,21 @@ a non-secret placeholder issuer; replace it with the value documented as
 ## Fixtures
 
 Tiny deterministic fixtures live in `data/municipalities/`, `data/scans/`, and
-`data/reports/`. Linked dataset work owns larger real municipality coverage.
+`data/reports/`. The source-backed municipality MVP seed lives at
+`data/municipalities/municipalities.seed.json` with dataset notes in
+`data/municipalities/README.md`.
+
+For the municipality seed workflow:
+
+```bash
+pnpm municipalities:validate
+pnpm municipalities:seed
+```
+
+`pnpm municipalities:seed` runs the Convex `municipalities:seed` mutation with the
+validated JSON records. If Convex credentials or a development deployment are not
+available, keep using `municipalities.seed.json` as the deterministic fallback
+for local demos and review.
 
 ## Current Repository State
 
@@ -47,14 +63,15 @@ Already present:
 
 - `package.json`, `pnpm-lock.yaml`, `vite.config.ts`, `tsconfig.json`, and `src/` from a TanStack Start starter app.
 - Generated Convex client files under `convex/_generated/` plus Convex AI guidance under `convex/_generated/ai/`.
+- Shared Zod contracts, tiny sample fixtures, fixture validation scripts, Convex schema/functions, and placeholder Convex auth config.
 - Local toolchain pins in `package.json`: Node.js `24.15.0` and `pnpm@11.1.2`.
 - Basic scripts for local development, production build, typecheck, preview, and Convex dev.
 
 Still pending:
 
 - Replacing the minimal placeholder screen with DEFF-ACC product screens.
-- Adding shared DEFF-ACC contracts in code.
-- Adding `convex/schema.ts`, Convex queries/mutations/actions, and `convex/auth.config.ts` for Clerk-issued auth.
+- Completing shared DEFF-ACC contracts beyond the initial fixture/runtime schemas.
+- Expanding Convex queries/mutations/actions and replacing placeholder Clerk auth configuration with deployment values.
 - Adding Clerk provider wiring and signed-in/signed-out UI states.
 - Adding Mastra workflows, TanStack AI provider adapters, scanner/scoring/report modules, seed fixtures, and PDF generation.
 
@@ -184,6 +201,10 @@ flowchart LR
 ## Shared Contracts
 
 All tasks should converge on these contracts, finalized in [#1](https://github.com/jerif118/DEFF-ACC/issues/1). Downstream tasks can use this shape as a local stub until #1 lands.
+
+Current municipality contract status for [#2](https://github.com/jerif118/DEFF-ACC/issues/2): the committed shared TypeScript schema in `src/shared/contracts.ts` is the runtime fixture contract today. It requires `id`, `name`, `state`, `websiteUrl`, and `riskTier`, with optional `population`. The sample fixture at `data/municipalities/sample-municipality.json` follows that shape, and `pnpm fixtures:validate` validates fixtures through `scripts/validate-fixtures.ts` and Zod.
+
+The seed dataset required by #2 also carries `population`, `latitude`, `longitude`, and `sourceUrl` for each real municipality. The seed-specific Zod contract lives in `src/shared/municipalitySeed.ts`, and `pnpm fixtures:validate` now validates both the small runtime fixtures and the 50-record seed dataset. Convex stores imported seed records with `externalId` mapped from seed `id`, plus coordinates and source evidence when present; `convex/municipalities.ts` exposes read-only `list`/`get` queries and an idempotent `municipalities:seed` mutation that updates by `externalId`.
 
 ```ts
 export type RiskLevel = "low" | "medium" | "high" | "critical";
