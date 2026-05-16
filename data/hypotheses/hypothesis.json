@@ -1,0 +1,14 @@
+{
+  "hypothesisId": "hyp_tls_weak_001",
+  "targetId": "tgt_openbreach_001",
+  "runId": "run_001",
+  "category": "tls",
+  "severity": "high",
+  "title": "TLS version advisory detected",
+  "description": "The target appears to negotiate TLS 1.0/1.1 which are deprecated. Further validation needed to confirm.",
+  "evidenceIds": ["evd_passive_001"],
+  "confidence": "medium",
+  "createdAt": "2026-05-16T10:05:00.000Z",
+  "sourceAgent": "agent-scanner-01",
+  "status": "pending"
+}

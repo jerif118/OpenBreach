@@ -339,3 +339,232 @@ export type GenerateRemediationReport = (
 export type GenerateRemediationReportVariants = (
   input: GenerateRemediationReportInput,
 ) => Promise<RemediationReportVariants>;
+
+
+// ============================================================
+// OpenBreach Contract Layer — Phase 1: Schemas
+// ============================================================
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const targetProfileSchema = z.object({
+  targetId: z.string().min(1),
+  assetId: z.string().min(1),
+  organizationName: z.string().min(1),
+  canonicalUrl: z.string().url(),
+  outOfScope: z.boolean().optional().default(false),
+});
+export type TargetProfile = z.infer<typeof targetProfileSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const authorizationScopeSchema = z.object({
+  scopeId: z.string().min(1),
+  targetId: z.string().min(1),
+  authorizedUrls: z.array(z.string().url()).min(1),
+  authorizedMethods: z.array(z.enum(["GET", "HEAD", "OPTIONS"])).default(["GET", "HEAD", "OPTIONS"]),
+  authorizedCategories: z.array(z.enum(["tls", "headers", "cms", "exposure", "availability", "known-vulnerability"])).default(["tls", "headers", "cms", "exposure", "availability", "known-vulnerability"]),
+  maxDepth: z.number().int().nonnegative().default(3),
+  validFrom: z.string().datetime(),
+  validUntil: z.string().datetime(),
+  agentId: z.string().min(1),
+  legalBasis: z.string().min(1).optional(),
+});
+export type AuthorizationScope = z.infer<typeof authorizationScopeSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const workflowRunStatusSchema = z.enum(["hypothesis", "approved", "confirmed", "skipped", "halted", "rejected"]);
+export type WorkflowRunStatus = z.infer<typeof workflowRunStatusSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const workflowRunSchema = z.object({
+  runId: z.string().min(1),
+  scopeId: z.string().min(1),
+  targetId: z.string().min(1),
+  status: workflowRunStatusSchema,
+  hypothesisId: z.string().optional(),
+  testPlanId: z.string().optional(),
+  startedAt: z.string().datetime(),
+  completedAt: z.string().datetime().optional(),
+  agentId: z.string().min(1),
+  evidenceEnvelopeId: z.string().optional(),
+});
+export type WorkflowRun = z.infer<typeof workflowRunSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const passiveScanEvidenceSchema = z.object({
+  evidenceId: z.string().min(1),
+  runId: z.string().min(1),
+  targetId: z.string().min(1),
+  collectedAt: z.string().datetime(),
+  sourceAgent: z.string().min(1),
+  observationType: z.enum(["response-header", "resource-load", "tls-version", "content-match"]),
+  rawData: z.record(z.unknown()),
+  canonicalUrl: z.string().url(),
+  evidenceRefs: z.array(z.string()).optional(),
+});
+export type PassiveScanEvidence = z.infer<typeof passiveScanEvidenceSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const technologyFingerprintSchema = z.object({
+  fingerprintId: z.string().min(1),
+  targetId: z.string().min(1),
+  runId: z.string().min(1),
+  technology: z.string().min(1),
+  version: z.string().optional(),
+  category: z.enum(["cms", "framework", "library", "server", "cdn", "other"]),
+  evidenceIds: z.array(z.string()).min(1),
+  confidence: z.enum(["low", "medium", "high"]),
+  identifiedAt: z.string().datetime(),
+  sourceAgent: z.string().min(1),
+});
+export type TechnologyFingerprint = z.infer<typeof technologyFingerprintSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const vulnerabilityHypothesisSchema = z.object({
+  hypothesisId: z.string().min(1),
+  targetId: z.string().min(1),
+  runId: z.string().min(1),
+  category: z.enum(["tls", "headers", "cms", "exposure", "availability", "known-vulnerability"]),
+  severity: z.enum(["info", "low", "medium", "high", "critical"]),
+  title: z.string().min(1),
+  description: z.string().min(10),
+  evidenceIds: z.array(z.string()).min(1),
+  confidence: z.enum(["low", "medium", "high"]),
+  createdAt: z.string().datetime(),
+  sourceAgent: z.string().min(1),
+  status: z.enum(["pending", "approved", "rejected"]).default("pending"),
+});
+export type VulnerabilityHypothesis = z.infer<typeof vulnerabilityHypothesisSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const testPlanSchema = z.object({
+  testPlanId: z.string().min(1),
+  runId: z.string().min(1),
+  scopeId: z.string().min(1),
+  strategy: z.enum(["passive-only", "passive-aggressive"]),
+  plannedCategories: z.array(z.enum(["tls", "headers", "cms", "exposure", "availability", "known-vulnerability"])),
+  plannedChecks: z.array(z.object({
+    checkId: z.string().min(1),
+    category: z.enum(["tls", "headers", "cms", "exposure", "availability", "known-vulnerability"]),
+    description: z.string().min(1),
+  })),
+  createdAt: z.string().datetime(),
+  agentId: z.string().min(1),
+});
+export type TestPlan = z.infer<typeof testPlanSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const approvalGateStatusSchema = z.enum(["pending", "approved", "rejected", "expired", "revoked"]);
+export type ApprovalGateStatus = z.infer<typeof approvalGateStatusSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const approvalGateSchema = z.object({
+  gateId: z.string().min(1),
+  hypothesisId: z.string().min(1),
+  scopeId: z.string().min(1),
+  status: approvalGateStatusSchema,
+  requestedAt: z.string().datetime(),
+  reviewedAt: z.string().datetime().optional(),
+  reviewerId: z.string().optional(),
+  reviewNotes: z.string().optional(),
+  validUntil: z.string().datetime().optional(),
+  sourceAgent: z.string().min(1),
+});
+export type ApprovalGate = z.infer<typeof approvalGateSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const validationResultStatusSchema = z.enum(["confirmed", "skipped", "halted", "rejected"]);
+export type ValidationResultStatus = z.infer<typeof validationResultStatusSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const validationResultSchema = z.object({
+  resultId: z.string().min(1),
+  hypothesisId: z.string().min(1),
+  gateId: z.string().min(1),
+  runId: z.string().min(1),
+  status: validationResultStatusSchema,
+  executedAt: z.string().datetime(),
+  completedAt: z.string().datetime().optional(),
+  evidenceIds: z.array(z.string()),
+  findings: z.array(z.string()).optional(),
+  agentId: z.string().min(1),
+  notes: z.string().optional(),
+});
+export type ValidationResult = z.infer<typeof validationResultSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const evidenceEnvelopeSchema = z.object({
+  envelopeId: z.string().min(1),
+  runId: z.string().min(1),
+  targetId: z.string().min(1),
+  evidenceIds: z.array(z.string()),
+  createdAt: z.string().datetime(),
+  sourceAgent: z.string().min(1),
+});
+export type EvidenceEnvelope = z.infer<typeof evidenceEnvelopeSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const findingSeveritySchema = z.enum(["info", "low", "medium", "high", "critical"]);
+export type FindingSeverity = z.infer<typeof findingSeveritySchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const findingCategorySchema = z.enum(["tls", "headers", "cms", "exposure", "availability", "known-vulnerability"]);
+export type FindingCategory = z.infer<typeof findingCategorySchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const findingSchema = z.object({
+  findingId: z.string().min(1),
+  resultId: z.string().min(1),
+  hypothesisId: z.string().min(1),
+  targetId: z.string().min(1),
+  severity: findingSeveritySchema,
+  category: findingCategorySchema,
+  title: z.string().min(1),
+  description: z.string().min(10),
+  evidenceIds: z.array(z.string()).min(1),
+  cveId: z.string().optional(),
+  cweId: z.string().optional(),
+  createdAt: z.string().datetime(),
+  sourceAgent: z.string().min(1),
+  confirmedBy: z.string().min(1),
+});
+export type Finding = z.infer<typeof findingSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const reportArtifactSchema = z.object({
+  artifactId: z.string().min(1),
+  runId: z.string().min(1),
+  targetId: z.string().min(1),
+  artifactType: z.enum(["summary", "detailed", "executive", "technical"]),
+  format: z.enum(["json", "markdown", "html"]),
+  content: z.record(z.unknown()),
+  findingIds: z.array(z.string()),
+  generatedAt: z.string().datetime(),
+  generatedBy: z.string().min(1),
+  version: z.string().default("1.0.0"),
+});
+export type ReportArtifact = z.infer<typeof reportArtifactSchema>;
+
+// NOTE: If you modify this schema, update the corresponding Convex validator in convex/schema.ts
+export const auditEventSchema = z.object({
+  eventId: z.string().min(1),
+  timestamp: z.string().datetime(),
+  eventType: z.enum([
+    "scope_created",
+    "workflow_started",
+    "workflow_completed",
+    "hypothesis_created",
+    "gate_requested",
+    "gate_approved",
+    "gate_rejected",
+    "validation_executed",
+    "finding_confirmed",
+    "report_generated",
+  ]),
+  agentId: z.string().min(1),
+  targetId: z.string().optional(),
+  runId: z.string().optional(),
+  entityId: z.string().optional(),
+  entityType: z.string().optional(),
+  metadata: z.record(z.unknown()).optional(),
+});
+export type AuditEvent = z.infer<typeof auditEventSchema>;
