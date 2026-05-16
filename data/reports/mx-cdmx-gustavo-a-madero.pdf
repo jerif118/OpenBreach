@@ -1,0 +1,98 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 3170 >>
+stream
+BT
+/F1 11 Tf
+50 760 Td
+(Remediation Report: Gustavo A. Madero) Tj
+0 -16 Td
+(Municipality ID: mx-cdmx-gustavo-a-madero) Tj
+0 -16 Td
+(Risk score: 83) Tj
+0 -16 Td
+(Risk level: critical) Tj
+0 -16 Td
+(Generated at: 2026-01-01T00:00:00.000Z) Tj
+0 -16 Td
+(Summary:) Tj
+0 -16 Td
+(Gustavo A. Madero currently has a critical risk level with risk score 83 based on 6 passive scan findings. The first technician focus should be: WordPress 6.4 requires patch review, because the scan evidence is actionable. Review the items below as practical remediation guidance, not as a legal or regulatory determination.) Tj
+0 -16 Td
+(Priority actions:) Tj
+0 -16 Td
+(Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Evidence: wordpress 6.4; confidence 0.8; references CVE-2024-31210) Tj
+0 -16 Td
+(Priority 2: Restrict administrative entry points with access controls, MFA, and monitoring where operationally possible. Evidence: /wp-login.php returned 200) Tj
+0 -16 Td
+(Priority 3: Send X-Content-Type-Options: nosniff on HTML and static asset responses. Evidence: x-content-type-options was not present in the selected response headers.) Tj
+0 -16 Td
+(Priority 4: Add a tested Content-Security-Policy that limits script, frame, and object sources. Evidence: content-security-policy was not present in the selected response headers.) Tj
+0 -16 Td
+(Priority 5: Enable HSTS after confirming HTTPS is stable for the site and subdomains. Evidence: strict-transport-security was not present in the selected response headers.) Tj
+0 -16 Td
+(Evidence and remediation:) Tj
+0 -16 Td
+(HIGH: WordPress 6.4 requires patch review) Tj
+0 -16 Td
+(Evidence: wordpress 6.4; confidence 0.8; references CVE-2024-31210) Tj
+0 -16 Td
+(Remediation: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release.) Tj
+0 -16 Td
+(MEDIUM: Public admin path is reachable) Tj
+0 -16 Td
+(Evidence: /wp-login.php returned 200) Tj
+0 -16 Td
+(Remediation: Restrict administrative entry points with access controls, MFA, and monitoring where operationally possible.) Tj
+0 -16 Td
+(MEDIUM: Missing X-Content-Type-Options) Tj
+0 -16 Td
+(Evidence: x-content-type-options was not present in the selected response headers.) Tj
+0 -16 Td
+(Remediation: Send X-Content-Type-Options: nosniff on HTML and static asset responses.) Tj
+0 -16 Td
+(MEDIUM: Missing Content Security Policy) Tj
+0 -16 Td
+(Evidence: content-security-policy was not present in the selected response headers.) Tj
+0 -16 Td
+(Remediation: Add a tested Content-Security-Policy that limits script, frame, and object sources.) Tj
+0 -16 Td
+(MEDIUM: Missing HTTP Strict Transport Security) Tj
+0 -16 Td
+(Evidence: strict-transport-security was not present in the selected response headers.) Tj
+0 -16 Td
+(Remediation: Enable HSTS after confirming HTTPS is stable for the site and subdomains.) Tj
+0 -16 Td
+(LOW: CMS fingerprint was detected) Tj
+0 -16 Td
+(Evidence: wordpress 6.4; confidence 0.8; evidence generator:WordPress 6.4, marker:wordpress) Tj
+0 -16 Td
+(Remediation: Keep CMS core, extensions, and themes patched, and remove unnecessary public version disclosures where practical.) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+3533
+%%EOF
