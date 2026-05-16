@@ -6,8 +6,13 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   return (
-    <div className="p-2">
-      <h3>Welcome Home!!!</h3>
-    </div>
+    <main className="app-shell">
+      <p className="eyebrow">DEFF-ACC</p>
+      <h1>Passive Municipal Cyber Risk Map</h1>
+      <p>
+        A minimal TanStack Start shell ready for the municipal risk dashboard,
+        Convex data layer, and passive scanning workflow.
+      </p>
+    </main>
   )
 }

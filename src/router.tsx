@@ -1,15 +1,10 @@
-import { createRouter } from '@tanstack/react-router'
-import { routeTree } from './routeTree.gen'
-import { DefaultCatchBoundary } from './components/DefaultCatchBoundary'
-import { NotFound } from './components/NotFound'
+import { createRouter } from "@tanstack/react-router";
+import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
-  const router = createRouter({
+  return createRouter({
+    defaultPreload: "viewport",
     routeTree,
-    defaultPreload: 'intent',
-    defaultErrorComponent: DefaultCatchBoundary,
-    defaultNotFoundComponent: () => <NotFound />,
     scrollRestoration: true,
-  })
-  return router
+  });
 }
