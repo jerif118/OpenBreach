@@ -413,5 +413,5 @@ What makes the MVP credible:
 - Pivot plan: [`pentesting-automation.md`](./pentesting-automation.md)
 - Original product description: [`product-description.md`](./product-description.md)
 - Original idea: [`IDEA.md`](./IDEA.md)
-- DOCX concept note: [KID MYTHOS concept DOCX](./KID%20MYTHOS%20%E2%80%94%20Alcance%20del%20Proyecto.docx)
+- DOCX concept note: [KID MYTHOS concept DOCX](./kid-mythos.docx)
 - GitHub pivot issue inventory: https://github.com/jerif118/DEFF-ACC/issues?q=is%3Aissue%20%5BPivot%20MVP%5D
