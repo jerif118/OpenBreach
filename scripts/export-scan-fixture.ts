@@ -21,7 +21,10 @@ const results = await scanMunicipalities(records, {
 await exportScanFixture(results, outputPath);
 console.log(`Exported ${results.length} scan results to ${outputPath}`);
 
-function makeFixtureResponse(input: RequestInfo | URL, method: string | undefined): Response {
+function makeFixtureResponse(
+  input: RequestInfo | URL,
+  method: string | undefined,
+): Response {
   const url = new URL(input instanceof URL ? input.toString() : String(input));
   const isHomePage = url.pathname === "/" || url.pathname.length === 0;
   const status = isHomePage || url.pathname === "/wp-login.php" ? 200 : 404;
@@ -31,7 +34,9 @@ function makeFixtureResponse(input: RequestInfo | URL, method: string | undefine
   const response = new Response(method === "HEAD" ? null : body, {
     status,
     headers: {
-      "content-type": isHomePage ? "text/html; charset=utf-8" : "text/plain; charset=utf-8",
+      "content-type": isHomePage
+        ? "text/html; charset=utf-8"
+        : "text/plain; charset=utf-8",
       server: "deff-acc-fixture",
       "x-frame-options": "SAMEORIGIN",
     },

@@ -13,10 +13,17 @@ function parseJsonFromCommandOutput(stdout: string) {
     .map((line) => line.trim())
     .filter(Boolean)
     .reverse()
-    .find((line) => (line.startsWith("[") || line.startsWith("{")) && !line.startsWith("[WARN]") && !line.startsWith("$ "));
+    .find(
+      (line) =>
+        (line.startsWith("[") || line.startsWith("{")) &&
+        !line.startsWith("[WARN]") &&
+        !line.startsWith("$ "),
+    );
 
   if (!jsonLine) {
-    throw new Error(`Command output did not contain a JSON payload.\nSTDOUT:\n${stdout}`);
+    throw new Error(
+      `Command output did not contain a JSON payload.\nSTDOUT:\n${stdout}`,
+    );
   }
 
   return JSON.parse(jsonLine) as unknown[];
@@ -50,16 +57,24 @@ const installedDependencyNames = new Set([
 
 for (const dependency of forbiddenDependencies) {
   if (installedDependencyNames.has(dependency)) {
-    throw new Error(`Report generation must not depend on excluded package ${dependency}.`);
+    throw new Error(
+      `Report generation must not depend on excluded package ${dependency}.`,
+    );
   }
 }
 
-const run = spawnSync("pnpm", ["report:generate", "--", "--generated-at", "2026-01-01T00:00:00.000Z"], {
-  encoding: "utf8",
-});
+const run = spawnSync(
+  "pnpm",
+  ["report:generate", "--", "--generated-at", "2026-01-01T00:00:00.000Z"],
+  {
+    encoding: "utf8",
+  },
+);
 
 if (run.status !== 0) {
-  throw new Error(`report:generate failed.\nSTDOUT:\n${run.stdout}\nSTDERR:\n${run.stderr}`);
+  throw new Error(
+    `report:generate failed.\nSTDOUT:\n${run.stdout}\nSTDERR:\n${run.stderr}`,
+  );
 }
 
 if (!run.stdout.includes("Report generation complete")) {
@@ -84,26 +99,38 @@ const artifact = JSON.parse(await readFile(artifactPath, "utf8")) as {
 };
 
 if (artifact.id !== "latest-report-generation") {
-  throw new Error("Generated report artifact must use the stable latest-report-generation id.");
+  throw new Error(
+    "Generated report artifact must use the stable latest-report-generation id.",
+  );
 }
 
 if (artifact.generatedAt !== "2026-01-01T00:00:00.000Z") {
-  throw new Error("Generated report artifact must preserve the requested generated timestamp.");
+  throw new Error(
+    "Generated report artifact must preserve the requested generated timestamp.",
+  );
 }
 
 if (artifact.provider !== "deterministic-fallback") {
-  throw new Error(`Expected deterministic fallback provider, received ${artifact.provider}.`);
+  throw new Error(
+    `Expected deterministic fallback provider, received ${artifact.provider}.`,
+  );
 }
 
-const selected = selectedMunicipalityReportContextSchema.array().parse(artifact.selected);
+const selected = selectedMunicipalityReportContextSchema
+  .array()
+  .parse(artifact.selected);
 
 if (selected.length === 0 || selected.length > 10) {
-  throw new Error(`Expected 1-10 selected report contexts, received ${selected.length}.`);
+  throw new Error(
+    `Expected 1-10 selected report contexts, received ${selected.length}.`,
+  );
 }
 
 for (let index = 1; index < selected.length; index += 1) {
   if (selected[index - 1].scan.riskScore < selected[index].scan.riskScore) {
-    throw new Error("Selected report contexts must be sorted by descending risk score.");
+    throw new Error(
+      "Selected report contexts must be sorted by descending risk score.",
+    );
   }
 }
 
@@ -111,14 +138,21 @@ if (artifact.batch?.summary?.requested !== selected.length) {
   throw new Error("Batch summary must count every selected report context.");
 }
 
-if (artifact.batch.summary.completed !== selected.length || artifact.batch.summary.failed !== 0) {
-  throw new Error("End-to-end fixture report generation must complete all selected records.");
+if (
+  artifact.batch.summary.completed !== selected.length ||
+  artifact.batch.summary.failed !== 0
+) {
+  throw new Error(
+    "End-to-end fixture report generation must complete all selected records.",
+  );
 }
 
 const results = artifact.batch.results ?? [];
 
 if (results.length !== selected.length) {
-  throw new Error("Batch results must include one record per selected context.");
+  throw new Error(
+    "Batch results must include one record per selected context.",
+  );
 }
 
 for (const record of results) {
@@ -133,22 +167,30 @@ for (const record of results) {
   const pdfStat = await stat(pdf.storagePath);
 
   if (pdfStat.size <= 0 || pdf.sizeBytes !== pdfStat.size) {
-    throw new Error(`Generated PDF size metadata is invalid for ${pdf.storagePath}.`);
+    throw new Error(
+      `Generated PDF size metadata is invalid for ${pdf.storagePath}.`,
+    );
   }
 
   if (pdf.fileName !== `${result.report.municipalityId}-technical.pdf`) {
-    throw new Error("Generated technical PDF filenames must be based on municipality IDs plus the technical suffix.");
+    throw new Error(
+      "Generated technical PDF filenames must be based on municipality IDs plus the technical suffix.",
+    );
   }
 
   if (!artifacts?.technical || !artifacts.friendly) {
-    throw new Error("Completed report metadata must include both technical and friendly PDF artifacts.");
+    throw new Error(
+      "Completed report metadata must include both technical and friendly PDF artifacts.",
+    );
   }
 }
 
 const persistenceArgs = artifact.convexPersistenceArgs ?? [];
 
 if (persistenceArgs.length !== selected.length) {
-  throw new Error("Generated artifact must include one Convex persistence args payload per selected report.");
+  throw new Error(
+    "Generated artifact must include one Convex persistence args payload per selected report.",
+  );
 }
 
 for (const arg of persistenceArgs) {
@@ -160,27 +202,46 @@ for (const arg of persistenceArgs) {
     municipalityExternalId?: string;
   };
 
-  if (candidate.status !== "completed" || !candidate.externalId || !candidate.municipalityExternalId) {
-    throw new Error("Convex persistence args must include completed status, externalId, and municipalityExternalId.");
+  if (
+    candidate.status !== "completed" ||
+    !candidate.externalId ||
+    !candidate.municipalityExternalId
+  ) {
+    throw new Error(
+      "Convex persistence args must include completed status, externalId, and municipalityExternalId.",
+    );
   }
 
   reportPdfReferenceSchema.parse(candidate.pdf);
 
-  if (!candidate.artifacts?.technical?.pdf || !candidate.artifacts?.friendly?.pdf) {
-    throw new Error("Convex persistence args must include both report artifact variants.");
+  if (
+    !candidate.artifacts?.technical?.pdf ||
+    !candidate.artifacts?.friendly?.pdf
+  ) {
+    throw new Error(
+      "Convex persistence args must include both report artifact variants.",
+    );
   }
 }
 
-const persistenceStdout = spawnSync("pnpm", ["report:persist:args"], { encoding: "utf8" });
+const persistenceStdout = spawnSync("pnpm", ["report:persist:args"], {
+  encoding: "utf8",
+});
 
 if (persistenceStdout.status !== 0) {
-  throw new Error(`report:persist:args failed.\nSTDOUT:\n${persistenceStdout.stdout}\nSTDERR:\n${persistenceStdout.stderr}`);
+  throw new Error(
+    `report:persist:args failed.\nSTDOUT:\n${persistenceStdout.stdout}\nSTDERR:\n${persistenceStdout.stderr}`,
+  );
 }
 
-const parsedPersistenceArgs = parseJsonFromCommandOutput(persistenceStdout.stdout);
+const parsedPersistenceArgs = parseJsonFromCommandOutput(
+  persistenceStdout.stdout,
+);
 
 if (parsedPersistenceArgs.length !== persistenceArgs.length) {
-  throw new Error("report:persist:args output must match generated artifact persistence payload count.");
+  throw new Error(
+    "report:persist:args output must match generated artifact persistence payload count.",
+  );
 }
 
 const storageDoc = await readFile("docs/report-mvp-storage.md", "utf8");

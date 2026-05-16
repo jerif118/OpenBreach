@@ -8,10 +8,10 @@ const requiredSnippets = [
   "const DEFAULT_LIST_LIMIT = 50",
   "const MAX_LIST_LIMIT = 50",
   "normalizeListLimit(args.limit)",
-  '.take(MAX_LIST_LIMIT)',
+  ".take(MAX_LIST_LIMIT)",
   '.withIndex("by_municipalityId_and_scannedAt"',
   '.order("desc")',
-  '.take(1)',
+  ".take(1)",
   "id: municipality.externalId",
   "riskScore: riskScoreFromScan(scan) ?? fallbackRiskScoreByTier[municipality.riskTier]",
   "riskLevel: scan?.riskLevel ?? municipality.riskTier",
@@ -21,7 +21,9 @@ const requiredSnippets = [
 
 for (const snippet of requiredSnippets) {
   if (!municipalitiesSource.includes(snippet)) {
-    throw new Error(`municipalities.list is missing required aggregate behavior: ${snippet}`);
+    throw new Error(
+      `municipalities.list is missing required aggregate behavior: ${snippet}`,
+    );
   }
 }
 
@@ -39,8 +41,14 @@ const validated = municipalityListItemSchema.parse({
   riskLevel: "critical",
 });
 
-if (validated.id !== "CA-LOS-ANGELES" || validated.riskScore !== 88 || validated.riskLevel !== "critical") {
-  throw new Error("municipality list item contract did not preserve required fields.");
+if (
+  validated.id !== "CA-LOS-ANGELES" ||
+  validated.riskScore !== 88 ||
+  validated.riskLevel !== "critical"
+) {
+  throw new Error(
+    "municipality list item contract did not preserve required fields.",
+  );
 }
 
 console.log("Municipality list validation passed.");

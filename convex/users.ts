@@ -2,7 +2,11 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserProfile, requireAdmin, ROLES } from "./auth";
 
-const profileRole = v.union(v.literal("viewer"), v.literal("operator"), v.literal("admin"));
+const profileRole = v.union(
+  v.literal("viewer"),
+  v.literal("operator"),
+  v.literal("admin"),
+);
 
 export const current = query({
   args: {},

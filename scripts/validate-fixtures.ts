@@ -99,7 +99,9 @@ const failedWithoutError = generateRemediationReportResultSchema.safeParse({
 });
 
 if (failedWithoutError.success) {
-  throw new Error("Failed report generation results must include an error message.");
+  throw new Error(
+    "Failed report generation results must include an error message.",
+  );
 }
 
 console.log("Fixture validation passed.");

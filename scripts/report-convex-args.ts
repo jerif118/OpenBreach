@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 
-const inputPath = process.argv[2] ?? "data/reports/latest.report-generation.json";
+const inputPath =
+  process.argv[2] ?? "data/reports/latest.report-generation.json";
 const artifact = JSON.parse(await readFile(inputPath, "utf8")) as {
   convexPersistenceArgs?: unknown[];
 };

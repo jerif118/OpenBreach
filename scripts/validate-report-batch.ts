@@ -1,6 +1,9 @@
 import municipalitiesFixture from "../data/municipalities/municipalities.seed.json" with { type: "json" };
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
-import { generateRemediationReportBatch, reportWorkflow } from "../src/mastra/workflows/report-workflow.ts";
+import {
+  generateRemediationReportBatch,
+  reportWorkflow,
+} from "../src/mastra/workflows/report-workflow.ts";
 import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-tool.ts";
 import {
   generateRemediationReportResultSchema,
@@ -21,7 +24,9 @@ const contexts = selectTopRiskReportContexts({
 });
 
 if (contexts.length !== 3) {
-  throw new Error(`Expected 3 selected contexts for batch validation, received ${contexts.length}.`);
+  throw new Error(
+    `Expected 3 selected contexts for batch validation, received ${contexts.length}.`,
+  );
 }
 
 const batch = await generateRemediationReportBatch({
@@ -38,7 +43,9 @@ const repeatedBatch = await reportWorkflow.runBatch({
 });
 
 if (JSON.stringify(batch) !== JSON.stringify(repeatedBatch)) {
-  throw new Error("Batch workflow must produce deterministic output for the same fixture inputs.");
+  throw new Error(
+    "Batch workflow must produce deterministic output for the same fixture inputs.",
+  );
 }
 
 if (batch.id !== "report-batch-validation") {
@@ -46,15 +53,25 @@ if (batch.id !== "report-batch-validation") {
 }
 
 if (batch.generatedAt !== selectedAt) {
-  throw new Error("Batch output must preserve the requested generated timestamp.");
+  throw new Error(
+    "Batch output must preserve the requested generated timestamp.",
+  );
 }
 
 if (batch.provider !== "deterministic-fallback") {
-  throw new Error(`Expected deterministic fallback provider, received ${batch.provider}.`);
+  throw new Error(
+    `Expected deterministic fallback provider, received ${batch.provider}.`,
+  );
 }
 
-if (batch.summary.requested !== contexts.length || batch.summary.completed !== contexts.length || batch.summary.failed !== 0) {
-  throw new Error("Batch summary must count requested, completed, and failed records.");
+if (
+  batch.summary.requested !== contexts.length ||
+  batch.summary.completed !== contexts.length ||
+  batch.summary.failed !== 0
+) {
+  throw new Error(
+    "Batch summary must count requested, completed, and failed records.",
+  );
 }
 
 if (batch.results.length !== contexts.length) {
@@ -96,12 +113,23 @@ const partialBatch = await generateRemediationReportBatch({
   providerKey: "",
 });
 
-if (partialBatch.summary.requested !== 2 || partialBatch.summary.completed !== 1 || partialBatch.summary.failed !== 1) {
-  throw new Error("Batch workflow must record partial failures without aborting valid records.");
+if (
+  partialBatch.summary.requested !== 2 ||
+  partialBatch.summary.completed !== 1 ||
+  partialBatch.summary.failed !== 1
+) {
+  throw new Error(
+    "Batch workflow must record partial failures without aborting valid records.",
+  );
 }
 
-if (partialBatch.results[0].result.status !== "completed" || partialBatch.results[1].result.status !== "failed") {
-  throw new Error("Batch workflow must preserve per-record completed and failed statuses.");
+if (
+  partialBatch.results[0].result.status !== "completed" ||
+  partialBatch.results[1].result.status !== "failed"
+) {
+  throw new Error(
+    "Batch workflow must preserve per-record completed and failed statuses.",
+  );
 }
 
 console.log("Report batch validation passed.");

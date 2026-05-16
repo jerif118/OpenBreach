@@ -1,8 +1,19 @@
 import { v } from "convex/values";
 import { internalMutation, query } from "./_generated/server";
 
-const severity = v.union(v.literal("info"), v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("critical"));
-const riskLevel = v.union(v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("critical"));
+const severity = v.union(
+  v.literal("info"),
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+  v.literal("critical"),
+);
+const riskLevel = v.union(
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+  v.literal("critical"),
+);
 
 const finding = v.object({
   id: v.string(),
@@ -31,7 +42,12 @@ const rawScanTls = v.object({
 });
 
 const rawScanCms = v.object({
-  name: v.union(v.literal("wordpress"), v.literal("joomla"), v.literal("drupal"), v.literal("unknown")),
+  name: v.union(
+    v.literal("wordpress"),
+    v.literal("joomla"),
+    v.literal("drupal"),
+    v.literal("unknown"),
+  ),
   version: v.optional(v.string()),
   confidence: v.number(),
   evidence: v.array(v.string()),
@@ -46,7 +62,12 @@ const rawScanAdminExposure = v.object({
 });
 
 const rawScanError = v.object({
-  stage: v.union(v.literal("http"), v.literal("tls"), v.literal("cms"), v.literal("admin-exposure")),
+  stage: v.union(
+    v.literal("http"),
+    v.literal("tls"),
+    v.literal("cms"),
+    v.literal("admin-exposure"),
+  ),
   message: v.string(),
 });
 
@@ -79,7 +100,9 @@ export const upsertEnrichedMany = internalMutation({
     for (const result of args.results) {
       const municipality = await ctx.db
         .query("municipalities")
-        .withIndex("by_externalId", (q) => q.eq("externalId", result.municipalityExternalId))
+        .withIndex("by_externalId", (q) =>
+          q.eq("externalId", result.municipalityExternalId),
+        )
         .unique();
 
       if (!municipality) {
@@ -89,7 +112,9 @@ export const upsertEnrichedMany = internalMutation({
 
       const existing = await ctx.db
         .query("scanResults")
-        .withIndex("by_externalId", (q) => q.eq("externalId", result.municipalityExternalId))
+        .withIndex("by_externalId", (q) =>
+          q.eq("externalId", result.municipalityExternalId),
+        )
         .unique();
 
       const document = {
@@ -145,7 +170,9 @@ export const latestByMunicipalityId = query({
   handler: async (ctx, args) => {
     const results = await ctx.db
       .query("scanResults")
-      .withIndex("by_municipalityId_and_scannedAt", (q) => q.eq("municipalityId", args.municipalityId))
+      .withIndex("by_municipalityId_and_scannedAt", (q) =>
+        q.eq("municipalityId", args.municipalityId),
+      )
       .order("desc")
       .take(1);
 
@@ -156,6 +183,9 @@ export const latestByMunicipalityId = query({
 export const listLatest = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    return await ctx.db.query("scanResults").order("desc").take(args.limit ?? 50);
+    return await ctx.db
+      .query("scanResults")
+      .order("desc")
+      .take(args.limit ?? 50);
   },
 });
