@@ -1,0 +1,17 @@
+{
+  "id": "scan-mx-yuc-merida-2026-01-01",
+  "municipalityId": "mx-yuc-merida",
+  "scannedAt": "2026-01-01T00:00:00.000Z",
+  "score": 68,
+  "findings": [
+    {
+      "id": "finding-missing-security-headers",
+      "category": "headers",
+      "severity": "medium",
+      "title": "Missing baseline security headers",
+      "description": "The public site sample does not include the full expected defensive header set.",
+      "evidence": "Fixture evidence for X-Frame-Options and Content-Security-Policy review.",
+      "remediationHint": "Add Content-Security-Policy, X-Frame-Options, and HSTS after validating compatibility."
+    }
+  ]
+}

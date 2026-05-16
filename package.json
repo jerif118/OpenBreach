@@ -10,6 +10,9 @@
     "start": "node .output/server/index.mjs",
     "typecheck": "tsc --noEmit",
     "convex:dev": "convex dev",
+    "convex:codegen": "convex codegen",
+    "fixtures:validate": "node scripts/validate-fixtures.ts",
+    "report:smoke": "node scripts/report-smoke.ts",
     "clean:hard": "node scripts/hard-clean.ts",
     "clean:soft": "node scripts/soft-clean.ts"
   },
