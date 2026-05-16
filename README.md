@@ -46,7 +46,7 @@ Must have:
 - One controlled low-impact validation runner for an owned demo target or deterministic fixture.
 - Risk panel and target detail page showing scope, state, evidence, hypotheses, validation status, findings, and report links.
 - Technical and friendly remediation PDFs generated from structured evidence and findings.
-- Demo runbook, safety checklist, and fixture fallback.
+- Demo runbook, safety checklist, and fixture fallbacks.
 
 Should have if time allows:
 
