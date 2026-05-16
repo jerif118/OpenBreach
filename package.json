@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "convex:dev": "convex dev",
     "convex:codegen": "convex codegen",
-    "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts",
+    "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts && node scripts/validate-openbreach-contracts.ts",
     "scanner:validate": "node scripts/validate-scanner.ts",
     "scanner:fixture": "node scripts/export-scan-fixture.ts",
     "risk:fixture": "node scripts/export-enriched-scan-fixture.ts",

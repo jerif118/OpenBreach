@@ -38,10 +38,9 @@ findingSchema.parse(reportReadyFindingFixture);
 console.log("✓ report-ready-finding.json validated");
 
 // Negative case: malformed URL must be rejected
+// Use approvedTargetFixture and only override canonicalUrl to test exactly the URL validation
 const badUrlResult = targetProfileSchema.safeParse({
-  targetId: "tgt_test",
-  assetId: "ast_test",
-  organizationName: "Test Org",
+  ...approvedTargetFixture,
   canonicalUrl: "not-a-valid-url",
 });
 if (badUrlResult.success) {
