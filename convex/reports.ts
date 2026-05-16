@@ -1,14 +1,95 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 
+const severity = v.union(v.literal("info"), v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("critical"));
+
+const finding = v.object({
+  id: v.string(),
+  category: v.union(
+    v.literal("tls"),
+    v.literal("headers"),
+    v.literal("cms"),
+    v.literal("exposure"),
+    v.literal("admin-exposure"),
+    v.literal("availability"),
+    v.literal("known-vulnerability"),
+  ),
+  severity,
+  title: v.string(),
+  description: v.string(),
+  evidence: v.string(),
+  remediationHint: v.string(),
+});
+
+const reportStatus = v.union(v.literal("pending"), v.literal("completed"), v.literal("failed"));
+
+const generatedBy = v.union(v.literal("deterministic-fallback"), v.literal("ai-provider"));
+
+const reportPdfReference = v.object({
+  storagePath: v.string(),
+  fileName: v.string(),
+  contentType: v.literal("application/pdf"),
+  generatedAt: v.optional(v.string()),
+  sizeBytes: v.optional(v.number()),
+});
+
 export const getForMunicipality = query({
-  args: { municipalityId: v.id("municipalities"), limit: v.optional(v.number()) },
+  args: { municipalityId: v.id("municipalities") },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const reports = await ctx.db
       .query("remediationReports")
-      .withIndex("by_municipalityId", (q) => q.eq("municipalityId", args.municipalityId))
+      .withIndex("by_municipalityId_and_generatedAt", (q) => q.eq("municipalityId", args.municipalityId))
       .order("desc")
-      .take(args.limit ?? 10);
+      .take(1);
+
+    return reports[0] ?? null;
+  },
+});
+
+export const persistGenerated = mutation({
+  args: {
+    municipalityId: v.id("municipalities"),
+    externalId: v.string(),
+    scanResultId: v.optional(v.id("scanResults")),
+    status: reportStatus,
+    generatedAt: v.string(),
+    summary: v.optional(v.string()),
+    priorityActions: v.optional(v.array(v.string())),
+    findings: v.optional(v.array(finding)),
+    generatedBy: v.optional(generatedBy),
+    pdf: v.optional(reportPdfReference),
+    error: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required to persist remediation reports.");
+    }
+
+    if (args.status === "completed") {
+      if (!args.summary || !args.priorityActions || !args.findings || !args.generatedBy) {
+        throw new Error("Completed reports require summary, priority actions, findings, and generator metadata.");
+      }
+    }
+
+    if (args.status === "failed" && !args.error) {
+      throw new Error("Failed reports require an error message.");
+    }
+
+    return await ctx.db.insert("remediationReports", {
+      externalId: args.externalId,
+      municipalityId: args.municipalityId,
+      scanResultId: args.scanResultId,
+      status: args.status,
+      generatedAt: args.generatedAt,
+      updatedAt: new Date().toISOString(),
+      summary: args.summary,
+      priorityActions: args.priorityActions,
+      findings: args.findings,
+      generatedBy: args.generatedBy,
+      pdf: args.pdf,
+      error: args.error,
+    });
   },
 });
 
@@ -27,7 +108,9 @@ export const createPlaceholder = mutation({
     return await ctx.db.insert("remediationReports", {
       externalId: args.externalId,
       municipalityId: args.municipalityId,
+      status: "pending",
       generatedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
       summary: args.summary,
       priorityActions: [],
       findings: [],

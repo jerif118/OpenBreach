@@ -62,6 +62,16 @@ const riskLevel = v.union(
   v.literal("critical"),
 );
 
+const reportStatus = v.union(v.literal("pending"), v.literal("completed"), v.literal("failed"));
+
+const reportPdfReference = v.object({
+  storagePath: v.string(),
+  fileName: v.string(),
+  contentType: v.literal("application/pdf"),
+  generatedAt: v.optional(v.string()),
+  sizeBytes: v.optional(v.number()),
+});
+
 export default defineSchema({
   municipalities: defineTable({
     externalId: v.string(),
@@ -124,14 +134,19 @@ export default defineSchema({
     externalId: v.string(),
     municipalityId: v.id("municipalities"),
     scanResultId: v.optional(v.id("scanResults")),
+    status: reportStatus,
     generatedAt: v.string(),
-    summary: v.string(),
-    priorityActions: v.array(v.string()),
-    findings: v.array(finding),
-    generatedBy: v.union(v.literal("deterministic-fallback"), v.literal("ai-provider")),
+    updatedAt: v.string(),
+    summary: v.optional(v.string()),
+    priorityActions: v.optional(v.array(v.string())),
+    findings: v.optional(v.array(finding)),
+    generatedBy: v.optional(v.union(v.literal("deterministic-fallback"), v.literal("ai-provider"))),
+    pdf: v.optional(reportPdfReference),
+    error: v.optional(v.string()),
   })
     .index("by_externalId", ["externalId"])
-    .index("by_municipalityId", ["municipalityId"]),
+    .index("by_municipalityId", ["municipalityId"])
+    .index("by_municipalityId_and_generatedAt", ["municipalityId", "generatedAt"]),
   userProfiles: defineTable({
     tokenIdentifier: v.string(),
     email: v.optional(v.string()),
