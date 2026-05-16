@@ -61,7 +61,13 @@ for (const forbiddenSnippet of ["userId: v.", "userIdentifier: v.", "clerkUserId
   }
 }
 
-if (!authConfigSource.includes('applicationID: "convex"') || !authConfigSource.includes("clerk.accounts.dev")) {
+// The Clerk provider must keep its Convex applicationID and read the issuer
+// domain from the environment so each deployment (dev, prod, fixture) can wire
+// a different Clerk instance without code changes. See README.md > Environment.
+if (
+  !authConfigSource.includes('applicationID: "convex"') ||
+  !authConfigSource.includes("process.env.CLERK_JWT_ISSUER_DOMAIN")
+) {
   throw new Error("Convex auth config must retain the Clerk provider shape for environment-specific issuer setup.");
 }
 
