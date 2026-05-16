@@ -2,6 +2,7 @@
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
+import { AppProviders } from "~/providers/app-providers";
 import appCss from "~/styles/app.css?url";
 
 export const Route = createRootRoute({
@@ -39,7 +40,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <AppProviders>{children}</AppProviders>
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
       </body>
