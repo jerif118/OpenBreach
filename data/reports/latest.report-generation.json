@@ -1,6 +1,6 @@
 {
   "id": "latest-report-generation",
-  "generatedAt": "2026-05-16T07:55:40.612Z",
+  "generatedAt": "2026-01-01T00:00:00.000Z",
   "provider": "deterministic-fallback",
   "selected": [
     {
@@ -10,6 +10,9 @@
         "state": "Ciudad de Mexico",
         "websiteUrl": "https://www.aao.cdmx.gob.mx",
         "population": 759137,
+        "latitude": 19.3605,
+        "longitude": -99.2267,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -138,7 +141,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 1
     },
     {
@@ -148,6 +151,9 @@
         "state": "Ciudad de Mexico",
         "websiteUrl": "https://coyoacan.cdmx.gob.mx",
         "population": 614447,
+        "latitude": 19.3467,
+        "longitude": -99.1617,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -276,7 +282,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 2
     },
     {
@@ -286,6 +292,9 @@
         "state": "Ciudad de Mexico",
         "websiteUrl": "https://alcaldiacuauhtemoc.mx",
         "population": 545884,
+        "latitude": 19.4326,
+        "longitude": -99.1332,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -414,7 +423,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 3
     },
     {
@@ -424,6 +433,9 @@
         "state": "Ciudad de Mexico",
         "websiteUrl": "https://www.gamadero.cdmx.gob.mx",
         "population": 1173351,
+        "latitude": 19.4829,
+        "longitude": -99.1136,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -552,7 +564,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 4
     },
     {
@@ -562,6 +574,9 @@
         "state": "Ciudad de Mexico",
         "websiteUrl": "https://www.iztapalapa.cdmx.gob.mx",
         "population": 1835486,
+        "latitude": 19.3574,
+        "longitude": -99.0671,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -690,7 +705,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 5
     },
     {
@@ -700,6 +715,9 @@
         "state": "Ciudad de Mexico",
         "websiteUrl": "https://www.tlalpan.cdmx.gob.mx",
         "population": 699928,
+        "latitude": 19.2879,
+        "longitude": -99.1677,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -828,7 +846,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 6
     },
     {
@@ -838,6 +856,9 @@
         "state": "Chiapas",
         "websiteUrl": "https://www.tuxtla.gob.mx",
         "population": 604147,
+        "latitude": 16.7516,
+        "longitude": -93.1029,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -966,7 +987,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 7
     },
     {
@@ -976,6 +997,9 @@
         "state": "Chihuahua",
         "websiteUrl": "https://www.municipiochihuahua.gob.mx",
         "population": 937674,
+        "latitude": 28.6353,
+        "longitude": -106.0889,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -1104,7 +1128,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 8
     },
     {
@@ -1114,6 +1138,9 @@
         "state": "Chihuahua",
         "websiteUrl": "https://www.juarez.gob.mx",
         "population": 1512450,
+        "latitude": 31.6904,
+        "longitude": -106.4245,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -1242,7 +1269,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 9
     },
     {
@@ -1252,6 +1279,9 @@
         "state": "Coahuila",
         "websiteUrl": "https://www.saltillo.gob.mx",
         "population": 879958,
+        "latitude": 25.4382,
+        "longitude": -100.9737,
+        "sourceUrl": "https://www.inegi.org.mx/programas/ccpv/2020/",
         "riskTier": "medium"
       },
       "scan": {
@@ -1380,13 +1410,13 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-16T07:55:40.612Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 10
     }
   ],
   "batch": {
     "id": "latest-report-generation",
-    "generatedAt": "2026-05-16T07:55:40.612Z",
+    "generatedAt": "2026-01-01T00:00:00.000Z",
     "provider": "deterministic-fallback",
     "summary": {
       "requested": 10,
@@ -1473,12 +1503,12 @@
             "reportId": "report-scan-mx-cdmx-alvaro-obregon-2026-01-01",
             "municipalityId": "mx-cdmx-alvaro-obregon",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-alvaro-obregon.pdf",
               "fileName": "mx-cdmx-alvaro-obregon.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3709
             },
             "status": "completed"
@@ -1564,12 +1594,12 @@
             "reportId": "report-scan-mx-cdmx-coyoacan-2026-01-01",
             "municipalityId": "mx-cdmx-coyoacan",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-coyoacan.pdf",
               "fileName": "mx-cdmx-coyoacan.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3691
             },
             "status": "completed"
@@ -1655,12 +1685,12 @@
             "reportId": "report-scan-mx-cdmx-cuauhtemoc-2026-01-01",
             "municipalityId": "mx-cdmx-cuauhtemoc",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-cuauhtemoc.pdf",
               "fileName": "mx-cdmx-cuauhtemoc.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3697
             },
             "status": "completed"
@@ -1746,12 +1776,12 @@
             "reportId": "report-scan-mx-cdmx-gustavo-a-madero-2026-01-01",
             "municipalityId": "mx-cdmx-gustavo-a-madero",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-gustavo-a-madero.pdf",
               "fileName": "mx-cdmx-gustavo-a-madero.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3717
             },
             "status": "completed"
@@ -1837,12 +1867,12 @@
             "reportId": "report-scan-mx-cdmx-iztapalapa-2026-01-01",
             "municipalityId": "mx-cdmx-iztapalapa",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-iztapalapa.pdf",
               "fileName": "mx-cdmx-iztapalapa.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3697
             },
             "status": "completed"
@@ -1928,12 +1958,12 @@
             "reportId": "report-scan-mx-cdmx-tlalpan-2026-01-01",
             "municipalityId": "mx-cdmx-tlalpan",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-tlalpan.pdf",
               "fileName": "mx-cdmx-tlalpan.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3688
             },
             "status": "completed"
@@ -2019,12 +2049,12 @@
             "reportId": "report-scan-mx-chiapas-tuxtla-gutierrez-2026-01-01",
             "municipalityId": "mx-chiapas-tuxtla-gutierrez",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-chiapas-tuxtla-gutierrez.pdf",
               "fileName": "mx-chiapas-tuxtla-gutierrez.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3718
             },
             "status": "completed"
@@ -2110,12 +2140,12 @@
             "reportId": "report-scan-mx-chihuahua-chihuahua-2026-01-01",
             "municipalityId": "mx-chihuahua-chihuahua",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-chihuahua-chihuahua.pdf",
               "fileName": "mx-chihuahua-chihuahua.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3699
             },
             "status": "completed"
@@ -2201,12 +2231,12 @@
             "reportId": "report-scan-mx-chihuahua-juarez-2026-01-01",
             "municipalityId": "mx-chihuahua-juarez",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-chihuahua-juarez.pdf",
               "fileName": "mx-chihuahua-juarez.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3690
             },
             "status": "completed"
@@ -2292,12 +2322,12 @@
             "reportId": "report-scan-mx-coahuila-saltillo-2026-01-01",
             "municipalityId": "mx-coahuila-saltillo",
             "generatedAt": "2026-01-01T00:00:00.000Z",
-            "updatedAt": "2026-05-16T07:55:40.612Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-coahuila-saltillo.pdf",
               "fileName": "mx-coahuila-saltillo.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-16T07:55:40.612Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 3695
             },
             "status": "completed"
@@ -2382,7 +2412,7 @@
         "storagePath": "data/reports/mx-cdmx-alvaro-obregon.pdf",
         "fileName": "mx-cdmx-alvaro-obregon.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3709
       }
     },
@@ -2461,7 +2491,7 @@
         "storagePath": "data/reports/mx-cdmx-coyoacan.pdf",
         "fileName": "mx-cdmx-coyoacan.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3691
       }
     },
@@ -2540,7 +2570,7 @@
         "storagePath": "data/reports/mx-cdmx-cuauhtemoc.pdf",
         "fileName": "mx-cdmx-cuauhtemoc.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3697
       }
     },
@@ -2619,7 +2649,7 @@
         "storagePath": "data/reports/mx-cdmx-gustavo-a-madero.pdf",
         "fileName": "mx-cdmx-gustavo-a-madero.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3717
       }
     },
@@ -2698,7 +2728,7 @@
         "storagePath": "data/reports/mx-cdmx-iztapalapa.pdf",
         "fileName": "mx-cdmx-iztapalapa.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3697
       }
     },
@@ -2777,7 +2807,7 @@
         "storagePath": "data/reports/mx-cdmx-tlalpan.pdf",
         "fileName": "mx-cdmx-tlalpan.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3688
       }
     },
@@ -2856,7 +2886,7 @@
         "storagePath": "data/reports/mx-chiapas-tuxtla-gutierrez.pdf",
         "fileName": "mx-chiapas-tuxtla-gutierrez.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3718
       }
     },
@@ -2935,7 +2965,7 @@
         "storagePath": "data/reports/mx-chihuahua-chihuahua.pdf",
         "fileName": "mx-chihuahua-chihuahua.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3699
       }
     },
@@ -3014,7 +3044,7 @@
         "storagePath": "data/reports/mx-chihuahua-juarez.pdf",
         "fileName": "mx-chihuahua-juarez.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3690
       }
     },
@@ -3093,7 +3123,7 @@
         "storagePath": "data/reports/mx-coahuila-saltillo.pdf",
         "fileName": "mx-coahuila-saltillo.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-16T07:55:40.612Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 3695
       }
     }
