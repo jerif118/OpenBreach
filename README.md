@@ -13,11 +13,11 @@ Already present:
 - `package.json`, `pnpm-lock.yaml`, `vite.config.ts`, `tsconfig.json`, and `src/` from a TanStack Start starter app.
 - Generated Convex client files under `convex/_generated/` plus Convex AI guidance under `convex/_generated/ai/`.
 - Local toolchain pins in `package.json`: Node.js `24.15.0` and `pnpm@11.1.2`.
-- Basic scripts for local development, production build, typecheck, preview, Convex dev, and repository cleanup.
+- Basic scripts for local development, production build, typecheck, preview, and Convex dev.
 
 Still pending:
 
-- Replacing starter routes, metadata, navigation, and sample API/demo content with DEFF-ACC product screens.
+- Replacing the minimal placeholder screen with DEFF-ACC product screens.
 - Adding shared DEFF-ACC contracts in code.
 - Adding `convex/schema.ts`, Convex queries/mutations/actions, and `convex/auth.config.ts` for Clerk-issued auth.
 - Adding Clerk provider wiring and signed-in/signed-out UI states.
