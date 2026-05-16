@@ -9,6 +9,8 @@ export type PdfPage = {
 function escapePdfText(value: string) {
   return value
     .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
     .replace(/\(/g, "\\(")
     .replace(/\)/g, "\\)");
 }
