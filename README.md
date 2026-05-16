@@ -26,7 +26,13 @@ The project must stay passive. It only uses information any browser or normal HT
 - `pnpm scanner:persist`: run the passive scanner against the seed dataset and upsert raw evidence into the configured Convex deployment.
 - `pnpm municipalities:validate`: validate the 50-record Mexican municipality seed dataset.
 - `pnpm municipalities:seed`: import the validated municipality seed into the configured Convex development deployment.
+- `pnpm municipalities:list:validate`: validate the public municipality list query contract and bounded fallback behavior.
+- `pnpm municipalities:detail:validate`: validate the public municipality detail aggregate contract and null optional data behavior.
+- `pnpm auth:writes:validate`: validate protected-write source boundaries and admin/operator role requirements.
 - `pnpm report:smoke`: generate a deterministic `RemediationReport` from fixtures.
+- `pnpm report:generate`: generate deterministic fallback report JSON and local PDF artifacts.
+- `pnpm report:persist:args`: print Convex mutation arguments for live report metadata persistence.
+- `pnpm report:persistence:validate`: validate report persistence argument generation and protected write expectations.
 
 ## Environment
 
@@ -42,6 +48,14 @@ Convex source files live under `convex/`. Do not edit generated files under
 refresh them. Clerk JWT validation is configured in `convex/auth.config.ts` with
 a non-secret placeholder issuer; replace it with the value documented as
 `CLERK_JWT_ISSUER_DOMAIN` for a real deployment.
+
+Public municipality reads are intentionally separate from protected writes.
+`municipalities.list` and `municipalities.get` can be used by dashboard and
+detail screens as read-only live data contracts. Write paths that change seed,
+profile, scan, score, or report data are not public unauthenticated APIs:
+municipality seed and profile administration require an authenticated `admin`
+profile, report writes require `operator` or `admin`, and raw/enriched scan
+persistence uses internal Convex mutations invoked by trusted scripts.
 
 ## Fixtures
 
@@ -154,6 +168,61 @@ pnpm risk:persist
 The command builds validated `scanResults:upsertEnrichedMany` mutation arguments
 from the raw fixture/scanner evidence, preserving original scan context alongside
 findings, `riskScore`, and `riskLevel`.
+
+### Convex Developer Data Flow
+
+Use this ordered flow when preparing live data for the dashboard, detail page,
+and downstream demo runbook:
+
+```bash
+pnpm municipalities:validate
+pnpm scanner:persistence:validate
+pnpm risk:validate
+pnpm report:persistence:validate
+pnpm auth:writes:validate
+pnpm municipalities:list:validate
+pnpm municipalities:detail:validate
+pnpm municipalities:seed
+pnpm scanner:persist
+pnpm risk:persist
+pnpm report:generate
+pnpm report:persist:args
+```
+
+Run `pnpm convex:dev` in a configured Convex project before live Convex writes.
+`pnpm municipalities:seed` calls the protected `municipalities:seed` mutation and
+therefore needs Clerk/Convex auth configured with an authenticated `admin`
+profile. `pnpm scanner:persist` and `pnpm risk:persist` call internal Convex
+mutations through trusted developer scripts; they are for local/deployment
+operators, not browser callers. `pnpm report:persist:args` only prints the live
+payload shape; persisting report metadata with `reports:persistGenerated` still
+requires authenticated Convex context, `operator` or `admin` role membership, and
+live Convex document IDs.
+
+When Clerk/Convex credentials are unavailable, use the fixture commands instead:
+
+```bash
+pnpm scanner:fixture
+pnpm risk:fixture
+pnpm report:generate
+pnpm fixtures:validate
+```
+
+Fixtures are import/export and offline demo inputs. Convex read queries do not
+synthesize persisted sample rows from fixtures.
+
+### Convex Missing-Data Behavior
+
+| State | Public read behavior | Developer action |
+| --- | --- | --- |
+| No municipalities seeded | `municipalities.list` returns an empty bounded array; `municipalities.get({ id })` returns `null`. | Run `pnpm municipalities:seed` with an authenticated `admin` profile, or use committed fixtures for an offline demo. |
+| Municipality exists without enriched scan rows | `municipalities.list` returns up to 50 rows and derives `riskScore`/`riskLevel` from the municipality `riskTier`; `municipalities.get({ id })` returns `scan: null`. | Run `pnpm scanner:persist` then `pnpm risk:persist`, or explain the unscanned state in the demo. |
+| Municipality exists without report metadata | `municipalities.get({ id })` returns `report: null`; `reports.getForMunicipality({ municipalityId })` returns `null`. | Run `pnpm report:generate`, inspect `pnpm report:persist:args`, then persist with authenticated `operator` or `admin` context and live document IDs. |
+| Unknown external municipality ID | `municipalities.get({ id })` returns `null`. | Check the seed dataset ID or seed Convex before opening the detail route. |
+
+These states are expected and should not crash downstream dashboard, detail, or
+demo flows. Downstream issue #9 can use the validation commands above to prove
+the contract surface before attempting live deployment smoke checks.
 
 ## Current Repository State
 
@@ -535,28 +604,29 @@ pnpm dev
 pnpm build
 ```
 
-Convex generated files are present, but product schema/functions are not. Once #6 adds real Convex functions, use:
+Convex source files and generated files are present. Use:
 
 ```bash
 pnpm convex:dev
 ```
 
-Target data and demo commands:
+Current data and demo commands:
 
 ```bash
-pnpm run validate:data
-pnpm run seed:convex
-pnpm run scan:sample
-pnpm run score
-pnpm run reports
+pnpm fixtures:validate
+pnpm municipalities:validate
+pnpm municipalities:seed
+pnpm scanner:fixture
+pnpm scanner:persist
+pnpm risk:fixture
+pnpm risk:persist
+pnpm report:generate
+pnpm report:persist:args
 pnpm build
 ```
 
-If the team runs Mastra as a separate local development server, document and wire an explicit paired command such as:
-
-```bash
-pnpm run dev:mastra
-```
+If the team later runs Mastra as a separate local development server, add a real
+package script before documenting it here.
 
 Suggested environment variables:
 
@@ -599,7 +669,7 @@ Suggested environment variables:
 Fallback demo path:
 
 - Use committed fixtures instead of live scans.
-- Seed Convex from committed fixtures or use the static mock data path if Convex credentials are unavailable.
+- Seed Convex from committed fixtures when authenticated Convex access is available, or use fixture-backed static/mock data if Convex credentials are unavailable.
 - Run read-only demo screens without Clerk sign-in if protected operator/admin workflows are not configured.
 - Use local template reports instead of model-backed Mastra generation.
 - Run the app locally if deployment is not ready.

@@ -17,6 +17,8 @@ When Convex credentials or a development deployment are unavailable, use `munici
 
 Scanner tasks use the same fallback rule: read Convex `municipalities` records first when configured, then fall back to `municipalities.seed.json` without requiring live Convex credentials.
 
+For the full live-data flow after seeding, use the root README's Convex developer data flow. It documents the scanner, risk, report, and protected auth steps that turn seeded municipalities into dashboard/detail data without fabricating rows in read queries.
+
 ## Expansion Notes
 
 The issue target is 500 municipalities. Expand this file by appending records that pass the same validation rules, keep stable IDs in `mx-<state-or-entity>-<municipality>` form, and preserve source URLs for every added row.
