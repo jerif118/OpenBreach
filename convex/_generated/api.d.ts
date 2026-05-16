@@ -8,12 +8,20 @@
  * @module
  */
 
+import type * as approvals from "../approvals.js";
+import type * as auditEvents from "../auditEvents.js";
 import type * as auth from "../auth.js";
+import type * as evidence from "../evidence.js";
+import type * as findings from "../findings.js";
+import type * as hypotheses from "../hypotheses.js";
 import type * as municipalities from "../municipalities.js";
 import type * as rawScanResults from "../rawScanResults.js";
 import type * as reports from "../reports.js";
 import type * as scanResults from "../scanResults.js";
+import type * as targets from "../targets.js";
 import type * as users from "../users.js";
+import type * as validations from "../validations.js";
+import type * as workflowRuns from "../workflowRuns.js";
 
 import type {
   ApiFromModules,
@@ -22,12 +30,20 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  approvals: typeof approvals;
+  auditEvents: typeof auditEvents;
   auth: typeof auth;
+  evidence: typeof evidence;
+  findings: typeof findings;
+  hypotheses: typeof hypotheses;
   municipalities: typeof municipalities;
   rawScanResults: typeof rawScanResults;
   reports: typeof reports;
   scanResults: typeof scanResults;
+  targets: typeof targets;
   users: typeof users;
+  validations: typeof validations;
+  workflowRuns: typeof workflowRuns;
 }>;
 
 /**
