@@ -41,7 +41,9 @@ function buildDetailedFindingsMarkdown(report: RemediationReport) {
         `- Status: ${finding.status}`,
         `- Confidence: ${finding.confidence}`,
         `- Category: ${finding.category}`,
-        finding.affectedAssets.length > 0 ? `- Affected assets: ${finding.affectedAssets.join(", ")}` : null,
+        finding.affectedAssets.length > 0
+          ? `- Affected assets: ${finding.affectedAssets.join(", ")}`
+          : null,
         "",
         `**Description**`,
         finding.description,
@@ -76,28 +78,47 @@ function buildTemplateContext({
     summary: report.summary,
     municipalityName,
     municipalityId: report.municipalityId,
-    audienceLabel: report.variant === "technical" ? "Technical" : "Friendly / nontechnical",
+    audienceLabel:
+      report.variant === "technical" ? "Technical" : "Friendly / nontechnical",
     generatedAt: report.generatedAt,
     generatedBy: report.generatedBy,
     priorityActionsMarkdown: toOrderedMarkdown(report.priorityActions),
     scopeNarrative: report.sections.scope.narrative,
     scopeBulletsMarkdown: toBulletsMarkdown(report.sections.scope.bullets),
     authorizationNarrative: report.sections.authorization.narrative,
-    authorizationBulletsMarkdown: toBulletsMarkdown(report.sections.authorization.bullets),
+    authorizationBulletsMarkdown: toBulletsMarkdown(
+      report.sections.authorization.bullets,
+    ),
     methodologyNarrative: report.sections.methodology.narrative,
-    methodologyBulletsMarkdown: toBulletsMarkdown(report.sections.methodology.bullets),
+    methodologyBulletsMarkdown: toBulletsMarkdown(
+      report.sections.methodology.bullets,
+    ),
     findingsOverviewNarrative: report.sections.findingsOverview.narrative,
-    findingsOverviewBulletsMarkdown: toBulletsMarkdown(report.sections.findingsOverview.bullets),
+    findingsOverviewBulletsMarkdown: toBulletsMarkdown(
+      report.sections.findingsOverview.bullets,
+    ),
     skippedTestsNarrative: report.sections.skippedTests.narrative,
-    skippedTestsBulletsMarkdown: toBulletsMarkdown(report.sections.skippedTests.bullets),
+    skippedTestsBulletsMarkdown: toBulletsMarkdown(
+      report.sections.skippedTests.bullets,
+    ),
     validationStatusNarrative: report.sections.validationStatus.narrative,
-    validationStatusBulletsMarkdown: toBulletsMarkdown(report.sections.validationStatus.bullets),
+    validationStatusBulletsMarkdown: toBulletsMarkdown(
+      report.sections.validationStatus.bullets,
+    ),
     limitationsNarrative: report.sections.limitations.narrative,
-    limitationsBulletsMarkdown: toBulletsMarkdown(report.sections.limitations.bullets),
-    remediationChecklistNarrative: report.sections.remediationChecklist.narrative,
-    remediationChecklistBulletsMarkdown: toBulletsMarkdown(report.sections.remediationChecklist.bullets),
-    verificationGuidanceNarrative: report.sections.verificationGuidance.narrative,
-    verificationGuidanceBulletsMarkdown: toBulletsMarkdown(report.sections.verificationGuidance.bullets),
+    limitationsBulletsMarkdown: toBulletsMarkdown(
+      report.sections.limitations.bullets,
+    ),
+    remediationChecklistNarrative:
+      report.sections.remediationChecklist.narrative,
+    remediationChecklistBulletsMarkdown: toBulletsMarkdown(
+      report.sections.remediationChecklist.bullets,
+    ),
+    verificationGuidanceNarrative:
+      report.sections.verificationGuidance.narrative,
+    verificationGuidanceBulletsMarkdown: toBulletsMarkdown(
+      report.sections.verificationGuidance.bullets,
+    ),
     detailedFindingsMarkdown: buildDetailedFindingsMarkdown(report),
   };
 }
@@ -119,7 +140,13 @@ export async function renderReportMarkdown({
   municipalityName: string;
   report: RemediationReport;
 }) {
-  const templatePath = join(TEMPLATE_DIRECTORY, templateFileByVariant[report.variant]);
+  const templatePath = join(
+    TEMPLATE_DIRECTORY,
+    templateFileByVariant[report.variant],
+  );
   const template = await readFile(templatePath, "utf8");
-  return renderTemplate(template, buildTemplateContext({ municipalityName, report }));
+  return renderTemplate(
+    template,
+    buildTemplateContext({ municipalityName, report }),
+  );
 }
