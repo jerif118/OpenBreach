@@ -15,6 +15,8 @@ The current population source is INEGI Census 2020 data: https://www.inegi.org.m
 
 When Convex credentials or a development deployment are unavailable, use `municipalities.seed.json` as the deterministic fallback data source for demos and local review. The JSON file remains committed and reviewable even when the live Convex import cannot run.
 
+Scanner tasks use the same fallback rule: read Convex `municipalities` records first when configured, then fall back to `municipalities.seed.json` without requiring live Convex credentials.
+
 ## Expansion Notes
 
 The issue target is 500 municipalities. Expand this file by appending records that pass the same validation rules, keep stable IDs in `mx-<state-or-entity>-<municipality>` form, and preserve source URLs for every added row.

@@ -17,6 +17,10 @@ The project must stay passive. It only uses information any browser or normal HT
 - `pnpm convex:dev`: start Convex after configuring `VITE_CONVEX_URL`.
 - `pnpm convex:codegen`: refresh generated Convex API files from source functions.
 - `pnpm fixtures:validate`: validate sample fixture JSON against shared contracts.
+- `pnpm scanner:validate`: validate passive scanner behavior with offline mocked HTTP/TLS checks.
+- `pnpm scanner:fixture`: export `data/scans/latest.scan-results.json` as a deterministic raw scan fixture for demos and downstream development.
+- `pnpm scanner:persistence:validate`: validate raw scanner output can be converted to Convex mutation args without scored findings.
+- `pnpm scanner:persist`: run the passive scanner against the seed dataset and upsert raw evidence into the configured Convex deployment.
 - `pnpm municipalities:validate`: validate the 50-record Mexican municipality seed dataset.
 - `pnpm municipalities:seed`: import the validated municipality seed into the configured Convex development deployment.
 - `pnpm report:smoke`: generate a deterministic `RemediationReport` from fixtures.
@@ -54,6 +58,59 @@ pnpm municipalities:seed
 validated JSON records. If Convex credentials or a development deployment are not
 available, keep using `municipalities.seed.json` as the deterministic fallback
 for local demos and review.
+
+For passive scan persistence, seed municipalities first, then run:
+
+```bash
+pnpm scanner:persist
+```
+
+The command runs the passive scanner with the centralized timeout, retry, and
+delay controls, converts the raw observable evidence into the internal
+`rawScanResults:upsertMany` mutation arguments, and upserts one latest raw
+evidence record per municipality external ID. The persisted raw records are
+queryable through `rawScanResults:listLatest` and
+`rawScanResults:latestByExternalId`. They do not require issue #4-owned findings,
+scores, `riskScore`, or `riskLevel` fields.
+
+For deterministic demo and downstream issue #4 fallback data, export the raw scan
+fixture instead:
+
+```bash
+pnpm scanner:fixture
+```
+
+The exporter runs the scanner against the seed municipalities with deterministic
+local HTTP/TLS dependencies, validates every record against `RawScanEvidence`,
+sorts output by stable municipality ID, writes two-space JSON with a trailing
+newline, and keeps scoring/enrichment fields out of
+`data/scans/latest.scan-results.json`.
+
+### Passive Scanner Verification
+
+Use the offline scanner checks before demoing or persisting scan output:
+
+```bash
+pnpm scanner:validate
+pnpm scanner:persistence:validate
+pnpm scanner:fixture
+pnpm fixtures:validate
+```
+
+`pnpm scanner:validate` uses mocked HTTP, TLS, delay, and clock dependencies. It
+checks successful raw evidence shape, structured HTTP/TLS/admin failure output,
+centralized timeout/retry/delay behavior, and a 10-municipality batch from the
+seed dataset without live municipal traffic. It also verifies the passive safety
+boundary: scanner requests omit credentials, use only `HEAD` or safe `GET`, do
+not send request bodies, stay on the fixed public admin-path allowlist, avoid
+query payloads, and never perform POST, login, brute-force, exploit, destructive,
+or deep-crawl behavior.
+
+`pnpm scanner:persistence:validate` verifies raw scanner records can be converted
+to `rawScanResults:upsertMany` arguments without downstream scoring fields.
+`pnpm scanner:fixture` refreshes the deterministic JSON fixture at
+`data/scans/latest.scan-results.json`; use `pnpm fixtures:validate` after export
+to confirm committed fixtures still satisfy shared contracts.
 
 ## Current Repository State
 
@@ -206,6 +263,14 @@ Current municipality contract status for [#2](https://github.com/jerif118/DEFF-A
 
 The seed dataset required by #2 also carries `population`, `latitude`, `longitude`, and `sourceUrl` for each real municipality. The seed-specific Zod contract lives in `src/shared/municipalitySeed.ts`, and `pnpm fixtures:validate` now validates both the small runtime fixtures and the 50-record seed dataset. Convex stores imported seed records with `externalId` mapped from seed `id`, plus coordinates and source evidence when present; `convex/municipalities.ts` exposes read-only `list`/`get` queries and an idempotent `municipalities:seed` mutation that updates by `externalId`.
 
+Scanner contract status for [#3](https://github.com/jerif118/DEFF-ACC/issues/3): the passive scanner reads municipalities from Convex first when a deployment is configured, using the `municipalities` table and `externalId` as the stable seed ID. When Convex is unavailable, scanner tasks must be able to read `data/municipalities/municipalities.seed.json` directly as the deterministic fallback, using the seed `id`, `name`, `state`, `websiteUrl`, `population`, coordinates, `sourceUrl`, and `riskTier` fields.
+
+The raw scanner output boundary for #3 is `RawScanEvidence` in `src/shared/contracts.ts`, with the sample fixture at `data/scans/sample-raw-scan-evidence.json`. It contains only browser-observable evidence: municipality ID, source, requested URL, scanned timestamp, reachability, final URL, HTTP status, selected response headers, TLS validity/expiry/issuer when available, CMS guess and evidence, fixed public admin-path evidence, and structured errors for failed checks. This shape is intentionally separate from the existing scored `ScanResult` fixture contract.
+
+The passive HTTP/TLS collector lives in `src/scanner/passive.ts`. It uses safe GET requests for page evidence, fixed public admin-path checks with HEAD and narrow GET fallback, follows normal redirects, captures only an allowlist of public response headers, derives lightweight CMS hints from public HTML/header evidence, and records TLS certificate validity/expiry/issuer for HTTPS URLs when available. Scanner run controls are centralized in `DEFAULT_SCANNER_CONTROLS` with conservative MVP defaults: `timeoutMs=5000`, `retries=1`, and `delayMs=250`. Local/demo runners can override them per call, for example `scanMunicipalities(municipalities, { controls: { timeoutMs: 7500, retries: 0, delayMs: 500 } })`. The same resolved controls apply to page requests, TLS certificate collection, retry pacing, batch pacing, and admin-path checks; `pnpm scanner:validate` verifies this behavior without live municipal traffic by injecting mocked HTTP, TLS, delay, and clock functions.
+
+`findings`, `score`, `riskScore`, `riskLevel`, CVE matching, remediation text, and vulnerability enrichment are downstream scoring/reporting concerns owned by [#4](https://github.com/jerif118/DEFF-ACC/issues/4). The passive scanner may preserve legacy scored fixtures for compatibility, but it must not require those fields to produce raw evidence for #3.
+
 ```ts
 export type RiskLevel = "low" | "medium" | "high" | "critical";
 
@@ -257,6 +322,35 @@ export type ScanResult = {
   findings: ScanFinding[];
   riskScore: number;
   riskLevel: RiskLevel;
+};
+
+export type RawScanEvidence = {
+  municipalityId: string;
+  source: "convex" | "fixture";
+  requestedUrl: string;
+  scannedAt: string;
+  reachable: boolean;
+  finalUrl?: string;
+  httpStatus?: number;
+  headers: Record<string, string>;
+  tls?: { valid: boolean; expiresAt?: string; issuer?: string };
+  cms?: {
+    name: "wordpress" | "joomla" | "drupal" | "unknown";
+    version?: string;
+    confidence: number;
+    evidence: string[];
+  };
+  adminExposure: Array<{
+    path: string;
+    method?: "HEAD" | "GET";
+    reachable: boolean;
+    httpStatus?: number;
+    finalUrl?: string;
+  }>;
+  errors: Array<{
+    stage: "http" | "tls" | "cms" | "admin-exposure";
+    message: string;
+  }>;
 };
 
 export type RemediationReport = {
