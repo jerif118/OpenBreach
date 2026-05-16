@@ -5,6 +5,7 @@ import {
 import { renderReportArtifacts } from "../../reports/pdf-renderer.ts";
 import {
   generateRemediationReportInputSchema,
+  generateRemediationReportBatchOutputSchema,
   generateRemediationReportResultSchema,
   selectedMunicipalityReportContextSchema,
   type GenerateRemediationReportInput,
@@ -136,7 +137,7 @@ export async function generateRemediationReportBatch({
     (result) => result.result.status === "completed",
   ).length;
 
-  return {
+  return generateRemediationReportBatchOutputSchema.parse({
     id,
     generatedAt,
     provider: adapter.provider,
@@ -146,7 +147,7 @@ export async function generateRemediationReportBatch({
       failed: results.length - completed,
     },
     results,
-  };
+  });
 }
 
 export async function renderReportBatchPdfs({
@@ -201,10 +202,10 @@ export async function renderReportBatchPdfs({
     });
   }
 
-  return {
+  return generateRemediationReportBatchOutputSchema.parse({
     ...batch,
     results,
-  };
+  });
 }
 
 export const reportWorkflow = {
