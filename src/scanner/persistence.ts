@@ -1,23 +1,14 @@
 import {
   rawScanEvidenceSchema,
+  rawScanPersistenceArgsSchema,
   type RawScanEvidence,
+  type RawScanPersistenceArgs,
 } from "../shared/contracts.ts";
-
-export type RawScanPersistenceResult = Omit<
-  RawScanEvidence,
-  "municipalityId"
-> & {
-  municipalityExternalId: string;
-};
-
-export type RawScanPersistenceArgs = {
-  results: RawScanPersistenceResult[];
-};
 
 export function toRawScanPersistenceArgs(
   results: readonly RawScanEvidence[],
 ): RawScanPersistenceArgs {
-  return {
+  return rawScanPersistenceArgsSchema.parse({
     results: results.map((result) => {
       const validated = rawScanEvidenceSchema.parse(result);
       const { municipalityId, ...evidence } = validated;
@@ -27,5 +18,5 @@ export function toRawScanPersistenceArgs(
         ...evidence,
       };
     }),
-  };
+  });
 }
