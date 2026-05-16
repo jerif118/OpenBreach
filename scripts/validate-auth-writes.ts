@@ -23,8 +23,12 @@ for (const snippet of requiredAuthSnippets) {
   }
 }
 
-if (!municipalitiesSource.includes("await requireAdmin(ctx)")) {
-  throw new Error("municipalities.seed must require an admin profile before writes.");
+// municipalities.seed is an internalMutation: it is not reachable from the
+// public client surface, so it does not need an additional `requireAdmin`
+// runtime check. This matches the pattern used by rawScanResults.upsertMany
+// and scanResults.upsertEnrichedMany below.
+if (!municipalitiesSource.includes("export const seed = internalMutation")) {
+  throw new Error("municipalities.seed must remain internal-only unless a protected public wrapper is added.");
 }
 
 for (const mutationName of ["persistGenerated", "createPlaceholder"]) {
