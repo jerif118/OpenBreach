@@ -746,7 +746,7 @@ function buildStyledPdfDocument(
     );
   }
 
-  const pageObjectStart = 5;
+  const pageObjectStart = 6;
   const pageCount = pages.length;
   const pageObjectIds = pages.map((_, index) => pageObjectStart + index);
   const contentObjectIds = pages.map(
