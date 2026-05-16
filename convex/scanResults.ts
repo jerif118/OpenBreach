@@ -143,10 +143,13 @@ export const latestByExternalId = query({
 export const latestByMunicipalityId = query({
   args: { municipalityId: v.id("municipalities") },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const results = await ctx.db
       .query("scanResults")
-      .withIndex("by_municipalityId", (q) => q.eq("municipalityId", args.municipalityId))
-      .unique();
+      .withIndex("by_municipalityId_and_scannedAt", (q) => q.eq("municipalityId", args.municipalityId))
+      .order("desc")
+      .take(1);
+
+    return results[0] ?? null;
   },
 });
 

@@ -1,6 +1,17 @@
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./auth";
+
+const DEFAULT_LIST_LIMIT = 50;
+const MAX_LIST_LIMIT = 50;
+
+const fallbackRiskScoreByTier = {
+  low: 0,
+  medium: 25,
+  high: 50,
+  critical: 75,
+} as const;
 
 const riskTier = v.union(
   v.literal("low"),
@@ -24,17 +35,165 @@ const seedMunicipality = v.object({
 export const list = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    return await ctx.db.query("municipalities").take(args.limit ?? 50);
+    const limit = normalizeListLimit(args.limit);
+    const municipalities = await ctx.db.query("municipalities").take(MAX_LIST_LIMIT);
+    const items = [];
+
+    for (const municipality of municipalities) {
+      const latestScans = await ctx.db
+        .query("scanResults")
+        .withIndex("by_municipalityId_and_scannedAt", (q) => q.eq("municipalityId", municipality._id))
+        .order("desc")
+        .take(1);
+
+      items.push(toListItem(municipality, latestScans[0] ?? null));
+    }
+
+    return items.sort(compareListItems).slice(0, limit);
   },
 });
 
+function normalizeListLimit(limit: number | undefined) {
+  if (limit === undefined) {
+    return DEFAULT_LIST_LIMIT;
+  }
+
+  if (!Number.isInteger(limit) || limit < 1 || limit > MAX_LIST_LIMIT) {
+    throw new Error(`municipalities.list limit must be an integer from 1 to ${MAX_LIST_LIMIT}.`);
+  }
+
+  return limit;
+}
+
+function toListItem(municipality: Doc<"municipalities">, scan: Doc<"scanResults"> | null) {
+  return {
+    ...toMunicipalityContract(municipality),
+    riskScore: riskScoreFromScan(scan) ?? fallbackRiskScoreByTier[municipality.riskTier],
+    riskLevel: scan?.riskLevel ?? municipality.riskTier,
+  };
+}
+
+function toMunicipalityContract(municipality: Doc<"municipalities">) {
+  return {
+    id: municipality.externalId,
+    name: municipality.name,
+    state: municipality.state,
+    websiteUrl: municipality.websiteUrl,
+    population: municipality.population,
+    latitude: municipality.latitude,
+    longitude: municipality.longitude,
+    sourceUrl: municipality.sourceUrl,
+    riskTier: municipality.riskTier,
+  };
+}
+
+function toScanResultContract(municipality: Doc<"municipalities">, scan: Doc<"scanResults"> | null) {
+  if (scan === null) {
+    return null;
+  }
+
+  return {
+    id: scan.externalId,
+    municipalityId: municipality.externalId,
+    scannedAt: scan.scannedAt,
+    requestedUrl: scan.requestedUrl,
+    finalUrl: scan.finalUrl,
+    reachable: scan.reachable,
+    httpStatus: scan.httpStatus,
+    headers: scan.headers,
+    tls: scan.tls,
+    cms: scan.cms,
+    adminExposure: scan.adminExposure,
+    errors: scan.errors,
+    riskScore: riskScoreFromScan(scan) ?? fallbackRiskScoreByTier[municipality.riskTier],
+    riskLevel: scan.riskLevel ?? municipality.riskTier,
+    findings: scan.findings,
+    score: scan.score,
+  };
+}
+
+function toReportMetadataContract(
+  municipality: Doc<"municipalities">,
+  report: Doc<"remediationReports"> | null,
+) {
+  if (report === null) {
+    return null;
+  }
+
+  const metadata = {
+    reportId: report.externalId,
+    municipalityId: municipality.externalId,
+    generatedAt: report.generatedAt,
+    updatedAt: report.updatedAt,
+    pdf: report.pdf,
+  };
+
+  if (report.status === "failed") {
+    return {
+      ...metadata,
+      status: report.status,
+      error: report.error ?? "Report generation failed.",
+    };
+  }
+
+  return {
+    ...metadata,
+    status: report.status,
+  };
+}
+
+function riskScoreFromScan(scan: Doc<"scanResults"> | null) {
+  if (scan === null || scan.riskScore === undefined) {
+    return null;
+  }
+
+  if (!Number.isFinite(scan.riskScore) || scan.riskScore < 0 || scan.riskScore > 100) {
+    return null;
+  }
+
+  return scan.riskScore;
+}
+
+function compareListItems(
+  left: ReturnType<typeof toListItem>,
+  right: ReturnType<typeof toListItem>,
+) {
+  return (
+    right.riskScore - left.riskScore ||
+    left.name.localeCompare(right.name) ||
+    left.id.localeCompare(right.id)
+  );
+}
+
 export const get = query({
-  args: { externalId: v.string() },
+  args: { id: v.string() },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const municipality = await ctx.db
       .query("municipalities")
-      .withIndex("by_externalId", (q) => q.eq("externalId", args.externalId))
+      .withIndex("by_externalId", (q) => q.eq("externalId", args.id))
       .unique();
+
+    if (municipality === null) {
+      return null;
+    }
+
+    const latestScans = await ctx.db
+      .query("scanResults")
+      .withIndex("by_municipalityId_and_scannedAt", (q) => q.eq("municipalityId", municipality._id))
+      .order("desc")
+      .take(1);
+
+    const latestReports = await ctx.db
+      .query("remediationReports")
+      .withIndex("by_municipalityId_and_generatedAt", (q) => q.eq("municipalityId", municipality._id))
+      .order("desc")
+      .take(1);
+
+    return {
+      municipality: toMunicipalityContract(municipality),
+      scan: toScanResultContract(municipality, latestScans[0] ?? null),
+      report: toReportMetadataContract(municipality, latestReports[0] ?? null),
+    };
   },
 });
 

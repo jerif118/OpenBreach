@@ -111,6 +111,7 @@ export default defineSchema({
   })
     .index("by_externalId", ["externalId"])
     .index("by_municipalityId", ["municipalityId"])
+    .index("by_municipalityId_and_scannedAt", ["municipalityId", "scannedAt"])
     .index("by_riskLevel", ["riskLevel"]),
   rawScanResults: defineTable({
     externalId: v.string(),

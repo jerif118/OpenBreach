@@ -22,6 +22,8 @@
     "scanner:persist:args": "node scripts/scan-convex-args.ts",
     "scanner:persist": "convex run rawScanResults:upsertMany \"$(node scripts/scan-convex-args.ts)\"",
     "municipalities:validate": "node scripts/validate-municipality-seed.ts",
+    "municipalities:list:validate": "node scripts/validate-municipality-list.ts",
+    "municipalities:detail:validate": "node scripts/validate-municipality-detail.ts",
     "municipalities:seed:args": "node scripts/municipality-seed-args.ts",
     "municipalities:seed": "convex run municipalities:seed \"$(node scripts/municipality-seed-args.ts)\"",
     "report:select": "node scripts/validate-report-selection.ts",
