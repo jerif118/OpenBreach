@@ -73,9 +73,29 @@ const detail = municipalityDetailSchema.parse({
     generatedAt: "2026-05-16T09:35:00.000Z",
     updatedAt: "2026-05-16T09:36:00.000Z",
     pdf: {
-      storagePath: "data/reports/CA-LOS-ANGELES.pdf",
-      fileName: "CA-LOS-ANGELES.pdf",
+      storagePath: "data/reports/CA-LOS-ANGELES-technical.pdf",
+      fileName: "CA-LOS-ANGELES-technical.pdf",
       contentType: "application/pdf",
+    },
+    artifacts: {
+      technical: {
+        variant: "technical",
+        label: "Technical report PDF",
+        pdf: {
+          storagePath: "data/reports/CA-LOS-ANGELES-technical.pdf",
+          fileName: "CA-LOS-ANGELES-technical.pdf",
+          contentType: "application/pdf",
+        },
+      },
+      friendly: {
+        variant: "friendly",
+        label: "Friendly report PDF",
+        pdf: {
+          storagePath: "data/reports/CA-LOS-ANGELES-friendly.pdf",
+          fileName: "CA-LOS-ANGELES-friendly.pdf",
+          contentType: "application/pdf",
+        },
+      },
     },
   },
 });
@@ -158,11 +178,14 @@ const routeRequiredSnippets = [
   "Signed in for protected operator actions",
   "Public detail viewing and PDF downloads remain available without sign-in",
   "Protected report regeneration remains deferred to issue #10",
-  "Download remediation PDF",
   "Report download unavailable",
-  "getReportDownloadUrl",
+  "Generated PDFs available",
+  "getReportDownloadLinks",
+  "downloadLinks.map",
+  "link.label",
   "report.pdf.fileName",
   "`/reports/${encodeURIComponent(report.pdf.fileName)}`",
+  "normalized evidence",
   "observed public signals",
   "does not confirm a breach",
   "getFindingsBySeverity",

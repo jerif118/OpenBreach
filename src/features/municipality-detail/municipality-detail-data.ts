@@ -74,11 +74,35 @@ export const municipalityDetailMockItems = [
       generatedAt: "2026-05-16T09:35:00.000Z",
       updatedAt: "2026-05-16T09:36:00.000Z",
       pdf: {
-        storagePath: "data/reports/mx-bcn-tijuana.pdf",
-        fileName: "mx-bcn-tijuana.pdf",
+        storagePath: "data/reports/mx-bcn-tijuana-technical.pdf",
+        fileName: "mx-bcn-tijuana-technical.pdf",
         contentType: "application/pdf",
         generatedAt: "2026-05-16T09:36:00.000Z",
         sizeBytes: 24576,
+      },
+      artifacts: {
+        technical: {
+          variant: "technical",
+          label: "Technical report PDF",
+          pdf: {
+            storagePath: "data/reports/mx-bcn-tijuana-technical.pdf",
+            fileName: "mx-bcn-tijuana-technical.pdf",
+            contentType: "application/pdf",
+            generatedAt: "2026-05-16T09:36:00.000Z",
+            sizeBytes: 24576,
+          },
+        },
+        friendly: {
+          variant: "friendly",
+          label: "Friendly report PDF",
+          pdf: {
+            storagePath: "data/reports/mx-bcn-tijuana-friendly.pdf",
+            fileName: "mx-bcn-tijuana-friendly.pdf",
+            contentType: "application/pdf",
+            generatedAt: "2026-05-16T09:36:00.000Z",
+            sizeBytes: 23810,
+          },
+        },
       },
     },
   },

@@ -1,5 +1,5 @@
 import { createReportAiAdapter, type ReportAiProvider } from "../../ai/report-adapter.ts";
-import { renderReportPdf } from "../../reports/pdf-renderer.ts";
+import { renderReportArtifacts } from "../../reports/pdf-renderer.ts";
 import {
   generateRemediationReportInputSchema,
   generateRemediationReportResultSchema,
@@ -44,6 +44,11 @@ export async function generateRemediationReport(input: GenerateRemediationReport
   return await adapter.generateRemediationReport(input);
 }
 
+export async function generateRemediationReportVariants(input: GenerateRemediationReportInput) {
+  const adapter = createReportAiAdapter();
+  return await adapter.generateRemediationReportVariants(input);
+}
+
 function buildFailedResult({
   error,
   generatedAt,
@@ -85,8 +90,11 @@ export async function generateRemediationReportBatch({
       const input = generateRemediationReportInputSchema.parse({
         municipality: context.municipality,
         scan: context.scan,
+        generatedAt,
+        sourceData: context,
       });
-      const report = await adapter.generateRemediationReport(input);
+      const reports = await adapter.generateRemediationReportVariants(input);
+      const report = reports.technical;
 
       results.push({
         municipalityId: context.municipality.id,
@@ -94,6 +102,7 @@ export async function generateRemediationReportBatch({
         result: generateRemediationReportResultSchema.parse({
           status: "completed",
           report,
+          reports,
           metadata: {
             reportId: report.id,
             municipalityId: report.municipalityId,
@@ -158,10 +167,9 @@ export async function renderReportBatchPdfs({
       continue;
     }
 
-    const pdf = await renderReportPdf({
+    const rendered = await renderReportArtifacts({
       municipalityName: context.municipality.name,
-      report: record.result.report,
-      scan: context.scan,
+      reports: record.result.reports,
       generatedAt: batch.generatedAt,
       outputDirectory,
     });
@@ -172,7 +180,8 @@ export async function renderReportBatchPdfs({
         ...record.result,
         metadata: {
           ...record.result.metadata,
-          pdf,
+          pdf: rendered.pdf,
+          artifacts: rendered.artifacts,
           updatedAt: batch.generatedAt,
         },
       }),
@@ -188,6 +197,7 @@ export async function renderReportBatchPdfs({
 export const reportWorkflow = {
   id: "deff-acc-remediation-report-workflow",
   run: generateRemediationReport,
+  runVariants: generateRemediationReportVariants,
   runBatch: generateRemediationReportBatch,
   renderBatchPdfs: renderReportBatchPdfs,
 };

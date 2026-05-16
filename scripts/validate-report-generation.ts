@@ -7,6 +7,21 @@ import {
   selectedMunicipalityReportContextSchema,
 } from "../src/shared/contracts.ts";
 
+function parseJsonFromCommandOutput(stdout: string) {
+  const jsonLine = stdout
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .reverse()
+    .find((line) => (line.startsWith("[") || line.startsWith("{")) && !line.startsWith("[WARN]") && !line.startsWith("$ "));
+
+  if (!jsonLine) {
+    throw new Error(`Command output did not contain a JSON payload.\nSTDOUT:\n${stdout}`);
+  }
+
+  return JSON.parse(jsonLine) as unknown[];
+}
+
 const packageJson = JSON.parse(await readFile("package.json", "utf8")) as {
   scripts?: Record<string, string>;
   dependencies?: Record<string, string>;
@@ -114,14 +129,19 @@ for (const record of results) {
   }
 
   const pdf = reportPdfReferenceSchema.parse(result.metadata.pdf);
+  const artifacts = result.metadata.artifacts;
   const pdfStat = await stat(pdf.storagePath);
 
   if (pdfStat.size <= 0 || pdf.sizeBytes !== pdfStat.size) {
     throw new Error(`Generated PDF size metadata is invalid for ${pdf.storagePath}.`);
   }
 
-  if (pdf.fileName !== `${result.report.municipalityId}.pdf`) {
-    throw new Error("Generated PDF filenames must be based on municipality IDs.");
+  if (pdf.fileName !== `${result.report.municipalityId}-technical.pdf`) {
+    throw new Error("Generated technical PDF filenames must be based on municipality IDs plus the technical suffix.");
+  }
+
+  if (!artifacts?.technical || !artifacts.friendly) {
+    throw new Error("Completed report metadata must include both technical and friendly PDF artifacts.");
   }
 }
 
@@ -132,13 +152,23 @@ if (persistenceArgs.length !== selected.length) {
 }
 
 for (const arg of persistenceArgs) {
-  const candidate = arg as { status?: string; pdf?: unknown; externalId?: string; municipalityExternalId?: string };
+  const candidate = arg as {
+    status?: string;
+    pdf?: unknown;
+    artifacts?: { technical?: { pdf?: unknown }; friendly?: { pdf?: unknown } };
+    externalId?: string;
+    municipalityExternalId?: string;
+  };
 
   if (candidate.status !== "completed" || !candidate.externalId || !candidate.municipalityExternalId) {
     throw new Error("Convex persistence args must include completed status, externalId, and municipalityExternalId.");
   }
 
   reportPdfReferenceSchema.parse(candidate.pdf);
+
+  if (!candidate.artifacts?.technical?.pdf || !candidate.artifacts?.friendly?.pdf) {
+    throw new Error("Convex persistence args must include both report artifact variants.");
+  }
 }
 
 const persistenceStdout = spawnSync("pnpm", ["report:persist:args"], { encoding: "utf8" });
@@ -147,7 +177,7 @@ if (persistenceStdout.status !== 0) {
   throw new Error(`report:persist:args failed.\nSTDOUT:\n${persistenceStdout.stdout}\nSTDERR:\n${persistenceStdout.stderr}`);
 }
 
-const parsedPersistenceArgs = JSON.parse(persistenceStdout.stdout) as unknown[];
+const parsedPersistenceArgs = parseJsonFromCommandOutput(persistenceStdout.stdout);
 
 if (parsedPersistenceArgs.length !== persistenceArgs.length) {
   throw new Error("report:persist:args output must match generated artifact persistence payload count.");

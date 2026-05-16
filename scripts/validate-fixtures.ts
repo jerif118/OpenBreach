@@ -8,9 +8,11 @@ import {
   municipalitySchema,
   rawScanEvidenceSchema,
   reportGenerationStatusSchema,
+  reportArtifactsSchema,
   reportMetadataSchema,
   reportPdfReferenceSchema,
   remediationReportSchema,
+  remediationReportVariantsSchema,
   scanResultSchema,
   selectedMunicipalityReportContextSchema,
 } from "../src/shared/contracts.ts";
@@ -24,10 +26,28 @@ const report = remediationReportSchema.parse(reportFixture);
 reportGenerationStatusSchema.parse("completed");
 
 const pdfReference = reportPdfReferenceSchema.parse({
-  storagePath: "data/reports/mx-yuc-merida.pdf",
-  fileName: "mx-yuc-merida.pdf",
+  storagePath: "data/reports/mx-yuc-merida-technical.pdf",
+  fileName: "mx-yuc-merida-technical.pdf",
   contentType: "application/pdf",
   generatedAt: report.generatedAt,
+});
+
+const reportArtifacts = reportArtifactsSchema.parse({
+  technical: {
+    variant: "technical",
+    label: "Technical report PDF",
+    pdf: pdfReference,
+  },
+  friendly: {
+    variant: "friendly",
+    label: "Friendly report PDF",
+    pdf: {
+      storagePath: "data/reports/mx-yuc-merida-friendly.pdf",
+      fileName: "mx-yuc-merida-friendly.pdf",
+      contentType: "application/pdf",
+      generatedAt: report.generatedAt,
+    },
+  },
 });
 
 const reportMetadata = reportMetadataSchema.parse({
@@ -37,6 +57,17 @@ const reportMetadata = reportMetadataSchema.parse({
   generatedAt: report.generatedAt,
   updatedAt: report.generatedAt,
   pdf: pdfReference,
+  artifacts: reportArtifacts,
+});
+
+const reportVariants = remediationReportVariantsSchema.parse({
+  technical: report,
+  friendly: {
+    ...report,
+    id: "report-friendly-mx-yuc-merida",
+    variant: "friendly",
+    title: "Friendly Remediation Report for Merida",
+  },
 });
 
 selectedMunicipalityReportContextSchema.parse({
@@ -49,6 +80,7 @@ selectedMunicipalityReportContextSchema.parse({
 generateRemediationReportResultSchema.parse({
   status: "completed",
   report,
+  reports: reportVariants,
   metadata: reportMetadata,
 });
 
