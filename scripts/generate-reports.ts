@@ -36,7 +36,20 @@ type ReportPersistenceArgs = {
     : never;
   generatedBy: "deterministic-fallback" | "ai-provider";
   pdf: NonNullable<GenerateRemediationReportResult & { status: "completed" } extends { metadata: { pdf?: infer Pdf } } ? Pdf : never>;
+  artifacts: NonNullable<
+    GenerateRemediationReportResult & { status: "completed" } extends {
+      metadata: { artifacts?: infer Artifacts };
+    }
+      ? Artifacts
+      : never
+  >;
 };
+
+function sanitizePersistenceFindings(
+  findings: ReportPersistenceArgs["findings"],
+): ReportPersistenceArgs["findings"] {
+  return findings.map(({ raw: _raw, ...finding }) => finding);
+}
 
 function readCliOptions(argv: string[]): CliOptions {
   const options: CliOptions = {
@@ -82,7 +95,7 @@ function toPersistenceArgs({
   result: Extract<GenerateRemediationReportResult, { status: "completed" }>;
   context: SelectedMunicipalityReportContext;
 }): ReportPersistenceArgs {
-  if (!result.metadata.pdf) {
+  if (!result.metadata.pdf || !result.metadata.artifacts) {
     throw new Error(`Completed report ${result.report.id} is missing PDF metadata.`);
   }
 
@@ -94,9 +107,10 @@ function toPersistenceArgs({
     generatedAt: result.report.generatedAt,
     summary: result.report.summary,
     priorityActions: result.report.priorityActions,
-    findings: result.report.findings,
+    findings: sanitizePersistenceFindings(result.report.findings),
     generatedBy: result.report.generatedBy,
     pdf: result.metadata.pdf,
+    artifacts: result.metadata.artifacts,
   };
 }
 

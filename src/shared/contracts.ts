@@ -143,17 +143,57 @@ export const rawScanEvidenceSchema = z.object({
 
 export type RawScanEvidence = z.infer<typeof rawScanEvidenceSchema>;
 
+export const reportFindingSchema = scanFindingSchema
+  .extend({
+    confidence: z.enum(["low", "medium", "high"]).default("medium"),
+    status: z.enum(["confirmed", "likely", "observed", "skipped", "unresolved"]).default("observed"),
+    affectedAssets: z.array(z.string().min(1)).default([]),
+    evidenceSummary: z.string().min(1),
+    remediationSteps: z.array(z.string().min(1)).default([]),
+    verificationSteps: z.array(z.string().min(1)).default([]),
+    raw: z.record(z.string(), z.unknown()).optional(),
+  })
+  .passthrough();
+
+export const reportSectionSchema = z.object({
+  title: z.string().min(1),
+  narrative: z.string().min(1),
+  bullets: z.array(z.string().min(1)).default([]),
+});
+
 export const remediationReportSchema = z.object({
   id: z.string().min(1),
   municipalityId: z.string().min(1),
+  variant: z.enum(["technical", "friendly"]),
   generatedAt: z.string().datetime(),
+  title: z.string().min(1),
   summary: z.string().min(1),
   priorityActions: z.array(z.string().min(1)),
-  findings: z.array(scanFindingSchema),
+  findings: z.array(reportFindingSchema),
+  sections: z.object({
+    scope: reportSectionSchema,
+    authorization: reportSectionSchema,
+    methodology: reportSectionSchema,
+    findingsOverview: reportSectionSchema,
+    skippedTests: reportSectionSchema,
+    validationStatus: reportSectionSchema,
+    limitations: reportSectionSchema,
+    remediationChecklist: reportSectionSchema,
+    verificationGuidance: reportSectionSchema,
+  }),
   generatedBy: z.enum(["deterministic-fallback", "ai-provider"]),
 });
 
 export type RemediationReport = z.infer<typeof remediationReportSchema>;
+export type ReportFinding = RemediationReport["findings"][number];
+export type ReportAudience = RemediationReport["variant"];
+
+export const remediationReportVariantsSchema = z.object({
+  technical: remediationReportSchema,
+  friendly: remediationReportSchema,
+});
+
+export type RemediationReportVariants = z.infer<typeof remediationReportVariantsSchema>;
 
 export const reportGenerationStatusSchema = z.enum(["pending", "completed", "failed"]);
 
@@ -175,12 +215,27 @@ export const reportPdfReferenceSchema = z.object({
 
 export type ReportPdfReference = z.infer<typeof reportPdfReferenceSchema>;
 
+export const reportArtifactReferenceSchema = z.object({
+  variant: z.enum(["technical", "friendly"]),
+  label: z.string().min(1),
+  pdf: reportPdfReferenceSchema,
+});
+
+export const reportArtifactsSchema = z.object({
+  technical: reportArtifactReferenceSchema.optional(),
+  friendly: reportArtifactReferenceSchema.optional(),
+});
+
+export type ReportArtifactReference = z.infer<typeof reportArtifactReferenceSchema>;
+export type ReportArtifacts = z.infer<typeof reportArtifactsSchema>;
+
 const reportMetadataBaseSchema = z.object({
   reportId: z.string().min(1),
   municipalityId: z.string().min(1),
   generatedAt: z.string().datetime().optional(),
   updatedAt: z.string().datetime(),
   pdf: reportPdfReferenceSchema.optional(),
+  artifacts: reportArtifactsSchema.optional(),
 });
 
 const completedReportMetadataSchema = reportMetadataBaseSchema.extend({
@@ -232,6 +287,7 @@ export const generateRemediationReportResultSchema = z.discriminatedUnion("statu
   z.object({
     status: z.literal("completed"),
     report: remediationReportSchema,
+    reports: remediationReportVariantsSchema,
     metadata: completedReportMetadataSchema,
   }),
   z.object({
@@ -255,10 +311,22 @@ export const userProfileSchema = z.object({
 
 export type UserProfile = z.infer<typeof userProfileSchema>;
 
-export const generateRemediationReportInputSchema = z.object({
-  municipality: municipalitySchema,
-  scan: scanResultSchema,
-});
+export const generateRemediationReportInputSchema = z
+  .object({
+    municipality: municipalitySchema.optional(),
+    scan: scanResultSchema.optional(),
+    generatedAt: z.string().datetime().optional(),
+    sourceData: z.unknown().optional(),
+  })
+  .passthrough()
+  .superRefine((value, ctx) => {
+    if (!value.scan && value.sourceData === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Report generation input requires scan data or sourceData for normalization.",
+      });
+    }
+  });
 
 export type GenerateRemediationReportInput = z.infer<
   typeof generateRemediationReportInputSchema
@@ -267,3 +335,7 @@ export type GenerateRemediationReportInput = z.infer<
 export type GenerateRemediationReport = (
   input: GenerateRemediationReportInput,
 ) => Promise<RemediationReport>;
+
+export type GenerateRemediationReportVariants = (
+  input: GenerateRemediationReportInput,
+) => Promise<RemediationReportVariants>;

@@ -1,13 +1,26 @@
 import { chat } from "@tanstack/ai";
 import { createOpenRouterText } from "@tanstack/ai-openrouter";
-import { remediationReportSchema } from "../shared/contracts.ts";
-import type { GenerateRemediationReport, RemediationReport, ScanFinding } from "~/shared";
+import { plainLanguageReportAgent } from "../mastra/agents/plain-language-report-agent.ts";
+import { reportAgent } from "../mastra/agents/report-agent.ts";
+import { buildDeterministicReportVariants } from "../reports/report-composer.ts";
+import { normalizeReportInput } from "../reports/report-normalizer.ts";
+import {
+  remediationReportSchema,
+  remediationReportVariantsSchema,
+  type GenerateRemediationReport,
+  type GenerateRemediationReportInput,
+  type GenerateRemediationReportVariants,
+  type RemediationReport,
+  type RemediationReportVariants,
+  type ReportAudience,
+} from "../shared/contracts.ts";
 
 export type ReportAiProvider = "deterministic-fallback" | "tanstack-ai";
 
 export type ReportAiAdapter = {
   provider: ReportAiProvider;
   generateRemediationReport: GenerateRemediationReport;
+  generateRemediationReportVariants: GenerateRemediationReportVariants;
 };
 
 type ReportAiAdapterProvider = "openrouter";
@@ -28,61 +41,6 @@ export type CreateReportAiAdapterOptions = {
   provider?: ReportAiAdapterProvider;
 };
 
-const severityRank: Record<ScanFinding["severity"], number> = {
-  critical: 5,
-  high: 4,
-  medium: 3,
-  low: 2,
-  info: 1,
-};
-
-const actionCategoryRank: Partial<Record<ScanFinding["category"], number>> = {
-  "known-vulnerability": 3,
-  "admin-exposure": 2,
-  exposure: 1,
-};
-
-function compareFindingsByTechnicianPriority(left: ScanFinding, right: ScanFinding) {
-  const severityOrder = severityRank[right.severity] - severityRank[left.severity];
-
-  if (severityOrder !== 0) {
-    return severityOrder;
-  }
-
-  const categoryOrder =
-    (actionCategoryRank[right.category] ?? 0) - (actionCategoryRank[left.category] ?? 0);
-
-  if (categoryOrder !== 0) {
-    return categoryOrder;
-  }
-
-  return `${left.id}:${left.title}`.localeCompare(`${right.id}:${right.title}`);
-}
-
-function buildFallbackSummary({
-  municipalityName,
-  riskLevel,
-  riskScore,
-  findingCount,
-  topFinding,
-}: {
-  municipalityName: string;
-  riskLevel: string;
-  riskScore: number;
-  findingCount: number;
-  topFinding?: ScanFinding;
-}) {
-  const focus = topFinding
-    ? ` The first technician focus should be: ${topFinding.title}, because the scan evidence is actionable.`
-    : " No reportable passive findings were included in this input.";
-
-  return `${municipalityName} currently has a ${riskLevel} risk level with risk score ${riskScore} based on ${findingCount} passive scan findings.${focus} Review the items below as practical remediation guidance, not as a legal or regulatory determination.`;
-}
-
-function buildFallbackAction(finding: ScanFinding, index: number) {
-  return `Priority ${index + 1}: ${finding.remediationHint} Evidence: ${finding.evidence}`;
-}
-
 function getConfiguredProviderKey() {
   return (
     process.env.AI_PROVIDER_KEY ??
@@ -100,26 +58,46 @@ function getConfiguredModel() {
   return process.env.AI_PROVIDER_MODEL ?? "anthropic/claude-sonnet-4";
 }
 
-function buildProviderPrompt({ municipality, scan }: Parameters<GenerateRemediationReport>[0]) {
+function buildProviderPrompt(input: GenerateRemediationReportInput, variant: ReportAudience) {
+  const normalized = normalizeReportInput(input);
+
   return JSON.stringify(
     {
       instructions: [
         "Return only JSON matching the RemediationReport contract.",
-        "Use non-alarmist technician language and do not make legal or compliance certification claims.",
-        "Preserve evidence-backed findings from the input; do not invent unsupported findings.",
+        "Do not invent new findings, evidence, validation outcomes, or scope details.",
+        "Use only the structured normalized input provided below.",
+        "Avoid exploit steps, payloads, raw secrets, or compliance-certification claims.",
         "Set generatedBy to ai-provider.",
+        `Render the ${variant} report variant and keep the variant field exactly "${variant}".`,
       ],
+      audience:
+        variant === "technical"
+          ? "Formal, engineer-ready, detailed, ordered, and evidence-grounded."
+          : "Plain-language, accessible to nontechnical owners, and free of unnecessary jargon.",
       outputShape: {
         id: "string",
-        municipalityId: municipality.id,
-        generatedAt: "ISO datetime string",
-        summary: "plain-language technician summary",
-        priorityActions: ["prioritized remediation action strings"],
-        findings: "array of supplied findings",
+        municipalityId: normalized.subject.id,
+        variant,
+        generatedAt: normalized.generatedAt,
+        title: "string",
+        summary: "string",
+        priorityActions: ["string"],
+        findings: "array matching the supplied normalized finding shape",
+        sections: {
+          scope: { title: "string", narrative: "string", bullets: ["string"] },
+          authorization: { title: "string", narrative: "string", bullets: ["string"] },
+          methodology: { title: "string", narrative: "string", bullets: ["string"] },
+          findingsOverview: { title: "string", narrative: "string", bullets: ["string"] },
+          skippedTests: { title: "string", narrative: "string", bullets: ["string"] },
+          validationStatus: { title: "string", narrative: "string", bullets: ["string"] },
+          limitations: { title: "string", narrative: "string", bullets: ["string"] },
+          remediationChecklist: { title: "string", narrative: "string", bullets: ["string"] },
+          verificationGuidance: { title: "string", narrative: "string", bullets: ["string"] },
+        },
         generatedBy: "ai-provider",
       },
-      municipality,
-      scan,
+      normalizedInput: normalized,
     },
     null,
     2,
@@ -152,10 +130,62 @@ async function runTanStackChat({
   });
 }
 
+async function generateProviderBackedVariants({
+  chatExecutor,
+  input,
+  model,
+  provider,
+  providerKey,
+}: {
+  chatExecutor: ReportAiChatExecutor;
+  input: GenerateRemediationReportInput;
+  model: string;
+  provider: ReportAiAdapterProvider;
+  providerKey: string;
+}) {
+  const results: Partial<Record<ReportAudience, RemediationReport>> = {};
+
+  for (const variant of ["technical", "friendly"] as const) {
+    const content = await chatExecutor({
+      model,
+      provider,
+      providerKey,
+      systemPrompts: [
+        variant === "technical" ? reportAgent.instructions : plainLanguageReportAgent.instructions,
+        "Return only valid JSON that matches the requested contract.",
+      ],
+      messages: [
+        {
+          role: "user",
+          content: buildProviderPrompt(input, variant),
+        },
+      ],
+    });
+
+    results[variant] = parseProviderReport(content);
+  }
+
+  return remediationReportVariantsSchema.parse({
+    technical: results.technical,
+    friendly: results.friendly,
+  });
+}
+
 export function createReportAiAdapter(
   providerKey = getConfiguredProviderKey(),
   options: CreateReportAiAdapterOptions = {},
 ): ReportAiAdapter {
+  const deterministicReportAdapter: ReportAiAdapter = {
+    provider: "deterministic-fallback",
+    async generateRemediationReport(input): Promise<RemediationReport> {
+      return (await deterministicReportAdapter.generateRemediationReportVariants(input)).technical;
+    },
+    async generateRemediationReportVariants(input): Promise<RemediationReportVariants> {
+      const normalized = normalizeReportInput(input);
+      return buildDeterministicReportVariants(normalized, "deterministic-fallback", normalized.generatedAt);
+    },
+  };
+
   if (!providerKey) {
     return deterministicReportAdapter;
   }
@@ -167,50 +197,20 @@ export function createReportAiAdapter(
   return {
     provider: "tanstack-ai",
     async generateRemediationReport(input): Promise<RemediationReport> {
+      return (await this.generateRemediationReportVariants(input)).technical;
+    },
+    async generateRemediationReportVariants(input): Promise<RemediationReportVariants> {
       try {
-        const content = await chatExecutor({
+        return await generateProviderBackedVariants({
+          chatExecutor,
+          input,
           model,
           provider,
           providerKey,
-          systemPrompts: [
-            "You generate concise municipal remediation reports from public passive scan findings.",
-            "Return only valid JSON that matches the requested contract.",
-          ],
-          messages: [
-            {
-              role: "user",
-              content: buildProviderPrompt(input),
-            },
-          ],
         });
-
-        return parseProviderReport(content);
       } catch {
-        return await deterministicReportAdapter.generateRemediationReport(input);
+        return await deterministicReportAdapter.generateRemediationReportVariants(input);
       }
     },
   };
 }
-
-export const deterministicReportAdapter: ReportAiAdapter = {
-  provider: "deterministic-fallback",
-  async generateRemediationReport({ municipality, scan }): Promise<RemediationReport> {
-    const prioritizedFindings = [...scan.findings].sort(compareFindingsByTechnicianPriority);
-
-    return {
-      id: `report-${scan.id}`,
-      municipalityId: municipality.id,
-      generatedAt: new Date("2026-01-01T00:00:00.000Z").toISOString(),
-      summary: buildFallbackSummary({
-        municipalityName: municipality.name,
-        riskLevel: scan.riskLevel,
-        riskScore: scan.riskScore,
-        findingCount: scan.findings.length,
-        topFinding: prioritizedFindings[0],
-      }),
-      priorityActions: prioritizedFindings.slice(0, 5).map(buildFallbackAction),
-      findings: prioritizedFindings,
-      generatedBy: "deterministic-fallback",
-    };
-  },
-};

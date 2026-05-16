@@ -4,9 +4,12 @@ import municipalitiesFixture from "../data/municipalities/municipalities.seed.js
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
 import { createReportAiAdapter } from "../src/ai/report-adapter.ts";
 import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-tool.ts";
+import { buildDeterministicReportVariants } from "../src/reports/report-composer.ts";
+import { normalizeReportInput } from "../src/reports/report-normalizer.ts";
 import {
   municipalitySchema,
   remediationReportSchema,
+  remediationReportVariantsSchema,
   scanResultSchema,
   type RemediationReport,
 } from "../src/shared/contracts.ts";
@@ -29,20 +32,31 @@ if (fallbackAdapter.provider !== "deterministic-fallback") {
   throw new Error(`Expected deterministic fallback without credentials, received ${fallbackAdapter.provider}.`);
 }
 
-const providerReport: RemediationReport = {
-  id: `ai-${context.scan.id}`,
-  municipalityId: context.municipality.id,
-  generatedAt: "2026-01-02T00:00:00.000Z",
-  summary: `AI summary for ${context.municipality.name} with risk score ${context.scan.riskScore}.`,
-  priorityActions: [`AI action: ${context.scan.findings[0]?.remediationHint ?? "Review evidence."}`],
-  findings: context.scan.findings,
-  generatedBy: "ai-provider",
-};
+const providerReport: RemediationReport = buildDeterministicReportVariants(
+  normalizeReportInput({
+    municipality: context.municipality,
+    scan: context.scan,
+    generatedAt: "2026-01-02T00:00:00.000Z",
+  }),
+  "ai-provider",
+  "2026-01-02T00:00:00.000Z",
+).technical;
 
 let chatCalls = 0;
 const aiAdapter = createReportAiAdapter("test-provider-key", {
-  chat: async () => {
+  chat: async ({ messages }) => {
     chatCalls += 1;
+    const prompt = messages[0]?.content ?? "";
+
+    if (prompt.includes('"variant": "friendly"')) {
+      return JSON.stringify({
+        ...providerReport,
+        id: `ai-friendly-${context.scan.id}`,
+        variant: "friendly",
+        title: `Friendly Remediation Report for ${context.municipality.name}`,
+      });
+    }
+
     return JSON.stringify(providerReport);
   },
   provider: "openrouter",
@@ -53,19 +67,25 @@ if (aiAdapter.provider !== "tanstack-ai") {
   throw new Error(`Expected configured credentials to select tanstack-ai, received ${aiAdapter.provider}.`);
 }
 
-const aiReport = remediationReportSchema.parse(
-  await aiAdapter.generateRemediationReport({
+const aiReports = remediationReportVariantsSchema.parse(
+  await aiAdapter.generateRemediationReportVariants({
     municipality: context.municipality,
     scan: context.scan,
+    generatedAt: "2026-01-02T00:00:00.000Z",
   }),
 );
+const aiReport = remediationReportSchema.parse(aiReports.technical);
 
-if (chatCalls !== 1) {
-  throw new Error(`Expected provider chat executor to be called once, received ${chatCalls}.`);
+if (chatCalls !== 2) {
+  throw new Error(`Expected provider chat executor to be called twice, received ${chatCalls}.`);
 }
 
 if (aiReport.generatedBy !== "ai-provider") {
   throw new Error(`Expected provider output to remain ai-provider, received ${aiReport.generatedBy}.`);
+}
+
+if (aiReports.friendly.variant !== "friendly") {
+  throw new Error("Provider-backed generation must return the friendly report variant.");
 }
 
 const invalidAdapter = createReportAiAdapter("test-provider-key", {
@@ -73,10 +93,12 @@ const invalidAdapter = createReportAiAdapter("test-provider-key", {
   provider: "openrouter",
   model: "anthropic/claude-sonnet-4",
 });
-const fallbackReport = await invalidAdapter.generateRemediationReport({
+const fallbackReports = await invalidAdapter.generateRemediationReportVariants({
   municipality: context.municipality,
   scan: context.scan,
+  generatedAt: "2026-01-01T00:00:00.000Z",
 });
+const fallbackReport = fallbackReports.technical;
 
 if (fallbackReport.generatedBy !== "deterministic-fallback") {
   throw new Error("Invalid provider output must fall back to deterministic generation.");

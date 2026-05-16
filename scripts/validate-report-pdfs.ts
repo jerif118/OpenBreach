@@ -23,8 +23,25 @@ if (contexts.length !== 2) {
   throw new Error(`Expected 2 selected contexts for PDF validation, received ${contexts.length}.`);
 }
 
+for (const templatePath of [
+  "src/reports/templates/technical-report.md",
+  "src/reports/templates/friendly-report.md",
+  "src/reports/templates/README.md",
+]) {
+  const templateSource = await readFile(templatePath, "utf8");
+
+  if (templatePath.endsWith(".md") && !templatePath.endsWith("README.md") && !templateSource.includes("{{title}}")) {
+    throw new Error(`Report template is missing required placeholders: ${templatePath}`);
+  }
+
+  if (templatePath.endsWith("README.md") && !templateSource.includes("technical-report.md")) {
+    throw new Error("Report template README must document the editable template files.");
+  }
+}
+
 for (const context of contexts) {
-  await rm(`data/reports/${context.municipality.id}.pdf`, { force: true });
+  await rm(`data/reports/${context.municipality.id}-technical.pdf`, { force: true });
+  await rm(`data/reports/${context.municipality.id}-friendly.pdf`, { force: true });
 }
 
 const output = await renderReportBatchPdfs({
@@ -48,12 +65,18 @@ for (const record of output.results) {
   }
 
   const pdf = reportPdfReferenceSchema.parse(record.result.metadata.pdf);
+  const artifacts = record.result.metadata.artifacts;
 
-  if (pdf.fileName !== `${record.municipalityId}.pdf`) {
-    throw new Error("PDF filenames must be based on municipality IDs.");
+  if (pdf.fileName !== `${record.municipalityId}-technical.pdf`) {
+    throw new Error("Technical PDF filenames must be based on municipality IDs.");
   }
 
-  const pdfContent = await readFile(pdf.storagePath, "latin1");
+  if (!artifacts?.technical || !artifacts.friendly) {
+    throw new Error("Rendered report metadata must include both technical and friendly artifacts.");
+  }
+
+  const technicalPdfContent = await readFile(pdf.storagePath, "latin1");
+  const friendlyPdfContent = await readFile(artifacts.friendly.pdf.storagePath, "latin1");
   const context = contexts.find((candidate) => candidate.municipality.id === record.municipalityId);
 
   if (!context) {
@@ -62,16 +85,23 @@ for (const record of output.results) {
 
   const requiredSnippets = [
     context.municipality.name,
-    `Risk score: ${context.scan.riskScore}`,
-    record.result.report.summary,
-    record.result.report.priorityActions[0],
-    context.scan.findings[0]?.evidence,
-    context.scan.findings[0]?.remediationHint,
+    "Technical Remediation Report",
+    "Audience: Technical",
+    "Executive summary",
+    "Priority actions",
+    context.scan.findings[0]?.title,
+    `Severity: ${context.scan.findings[0]?.severity}`,
   ].filter((snippet): snippet is string => Boolean(snippet));
 
   for (const snippet of requiredSnippets) {
-    if (!pdfContent.includes(snippet)) {
+    if (!technicalPdfContent.includes(snippet)) {
       throw new Error(`Generated PDF is missing expected content: ${snippet}`);
+    }
+  }
+
+  for (const snippet of [context.municipality.name, "Friendly Remediation Report", "Quick summary"]) {
+    if (!friendlyPdfContent.includes(snippet)) {
+      throw new Error(`Friendly PDF is missing expected content: ${snippet}`);
     }
   }
 }
@@ -99,16 +129,17 @@ if (!unsafeRecord || unsafeRecord.result.status !== "completed") {
 
 const unsafePdf = reportPdfReferenceSchema.parse(unsafeRecord.result.metadata.pdf);
 
-if (unsafePdf.fileName !== "Unsafe_City_2026.pdf") {
+if (unsafePdf.fileName !== "Unsafe_City_2026-technical.pdf") {
   throw new Error(`Expected sanitized unsafe filename, received ${unsafePdf.fileName}.`);
 }
 
 await rm(unsafePdf.storagePath, { force: true });
+await rm("data/reports/Unsafe_City_2026-friendly.pdf", { force: true });
 
 const storageDoc = (await readFile("docs/report-mvp-storage.md", "utf8")).toLowerCase();
 
-if (!storageDoc.includes("data/reports/") || !storageDoc.includes("public serving is deferred")) {
-  throw new Error("MVP storage documentation must describe the local path and deferred public serving assumption.");
+if (!storageDoc.includes("data/reports/") || !storageDoc.includes("/reports/$filename")) {
+  throw new Error("MVP storage documentation must describe the local path and the route used to serve report downloads.");
 }
 
 console.log("Report PDF validation passed.");

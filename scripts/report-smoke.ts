@@ -6,6 +6,7 @@ import {
   generateRemediationReportResultSchema,
   municipalitySchema,
   remediationReportSchema,
+  remediationReportVariantsSchema,
   reportMetadataSchema,
   scanResultSchema,
 } from "../src/shared/contracts.ts";
@@ -29,13 +30,20 @@ if (adapter.provider !== "deterministic-fallback") {
   throw new Error(`Expected deterministic fallback without credentials, received ${adapter.provider}.`);
 }
 
-const report = await adapter.generateRemediationReport({ municipality, scan });
-const repeatedReport = await adapter.generateRemediationReport({ municipality, scan });
+const reports = await adapter.generateRemediationReportVariants({ municipality, scan, generatedAt: "2026-01-01T00:00:00.000Z" });
+const repeatedReports = await adapter.generateRemediationReportVariants({
+  municipality,
+  scan,
+  generatedAt: "2026-01-01T00:00:00.000Z",
+});
 
-if (JSON.stringify(report) !== JSON.stringify(repeatedReport)) {
+const report = reports.technical;
+
+if (JSON.stringify(reports) !== JSON.stringify(repeatedReports)) {
   throw new Error("Deterministic fallback must return identical report JSON for the same input.");
 }
 
+remediationReportVariantsSchema.parse(reports);
 remediationReportSchema.parse(report);
 const metadata = reportMetadataSchema.parse({
   reportId: report.id,
@@ -48,6 +56,7 @@ const metadata = reportMetadataSchema.parse({
 generateRemediationReportResultSchema.parse({
   status: "completed",
   report,
+  reports,
   metadata,
 });
 
@@ -68,8 +77,8 @@ report.priorityActions.forEach((action, index) => {
     throw new Error("Fallback actions must be clearly prioritized for technicians.");
   }
 
-  if (!action.includes("Evidence:")) {
-    throw new Error("Fallback actions must connect remediation steps to evidence.");
+  if (!action.includes("Verification:")) {
+    throw new Error("Fallback actions must connect remediation steps to verification guidance.");
   }
 });
 
@@ -80,9 +89,13 @@ if (blockedLanguage.test(report.summary) || report.priorityActions.some((action)
 }
 
 for (const finding of report.findings) {
-  if (!finding.evidence || !finding.remediationHint) {
+  if (!finding.evidence || !finding.remediationHint || finding.remediationSteps.length === 0 || finding.verificationSteps.length === 0) {
     throw new Error("Fallback report findings must preserve evidence and remediation hints.");
   }
 }
 
-console.log(JSON.stringify(report, null, 2));
+if (reports.friendly.variant !== "friendly") {
+  throw new Error("Friendly report variant must be generated alongside the technical report.");
+}
+
+console.log(JSON.stringify(reports, null, 2));

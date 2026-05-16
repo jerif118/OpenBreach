@@ -6,6 +6,7 @@ import {
   generateRemediationReportResultSchema,
   municipalitySchema,
   remediationReportSchema,
+  remediationReportVariantsSchema,
   reportMetadataSchema,
   scanResultSchema,
 } from "../src/shared/contracts.ts";
@@ -77,6 +78,7 @@ batch.results.forEach((result, index) => {
   }
 
   remediationReportSchema.parse(result.result.report);
+  remediationReportVariantsSchema.parse(result.result.reports);
 });
 
 const invalidContext = {

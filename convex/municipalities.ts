@@ -126,6 +126,7 @@ function toReportMetadataContract(
     generatedAt: report.generatedAt,
     updatedAt: report.updatedAt,
     pdf: report.pdf,
+    artifacts: report.artifacts,
   };
 
   if (report.status === "failed") {

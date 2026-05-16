@@ -230,27 +230,32 @@ function EmptyPanel({ title, body }: { title: string; body: string }) {
 }
 
 function ReportDownloadPanel({ report }: { report: ReportMetadata | null }) {
-  const downloadUrl = getReportDownloadUrl(report);
+  const downloadLinks = getReportDownloadLinks(report);
 
-  if (downloadUrl && report) {
+  if (downloadLinks.length > 0 && report) {
     return (
       <section className="rounded-[2rem] border border-emerald-300/20 bg-emerald-300/10 p-6 shadow-xl shadow-black/20 sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200">Remediation report</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Generated PDF available</h2>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Generated PDFs available</h2>
             <p className="mt-2 text-sm leading-6 text-emerald-50/90">
-              Download the technician remediation PDF generated from the latest observed public signals.
+              Download the technical and friendly remediation PDFs generated from the latest normalized evidence.
             </p>
             <p className="mt-2 text-xs text-emerald-50/70">{getReportMetadataSummary(report)}</p>
           </div>
-          <a
-            className="inline-flex w-fit items-center justify-center rounded-full bg-emerald-200 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-950/30 transition hover:bg-white"
-            download
-            href={downloadUrl}
-          >
-            Download remediation PDF
-          </a>
+          <div className="flex flex-col gap-3 sm:items-end">
+            {downloadLinks.map((link) => (
+              <a
+                key={link.label}
+                className="inline-flex w-fit items-center justify-center rounded-full bg-emerald-200 px-5 py-3 text-sm font-bold text-slate-950 shadow-lg shadow-emerald-950/30 transition hover:bg-white"
+                download
+                href={link.href}
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -384,12 +389,30 @@ function getFindingsBySeverity(findings: ScanFinding[]) {
     .filter(([, severityFindings]) => severityFindings.length > 0);
 }
 
-function getReportDownloadUrl(report: ReportMetadata | null) {
-  if (report?.status !== "completed" || !report.pdf) {
-    return null;
+function getReportDownloadLinks(report: ReportMetadata | null) {
+  if (report?.status !== "completed") {
+    return [];
   }
 
-  return `/reports/${encodeURIComponent(report.pdf.fileName)}`;
+  if (report.artifacts) {
+    return Object.values(report.artifacts)
+      .filter((artifact): artifact is NonNullable<typeof artifact> => Boolean(artifact))
+      .map((artifact) => ({
+        label: artifact.label,
+        href: `/reports/${encodeURIComponent(artifact.pdf.fileName)}`,
+      }));
+  }
+
+  if (!report.pdf) {
+    return [];
+  }
+
+  return [
+    {
+      label: "Technical report PDF",
+      href: `/reports/${encodeURIComponent(report.pdf.fileName)}`,
+    },
+  ];
 }
 
 function getReportUnavailableMessage(report: ReportMetadata | null) {
@@ -410,9 +433,13 @@ function getReportUnavailableMessage(report: ReportMetadata | null) {
 
 function getReportMetadataSummary(report: ReportMetadata) {
   const generated = report.generatedAt ? `Generated ${formatDateTime(report.generatedAt)}` : "Generation time unavailable";
-  const fileName = report.pdf ? `File: ${report.pdf.fileName}` : "No PDF file metadata";
+  const artifactSummary = report.artifacts
+    ? `${Object.values(report.artifacts).filter(Boolean).length} PDF variants`
+    : report.pdf
+      ? `File: ${report.pdf.fileName}`
+      : "No PDF file metadata";
 
-  return `${generated}. ${fileName}. Status: ${report.status}.`;
+  return `${generated}. ${artifactSummary}. Status: ${report.status}.`;
 }
 
 function formatPopulation(population: number | undefined) {

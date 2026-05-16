@@ -27,6 +27,36 @@ const finding = v.object({
   remediationHint: v.string(),
 });
 
+const reportFinding = v.object({
+  id: v.string(),
+  category: v.union(
+    v.literal("tls"),
+    v.literal("headers"),
+    v.literal("cms"),
+    v.literal("exposure"),
+    v.literal("admin-exposure"),
+    v.literal("availability"),
+    v.literal("known-vulnerability"),
+  ),
+  severity,
+  title: v.string(),
+  description: v.string(),
+  evidence: v.string(),
+  remediationHint: v.string(),
+  confidence: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+  status: v.union(
+    v.literal("confirmed"),
+    v.literal("likely"),
+    v.literal("observed"),
+    v.literal("skipped"),
+    v.literal("unresolved"),
+  ),
+  affectedAssets: v.array(v.string()),
+  evidenceSummary: v.string(),
+  remediationSteps: v.array(v.string()),
+  verificationSteps: v.array(v.string()),
+});
+
 const rawScanHeaders = v.record(v.string(), v.string());
 
 const rawScanTls = v.object({
@@ -70,6 +100,17 @@ const reportPdfReference = v.object({
   contentType: v.literal("application/pdf"),
   generatedAt: v.optional(v.string()),
   sizeBytes: v.optional(v.number()),
+});
+
+const reportArtifactReference = v.object({
+  variant: v.union(v.literal("technical"), v.literal("friendly")),
+  label: v.string(),
+  pdf: reportPdfReference,
+});
+
+const reportArtifacts = v.object({
+  technical: v.optional(reportArtifactReference),
+  friendly: v.optional(reportArtifactReference),
 });
 
 export default defineSchema({
@@ -140,9 +181,10 @@ export default defineSchema({
     updatedAt: v.string(),
     summary: v.optional(v.string()),
     priorityActions: v.optional(v.array(v.string())),
-    findings: v.optional(v.array(finding)),
+    findings: v.optional(v.array(reportFinding)),
     generatedBy: v.optional(v.union(v.literal("deterministic-fallback"), v.literal("ai-provider"))),
     pdf: v.optional(reportPdfReference),
+    artifacts: v.optional(reportArtifacts),
     error: v.optional(v.string()),
   })
     .index("by_externalId", ["externalId"])

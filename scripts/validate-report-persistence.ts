@@ -7,6 +7,7 @@ const requiredSchemaSnippets = [
   "status: reportStatus",
   "updatedAt: v.string()",
   "pdf: v.optional(reportPdfReference)",
+  "artifacts: v.optional(reportArtifacts)",
   "error: v.optional(v.string())",
   '.index("by_municipalityId_and_generatedAt", ["municipalityId", "generatedAt"])',
 ];
