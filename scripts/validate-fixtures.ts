@@ -1,5 +1,5 @@
 import municipalityFixture from "../data/municipalities/sample-municipality.json" with { type: "json" };
-import reportFixture from "../data/reports/sample-report.json" with { type: "json" };
+import reportGenerationFixture from "../data/reports/latest.report-generation.json" with { type: "json" };
 import scanFixture from "../data/scans/sample-scan.json" with { type: "json" };
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
 import rawScanEvidenceFixture from "../data/scans/sample-raw-scan-evidence.json" with { type: "json" };
@@ -7,6 +7,7 @@ import {
   generateRemediationReportResultSchema,
   municipalitySchema,
   rawScanEvidenceSchema,
+  reportGenerationArtifactSchema,
   reportGenerationStatusSchema,
   reportArtifactsSchema,
   reportMetadataSchema,
@@ -21,7 +22,23 @@ municipalitySchema.parse(municipalityFixture);
 scanResultSchema.parse(scanFixture);
 scanResultSchema.array().parse(enrichedScanFixture);
 rawScanEvidenceSchema.parse(rawScanEvidenceFixture);
-const report = remediationReportSchema.parse(reportFixture);
+const reportArtifact = reportGenerationArtifactSchema.parse(
+  reportGenerationFixture,
+);
+const firstCompletedReport = reportArtifact.batch.results.find(
+  (record) => record.result.status === "completed",
+);
+
+if (
+  !firstCompletedReport ||
+  firstCompletedReport.result.status !== "completed"
+) {
+  throw new Error("Report generation fixture must include a completed report.");
+}
+
+const report = remediationReportSchema.parse(
+  firstCompletedReport.result.report,
+);
 
 reportGenerationStatusSchema.parse("completed");
 
