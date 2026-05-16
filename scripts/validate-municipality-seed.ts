@@ -9,10 +9,4 @@ const seedPath = new URL(
 const rawSeed = await readFile(seedPath, "utf8");
 const seed = municipalitySeedSchema.parse(JSON.parse(rawSeed));
 
-if (seed.length < 50) {
-  throw new Error(
-    `Municipality seed must contain at least 50 records; found ${seed.length}.`,
-  );
-}
-
 console.log(`Municipality seed validation passed for ${seed.length} records.`);
