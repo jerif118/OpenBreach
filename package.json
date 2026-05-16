@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "name": "deff-acc",
   "private": true,
@@ -82,3 +83,84 @@
   },
   "packageManager": "pnpm@11.1.2+sha224.6d287705d0efa6c2ba7a74795dc72a7800f64840f2bc0961cedba029"
 }
+=======
+{
+  "name": "deff-acc",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build && pnpm typecheck",
+    "preview": "vite preview",
+    "start": "node .output/server/index.mjs",
+    "typecheck": "tsc --noEmit",
+    "convex:dev": "convex dev",
+    "convex:codegen": "convex codegen",
+    "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts",
+    "scanner:validate": "node scripts/validate-scanner.ts",
+    "scanner:fixture": "node scripts/export-scan-fixture.ts",
+    "risk:fixture": "node scripts/export-enriched-scan-fixture.ts",
+    "risk:validate": "node scripts/validate-risk-scoring.ts",
+    "risk:persist:args": "node scripts/risk-convex-args.ts",
+    "risk:persist": "node scripts/risk-convex-args.ts | node scripts/persist-via-convex.ts scanResults:upsertEnrichedMany",
+    "scanner:persistence:validate": "node scripts/validate-scan-persistence.ts",
+    "scanner:persist:args": "node scripts/scan-convex-args.ts",
+    "scanner:persist": "node scripts/scan-convex-args.ts | node scripts/persist-via-convex.ts rawScanResults:upsertMany",
+    "municipalities:validate": "node scripts/validate-municipality-seed.ts",
+    "municipalities:list:validate": "node scripts/validate-municipality-list.ts",
+    "dashboard:data:validate": "node scripts/validate-dashboard-data-adapter.ts",
+    "dashboard:shell:validate": "node scripts/validate-dashboard-shell.ts",
+    "dashboard:map:validate": "node scripts/validate-dashboard-map.ts",
+    "dashboard:list:validate": "node scripts/validate-dashboard-ranked-list.ts",
+    "dashboard:filters:validate": "node scripts/validate-dashboard-filters.ts",
+    "dashboard:verify": "node scripts/validate-dashboard-verification.ts",
+    "municipalities:detail:validate": "node scripts/validate-municipality-detail.ts",
+    "municipalities:seed:args": "node scripts/municipality-seed-args.ts",
+    "municipalities:seed": "convex run municipalities:seed \"$(node scripts/municipality-seed-args.ts)\"",
+    "report:select": "node scripts/validate-report-selection.ts",
+    "report:smoke": "node scripts/report-smoke.ts",
+    "report:batch": "node scripts/validate-report-batch.ts",
+    "report:pdfs": "node scripts/validate-report-pdfs.ts",
+    "report:ai-provider": "node scripts/validate-report-ai-provider.ts",
+    "report:persistence:validate": "node scripts/validate-report-persistence.ts",
+    "auth:writes:validate": "node scripts/validate-auth-writes.ts",
+    "report:generate": "node scripts/generate-reports.ts",
+    "report:generate:all": "node scripts/generate-reports.ts --all",
+    "report:persist:args": "node scripts/report-convex-args.ts",
+    "report:persist:fixture": "node scripts/report-fixture-persist-args.ts | node scripts/persist-via-convex.ts reports:seedFromFixture",
+    "report:generate:validate": "node scripts/validate-report-generation.ts",
+    "clean:hard": "node scripts/hard-clean.ts",
+    "clean:soft": "node scripts/soft-clean.ts"
+  },
+  "dependencies": {
+    "@clerk/tanstack-react-start": "1.2.4",
+    "@mastra/core": "1.34.0",
+    "@tanstack/ai": "0.17.0",
+    "@tanstack/ai-openrouter": "0.9.0",
+    "@tanstack/react-router": "^1.170.1",
+    "@tanstack/react-router-devtools": "^1.167.0",
+    "@tanstack/react-start": "^1.168.1",
+    "convex": "1.39.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.6.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "@types/node": "^22.5.4",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "nitro": "^3.0.260311-beta",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.0"
+  },
+  "engines": {
+    "node": "24.15.0"
+  },
+  "packageManager": "pnpm@11.1.2+sha224.6d287705d0efa6c2ba7a74795dc72a7800f64840f2bc0961cedba029"
+}
+>>>>>>> 75f41c9 (feat(convex): add OpenBreach persistence layer for generic workflow runs)
