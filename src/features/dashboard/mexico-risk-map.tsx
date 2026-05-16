@@ -12,8 +12,10 @@ export function MexicoRiskMap({
   state: DashboardMunicipalityState;
   totalRows: number;
 }) {
-  const markers = state.status === "ready" ? getProjectedMarkers(state.items) : [];
-  const omittedCount = state.status === "ready" ? state.items.length - markers.length : 0;
+  const markers =
+    state.status === "ready" ? getProjectedMarkers(state.items) : [];
+  const omittedCount =
+    state.status === "ready" ? state.items.length - markers.length : 0;
 
   return (
     <div className="relative mt-5 flex flex-1 overflow-hidden rounded-[1.5rem] border border-cyan-300/15 bg-slate-950/70 p-5 sm:p-8">
@@ -22,7 +24,9 @@ export function MexicoRiskMap({
         <div>
           <p className="text-sm font-medium text-cyan-100">Map-ready surface</p>
           <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
-            Municipality markers use approximate Mexico-relative positions when coordinate data is available. The panel remains sized while {getMapStateCopy(state)}
+            Municipality markers use approximate Mexico-relative positions when
+            coordinate data is available. The panel remains sized while{" "}
+            {getMapStateCopy(state)}
           </p>
         </div>
 
@@ -43,22 +47,32 @@ export function MexicoRiskMap({
                 tabIndex={0}
                 aria-label={markerLabel}
                 title={markerLabel}
-                className={`group absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 shadow-lg outline-none transition hover:scale-125 focus:scale-125 focus:ring-2 focus:ring-cyan-100 focus:ring-offset-2 focus:ring-offset-slate-950 ${riskDisplay.markerClassName}`}
+                className={`group absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 shadow-lg transition outline-none hover:scale-125 focus:scale-125 focus:ring-2 focus:ring-cyan-100 focus:ring-offset-2 focus:ring-offset-slate-950 ${riskDisplay.markerClassName}`}
                 style={{ left: `${x}%`, top: `${y}%` }}
               >
                 <span className="sr-only">{markerLabel}</span>
-                <span className="pointer-events-none absolute left-1/2 top-6 hidden min-w-44 -translate-x-1/2 rounded-xl border border-white/10 bg-slate-950/95 px-3 py-2 text-left text-xs text-slate-200 shadow-xl group-hover:block group-focus:block">
-                  <span className="block font-semibold text-white">{item.name}</span>
+                <span className="pointer-events-none absolute top-6 left-1/2 hidden min-w-44 -translate-x-1/2 rounded-xl border border-white/10 bg-slate-950/95 px-3 py-2 text-left text-xs text-slate-200 shadow-xl group-hover:block group-focus:block">
+                  <span className="block font-semibold text-white">
+                    {item.name}
+                  </span>
                   <span className="block text-slate-400">{item.state}</span>
-                  <span className={`mt-1 block font-medium ${riskDisplay.textClassName}`}>{riskDisplay.label} · {item.riskScore}</span>
+                  <span
+                    className={`mt-1 block font-medium ${riskDisplay.textClassName}`}
+                  >
+                    {riskDisplay.label} · {item.riskScore}
+                  </span>
                 </span>
               </button>
             );
           })}
           {state.status === "ready" && markers.length === 0 ? (
             <div className="absolute inset-x-4 top-1/2 mx-auto max-w-sm -translate-y-1/2 rounded-2xl border border-white/10 bg-slate-950/85 p-4 text-center text-sm text-slate-300">
-              <p className="font-semibold text-white">No positionable municipality markers</p>
-              <p className="mt-2 leading-6">Rows loaded, but none include usable latitude and longitude.</p>
+              <p className="font-semibold text-white">
+                No positionable municipality markers
+              </p>
+              <p className="mt-2 leading-6">
+                Rows loaded, but none include usable latitude and longitude.
+              </p>
             </div>
           ) : null}
         </div>
@@ -66,11 +80,16 @@ export function MexicoRiskMap({
         <div className="grid gap-3 sm:grid-cols-3">
           <MetricPill label="Rows available" value={String(totalRows)} />
           <MetricPill label="Markers shown" value={String(markers.length)} />
-          <MetricPill label="Omitted" value={String(Math.max(omittedCount, 0))} />
+          <MetricPill
+            label="Omitted"
+            value={String(Math.max(omittedCount, 0))}
+          />
         </div>
         {omittedCount > 0 ? (
           <p className="rounded-2xl border border-amber-200/20 bg-amber-200/10 px-4 py-3 text-sm leading-6 text-amber-100">
-            {omittedCount} municipality {omittedCount === 1 ? "row was" : "rows were"} omitted from the map because coordinates are missing or invalid.
+            {omittedCount} municipality{" "}
+            {omittedCount === 1 ? "row was" : "rows were"} omitted from the map
+            because coordinates are missing or invalid.
           </p>
         ) : null}
       </div>
@@ -80,7 +99,12 @@ export function MexicoRiskMap({
 
 function MexicoBasemap() {
   return (
-    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" role="img" aria-label="Approximate outline of Mexico">
+    <svg
+      className="absolute inset-0 h-full w-full"
+      viewBox="0 0 100 100"
+      role="img"
+      aria-label="Approximate outline of Mexico"
+    >
       <defs>
         <linearGradient id="mexico-map-fill" x1="0" x2="1" y1="0" y2="1">
           <stop offset="0%" stopColor="rgb(34 211 238 / 0.2)" />
@@ -106,8 +130,12 @@ function MexicoBasemap() {
 function MetricPill({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{label}</p>
-      <p className="mt-2 text-xl font-semibold capitalize text-white">{value}</p>
+      <p className="text-xs tracking-[0.2em] text-slate-400 uppercase">
+        {label}
+      </p>
+      <p className="mt-2 text-xl font-semibold text-white capitalize">
+        {value}
+      </p>
     </div>
   );
 }
@@ -123,12 +151,23 @@ export function projectMexicoCoordinate(
   latitude: number | undefined,
   longitude: number | undefined,
 ) {
-  if (typeof latitude !== "number" || typeof longitude !== "number" || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+  if (
+    typeof latitude !== "number" ||
+    typeof longitude !== "number" ||
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude)
+  ) {
     return null;
   }
 
-  const x = ((longitude - MEXICO_LONGITUDE_RANGE.min) / (MEXICO_LONGITUDE_RANGE.max - MEXICO_LONGITUDE_RANGE.min)) * 100;
-  const y = ((MEXICO_LATITUDE_RANGE.max - latitude) / (MEXICO_LATITUDE_RANGE.max - MEXICO_LATITUDE_RANGE.min)) * 100;
+  const x =
+    ((longitude - MEXICO_LONGITUDE_RANGE.min) /
+      (MEXICO_LONGITUDE_RANGE.max - MEXICO_LONGITUDE_RANGE.min)) *
+    100;
+  const y =
+    ((MEXICO_LATITUDE_RANGE.max - latitude) /
+      (MEXICO_LATITUDE_RANGE.max - MEXICO_LATITUDE_RANGE.min)) *
+    100;
 
   return {
     x: clamp(x, 6, 94),

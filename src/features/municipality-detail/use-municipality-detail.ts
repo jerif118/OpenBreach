@@ -6,7 +6,9 @@ import {
   toMunicipalityDetailState,
 } from "./municipality-detail-data.ts";
 
-export function useConvexMunicipalityDetail(id: string): MunicipalityDetailState {
+export function useConvexMunicipalityDetail(
+  id: string,
+): MunicipalityDetailState {
   const detail = useQuery(api.municipalities.get, { id });
 
   return toMunicipalityDetailState(detail, "convex", id);

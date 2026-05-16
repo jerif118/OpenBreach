@@ -1,4 +1,7 @@
-import { createReportAiAdapter, type ReportAiProvider } from "../../ai/report-adapter.ts";
+import {
+  createReportAiAdapter,
+  type ReportAiProvider,
+} from "../../ai/report-adapter.ts";
 import { renderReportArtifacts } from "../../reports/pdf-renderer.ts";
 import {
   generateRemediationReportInputSchema,
@@ -34,17 +37,24 @@ export type GenerateRemediationReportBatchOutput = {
   results: GenerateRemediationReportBatchRecord[];
 };
 
-export type RenderReportBatchPdfsInput = Omit<GenerateRemediationReportBatchInput, "id"> & {
+export type RenderReportBatchPdfsInput = Omit<
+  GenerateRemediationReportBatchInput,
+  "id"
+> & {
   batchId?: string;
   outputDirectory?: string;
 };
 
-export async function generateRemediationReport(input: GenerateRemediationReportInput) {
+export async function generateRemediationReport(
+  input: GenerateRemediationReportInput,
+) {
   const adapter = createReportAiAdapter();
   return await adapter.generateRemediationReport(input);
 }
 
-export async function generateRemediationReportVariants(input: GenerateRemediationReportInput) {
+export async function generateRemediationReportVariants(
+  input: GenerateRemediationReportInput,
+) {
   const adapter = createReportAiAdapter();
   return await adapter.generateRemediationReportVariants(input);
 }
@@ -58,7 +68,8 @@ function buildFailedResult({
   generatedAt: string;
   municipalityId: string;
 }): GenerateRemediationReportResult {
-  const message = error instanceof Error ? error.message : "Unknown report generation error.";
+  const message =
+    error instanceof Error ? error.message : "Unknown report generation error.";
 
   return generateRemediationReportResultSchema.parse({
     status: "failed",
@@ -121,7 +132,9 @@ export async function generateRemediationReportBatch({
     }
   }
 
-  const completed = results.filter((result) => result.result.status === "completed").length;
+  const completed = results.filter(
+    (result) => result.result.status === "completed",
+  ).length;
 
   return {
     id,
