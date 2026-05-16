@@ -145,6 +145,88 @@ export const remediationReportSchema = z.object({
 
 export type RemediationReport = z.infer<typeof remediationReportSchema>;
 
+export const reportGenerationStatusSchema = z.enum(["pending", "completed", "failed"]);
+
+export type ReportGenerationStatus = z.infer<typeof reportGenerationStatusSchema>;
+
+export const reportPdfReferenceSchema = z.object({
+  storagePath: z
+    .string()
+    .min(1)
+    .regex(/^data\/reports\/[A-Za-z0-9._-]+\.pdf$/, "PDF path must stay within data/reports/"),
+  fileName: z
+    .string()
+    .min(1)
+    .regex(/^[A-Za-z0-9._-]+\.pdf$/, "PDF file name must be a safe .pdf file name"),
+  contentType: z.literal("application/pdf").default("application/pdf"),
+  generatedAt: z.string().datetime().optional(),
+  sizeBytes: z.number().int().nonnegative().optional(),
+});
+
+export type ReportPdfReference = z.infer<typeof reportPdfReferenceSchema>;
+
+const reportMetadataBaseSchema = z.object({
+  reportId: z.string().min(1),
+  municipalityId: z.string().min(1),
+  generatedAt: z.string().datetime().optional(),
+  updatedAt: z.string().datetime(),
+  pdf: reportPdfReferenceSchema.optional(),
+});
+
+const completedReportMetadataSchema = reportMetadataBaseSchema.extend({
+  status: z.literal("completed"),
+});
+
+const pendingReportMetadataSchema = reportMetadataBaseSchema.extend({
+  status: z.literal("pending"),
+});
+
+const failedReportMetadataSchema = reportMetadataBaseSchema.extend({
+  status: z.literal("failed"),
+  error: z.string().min(1),
+});
+
+export const reportMetadataSchema = z.discriminatedUnion("status", [
+  pendingReportMetadataSchema,
+  completedReportMetadataSchema,
+  failedReportMetadataSchema,
+]);
+
+export type ReportMetadata = z.infer<typeof reportMetadataSchema>;
+
+export const selectedMunicipalityReportContextSchema = z.object({
+  municipality: municipalitySchema,
+  scan: scanResultSchema,
+  source: z.enum(["convex", "fixture"]),
+  selectedAt: z.string().datetime(),
+  rank: z.number().int().positive().optional(),
+});
+
+export type SelectedMunicipalityReportContext = z.infer<
+  typeof selectedMunicipalityReportContextSchema
+>;
+
+export const generateRemediationReportResultSchema = z.discriminatedUnion("status", [
+  z.object({
+    status: z.literal("pending"),
+    metadata: pendingReportMetadataSchema,
+  }),
+  z.object({
+    status: z.literal("completed"),
+    report: remediationReportSchema,
+    metadata: completedReportMetadataSchema,
+  }),
+  z.object({
+    status: z.literal("failed"),
+    metadata: failedReportMetadataSchema,
+    error: z.string().min(1),
+  }),
+]);
+
+export type GenerateRemediationReportResult = z.infer<
+  typeof generateRemediationReportResultSchema
+>;
+
 export const userProfileSchema = z.object({
   id: z.string().min(1),
   clerkUserId: z.string().min(1),
