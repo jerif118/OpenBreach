@@ -1,6 +1,6 @@
 import { rm } from "node:fs/promises";
 
-const PATHS = [".wrangler/", "coverage/", "dist/", "node_modules/.cache/"];
+const PATHS = [".output/", ".tanstack/", "coverage/", "node_modules/.cache/"];
 
 await Promise.all(
   PATHS.map(async (path) =>
