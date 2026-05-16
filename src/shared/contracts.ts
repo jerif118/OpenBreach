@@ -405,6 +405,17 @@ export const authorizationScopeSchema = z.object({
   validUntil: z.string().datetime(),
   agentId: z.string().min(1),
   legalBasis: z.string().min(1).optional(),
+}).superRefine((data, ctx) => {
+  const fromTime = Date.parse(data.validFrom);
+  const untilTime = Date.parse(data.validUntil);
+  if (isNaN(fromTime) || isNaN(untilTime)) return;
+  if (untilTime <= fromTime) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "validUntil must be strictly after validFrom",
+      path: ["validUntil"],
+    });
+  }
 });
 export type AuthorizationScope = z.infer<typeof authorizationScopeSchema>;
 
@@ -506,6 +517,23 @@ export const approvalGateSchema = z.object({
   reviewNotes: z.string().optional(),
   validUntil: z.string().datetime().optional(),
   sourceAgent: z.string().min(1),
+}).superRefine((data, ctx) => {
+  if (data.status === "approved" || data.status === "rejected") {
+    if (!data.reviewedAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "reviewedAt is required when status is approved or rejected",
+        path: ["reviewedAt"],
+      });
+    }
+    if (!data.reviewerId || data.reviewerId.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "reviewerId is required when status is approved or rejected",
+        path: ["reviewerId"],
+      });
+    }
+  }
 });
 export type ApprovalGate = z.infer<typeof approvalGateSchema>;
 
@@ -526,6 +554,16 @@ export const validationResultSchema = z.object({
   findings: z.array(z.string()).optional(),
   agentId: z.string().min(1),
   notes: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.status === "confirmed" || data.status === "rejected") {
+    if (!data.completedAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "completedAt is required for terminal status (confirmed/rejected)",
+        path: ["completedAt"],
+      });
+    }
+  }
 });
 export type ValidationResult = z.infer<typeof validationResultSchema>;
 
