@@ -18,11 +18,7 @@
     "dashboard:verify": "node scripts/validate-dashboard-verification.ts",
     "dev": "vite dev",
     "fix:oxfmt": "oxfmt --write",
-<<<<<<< HEAD
     "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts && node scripts/validate-openbreach-contracts.ts",
-=======
-    "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts",
->>>>>>> 91cf41431f02562bdcfee3d3344874b1d8f834a0
     "format": "oxfmt --write",
     "format:check": "oxfmt --check",
     "lint:oxfmt": "oxfmt --check",
@@ -31,10 +27,7 @@
     "municipalities:seed": "convex run municipalities:seed \"$(node scripts/municipality-seed-args.ts)\"",
     "municipalities:seed:args": "node scripts/municipality-seed-args.ts",
     "municipalities:validate": "node scripts/validate-municipality-seed.ts",
-<<<<<<< HEAD
     "openbreach:validate": "node scripts/validate-openbreach-contracts.ts",
-=======
->>>>>>> 91cf41431f02562bdcfee3d3344874b1d8f834a0
     "preview": "vite preview",
     "report:ai-provider": "node scripts/validate-report-ai-provider.ts",
     "report:batch": "node scripts/validate-report-batch.ts",
@@ -89,8 +82,4 @@
     "node": "24.15.0"
   },
   "packageManager": "pnpm@11.1.2+sha224.6d287705d0efa6c2ba7a74795dc72a7800f64840f2bc0961cedba029"
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 91cf41431f02562bdcfee3d3344874b1d8f834a0
