@@ -24,14 +24,14 @@ Must have for the MVP:
 - Deterministic scoring that turns passive signals into explainable findings and risk levels.
 - A dashboard with a Mexico risk map and highest-risk ranking.
 - A municipality detail page with findings, evidence, remediation text, and report download.
-- Remediation report JSON and PDFs for the top 10 risky municipalities, with a local template fallback if AWS access is unavailable.
+- Remediation report JSON and PDFs for the top 10 risky municipalities, generated through a Mastra workflow with a local template fallback if model credentials or runtime support are unavailable.
 - A demo runbook with local commands, fallback fixture flow, safety notes, and judging script.
 
 Should have if time allows:
 
 - Full 500-municipality seed coverage.
 - State and risk filters on the dashboard.
-- AWS Bedrock AgentCore-backed report generation.
+- Mastra-backed report generation using TanStack AI provider adapters.
 - Hosted public demo deployment.
 - Basic unit tests for contract validation and scoring thresholds.
 
@@ -51,8 +51,8 @@ Assumptions:
 - Team size and hackathon duration were not provided, so the plan assumes a 3-5 person team and a 24-48 hour build window.
 - The repository is `jerif118/DEFF-ACC` at `https://github.com/jerif118/DEFF-ACC`.
 - Issues are enabled and have been created as the source task inventory.
-- The app can use Node.js 20+ and TypeScript.
-- AWS Bedrock AgentCore access may not be available during the demo, so report generation must work without it.
+- The app can use TypeScript and should target Node.js 24+ when TanStack AI is enabled, because the TanStack AI README currently documents Node.js v24+ as a requirement.
+- The selected hosting provider may not support the required Node runtime immediately, so report generation must also work as an offline/local fixture pipeline.
 - The first implementation can be fixture-backed instead of database-backed.
 
 Risks and mitigations:
@@ -60,7 +60,7 @@ Risks and mitigations:
 - Public source quality may be uneven. Mitigation: store source URLs per municipality and accept a smaller verified seed dataset for the demo.
 - Passive CMS detection can produce false positives. Mitigation: display confidence and evidence, and avoid claiming confirmed compromise.
 - Live scanning may be slow or blocked. Mitigation: commit generated fixture data and demo from fixtures when needed.
-- AWS credentials or AgentCore access may be unavailable. Mitigation: isolate AgentCore behind one adapter and keep a deterministic report template fallback.
+- Model credentials or hosted Node runtime support may be unavailable. Mitigation: isolate AI generation behind a Mastra/TanStack AI adapter and keep a deterministic report template fallback.
 - Map implementation can consume too much time. Mitigation: use markers or a static basemap first; defer municipality polygons.
 
 ## Tech Stack
@@ -70,24 +70,28 @@ Recommended stack:
 | Layer | Choice | Rationale |
 | --- | --- | --- |
 | Full-stack web app | TanStack Start with React and TypeScript | The current docs describe TanStack Start as a full-stack React framework with SSR, streaming, API/server routes, server functions, Vite bundling, and universal deployment. This keeps the hackathon app in one TypeScript codebase. |
-| Runtime | Node.js 20+ | Required by the Bedrock AgentCore TypeScript SDK and compatible with modern TanStack/Vite tooling. |
+| Runtime | Node.js 24+ for AI-enabled paths | TanStack AI currently documents Node.js v24+ as a requirement. If Vercel/Netlify runtime support is not available during the hackathon, generate reports locally and serve committed artifacts. |
 | Data storage | JSON fixtures in `data/` | Fastest credible path for a hackathon; easy to inspect, commit, and demo offline. |
 | Scanner and scoring | TypeScript scripts/modules | Shares contracts with the web app and avoids cross-language glue. Python can be added later only if a specific scanner library justifies it. |
-| Report generation | Local template first, optional AWS Bedrock AgentCore TypeScript adapter | The AWS SDK supports TypeScript agents and requires AWS credentials plus AgentCore access. The local fallback protects the demo. |
+| Agent/workflow harness | Mastra | Mastra is a TypeScript framework for AI applications and agents, supports agents/tools/workflows, integrates with React/Node apps, and can also run standalone. This avoids AWS-specific runtime lock-in. |
+| AI SDK | TanStack AI | Provider-agnostic adapters, streaming/generation primitives, type-safe tools, observability events, and TanStack Start integration. Use it instead of Vercel AI SDK. |
+| Report generation | Mastra workflow plus local template fallback | The Mastra workflow owns report orchestration; TanStack AI owns provider calls; local templates protect the demo when model credentials or runtime support are missing. |
 | PDF rendering | Simple HTML-to-PDF or PDF library selected in #5 | Any solution is acceptable if PDFs are generated from the report contract and can be downloaded from the app. |
 | Map UI | Fast marker-based map or static SVG fallback | Markers with risk colors are enough for the demo; full municipal polygons are deferred. |
 
-Documentation note: Context7 was attempted for current framework docs but was unavailable because its API key is invalid in this environment. The plan uses the linked TanStack Start docs and the AWS Bedrock AgentCore SDK README as fallback references.
+Documentation note: Context7 was attempted for current framework docs but was unavailable because its API key is invalid in this environment. The plan uses the linked TanStack Start docs, Mastra README/docs, TanStack AI README/docs, and the TanStack Start + Mastra example repository as fallback references.
 
 ## Architecture
 
-Primary pattern: fixture-first pipeline inside one full-stack TypeScript app.
+Primary pattern: fixture-first pipeline inside one deployable full-stack TypeScript app.
 
-This pattern optimizes for visible progress. Data, scan outputs, scores, and reports are stored as JSON/PDF artifacts that the TanStack Start app serves through typed routes. Each task can build against fixtures before upstream work is finished.
+This pattern optimizes for visible progress and hosting portability. Data, scan outputs, scores, and reports are stored as JSON/PDF artifacts that the TanStack Start app serves through typed routes. Mastra agents/tools/workflows live under `src/mastra`, and TanStack Start routes or scripts invoke them through a narrow TypeScript boundary. TanStack AI handles provider-agnostic model calls. Each task can build against fixtures before upstream work is finished.
+
+Reference pattern: follow the separation shown in `ataschz/tanstack-start-mastra-example`: TanStack Start owns routes and UI, Mastra owns agents/tools/workflows, and a web boundary connects the UI to the agent runtime. This project should adapt the pattern without copying its Vercel AI SDK dependency; use TanStack AI instead.
 
 Fallback pattern: static demo shell.
 
-If live scanning, AWS, or API routes are blocked, the frontend can load committed mock JSON and static PDFs. This weakens realism but preserves the judging walkthrough.
+If live scanning, model credentials, runtime support, or API routes are blocked, the frontend can load committed mock JSON and static PDFs. This weakens realism but preserves the judging walkthrough.
 
 ```mermaid
 flowchart LR
@@ -96,8 +100,9 @@ flowchart LR
   C --> D[Raw scan results JSON]
   D --> E[Risk scorer]
   E --> F[Enriched risk results JSON]
-  F --> G[Report generator]
-  H[AWS Bedrock AgentCore optional] -.-> G
+  F --> G[Mastra remediation workflow]
+  H[TanStack AI provider adapter] -.-> G
+  N[Local template fallback] -.-> G
   G --> I[Remediation PDFs]
   F --> J[TanStack Start API routes]
   B --> J
@@ -171,7 +176,7 @@ GET /api/reports/:municipalityId.pdf -> application/pdf | 404
 
 | ID | Title | Owner | Status | Dependencies | Link |
 | --- | --- | --- | --- | --- | --- |
-| #1 | Bootstrap app shell and shared data contracts | TBD | Open | None | https://github.com/jerif118/DEFF-ACC/issues/1 |
+| #1 | Bootstrap app shell, Mastra runtime, and shared contracts | TBD | Open | None | https://github.com/jerif118/DEFF-ACC/issues/1 |
 | #2 | Curate top-municipality seed dataset | TBD | Open | #1 | https://github.com/jerif118/DEFF-ACC/issues/2 |
 | #3 | Implement passive website scanner | TBD | Open | #1, #2 | https://github.com/jerif118/DEFF-ACC/issues/3 |
 | #4 | Add vulnerability matching and risk scoring | TBD | Open | #3 | https://github.com/jerif118/DEFF-ACC/issues/4 |
@@ -183,11 +188,11 @@ GET /api/reports/:municipalityId.pdf -> application/pdf | 404
 
 ```mermaid
 flowchart TD
-  I1["#1 App shell and contracts"]
+  I1["#1 App shell, Mastra, contracts"]
   I2["#2 Seed dataset"]
   I3["#3 Passive scanner"]
   I4["#4 Risk scoring"]
-  I5["#5 Reports and PDFs"]
+  I5["#5 Mastra reports and PDFs"]
   I6["#6 API routes"]
   I7["#7 Risk map dashboard"]
   I8["#8 Detail and report flow"]
@@ -257,9 +262,9 @@ The executable app does not exist yet; [#1](https://github.com/jerif118/DEFF-ACC
 
 Prerequisites:
 
-- Node.js 20+
+- Node.js 24+ for TanStack AI-enabled report generation
 - npm
-- Optional AWS credentials and AgentCore access for AI-backed reports
+- Optional model-provider API key for AI-backed reports
 
 Target setup:
 
@@ -278,13 +283,21 @@ npm run reports
 npm run build
 ```
 
+If the team runs Mastra as a separate local development server, document and wire an explicit paired command such as:
+
+```bash
+npm run dev:mastra
+```
+
 Suggested environment variables:
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `AWS_REGION` | No | Region for optional AgentCore report generation. |
-| `AWS_PROFILE` | No | Local AWS profile when AgentCore is enabled. |
-| `BEDROCK_AGENTCORE_ENABLED` | No | Set to `true` to use AgentCore; default should use local templates. |
+| `REPORT_AI_ENABLED` | No | Set to `true` to use Mastra + TanStack AI report generation; default should use local templates. |
+| `AI_MODEL_PROVIDER` | No | Provider selected for TanStack AI adapters, for example `openai`, `anthropic`, `gemini`, or `ollama`. |
+| `OPENAI_API_KEY` | No | Provider key if OpenAI is selected. |
+| `ANTHROPIC_API_KEY` | No | Provider key if Anthropic is selected. |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | No | Provider key if Gemini is selected. |
 | `SCAN_CONCURRENCY` | No | Limits simultaneous passive requests. |
 | `SCAN_TIMEOUT_MS` | No | Per-request timeout for passive checks. |
 
@@ -309,7 +322,7 @@ Suggested environment variables:
 Fallback demo path:
 
 - Use committed fixtures instead of live scans.
-- Use local template reports instead of AgentCore.
+- Use local template reports instead of model-backed Mastra generation.
 - Run the app locally if deployment is not ready.
 
 ## Judging Narrative
@@ -335,4 +348,6 @@ What makes the MVP credible:
 - Original idea: [`IDEA.md`](./IDEA.md)
 - GitHub issue inventory: https://github.com/jerif118/DEFF-ACC/issues
 - TanStack Start docs: https://tanstack.com/start/latest
-- AWS Bedrock AgentCore SDK for TypeScript: https://github.com/aws/bedrock-agentcore-sdk-typescript
+- Mastra: https://github.com/mastra-ai/mastra
+- TanStack AI: https://tanstack.com/ai/latest
+- TanStack Start + Mastra reference: https://github.com/ataschz/tanstack-start-mastra-example

@@ -14,8 +14,12 @@ Para el MVP podemos enfocarnos en México, analizamos los 500 más grandes y arm
 
 ## Tech stack
 
-- https://github.com/aws/bedrock-agentcore-sdk-typescript
-
 - https://tanstack.com/start/latest
 
-We want to keep TypeScript on the client, and on the server side, we can still use TypeScript or have parts of the agent in Python.
+- https://github.com/mastra-ai/mastra
+
+- https://tanstack.com/ai/latest
+
+- Reference pattern: https://github.com/ataschz/tanstack-start-mastra-example
+
+We want to keep TypeScript across the client, server, and agent workflow. The app should be deployable to platform-agnostic hosting such as Vercel or Netlify, so the agent runtime should not depend on AWS-specific services. Python can be added later only if a specific passive scanning library clearly justifies it.
