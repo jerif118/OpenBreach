@@ -19,9 +19,7 @@
       "remediationHint": "Add Content-Security-Policy, X-Frame-Options, and HSTS after validating compatibility.",
       "confidence": "medium",
       "status": "observed",
-      "affectedAssets": [
-        "https://www.merida.gob.mx/"
-      ],
+      "affectedAssets": ["https://www.merida.gob.mx/"],
       "evidenceSummary": "Fixture evidence for X-Frame-Options and Content-Security-Policy review.",
       "remediationSteps": [
         "Add Content-Security-Policy, X-Frame-Options, and HSTS after validating compatibility.",
@@ -39,9 +37,7 @@
     "scope": {
       "title": "Scope",
       "narrative": "Merida was treated as the scoped public-facing target for this report. The report generator normalized the available structured input and limited the output to the provided target context.",
-      "bullets": [
-        "Primary public URL: https://www.merida.gob.mx"
-      ]
+      "bullets": ["Primary public URL: https://www.merida.gob.mx"]
     },
     "authorization": {
       "title": "Authorization",
@@ -63,10 +59,7 @@
     "findingsOverview": {
       "title": "Findings overview",
       "narrative": "The ordered finding set below reflects the normalized evidence currently available for Merida. Items with stronger evidence and higher severity appear first.",
-      "bullets": [
-        "medium: 1",
-        "Top finding: Missing baseline security headers"
-      ]
+      "bullets": ["medium: 1", "Top finding: Missing baseline security headers"]
     },
     "skippedTests": {
       "title": "Skipped and denied tests",
