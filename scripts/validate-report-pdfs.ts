@@ -10,6 +10,34 @@ import {
   scanResultSchema,
 } from "../src/shared/contracts.ts";
 
+function assertPageTreeReferencesPageObjects(pdfContent: string): void {
+  const objects = new Map<number, string>();
+
+  for (const match of pdfContent.matchAll(
+    /^(\d+) 0 obj\n([\s\S]*?)\nendobj/gm,
+  )) {
+    objects.set(Number(match[1]), match[2]);
+  }
+
+  const pagesObject = objects.get(2);
+  const kidsMatch = pagesObject?.match(/\/Kids \[([^\]]+)\]/);
+
+  if (!kidsMatch) {
+    throw new Error("Generated PDF page tree is missing /Kids references.");
+  }
+
+  for (const pageRef of kidsMatch[1].matchAll(/(\d+) 0 R/g)) {
+    const pageObjectId = Number(pageRef[1]);
+    const pageObject = objects.get(pageObjectId);
+
+    if (!pageObject || !/\/Type\s+\/Page\b/.test(pageObject)) {
+      throw new Error(
+        `Generated PDF /Kids references non-page object ${pageObjectId}.`,
+      );
+    }
+  }
+}
+
 const selectedAt = "2026-01-01T00:00:00.000Z";
 const contexts = selectTopRiskReportContexts({
   municipalities: municipalitySchema.array().parse(municipalitiesFixture),
@@ -108,6 +136,10 @@ for (const record of output.results) {
     artifacts.friendly.pdf.storagePath,
     "latin1",
   );
+
+  assertPageTreeReferencesPageObjects(technicalPdfContent);
+  assertPageTreeReferencesPageObjects(friendlyPdfContent);
+
   const context = contexts.find(
     (candidate) => candidate.municipality.id === record.municipalityId,
   );
