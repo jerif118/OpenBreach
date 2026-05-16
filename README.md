@@ -1,557 +1,272 @@
-# DEFF-ACC
+# OpenBreach
 
-DEFF-ACC is a hackathon MVP for helping Latin American municipal governments understand visible cybersecurity risk before attackers do. The first vertical slice focuses on Mexico: collect public website signals for major municipalities, store and sync results through Convex, score risk, show the result on an interactive map, and generate remediation PDFs for the highest-risk sites.
+OpenBreach is the working title for the DEFF-ACC pivot: an authorized security-validation workflow for public-facing web systems. The product starts where passive scanners stop. It collects safe public evidence, turns that evidence into vulnerability hypotheses, asks a human to approve any low-impact validation, normalizes evidence, and generates remediation reports for technical and nontechnical audiences.
 
-The project must stay passive. It only uses information any browser or normal HTTP client can see, such as TLS status, response headers, CMS hints, public admin paths, and known vulnerability metadata. It does not exploit, brute force, authenticate, submit forms, or scan private systems.
+This README is the source of truth for the hackathon MVP plan. The new pivot issue inventory is GitHub issues [#64](https://github.com/jerif118/DEFF-ACC/issues/64) through [#73](https://github.com/jerif118/DEFF-ACC/issues/73). Earlier municipality-only issues are useful implementation context, but they are superseded by the pivot scope unless a teammate explicitly reuses their code.
 
-## Runtime
+## Idea Summary
 
-- Node.js: `24.15.0`
-- pnpm: `11.1.2`
+Organizations operate public websites, APIs, portals, and service endpoints with limited security capacity. Attackers often find basic exposure first: expired TLS, missing browser security headers, exposed admin paths, public CMS fingerprints, and outdated technology hints.
 
-## Local Commands
-
-- `pnpm dev`: start the TanStack Start app.
-- `pnpm build`: build the app and run TypeScript checks.
-- `pnpm typecheck`: run TypeScript without emitting files.
-- `pnpm convex:dev`: start Convex after configuring `VITE_CONVEX_URL`.
-- `pnpm convex:codegen`: refresh generated Convex API files from source functions.
-- `pnpm fixtures:validate`: validate sample fixture JSON against shared contracts.
-- `pnpm scanner:validate`: validate passive scanner behavior with offline mocked HTTP/TLS checks.
-- `pnpm scanner:fixture`: export `data/scans/latest.scan-results.json` as a deterministic raw scan fixture for demos and downstream development.
-- `pnpm risk:fixture`: export `data/scans/latest.enriched-scan-results.json` with deterministic findings, `riskScore`, and `riskLevel`.
-- `pnpm risk:validate`: validate score thresholds, high-risk findings, enriched fixture coverage, and Convex mutation args.
-- `pnpm risk:persist`: upsert enriched scan results into the configured Convex deployment.
-- `pnpm scanner:persistence:validate`: validate raw scanner output can be converted to Convex mutation args without scored findings.
-- `pnpm scanner:persist`: run the passive scanner against the seed dataset and upsert raw evidence into the configured Convex deployment.
-- `pnpm municipalities:validate`: validate the 50-record Mexican municipality seed dataset.
-- `pnpm municipalities:seed`: import the validated municipality seed into the configured Convex development deployment.
-- `pnpm municipalities:list:validate`: validate the public municipality list query contract and bounded fallback behavior.
-- `pnpm municipalities:detail:validate`: validate the public municipality detail aggregate contract and null optional data behavior.
-- `pnpm auth:writes:validate`: validate protected-write source boundaries and admin/operator role requirements.
-- `pnpm report:smoke`: generate a deterministic `RemediationReport` from fixtures.
-- `pnpm report:generate`: generate deterministic fallback report JSON and local PDF artifacts.
-- `pnpm report:persist:args`: print Convex mutation arguments for live report metadata persistence.
-- `pnpm report:persistence:validate`: validate report persistence argument generation and protected write expectations.
-
-## Environment
-
-Copy `.env.example` for local setup. `VITE_CLERK_PUBLISHABLE_KEY`,
-`CLERK_SECRET_KEY`, `CLERK_JWT_ISSUER_DOMAIN`, and `VITE_CONVEX_URL` are
-expected for Clerk plus Convex auth. The public app shell renders without these
-secrets so local no-secret smoke checks remain available.
-
-## Convex And Clerk
-
-Convex source files live under `convex/`. Do not edit generated files under
-`convex/_generated/` by hand; run `pnpm convex:codegen` or `pnpm convex:dev` to
-refresh them. Clerk JWT validation is configured in `convex/auth.config.ts` with
-a non-secret placeholder issuer; replace it with the value documented as
-`CLERK_JWT_ISSUER_DOMAIN` for a real deployment.
-
-Public municipality reads are intentionally separate from protected writes.
-`municipalities.list` and `municipalities.get` can be used by dashboard and
-detail screens as read-only live data contracts. Write paths that change seed,
-profile, scan, score, or report data are not public unauthenticated APIs:
-municipality seed and profile administration require an authenticated `admin`
-profile, report writes require `operator` or `admin`, and raw/enriched scan
-persistence uses internal Convex mutations invoked by trusted scripts.
-
-## Fixtures
-
-Tiny deterministic fixtures live in `data/municipalities/`, `data/scans/`, and
-`data/reports/`. The source-backed municipality MVP seed lives at
-`data/municipalities/municipalities.seed.json` with dataset notes in
-`data/municipalities/README.md`.
-
-For the municipality seed workflow:
-
-```bash
-pnpm municipalities:validate
-pnpm municipalities:seed
-```
-
-`pnpm municipalities:seed` runs the Convex `municipalities:seed` mutation with the
-validated JSON records. If Convex credentials or a development deployment are not
-available, keep using `municipalities.seed.json` as the deterministic fallback
-for local demos and review.
-
-For passive scan persistence, seed municipalities first, then run:
-
-```bash
-pnpm scanner:persist
-```
-
-The command runs the passive scanner with the centralized timeout, retry, and
-delay controls, converts the raw observable evidence into the internal
-`rawScanResults:upsertMany` mutation arguments, and upserts one latest raw
-evidence record per municipality external ID. The persisted raw records are
-queryable through `rawScanResults:listLatest` and
-`rawScanResults:latestByExternalId`. They do not require issue #4-owned findings,
-scores, `riskScore`, or `riskLevel` fields.
-
-For deterministic demo and downstream issue #4 fallback data, export the raw scan
-fixture instead:
-
-```bash
-pnpm scanner:fixture
-```
-
-The exporter runs the scanner against the seed municipalities with deterministic
-local HTTP/TLS dependencies, validates every record against `RawScanEvidence`,
-sorts output by stable municipality ID, writes two-space JSON with a trailing
-newline, and keeps scoring/enrichment fields out of
-`data/scans/latest.scan-results.json`.
-
-### Passive Scanner Verification
-
-Use the offline scanner checks before demoing or persisting scan output:
-
-```bash
-pnpm scanner:validate
-pnpm scanner:persistence:validate
-pnpm scanner:fixture
-pnpm fixtures:validate
-```
-
-`pnpm scanner:validate` uses mocked HTTP, TLS, delay, and clock dependencies. It
-checks successful raw evidence shape, structured HTTP/TLS/admin failure output,
-centralized timeout/retry/delay behavior, and a 10-municipality batch from the
-seed dataset without live municipal traffic. It also verifies the passive safety
-boundary: scanner requests omit credentials, use only `HEAD` or safe `GET`, do
-not send request bodies, stay on the fixed public admin-path allowlist, avoid
-query payloads, and never perform POST, login, brute-force, exploit, destructive,
-or deep-crawl behavior.
-
-`pnpm scanner:persistence:validate` verifies raw scanner records can be converted
-to `rawScanResults:upsertMany` arguments without downstream scoring fields.
-`pnpm scanner:fixture` refreshes the deterministic JSON fixture at
-`data/scans/latest.scan-results.json`; use `pnpm fixtures:validate` after export
-to confirm committed fixtures still satisfy shared contracts.
-
-### Risk Scoring And Enrichment
-
-Issue #4 enrichment lives in `src/scanner/risk.ts`. It maps passive evidence to
-deterministic findings, clamps `riskScore` to `0-100`, and assigns levels as
-`low=0-24`, `medium=25-49`, `high=50-74`, and `critical=75-100`. The scoring
-weights are intentionally transparent and conservative: unreachable sites,
-invalid or expired TLS, missing baseline browser security headers, reachable
-public admin paths, CMS fingerprints, and high-confidence local CMS/version
-matches add bounded points. The output keeps `riskScore` canonical; `score`
-remains only as a temporary compatibility alias for older consumers.
-
-The local CMS knowledge base is a small deterministic MVP list in
-`src/scanner/vulnerableCmsKnowledgeBase.ts`. It only creates a known-vulnerability
-finding when the scanner observed a known CMS name, an explicit version string,
-and confidence `>= 0.8`. Findings describe exposure to known risk and remediation
-steps; they do not claim exploitation or compromise.
-
-Generate and validate enriched demo data with:
-
-```bash
-pnpm scanner:fixture
-pnpm risk:fixture
-pnpm risk:validate
-pnpm fixtures:validate
-```
-
-`pnpm risk:fixture` reads `data/scans/latest.scan-results.json`, enriches the
-raw evidence, and writes `data/scans/latest.enriched-scan-results.json`. The
-exporter keeps the fixture deterministic and ensures demo coverage includes at
-least one low, medium, high, and critical municipality. To persist enriched
-results after municipalities have been seeded in Convex, run:
-
-```bash
-pnpm risk:persist
-```
-
-The command builds validated `scanResults:upsertEnrichedMany` mutation arguments
-from the raw fixture/scanner evidence, preserving original scan context alongside
-findings, `riskScore`, and `riskLevel`.
-
-### Convex Developer Data Flow
-
-Use this ordered flow when preparing live data for the dashboard, detail page,
-and downstream demo runbook:
-
-```bash
-pnpm municipalities:validate
-pnpm scanner:persistence:validate
-pnpm risk:validate
-pnpm report:persistence:validate
-pnpm auth:writes:validate
-pnpm municipalities:list:validate
-pnpm municipalities:detail:validate
-pnpm municipalities:seed
-pnpm scanner:persist
-pnpm risk:persist
-pnpm report:generate
-pnpm report:persist:args
-```
-
-Run `pnpm convex:dev` in a configured Convex project before live Convex writes.
-`pnpm municipalities:seed` calls the protected `municipalities:seed` mutation and
-therefore needs Clerk/Convex auth configured with an authenticated `admin`
-profile. `pnpm scanner:persist` and `pnpm risk:persist` call internal Convex
-mutations through trusted developer scripts; they are for local/deployment
-operators, not browser callers. `pnpm report:persist:args` only prints the live
-payload shape; persisting report metadata with `reports:persistGenerated` still
-requires authenticated Convex context, `operator` or `admin` role membership, and
-live Convex document IDs.
-
-When Clerk/Convex credentials are unavailable, use the fixture commands instead:
-
-```bash
-pnpm scanner:fixture
-pnpm risk:fixture
-pnpm report:generate
-pnpm fixtures:validate
-```
-
-Fixtures are import/export and offline demo inputs. Convex read queries do not
-synthesize persisted sample rows from fixtures.
-
-### Convex Missing-Data Behavior
-
-| State | Public read behavior | Developer action |
-| --- | --- | --- |
-| No municipalities seeded | `municipalities.list` returns an empty bounded array; `municipalities.get({ id })` returns `null`. | Run `pnpm municipalities:seed` with an authenticated `admin` profile, or use committed fixtures for an offline demo. |
-| Municipality exists without enriched scan rows | `municipalities.list` returns up to 50 rows and derives `riskScore`/`riskLevel` from the municipality `riskTier`; `municipalities.get({ id })` returns `scan: null`. | Run `pnpm scanner:persist` then `pnpm risk:persist`, or explain the unscanned state in the demo. |
-| Municipality exists without report metadata | `municipalities.get({ id })` returns `report: null`; `reports.getForMunicipality({ municipalityId })` returns `null`. | Run `pnpm report:generate`, inspect `pnpm report:persist:args`, then persist with authenticated `operator` or `admin` context and live document IDs. |
-| Unknown external municipality ID | `municipalities.get({ id })` returns `null`. | Check the seed dataset ID or seed Convex before opening the detail route. |
-
-These states are expected and should not crash downstream dashboard, detail, or
-demo flows. Downstream issue #9 can use the validation commands above to prove
-the contract surface before attempting live deployment smoke checks.
-
-## Current Repository State
-
-The repository now contains a TanStack Start starter scaffold and initial Convex generated client files, but it is not yet a DEFF-ACC product implementation.
-
-Already present:
-
-- `package.json`, `pnpm-lock.yaml`, `vite.config.ts`, `tsconfig.json`, and `src/` from a TanStack Start starter app.
-- Generated Convex client files under `convex/_generated/` plus Convex AI guidance under `convex/_generated/ai/`.
-- Shared Zod contracts, tiny sample fixtures, fixture validation scripts, Convex schema/functions, and placeholder Convex auth config.
-- Local toolchain pins in `package.json`: Node.js `24.15.0` and `pnpm@11.1.2`.
-- Basic scripts for local development, production build, typecheck, preview, and Convex dev.
-
-Still pending:
-
-- Replacing the minimal placeholder screen with DEFF-ACC product screens.
-- Completing shared DEFF-ACC contracts beyond the initial fixture/runtime schemas.
-- Expanding Convex queries/mutations/actions and replacing placeholder Clerk auth configuration with deployment values.
-- Adding Clerk provider wiring and signed-in/signed-out UI states.
-- Adding Mastra workflows, TanStack AI provider adapters, scanner/scoring/report modules, seed fixtures, and PDF generation.
-
-Do not treat the current starter UI as implemented product scope. Issue `#1` now means completing and converting the existing scaffold, not creating a scaffold from nothing.
+OpenBreach helps a security operator or system owner see that exposure safely. It does not exploit, authenticate, brute force, fuzz forms, or scan private systems. It demonstrates a defensible path from approved target scope to passive recon, hypotheses, approval-gated validation, evidence, risk status, and remediation PDFs.
 
 ## MVP Definition
 
-Target users: municipal IT technicians, regional cybersecurity responders, hackathon judges, and civic-tech partners who need a fast view of which public municipal sites need basic remediation.
+Target users:
 
-Core problem: many municipal websites handle citizen services but lack dedicated cybersecurity staff. Known hygiene issues such as expired certificates, exposed CMS admin pages, old CMS versions, and risky headers are hard to prioritize across hundreds of sites.
+- Security analysts or coordinators responsible for multiple public-facing systems.
+- Small organization or public-sector technical owners who need prioritized remediation.
+- Hackathon judges evaluating a credible defensive security workflow.
 
-Demo scenario: a judge opens the dashboard, sees Mexico municipalities colored by risk, clicks a critical municipality, reviews the observed public evidence, and downloads a concise remediation PDF with prioritized steps.
+Core problem:
 
-Success outcome: in 3-5 minutes, the team can show a defensible end-to-end flow from seed municipality data to passive scan findings, risk score, map visualization, detail page, and top-risk remediation report.
+- Traditional pentesting is expensive, slow, and too aggressive for many small teams.
+- Passive scanners are safer, but they usually stop at observations instead of producing a scoped, evidence-backed remediation workflow.
+- Teams need a workflow that is useful without becoming an unauthorized exploitation tool.
 
-## Scope
+Demo scenario:
 
-Must have for the MVP:
+- A judge opens the app, selects or enters an approved demo target, reviews the authorization scope, runs or loads passive recon evidence, sees fingerprints and hypotheses, approves one safe validation against an owned/fixture target, opens the target detail page, and downloads technical plus friendly remediation PDFs.
 
-- A TypeScript full-stack app shell with shared data contracts.
-- Convex as the database and backend service layer, including schema, queries, mutations/actions, and real-time subscriptions.
-- Clerk authentication and authorization for protected operator/admin workflows, integrated with Convex auth.
-- A seed dataset of major Mexican municipalities, targeting 500 records but accepting at least 50 real records for the demo if time is tight.
-- A passive scanner that captures reachability, TLS status, selected headers, CMS hints, and public admin path exposure.
-- Deterministic scoring that turns passive signals into explainable findings and risk levels.
-- A real-time dashboard with a Mexico risk map and highest-risk ranking backed by Convex live queries.
-- A municipality detail page with findings, evidence, remediation text, and report download.
-- Remediation report JSON and PDFs for the top 10 risky municipalities, generated through a Mastra workflow with a local template fallback if model credentials or runtime support are unavailable.
-- A demo runbook with local commands, fallback fixture flow, safety notes, and judging script.
+Success outcome:
+
+- In 3 to 5 minutes, the team can show an end-to-end vertical slice from target intake to report generation, with scope gates and safety controls visible at every step.
+
+## MVP Scope
+
+Must have:
+
+- Generic target and scope contracts for public-facing systems, not only municipalities.
+- Fixture-first demo data for one approved target, one rejected target, passive evidence, hypotheses, approval gate, validation result, findings, reports, and audit events.
+- Convex-backed or fixture-backed workflow storage for targets, runs, evidence, approvals, findings, reports, and audit events.
+- Intake and authorization gate that refuses ambiguous or out-of-scope targets before any scan.
+- Passive recon agent for safe public evidence: HTTP status, redirects, selected headers, cookie metadata, TLS summary, visible HTML metadata, `robots.txt`, `sitemap.xml`, and fixed public admin/config path checks.
+- Fingerprinting and hypothesis generation from deterministic rules and a small local knowledge base.
+- Orchestrator state machine that creates an approval-ready test plan and blocks validation until approval.
+- One controlled low-impact validation runner for an owned demo target or deterministic fixture.
+- Risk panel and target detail page showing scope, state, evidence, hypotheses, validation status, findings, and report links.
+- Technical and friendly remediation PDFs generated from structured evidence and findings.
+- Demo runbook, safety checklist, and fixture fallback.
 
 Should have if time allows:
 
-- Full 500-municipality seed coverage.
-- State and risk filters on the dashboard.
-- Real-time scan progress and report-generation status indicators.
-- Mastra-backed report generation using TanStack AI provider adapters.
-- Hosted public demo deployment.
-- Clerk organization roles or metadata-backed analyst/admin role management.
-- Basic unit tests for contract validation and scoring thresholds.
+- Convex live sync for the full demo path instead of fixture-only state.
+- Clerk-protected operator/admin actions for approvals and report generation.
+- AI-assisted wording through Mastra and TanStack AI, grounded only in structured findings.
+- A small portfolio view for multiple demo targets.
+- Hosted demo deployment.
 
 Deferred until after the hackathon:
 
-- Exploit validation, credential testing, brute force checks, or form submissions.
-- Authenticated municipal portals or private network scanning.
-- Continuous monitoring, scheduled scans, alerting, and long-term history.
-- Production-grade RBAC policy design, audit logs, ticketing, and email delivery beyond the basic Clerk/Convex authorization needed for the MVP.
-- Full CVE database mirroring or exhaustive CMS fingerprinting.
-- Legal/compliance certification language.
+- Production proof-of-control, signed authorization documents, customer portal, revocation workflows, and multi-tenant isolation.
+- Full CVE feed integration or exhaustive technology fingerprint corpus.
+- Broad asset discovery, crawling, directory enumeration, fuzzing, credential testing, or exploit validation.
+- Continuous monitoring, scheduled scans, ticketing, compliance exports, and remediation tracking.
+- Certification or legal compliance claims.
+
+## Safety Boundary
+
+The product is authorized security validation, not automated intrusion.
+
+Allowed for the MVP:
+
+- L1 passive checks: fetch public pages, inspect headers, cookies, TLS certificate summary, redirects, and visible metadata.
+- L2 semiactive checks: request a fixed allowlist of public paths and explicitly approved subdomain or redirect observations.
+- L3-light only in controlled form: deterministic pattern correlation and one owned/fixture low-impact validation task.
+
+Not allowed:
+
+- Exploit payloads, credential tests, brute force, authentication attempts, form submission, fuzzing, file upload, destructive requests, stealth, persistence, or private-network scanning.
+- Treating hypotheses as confirmed findings without evidence.
+- Publishing raw secrets or sensitive personal data.
 
 ## Assumptions And Risks
 
 Assumptions:
 
-- Team size and hackathon duration were not provided, so the plan assumes a 3-5 person team and a 24-48 hour build window.
-- The repository is `jerif118/DEFF-ACC` at `https://github.com/jerif118/DEFF-ACC`.
-- Issues are enabled and have been created as the source task inventory.
-- The app uses TypeScript and currently pins Node.js `24.15.0` plus `pnpm@11.1.2` in `package.json`. This satisfies the current known package floors, including `@mastra/core` requiring Node.js `>=22.13.0`, `@tanstack/react-start` requiring Node.js `>=22.12.0`, and `@tanstack/ai` requiring Node.js `>=18`.
-- Convex is the default database and backend service provider for live MVP data; JSON fixtures remain only for import/export, local fallback, and deterministic demos.
-- Clerk is the default authentication and authorization provider; Convex should validate Clerk-issued auth for protected backend functions.
-- The selected hosting provider needs explicit runtime configuration during implementation, so report generation must also work as an offline/local fixture pipeline if deployment setup is blocked.
-- The first implementation should be Convex-backed, with fixtures available for seeding and deterministic fallback.
+- Team size and duration were not provided; the plan assumes 3 to 5 people and a 24 to 48 hour hackathon window.
+- The intended repository is `jerif118/DEFF-ACC` at `https://github.com/jerif118/DEFF-ACC`.
+- GitHub issues are enabled and the pivot issues have been created.
+- Existing TypeScript, TanStack Start, Convex, Clerk, Mastra, TanStack AI, scanner, risk, report, and fixture code can be reused where it accelerates the pivot.
+- Fixture mode must work even if Convex, Clerk, live scanning, AI provider credentials, or hosting are unavailable.
 
 Risks and mitigations:
 
-- Public source quality may be uneven. Mitigation: store source URLs per municipality and accept a smaller verified seed dataset for the demo.
-- Passive CMS detection can produce false positives. Mitigation: display confidence and evidence, and avoid claiming confirmed compromise.
-- Live scanning may be slow or blocked. Mitigation: commit generated fixture data and demo from fixtures when needed.
-- Convex or Clerk setup can be blocked by missing project keys or auth configuration. Mitigation: keep seed/import scripts, local fixtures, and read-only public demo paths working while protected mutations are disabled.
-- Model credentials or hosted runtime configuration may be unavailable. Mitigation: isolate AI generation behind a Mastra/TanStack AI adapter and keep a deterministic report template fallback.
-- Map implementation can consume too much time. Mitigation: use markers or a static basemap first; defer municipality polygons.
+| Risk | Mitigation |
+| --- | --- |
+| The product is misunderstood as an exploitation tool. | Lead with authorization, passive defaults, approval gates, rate limits, audit logs, and controlled validation only. |
+| Hackathon scope becomes too broad. | Build one vertical slice for one approved target before expanding target count or validation catalog. |
+| Live network behavior is slow, blocked, or legally sensitive. | Use deterministic fixtures and an owned demo target as the primary demo path. |
+| Hypotheses are mistaken for confirmed vulnerabilities. | Use explicit statuses: hypothesis, likely, confirmed, false positive, skipped, unresolved, halted. |
+| AI output overstates findings. | Generate findings deterministically; use AI only for wording grounded in structured inputs. |
+| Convex or Clerk configuration blocks the demo. | Keep fixture-backed reads and local report generation working without credentials. |
 
 ## Tech Stack
 
-Recommended stack:
-
-| Layer                            | Choice                                           | Rationale                                                                                                                                                                                                                                                                        |
-| -------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Full-stack web app               | TanStack Start with React and TypeScript         | The current docs describe TanStack Start as a full-stack React framework with SSR, streaming, API/server routes, server functions, Vite bundling, and universal deployment. This keeps the hackathon app in one TypeScript codebase.                                             |
-| Runtime                          | Node.js `24.15.0` project pin                    | Current project metadata pins Node.js `24.15.0`, which satisfies current known package floors for TanStack Start, Mastra, Convex, Clerk, and TanStack AI. Configure the selected host explicitly and keep local report generation plus committed artifacts as the fallback path. |
-| Package manager                  | `pnpm@11.1.2`                                    | The repository currently declares pnpm in `package.json`; use pnpm commands in setup and runbooks unless the project intentionally changes package managers.                                                                                                                     |
-| Database and backend             | Convex                                           | Convex provides a reactive database, TypeScript backend functions, generated API types, and real-time subscriptions so the map/detail UI can update without custom polling.                                                                                                      |
-| Authentication and authorization | Clerk                                            | Clerk provides sign-in/session management and integrates with Convex through Clerk auth/JWT configuration for protected queries, mutations, and operator/admin workflows.                                                                                                        |
-| Fixture fallback                 | JSON fixtures in `data/`                         | Fixtures remain useful for seed import/export, deterministic demos, and offline fallback when live scanning, Convex, or model-backed reports are unavailable.                                                                                                                    |
-| Scanner and scoring              | TypeScript scripts/modules                       | Shares contracts with the web app and avoids cross-language glue. Python can be added later only if a specific scanner library justifies it.                                                                                                                                     |
-| Agent/workflow harness           | Mastra                                           | Mastra is a TypeScript framework for AI applications and agents, supports agents/tools/workflows, integrates with React/Node apps, and can also run standalone. This avoids AWS-specific runtime lock-in.                                                                        |
-| AI SDK                           | TanStack AI                                      | Provider-agnostic adapters, streaming/generation primitives, type-safe tools, observability events, and TanStack Start integration. Use it instead of Vercel AI SDK.                                                                                                             |
-| Report generation                | Mastra workflow plus local template fallback     | The Mastra workflow owns report orchestration; TanStack AI owns provider calls; local templates protect the demo when model credentials or hosted runtime configuration are missing.                                                                                             |
-| PDF rendering                    | Simple HTML-to-PDF or PDF library selected in #5 | Any solution is acceptable if PDFs are generated from the report contract and can be downloaded from the app.                                                                                                                                                                    |
-| Map UI                           | Fast marker-based map or static SVG fallback     | Markers with risk colors are enough for the demo; full municipal polygons are deferred.                                                                                                                                                                                          |
-
-Documentation note: Context7 was used to verify Convex and Clerk planning facts. Earlier TanStack/Mastra framework docs were verified with fallback sources because Context7 was unavailable at that time. The plan uses the linked TanStack Start docs, Mastra README/docs, TanStack AI README/docs, Convex docs, Clerk docs, and the TanStack Start + Mastra example repository as references.
+| Layer | Choice | Rationale |
+| --- | --- | --- |
+| App framework | TanStack Start, React, TypeScript | Existing repository stack; keeps UI, server routes, contracts, and scripts in one TypeScript codebase. |
+| Runtime | Node.js `24.15.0` | Current `package.json` engine pin. |
+| Package manager | `pnpm@11.1.2` | Current repository package manager. |
+| Backend and database | Convex | Existing backend choice with typed functions, generated API types, and real-time data sync. |
+| Auth | Clerk with Convex auth | Existing scaffold for protected operator/admin workflows. Fixture mode must not require auth. |
+| Agent/workflow layer | Mastra | Existing scaffold can host report and orchestrator workflow boundaries. Keep deterministic fallback. |
+| AI provider boundary | TanStack AI | Existing dependency for provider-agnostic wording/report assistance. Findings must stay evidence-grounded. |
+| Contracts | Zod and TypeScript | Runtime validation plus shared types for independent task execution. |
+| Reports | Existing local PDF/report code plus template fallback | A deterministic report path protects the demo when model credentials or hosted runtime are unavailable. |
+| Fixtures | JSON fixtures under `data/` | Keeps demo repeatable and safe without live services. |
 
 ## Architecture
 
-Primary pattern: Convex-backed real-time pipeline inside one deployable full-stack TypeScript app.
+Primary pattern: contract-first orchestrated modular monolith.
 
-This pattern optimizes for visible progress, real-time UX, and hosting portability. Convex stores municipalities, scan outputs, findings, scores, report metadata, and user/operator state. TanStack Start components subscribe to Convex queries directly or through TanStack Query integration where useful. Clerk wraps the app, and Convex is configured to trust Clerk-issued auth for protected backend functions. Mastra agents/tools/workflows live under `src/mastra`, and TanStack Start routes, Convex actions, or scripts invoke them through a narrow TypeScript boundary. TanStack AI handles provider-agnostic model calls. Each task can still build against fixtures before upstream work is finished.
+Tradeoff:
 
-Reference pattern: follow the separation shown in `ataschz/tanstack-start-mastra-example`: TanStack Start owns routes and UI, Mastra owns agents/tools/workflows, and a web boundary connects the UI to the agent runtime. This project should adapt the pattern without copying its Vercel AI SDK dependency; use TanStack AI instead.
+- This keeps the hackathon build fast because the app, scanner, orchestrator, reports, and backend share one TypeScript repository.
+- It is less scalable than a distributed job system, but scalability is not the MVP risk.
 
-Fallback pattern: fixture-seeded demo shell.
+Fallback pattern: fixture-first deterministic demo.
 
-If live scanning, Convex deployment, Clerk configuration, model credentials, runtime support, or backend routes are blocked, the frontend can load committed mock JSON and static PDFs or seed Convex from committed fixtures. This weakens realism but preserves the judging walkthrough.
+Tradeoff:
+
+- This is less realistic than live Convex plus live scans, but it preserves a judge-ready vertical slice when credentials, network access, or deployment are blocked.
 
 ```mermaid
-flowchart LR
-  A[Public municipality sources] --> B[Seed dataset JSON]
-  B --> X[Convex import mutation]
-  X --> V[(Convex database)]
-  C[Passive scanner] --> V
-  V --> D[Raw scan results]
-  D --> E[Risk scorer]
-  E --> V
-  V --> F[Enriched risk results]
-  F --> G[Mastra remediation workflow]
-  H[TanStack AI provider adapter] -.-> G
-  N[Local template fallback] -.-> G
-  G --> I[Remediation PDFs and metadata]
-  I --> V
-  O[Clerk auth] --> P[Convex auth config]
-  P --> V
-  V --> K[Risk map dashboard]
-  V --> L[Municipality detail page]
-  L --> M[PDF download]
+flowchart TB
+  User["Operator or judge"] --> App["TanStack Start app"]
+
+  subgraph UI["Demo UI"]
+    Intake["Target intake and authorization gate"]
+    Panel["Risk panel"]
+    Detail["Target detail"]
+    ReportsUI["Report download"]
+  end
+
+  App --> UI
+
+  subgraph Backend["Convex or fixture store"]
+    Targets[("Targets and scopes")]
+    Runs[("Workflow runs")]
+    Evidence[("Evidence envelopes")]
+    Findings[("Findings and reports")]
+    Audit[("Audit events")]
+  end
+
+  subgraph Workflow["Orchestrated agents"]
+    Orchestrator["State machine and test planning"]
+    Recon["Passive recon agent"]
+    Fingerprint["Fingerprint and hypothesis agent"]
+    Approval["Human approval gate"]
+    Validation["Controlled validation runner"]
+    ReportAgent["Report generator"]
+  end
+
+  Intake --> Targets
+  Targets --> Orchestrator
+  Orchestrator --> Recon
+  Recon --> Evidence
+  Evidence --> Fingerprint
+  Fingerprint --> Orchestrator
+  Orchestrator --> Approval
+  Approval --> Validation
+  Validation --> Evidence
+  Evidence --> ReportAgent
+  Findings --> ReportsUI
+  ReportAgent --> Findings
+  Orchestrator --> Runs
+  Orchestrator --> Audit
+  Panel --> Backend
+  Detail --> Backend
 ```
 
 ## Shared Contracts
 
-All tasks should converge on these contracts, finalized in [#1](https://github.com/jerif118/DEFF-ACC/issues/1). Downstream tasks can use this shape as a local stub until #1 lands.
+Issue [#64](https://github.com/jerif118/DEFF-ACC/issues/64) owns the exact TypeScript and Zod definitions. Downstream tasks may use local stubs with these names until #64 lands.
 
-Current municipality contract status for [#2](https://github.com/jerif118/DEFF-ACC/issues/2): the committed shared TypeScript schema in `src/shared/contracts.ts` is the runtime fixture contract today. It requires `id`, `name`, `state`, `websiteUrl`, and `riskTier`, with optional `population`. The sample fixture at `data/municipalities/sample-municipality.json` follows that shape, and `pnpm fixtures:validate` validates fixtures through `scripts/validate-fixtures.ts` and Zod.
-
-The seed dataset required by #2 also carries `population`, `latitude`, `longitude`, and `sourceUrl` for each real municipality. The seed-specific Zod contract lives in `src/shared/municipalitySeed.ts`, and `pnpm fixtures:validate` now validates both the small runtime fixtures and the 50-record seed dataset. Convex stores imported seed records with `externalId` mapped from seed `id`, plus coordinates and source evidence when present; `convex/municipalities.ts` exposes read-only `list`/`get` queries and an idempotent `municipalities:seed` mutation that updates by `externalId`.
-
-Scanner contract status for [#3](https://github.com/jerif118/DEFF-ACC/issues/3): the passive scanner reads municipalities from Convex first when a deployment is configured, using the `municipalities` table and `externalId` as the stable seed ID. When Convex is unavailable, scanner tasks must be able to read `data/municipalities/municipalities.seed.json` directly as the deterministic fallback, using the seed `id`, `name`, `state`, `websiteUrl`, `population`, coordinates, `sourceUrl`, and `riskTier` fields.
-
-The raw scanner output boundary for #3 is `RawScanEvidence` in `src/shared/contracts.ts`, with the sample fixture at `data/scans/sample-raw-scan-evidence.json`. It contains only browser-observable evidence: municipality ID, source, requested URL, scanned timestamp, reachability, final URL, HTTP status, selected response headers, TLS validity/expiry/issuer when available, CMS guess and evidence, fixed public admin-path evidence, and structured errors for failed checks. This shape is intentionally separate from the existing scored `ScanResult` fixture contract.
-
-The passive HTTP/TLS collector lives in `src/scanner/passive.ts`. It uses safe GET requests for page evidence, fixed public admin-path checks with HEAD and narrow GET fallback, follows normal redirects, captures only an allowlist of public response headers, derives lightweight CMS hints from public HTML/header evidence, and records TLS certificate validity/expiry/issuer for HTTPS URLs when available. Scanner run controls are centralized in `DEFAULT_SCANNER_CONTROLS` with conservative MVP defaults: `timeoutMs=5000`, `retries=1`, and `delayMs=250`. Local/demo runners can override them per call, for example `scanMunicipalities(municipalities, { controls: { timeoutMs: 7500, retries: 0, delayMs: 500 } })`. The same resolved controls apply to page requests, TLS certificate collection, retry pacing, batch pacing, and admin-path checks; `pnpm scanner:validate` verifies this behavior without live municipal traffic by injecting mocked HTTP, TLS, delay, and clock functions.
-
-`findings`, `score`, `riskScore`, `riskLevel`, CVE matching, remediation text, and vulnerability enrichment are downstream scoring/reporting concerns owned by [#4](https://github.com/jerif118/DEFF-ACC/issues/4). The passive scanner may preserve legacy scored fixtures for compatibility, but it must not require those fields to produce raw evidence for #3.
-
-```ts
-export type RiskLevel = "low" | "medium" | "high" | "critical";
-
-export type Municipality = {
-  id: string;
-  name: string;
-  state: string;
-  population: number;
-  websiteUrl: string;
-  latitude: number;
-  longitude: number;
-  sourceUrl: string;
-};
-
-export type ScanFinding = {
-  id: string;
-  category:
-    | "tls"
-    | "headers"
-    | "cms"
-    | "admin-exposure"
-    | "known-vulnerability"
-    | "availability";
-  severity: RiskLevel;
-  title: string;
-  evidence: string;
-  remediation: string;
-  sourceUrl?: string;
-};
-
-export type ScanResult = {
-  municipalityId: string;
-  scannedAt: string;
-  url: string;
-  reachable: boolean;
-  httpStatus?: number;
-  tls: { valid: boolean; expiresAt?: string; issuer?: string };
-  headers: { server?: string; poweredBy?: string };
-  cms?: {
-    name: "wordpress" | "joomla" | "drupal" | "unknown";
-    version?: string;
-    confidence: number;
-  };
-  adminExposure: {
-    wordpressLogin: boolean;
-    joomlaAdmin: boolean;
-    genericAdmin: boolean;
-  };
-  findings: ScanFinding[];
-  riskScore: number;
-  riskLevel: RiskLevel;
-};
-
-export type RawScanEvidence = {
-  municipalityId: string;
-  source: "convex" | "fixture";
-  requestedUrl: string;
-  scannedAt: string;
-  reachable: boolean;
-  finalUrl?: string;
-  httpStatus?: number;
-  headers: Record<string, string>;
-  tls?: { valid: boolean; expiresAt?: string; issuer?: string };
-  cms?: {
-    name: "wordpress" | "joomla" | "drupal" | "unknown";
-    version?: string;
-    confidence: number;
-    evidence: string[];
-  };
-  adminExposure: Array<{
-    path: string;
-    method?: "HEAD" | "GET";
-    reachable: boolean;
-    httpStatus?: number;
-    finalUrl?: string;
-  }>;
-  errors: Array<{
-    stage: "http" | "tls" | "cms" | "admin-exposure";
-    message: string;
-  }>;
-};
-
-export type RemediationReport = {
-  municipalityId: string;
-  generatedAt: string;
-  summary: string;
-  prioritizedActions: Array<{ title: string; why: string; steps: string[] }>;
-  pdfPath?: string;
-};
-
-export type AppRole = "viewer" | "analyst" | "admin";
-
-export type UserProfile = {
-  clerkUserId: string;
-  role: AppRole;
-  displayName?: string;
-};
-```
-
-Expected Convex/data contract from [#6](https://github.com/jerif118/DEFF-ACC/issues/6):
-
-```ts
-api.municipalities.list -> Array<Municipality & { riskScore: number; riskLevel: RiskLevel }>
-api.municipalities.get({ id }) -> { municipality: Municipality; scan?: ScanResult; report?: RemediationReport }
-api.reports.getForMunicipality({ municipalityId }) -> RemediationReport | null
-GET /api/reports/:municipalityId.pdf -> application/pdf | 404 // optional TanStack Start route for PDF assets
-```
+| Contract | Purpose |
+| --- | --- |
+| `TargetProfile` | Submitted organization, canonical URL, contact, and business context. |
+| `AuthorizationScope` | Allowed assets, denied assets, time window, validation classes, rate limits, and forbidden actions. |
+| `WorkflowRun` | Current state, target, timestamps, and run-level status. |
+| `PassiveScanEvidence` | Browser-visible public evidence collected by the recon agent. |
+| `TechnologyFingerprint` | Evidence-backed technology or platform inference with confidence. |
+| `VulnerabilityHypothesis` | Security question mapped from public evidence, with severity estimate and validation class. |
+| `TestPlan` | Approval-ready low-impact validation plan with expected evidence, limits, and stop conditions. |
+| `ApprovalGate` | Pending, approved, denied, or expired human approval for a specific test plan. |
+| `ValidationResult` | Confirmed, not confirmed, skipped, halted, false-positive, or error result from controlled validation. |
+| `EvidenceEnvelope` | Normalized, minimized, redacted, and traceable evidence summary. |
+| `Finding` | Reportable risk item with status, severity, confidence, evidence refs, limitations, and remediation refs. |
+| `ReportArtifact` | Generated technical or friendly report metadata and file reference. |
+| `AuditEvent` | Decision, skip, approval, denial, halt, redaction, and report-generation record. |
 
 ## Task Inventory
 
-| ID  | Title                                                                   | Owner | Status | Dependencies                     | Link                                           |
-| --- | ----------------------------------------------------------------------- | ----- | ------ | -------------------------------- | ---------------------------------------------- |
-| #1  | Complete app shell, Convex, Clerk, Mastra runtime, and shared contracts | TBD   | Open   | None                             | https://github.com/jerif118/DEFF-ACC/issues/1  |
-| #2  | Curate top-municipality seed dataset and Convex import                  | TBD   | Open   | #1                               | https://github.com/jerif118/DEFF-ACC/issues/2  |
-| #3  | Implement passive website scanner with Convex writes                    | TBD   | Open   | #1, #2                           | https://github.com/jerif118/DEFF-ACC/issues/3  |
-| #4  | Add Convex-backed vulnerability matching and risk scoring               | TBD   | Open   | #3                               | https://github.com/jerif118/DEFF-ACC/issues/4  |
-| #5  | Generate remediation reports with Mastra                                | TBD   | Open   | #4, #6                           | https://github.com/jerif118/DEFF-ACC/issues/5  |
-| #6  | Implement Convex backend and real-time data layer                       | TBD   | Open   | #1, #2, #4, #10                  | https://github.com/jerif118/DEFF-ACC/issues/6  |
-| #7  | Build real-time Convex risk map dashboard                               | TBD   | Open   | #6, mock Convex data allowed     | https://github.com/jerif118/DEFF-ACC/issues/7  |
-| #8  | Build Convex-backed municipality detail and report flow                 | TBD   | Open   | #5, #6, #10, mock detail allowed | https://github.com/jerif118/DEFF-ACC/issues/8  |
-| #9  | Add Convex/Clerk demo runbook and deploy smoke test                     | TBD   | Open   | #1-#8, #10                       | https://github.com/jerif118/DEFF-ACC/issues/9  |
-| #10 | Add Clerk auth and Convex authorization rules                           | TBD   | Open   | #1                               | https://github.com/jerif118/DEFF-ACC/issues/10 |
+| ID | Title | Owner | Status | Dependencies | Link |
+| --- | --- | --- | --- | --- | --- |
+| #64 | Define target, scope, and evidence contracts | TBD | Open | None | https://github.com/jerif118/DEFF-ACC/issues/64 |
+| #65 | Persist generic workflow runs in Convex | TBD | Open | #64 | https://github.com/jerif118/DEFF-ACC/issues/65 |
+| #66 | Build target intake and authorization gate | TBD | Open | #64, optional #65 | https://github.com/jerif118/DEFF-ACC/issues/66 |
+| #67 | Adapt passive recon agent for generic targets | TBD | Open | #64 | https://github.com/jerif118/DEFF-ACC/issues/67 |
+| #68 | Generate fingerprints and vulnerability hypotheses | TBD | Open | #64, #67 or fixture evidence | https://github.com/jerif118/DEFF-ACC/issues/68 |
+| #69 | Implement orchestrator state machine and test planning | TBD | Open | #64, #66, #67, #68 or fixtures | https://github.com/jerif118/DEFF-ACC/issues/69 |
+| #70 | Add approval gate and controlled validation runner | TBD | Open | #64, #69 or fixture test plan | https://github.com/jerif118/DEFF-ACC/issues/70 |
+| #71 | Build risk panel and target detail experience | TBD | Open | #64, optional #65, #69, #70 | https://github.com/jerif118/DEFF-ACC/issues/71 |
+| #72 | Generate technical and friendly remediation PDFs | TBD | Open | #64, #68, #70, optional #71 | https://github.com/jerif118/DEFF-ACC/issues/72 |
+| #73 | Add demo runbook, safety checks, and fixture fallback | TBD | Open | #64 through #72 | https://github.com/jerif118/DEFF-ACC/issues/73 |
 
 ```mermaid
 flowchart TD
-  I1["#1 App shell, Convex, Clerk, Mastra, contracts"]
-  I2["#2 Seed dataset + Convex import"]
-  I3["#3 Passive scanner + Convex writes"]
-  I4["#4 Risk scoring"]
-  I5["#5 Mastra reports and PDFs"]
-  I6["#6 Convex backend + realtime data"]
-  I7["#7 Risk map dashboard"]
-  I8["#8 Detail and report flow"]
-  I9["#9 Demo runbook"]
-  I10["#10 Clerk auth + Convex authorization"]
+  I64["#64 Contracts and fixtures"]
+  I65["#65 Convex persistence"]
+  I66["#66 Intake and authorization"]
+  I67["#67 Passive recon"]
+  I68["#68 Fingerprints and hypotheses"]
+  I69["#69 Orchestrator and test plan"]
+  I70["#70 Approval and validation"]
+  I71["#71 Risk panel and detail"]
+  I72["#72 Technical and friendly PDFs"]
+  I73["#73 Demo runbook and safety checks"]
 
-  I1 --> I2
-  I1 --> I3
-  I1 --> I10
-  I2 --> I3
-  I3 --> I4
-  I1 --> I6
-  I2 --> I6
-  I4 --> I6
-  I10 --> I6
-  I4 --> I5
-  I6 --> I5
-  I6 --> I7
-  I6 --> I8
-  I5 --> I8
-  I10 --> I8
-  I1 --> I9
-  I2 --> I9
-  I3 --> I9
-  I4 --> I9
-  I5 --> I9
-  I6 --> I9
-  I7 --> I9
-  I8 --> I9
-  I10 --> I9
+  I64 --> I65
+  I64 --> I66
+  I64 --> I67
+  I64 --> I68
+  I64 --> I69
+  I64 --> I70
+  I64 --> I71
+  I64 --> I72
+  I65 -. "live data optional" .-> I66
+  I65 -. "live data optional" .-> I71
+  I67 --> I68
+  I66 --> I69
+  I67 --> I69
+  I68 --> I69
+  I69 --> I70
+  I69 --> I71
+  I70 --> I71
+  I68 --> I72
+  I70 --> I72
+  I71 -. "download link" .-> I72
+  I64 --> I73
+  I65 --> I73
+  I66 --> I73
+  I67 --> I73
+  I68 --> I73
+  I69 --> I73
+  I70 --> I73
+  I71 --> I73
+  I72 --> I73
 ```
 
 Parallelization guidance:
 
-- #1 should start first because it defines the shared contracts and wires TanStack Start, Convex, Clerk, Mastra, and TanStack AI boundaries.
-- #10 should start immediately after #1 so Convex authorization and protected operator/admin paths do not become an afterthought.
-- #2, #3, #4, #5, #7, and #8 can start from the contract snippets and mock fixtures in their issue bodies.
-- #6 integrates fixture outputs behind stable Convex queries/mutations/actions once #1, #2, #4, and #10 have usable artifacts.
-- #9 should be updated continuously, but final verification waits for the vertical slice.
+- Start #64 first because it defines contracts and fixtures.
+- #65, #66, and #67 can begin as soon as #64 has draft stubs.
+- #68 can work from fixture evidence before #67 is complete.
+- #69 can work from fixture scope/evidence/hypotheses before live agents are wired.
+- #70 can work from a fixture `TestPlan` and `ApprovalGate` before #69 is complete.
+- #71 and #72 should be fixture-first so the demo UI and report path do not block on backend integration.
+- #73 should be updated continuously, but final verification waits for the vertical slice.
 
 ## Main Product Flow
 
@@ -559,146 +274,144 @@ Parallelization guidance:
 sequenceDiagram
   participant Judge
   participant App as TanStack Start app
-  participant Auth as Clerk
-  participant DB as Convex
-  participant Data as JSON seed fixtures
-  participant PDF as Report PDFs
+  participant Store as Convex or fixtures
+  participant Orch as Orchestrator
+  participant Recon as Recon agent
+  participant Hyp as Hypothesis agent
+  participant Gate as Approval gate
+  participant Val as Controlled validation
+  participant PDF as Report generator
 
-  Judge->>App: Open dashboard
-  App->>DB: Subscribe api.municipalities.list
-  DB->>Data: Seed/import fallback if needed
-  DB-->>App: Live municipalities with risk levels
-  App-->>Judge: Map and ranked risk list
-  Judge->>App: Select high-risk municipality
-  App->>DB: Subscribe api.municipalities.get
-  DB-->>App: Findings and remediation summary
-  App-->>Judge: Detail page with evidence
-  opt Protected operator action
-    Judge->>Auth: Sign in with Clerk
-    Auth-->>App: Session/JWT
-    App->>DB: Authorized Convex mutation/action
-  end
-  Judge->>App: Download remediation PDF
-  App->>DB: Read report metadata
-  App->>PDF: GET generated PDF asset
-  App-->>Judge: Download report
+  Judge->>App: Open demo and choose approved target
+  App->>Store: Save or load TargetProfile and AuthorizationScope
+  Store-->>App: Scope approved with allowed and forbidden actions
+  App->>Orch: Start workflow run
+  Orch->>Recon: Collect passive public evidence
+  Recon-->>Store: PassiveScanEvidence and EvidenceEnvelope
+  Orch->>Hyp: Fingerprint technologies and create hypotheses
+  Hyp-->>Store: TechnologyFingerprint and VulnerabilityHypothesis
+  Orch-->>App: TestPlan awaits human approval
+  Judge->>Gate: Approve one safe validation task
+  Gate-->>Orch: ApprovalGate approved
+  Orch->>Val: Run bounded low-impact validation
+  Val-->>Store: ValidationResult and EvidenceEnvelope
+  App->>Store: Load target detail state
+  Store-->>App: Evidence, hypotheses, findings, audit events
+  Judge->>App: Request technical and friendly reports
+  App->>PDF: Generate report artifacts
+  PDF-->>Store: ReportArtifact metadata
+  App-->>Judge: Download PDFs
 ```
+
+## Runtime
+
+- Node.js: `24.15.0`
+- pnpm: `11.1.2`
 
 ## Local Setup
 
-An executable TanStack Start starter exists, but DEFF-ACC product routes, Convex schema/functions, Clerk auth, Mastra workflows, scanner/scoring/report code, and fixture data are not implemented yet. [#1](https://github.com/jerif118/DEFF-ACC/issues/1) converts the starter into the product app shell and shared runtime boundary.
-
 Prerequisites:
 
-- Node.js `24.15.0`, matching `package.json`
-- pnpm `11.1.2`, matching `package.json`
-- Convex project URL/deployment for live data sync
-- Clerk application keys and Clerk/Convex JWT issuer configuration for protected workflows
-- Optional model-provider API key for AI-backed reports
+- Node.js `24.15.0`, matching `package.json`.
+- pnpm `11.1.2`, matching `package.json`.
+- Optional Convex deployment for live backend sync.
+- Optional Clerk application keys for protected approval/operator flows.
+- Optional model-provider key for AI-assisted report wording.
 
-Current scaffold commands:
+Install and run the app:
 
 ```bash
 pnpm install
 pnpm dev
-pnpm build
 ```
 
-Convex source files and generated files are present. Use:
+Useful current commands:
+
+```bash
+pnpm typecheck
+pnpm build
+pnpm fixtures:validate
+pnpm scanner:validate
+pnpm scanner:fixture
+pnpm risk:fixture
+pnpm report:generate
+pnpm report:generate:validate
+```
+
+Convex commands when a deployment is configured:
 
 ```bash
 pnpm convex:dev
+pnpm convex:codegen
 ```
 
-Current data and demo commands:
+Do not edit generated files under `convex/_generated/` by hand. Run `pnpm convex:codegen` or `pnpm convex:dev` when Convex API files need to refresh.
 
-```bash
-pnpm fixtures:validate
-pnpm municipalities:validate
-pnpm municipalities:seed
-pnpm scanner:fixture
-pnpm scanner:persist
-pnpm risk:fixture
-pnpm risk:persist
-pnpm report:generate
-pnpm report:persist:args
-pnpm build
-```
+## Environment
 
-If the team later runs Mastra as a separate local development server, add a real
-package script before documenting it here.
+Copy `.env.example` for local setup. The current repository recognizes these variables for live services:
 
-Suggested environment variables:
-
-| Variable                       | Required                          | Purpose                                                                                               |
-| ------------------------------ | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `REPORT_AI_ENABLED`            | No                                | Set to `true` to use Mastra + TanStack AI report generation; default should use local templates.      |
-| `VITE_CONVEX_URL`              | Yes for live backend              | Convex deployment URL used by the TanStack Start client.                                              |
-| `CONVEX_DEPLOYMENT`            | Yes for Convex deploy/dev scripts | Convex deployment identifier used by Convex tooling.                                                  |
-| `VITE_CLERK_PUBLISHABLE_KEY`   | Yes for auth UI                   | Clerk publishable key for client-side Clerk provider setup.                                           |
-| `CLERK_SECRET_KEY`             | Yes for protected server routes   | Clerk secret key for server-side request authentication when needed.                                  |
-| `CLERK_JWT_ISSUER_DOMAIN`      | Yes for Convex auth               | Clerk issuer/domain configured in `convex/auth.config.ts` so Convex can validate Clerk-issued auth.   |
-| `AI_PROVIDER`                  | No                                | Provider selected for TanStack AI report generation. The MVP provider-backed path uses `openrouter`.  |
-| `AI_PROVIDER_MODEL`            | No                                | OpenRouter model id, for example `anthropic/claude-sonnet-4`.                                         |
-| `AI_PROVIDER_KEY`              | No                                | Generic provider key used by the server-side report adapter.                                          |
-| `OPENROUTER_API_KEY`           | No                                | OpenRouter key used when `AI_PROVIDER_KEY` is unset.                                                   |
-| `ANTHROPIC_API_KEY`            | No                                | Provider key if Anthropic is selected.                                                                |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | No                                | Provider key if Gemini is selected.                                                                   |
-| `SCAN_CONCURRENCY`             | No                                | Limits simultaneous passive requests.                                                                 |
-| `SCAN_TIMEOUT_MS`              | No                                | Per-request timeout for passive checks.                                                               |
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `VITE_CONVEX_URL` | Yes for live Convex | Convex URL used by the client. |
+| `CONVEX_DEPLOYMENT` | Yes for Convex tooling | Convex deployment identifier. |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Yes for auth UI | Clerk publishable key. |
+| `CLERK_SECRET_KEY` | Yes for protected server routes | Clerk server-side secret. |
+| `CLERK_JWT_ISSUER_DOMAIN` | Yes for Convex auth | Issuer configured in `convex/auth.config.ts`. |
+| `REPORT_AI_ENABLED` | No | Enable AI-assisted report wording. Default should stay deterministic. |
+| `AI_PROVIDER` | No | AI provider selected through TanStack AI. |
+| `AI_PROVIDER_MODEL` | No | Model identifier for report wording. |
+| `AI_PROVIDER_KEY` | No | Generic server-side provider key. |
+| `OPENROUTER_API_KEY` | No | OpenRouter key when used. |
+| `ANTHROPIC_API_KEY` | No | Anthropic key when used. |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | No | Gemini key when used. |
+| `SCAN_CONCURRENCY` | No | Passive scan concurrency limit. |
+| `SCAN_TIMEOUT_MS` | No | Passive check timeout. |
 
 ## Development Workflow
 
-- Pick one issue from the task inventory and assign an owner in GitHub.
-- Use the shared contracts or the issue-local mock contract if #1 is not merged yet.
-- Keep tasks Convex-first but fixture-friendly so UI and backend work can proceed in parallel and the demo can fall back to committed data.
-- Add or update verification commands in the issue body and README when scripts become real.
-- Keep Clerk-protected mutations/actions disabled or mocked until Convex auth is configured and verified.
-- Never add active exploitation, credential testing, destructive checks, or hidden scans.
-- Prefer visible demo progress over production hardening.
+- Pick one pivot issue from #64 through #73 and assign an owner.
+- Use issue-local fixtures or stubs when an upstream task is not merged yet.
+- Keep every output contract-compatible so tasks can integrate later without rework.
+- Keep all scanner and validation behavior safe by default and bounded by scope.
+- Prefer visible vertical-slice progress over production hardening.
+- Add or update verification commands in the issue body and README only when scripts actually exist.
+- Preserve fixture fallback for every live service integration.
 
 ## Demo Script
 
-1. Open with the problem: Latin American municipalities operate many citizen-service websites with limited cybersecurity staffing, and basic public signals can reveal urgent hygiene issues.
-2. Show the dashboard: explain that markers represent passive checks across major Mexican municipalities and colors represent low, medium, high, or critical risk.
-3. Use the ranked list: select one critical municipality and explain the score is based on observed evidence, not exploitation.
-4. Open the detail page: show TLS/header/CMS/admin exposure findings, evidence, and recommended remediation.
-5. Download the PDF: show a technician-friendly report with prioritized actions for the top-risk municipality.
-6. Explain safety and limitations: passive public data only, possible false positives, no proof of breach, and next steps for verified municipal outreach.
+1. Open with the problem: many organizations expose public systems faster than small teams can assess and remediate them.
+2. Show the safety model: target scope, allowed assets, denied assets, forbidden actions, rate limits, and passive default.
+3. Run or load passive recon: show public HTTP/TLS/header/CMS/path evidence.
+4. Show hypotheses: explain that these are evidence-backed questions, not confirmed compromise.
+5. Approve one safe validation task: show human approval and stop conditions.
+6. Show validation result: confirm, reject, skip, or halt with an evidence envelope and audit event.
+7. Open the target detail page: show workflow timeline, evidence, hypotheses, findings, uncertainty, and remediation.
+8. Download reports: show the technical PDF and friendly PDF.
+9. Close with the boundary: no exploitation, no credentials, no payloads, fixture/owned target demo first.
 
 Fallback demo path:
 
 - Use committed fixtures instead of live scans.
-- Seed Convex from committed fixtures when authenticated Convex access is available, or use fixture-backed static/mock data if Convex credentials are unavailable.
-- Run read-only demo screens without Clerk sign-in if protected operator/admin workflows are not configured.
-- Use local template reports instead of model-backed Mastra generation.
-- Run the app locally if deployment is not ready.
+- Use local deterministic reports instead of AI-assisted wording.
+- Use fixture-backed UI if Convex credentials are unavailable.
+- Use unsigned or mock approval state if Clerk is unavailable.
+- Run locally if deployment is unavailable.
 
 ## Judging Narrative
 
 What makes the MVP credible:
 
-- It solves a real, regional public-sector cybersecurity triage problem.
-- It produces an end-to-end vertical slice instead of a slide-only concept.
-- It avoids harmful behavior by using passive public signals only.
-- It outputs concrete remediation steps that non-specialist municipal technicians can act on.
-- It has a clear expansion path from 50 demo records to 500 municipalities, then to other countries.
-
-## Safety Boundaries
-
-- Only request public pages and fixed public admin paths with safe HTTP methods.
-- Do not submit forms, test passwords, fuzz parameters, upload files, or run exploit payloads.
-- Rate-limit requests and keep timeouts short.
-- Store evidence as public observations and avoid sensitive personal data.
-- Phrase results as risk indicators and recommendations, not confirmed compromise.
+- It turns passive security signals into a scoped remediation workflow rather than just a score.
+- It demonstrates human-in-the-loop authorization before any validation.
+- It separates hypotheses, confirmed findings, skipped checks, and limitations.
+- It gives both engineers and nontechnical owners an actionable report.
+- It shows a path from one controlled target to a reusable multi-agent security-validation platform.
 
 ## Source Documents
 
+- Pivot plan: [`pentesting-automation.md`](./pentesting-automation.md)
+- Original product description: [`product-description.md`](./product-description.md)
 - Original idea: [`IDEA.md`](./IDEA.md)
-- GitHub issue inventory: https://github.com/jerif118/DEFF-ACC/issues
-- TanStack Start docs: https://tanstack.com/start/latest
-- Mastra: https://github.com/mastra-ai/mastra
-- TanStack AI: https://tanstack.com/ai/latest
-- Convex: https://docs.convex.dev/
-- Clerk: https://clerk.com/docs
-- TanStack Start + Mastra reference: https://github.com/ataschz/tanstack-start-mastra-example
+- DOCX concept note: [KID MYTHOS concept DOCX](./KID%20MYTHOS%20%E2%80%94%20Alcance%20del%20Proyecto.docx)
+- GitHub pivot issue inventory: https://github.com/jerif118/DEFF-ACC/issues?q=is%3Aissue%20%5BPivot%20MVP%5D
