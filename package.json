@@ -19,6 +19,8 @@
     "dev": "vite dev",
     "fix:oxfmt": "oxfmt --write",
     "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts",
+    "format": "oxfmt --write",
+    "format:check": "oxfmt --check",
     "lint:oxfmt": "oxfmt --check",
     "municipalities:detail:validate": "node scripts/validate-municipality-detail.ts",
     "municipalities:list:validate": "node scripts/validate-municipality-list.ts",
