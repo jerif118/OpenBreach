@@ -134,9 +134,10 @@ export const seedFromFixture = internalMutation({
         generatedAt: v.string(),
         summary: v.optional(v.string()),
         priorityActions: v.optional(v.array(v.string())),
-        findings: v.optional(v.array(finding)),
+        findings: v.optional(v.array(reportFinding)),
         generatedBy: v.optional(generatedBy),
         pdf: v.optional(reportPdfReference),
+        artifacts: v.optional(reportArtifacts),
         error: v.optional(v.string()),
       }),
     ),
@@ -178,6 +179,7 @@ export const seedFromFixture = internalMutation({
         findings: result.findings,
         generatedBy: result.generatedBy,
         pdf: result.pdf,
+        artifacts: result.artifacts,
         error: result.error,
       };
 
