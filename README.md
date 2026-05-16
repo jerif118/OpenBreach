@@ -4,6 +4,27 @@ DEFF-ACC is a hackathon MVP for helping Latin American municipal governments und
 
 The project must stay passive. It only uses information any browser or normal HTTP client can see, such as TLS status, response headers, CMS hints, public admin paths, and known vulnerability metadata. It does not exploit, brute force, authenticate, submit forms, or scan private systems.
 
+## Current Repository State
+
+The repository now contains a TanStack Start starter scaffold and initial Convex generated client files, but it is not yet a DEFF-ACC product implementation.
+
+Already present:
+
+- `package.json`, `pnpm-lock.yaml`, `vite.config.ts`, `tsconfig.json`, and `src/` from a TanStack Start starter app.
+- Generated Convex client files under `convex/_generated/` plus Convex AI guidance under `convex/_generated/ai/`.
+- Local toolchain pins in `package.json`: Node.js `24.15.0` and `pnpm@11.1.2`.
+- Basic scripts for local development, production build, typecheck, preview, Convex dev, and repository cleanup.
+
+Still pending:
+
+- Replacing starter routes, metadata, navigation, and sample API/demo content with DEFF-ACC product screens.
+- Adding shared DEFF-ACC contracts in code.
+- Adding `convex/schema.ts`, Convex queries/mutations/actions, and `convex/auth.config.ts` for Clerk-issued auth.
+- Adding Clerk provider wiring and signed-in/signed-out UI states.
+- Adding Mastra workflows, TanStack AI provider adapters, scanner/scoring/report modules, seed fixtures, and PDF generation.
+
+Do not treat the current starter UI as implemented product scope. Issue `#1` now means completing and converting the existing scaffold, not creating a scaffold from nothing.
+
 ## MVP Definition
 
 Target users: municipal IT technicians, regional cybersecurity responders, hackathon judges, and civic-tech partners who need a fast view of which public municipal sites need basic remediation.
@@ -55,7 +76,7 @@ Assumptions:
 - Team size and hackathon duration were not provided, so the plan assumes a 3-5 person team and a 24-48 hour build window.
 - The repository is `jerif118/DEFF-ACC` at `https://github.com/jerif118/DEFF-ACC`.
 - Issues are enabled and have been created as the source task inventory.
-- The app can use TypeScript and should target Node.js 22.13+ for Mastra-backed AI/report paths, because current npm metadata for `@mastra/core` requires Node.js `>=22.13.0` while `@tanstack/ai` requires Node.js `>=18`.
+- The app uses TypeScript and currently pins Node.js `24.15.0` plus `pnpm@11.1.2` in `package.json`. This satisfies the current known package floors, including `@mastra/core` requiring Node.js `>=22.13.0`, `@tanstack/react-start` requiring Node.js `>=22.12.0`, and `@tanstack/ai` requiring Node.js `>=18`.
 - Convex is the default database and backend service provider for live MVP data; JSON fixtures remain only for import/export, local fallback, and deterministic demos.
 - Clerk is the default authentication and authorization provider; Convex should validate Clerk-issued auth for protected backend functions.
 - The selected hosting provider needs explicit runtime configuration during implementation, so report generation must also work as an offline/local fixture pipeline if deployment setup is blocked.
@@ -77,7 +98,8 @@ Recommended stack:
 | Layer                            | Choice                                           | Rationale                                                                                                                                                                                                                            |
 | -------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Full-stack web app               | TanStack Start with React and TypeScript         | The current docs describe TanStack Start as a full-stack React framework with SSR, streaming, API/server routes, server functions, Vite bundling, and universal deployment. This keeps the hackathon app in one TypeScript codebase. |
-| Runtime                          | Node.js 22.13+ for Mastra-backed AI/report paths | Current npm metadata requires Node.js `>=22.13.0` for `@mastra/core` and `>=18` for `@tanstack/ai`. Configure the selected host explicitly and keep local report generation plus committed artifacts as the fallback path.           |
+| Runtime                          | Node.js `24.15.0` project pin                     | Current project metadata pins Node.js `24.15.0`, which satisfies current known package floors for TanStack Start, Mastra, Convex, Clerk, and TanStack AI. Configure the selected host explicitly and keep local report generation plus committed artifacts as the fallback path. |
+| Package manager                  | `pnpm@11.1.2`                                     | The repository currently declares pnpm in `package.json`; use pnpm commands in setup and runbooks unless the project intentionally changes package managers.                                             |
 | Database and backend             | Convex                                           | Convex provides a reactive database, TypeScript backend functions, generated API types, and real-time subscriptions so the map/detail UI can update without custom polling.                                                          |
 | Authentication and authorization | Clerk                                            | Clerk provides sign-in/session management and integrates with Convex through Clerk auth/JWT configuration for protected queries, mutations, and operator/admin workflows.                                                            |
 | Fixture fallback                 | JSON fixtures in `data/`                         | Fixtures remain useful for seed import/export, deterministic demos, and offline fallback when live scanning, Convex, or model-backed reports are unavailable.                                                                        |
@@ -211,15 +233,15 @@ GET /api/reports/:municipalityId.pdf -> application/pdf | 404 // optional TanSta
 
 | ID  | Title                                                                    | Owner | Status | Dependencies                     | Link                                           |
 | --- | ------------------------------------------------------------------------ | ----- | ------ | -------------------------------- | ---------------------------------------------- |
-| #1  | Bootstrap app shell, Convex, Clerk, Mastra runtime, and shared contracts | TBD   | Open   | None                             | https://github.com/jerif118/DEFF-ACC/issues/1  |
+| #1  | Complete app shell, Convex, Clerk, Mastra runtime, and shared contracts  | TBD   | Open   | None                             | https://github.com/jerif118/DEFF-ACC/issues/1  |
 | #2  | Curate top-municipality seed dataset and Convex import                   | TBD   | Open   | #1                               | https://github.com/jerif118/DEFF-ACC/issues/2  |
 | #3  | Implement passive website scanner with Convex writes                     | TBD   | Open   | #1, #2                           | https://github.com/jerif118/DEFF-ACC/issues/3  |
-| #4  | Add vulnerability matching and risk scoring                              | TBD   | Open   | #3                               | https://github.com/jerif118/DEFF-ACC/issues/4  |
+| #4  | Add Convex-backed vulnerability matching and risk scoring                | TBD   | Open   | #3                               | https://github.com/jerif118/DEFF-ACC/issues/4  |
 | #5  | Generate remediation reports with Mastra                                 | TBD   | Open   | #4, #6                           | https://github.com/jerif118/DEFF-ACC/issues/5  |
 | #6  | Implement Convex backend and real-time data layer                        | TBD   | Open   | #1, #2, #4, #10                  | https://github.com/jerif118/DEFF-ACC/issues/6  |
-| #7  | Build interactive risk map dashboard                                     | TBD   | Open   | #6, mock Convex data allowed     | https://github.com/jerif118/DEFF-ACC/issues/7  |
-| #8  | Build municipality detail and report flow                                | TBD   | Open   | #5, #6, #10, mock detail allowed | https://github.com/jerif118/DEFF-ACC/issues/8  |
-| #9  | Add demo runbook and deploy smoke test                                   | TBD   | Open   | #1-#8, #10                       | https://github.com/jerif118/DEFF-ACC/issues/9  |
+| #7  | Build real-time Convex risk map dashboard                                | TBD   | Open   | #6, mock Convex data allowed     | https://github.com/jerif118/DEFF-ACC/issues/7  |
+| #8  | Build Convex-backed municipality detail and report flow                  | TBD   | Open   | #5, #6, #10, mock detail allowed | https://github.com/jerif118/DEFF-ACC/issues/8  |
+| #9  | Add Convex/Clerk demo runbook and deploy smoke test                      | TBD   | Open   | #1-#8, #10                       | https://github.com/jerif118/DEFF-ACC/issues/9  |
 | #10 | Add Clerk auth and Convex authorization rules                            | TBD   | Open   | #1                               | https://github.com/jerif118/DEFF-ACC/issues/10 |
 
 ```mermaid
@@ -302,39 +324,45 @@ sequenceDiagram
 
 ## Local Setup
 
-The executable app does not exist yet; [#1](https://github.com/jerif118/DEFF-ACC/issues/1) creates it. These are the target commands the team should make real during implementation.
+An executable TanStack Start starter exists, but DEFF-ACC product routes, Convex schema/functions, Clerk auth, Mastra workflows, scanner/scoring/report code, and fixture data are not implemented yet. [#1](https://github.com/jerif118/DEFF-ACC/issues/1) converts the starter into the product app shell and shared runtime boundary.
 
 Prerequisites:
 
-- Node.js 22.13+ for Mastra-backed AI/report generation
-- npm
+- Node.js `24.15.0`, matching `package.json`
+- pnpm `11.1.2`, matching `package.json`
 - Convex project URL/deployment for live data sync
 - Clerk application keys and Clerk/Convex JWT issuer configuration for protected workflows
 - Optional model-provider API key for AI-backed reports
 
-Target setup:
+Current scaffold commands:
 
 ```bash
-npm install
-npx convex dev
-npm run dev
+pnpm install
+pnpm dev
+pnpm build
+```
+
+Convex generated files are present, but product schema/functions are not. Once #6 adds real Convex functions, use:
+
+```bash
+pnpm convex:dev
 ```
 
 Target data and demo commands:
 
 ```bash
-npm run validate:data
-npm run seed:convex
-npm run scan:sample
-npm run score
-npm run reports
-npm run build
+pnpm run validate:data
+pnpm run seed:convex
+pnpm run scan:sample
+pnpm run score
+pnpm run reports
+pnpm build
 ```
 
 If the team runs Mastra as a separate local development server, document and wire an explicit paired command such as:
 
 ```bash
-npm run dev:mastra
+pnpm run dev:mastra
 ```
 
 Suggested environment variables:
