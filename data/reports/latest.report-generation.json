@@ -37,10 +37,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -178,10 +175,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -319,10 +313,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -460,10 +451,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -601,10 +589,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -742,10 +727,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -883,10 +865,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -1024,10 +1003,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -1165,10 +1141,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {
@@ -1306,10 +1279,7 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": [
-            "generator:WordPress 6.4",
-            "marker:wordpress"
-          ]
+          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
         },
         "adminExposure": [
           {

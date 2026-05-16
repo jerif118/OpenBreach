@@ -80,16 +80,16 @@ flowchart LR
 
 ## Funcionalidades Principales
 
-| Funcionalidad | Versión MVP | Versión futura |
-| --- | --- | --- |
-| Directorio municipal | Dataset inicial de México con URLs de sitios web | Sincronización continua desde fuentes oficiales y validación |
-| Scanner pasivo | Revisiones seguras de HTTP, TLS, headers y CMS | Monitoreo programado, detección de cambios y alertas |
-| Scoring de riesgo | Score y nivel transparentes con pesos simples | Scoring calibrado por expertos con niveles de confianza |
-| Mapa de riesgo | Mapa o lista demo de municipios por riesgo | Dashboard regional o nacional en tiempo real |
-| Detalle municipal | Hallazgos, evidencia, score y metadata de reporte | Tendencia histórica, estado de reescaneo y flujo de responsables |
-| Reportes de remediación | Acciones prioritarias en lenguaje claro | Exportación PDF, tickets y verificación guiada |
-| Autenticación y roles | Scaffold Clerk/Convex para operaciones protegidas | Flujos admin/operador con auditoría |
-| Asistencia con IA | Fallback determinista y frontera de adaptador IA | Copiloto de remediación aterrizado en evidencia |
+| Funcionalidad           | Versión MVP                                       | Versión futura                                                   |
+| ----------------------- | ------------------------------------------------- | ---------------------------------------------------------------- |
+| Directorio municipal    | Dataset inicial de México con URLs de sitios web  | Sincronización continua desde fuentes oficiales y validación     |
+| Scanner pasivo          | Revisiones seguras de HTTP, TLS, headers y CMS    | Monitoreo programado, detección de cambios y alertas             |
+| Scoring de riesgo       | Score y nivel transparentes con pesos simples     | Scoring calibrado por expertos con niveles de confianza          |
+| Mapa de riesgo          | Mapa o lista demo de municipios por riesgo        | Dashboard regional o nacional en tiempo real                     |
+| Detalle municipal       | Hallazgos, evidencia, score y metadata de reporte | Tendencia histórica, estado de reescaneo y flujo de responsables |
+| Reportes de remediación | Acciones prioritarias en lenguaje claro           | Exportación PDF, tickets y verificación guiada                   |
+| Autenticación y roles   | Scaffold Clerk/Convex para operaciones protegidas | Flujos admin/operador con auditoría                              |
+| Asistencia con IA       | Fallback determinista y frontera de adaptador IA  | Copiloto de remediación aterrizado en evidencia                  |
 
 ## Usuarios Objetivo
 
@@ -144,28 +144,28 @@ Nuestra recomendación actual: **optimizar primero para el coordinador multi-mun
 
 ### Construido
 
-| Área | Estado |
-| --- | --- |
-| Shell de producto | Ruta pública de TanStack Start con copy de DEFF-ACC |
-| Contratos | Contratos compartidos TypeScript/Zod |
-| Esquema backend | Esquema Convex para municipios, escaneos, reportes y usuarios |
-| Funciones backend | Funciones placeholder para municipios/reportes |
-| Auth | Providers de Clerk y Convex scaffolded |
-| Frontera IA/reportes | Adaptador TanStack AI con fallback determinista |
-| Runtime de agentes | Esqueleto de workflow de reportes con Mastra |
-| Fixtures | JSON de municipio, escaneo y reporte de ejemplo |
-| Smoke checks | Scripts de validación de fixtures y smoke test de reportes |
+| Área                 | Estado                                                        |
+| -------------------- | ------------------------------------------------------------- |
+| Shell de producto    | Ruta pública de TanStack Start con copy de DEFF-ACC           |
+| Contratos            | Contratos compartidos TypeScript/Zod                          |
+| Esquema backend      | Esquema Convex para municipios, escaneos, reportes y usuarios |
+| Funciones backend    | Funciones placeholder para municipios/reportes                |
+| Auth                 | Providers de Clerk y Convex scaffolded                        |
+| Frontera IA/reportes | Adaptador TanStack AI con fallback determinista               |
+| Runtime de agentes   | Esqueleto de workflow de reportes con Mastra                  |
+| Fixtures             | JSON de municipio, escaneo y reporte de ejemplo               |
+| Smoke checks         | Scripts de validación de fixtures y smoke test de reportes    |
 
 ### No Construido Todavía
 
-| Área | Siguiente necesidad |
-| --- | --- |
-| Dataset real | Curar datos semilla de municipios e import path |
-| Scanner | Implementar revisiones pasivas de sitios web públicos |
-| Scoring | Definir pesos y traducir hallazgos a niveles de riesgo |
-| Dashboard | Construir mapa en tiempo real y páginas de detalle municipal |
-| Reportes | Generar reportes mejores y exportables a PDF |
-| Runbook de demo | Documentar el recorrido exacto para el hackathon |
+| Área            | Siguiente necesidad                                          |
+| --------------- | ------------------------------------------------------------ |
+| Dataset real    | Curar datos semilla de municipios e import path              |
+| Scanner         | Implementar revisiones pasivas de sitios web públicos        |
+| Scoring         | Definir pesos y traducir hallazgos a niveles de riesgo       |
+| Dashboard       | Construir mapa en tiempo real y páginas de detalle municipal |
+| Reportes        | Generar reportes mejores y exportables a PDF                 |
+| Runbook de demo | Documentar el recorrido exacto para el hackathon             |
 
 ## Arquitectura Técnica
 
@@ -252,13 +252,13 @@ erDiagram
 
 ## Categorías del Escaneo Pasivo
 
-| Categoría | Señales de ejemplo | Por qué importa |
-| --- | --- | --- |
-| TLS | Certificado vencido, pistas de configuración débil | Confianza ciudadana y transporte seguro |
-| Headers | CSP, HSTS o X-Frame-Options faltantes | Endurecimiento básico del navegador |
-| CMS | Versiones públicas, indicadores de WordPress/Joomla | Versiones vulnerables conocidas pueden priorizarse |
-| Exposición | Rutas admin públicas, pistas de directorios | Reduce rutas fáciles de descubrimiento para atacantes |
-| Disponibilidad | Caídas, respuestas inestables | Indica fragilidad operacional |
+| Categoría      | Señales de ejemplo                                  | Por qué importa                                       |
+| -------------- | --------------------------------------------------- | ----------------------------------------------------- |
+| TLS            | Certificado vencido, pistas de configuración débil  | Confianza ciudadana y transporte seguro               |
+| Headers        | CSP, HSTS o X-Frame-Options faltantes               | Endurecimiento básico del navegador                   |
+| CMS            | Versiones públicas, indicadores de WordPress/Joomla | Versiones vulnerables conocidas pueden priorizarse    |
+| Exposición     | Rutas admin públicas, pistas de directorios         | Reduce rutas fáciles de descubrimiento para atacantes |
+| Disponibilidad | Caídas, respuestas inestables                       | Indica fragilidad operacional                         |
 
 ## Enfoque de Score de Riesgo
 
@@ -308,15 +308,15 @@ El punto clave para el hackathon: no venderlo como "un scanner con IA", sino com
 
 ### Capacidades del Sistema de Agentes
 
-| Agente | Responsabilidad | Output |
-| --- | --- | --- |
-| Agente de descubrimiento | Identificar municipios, dominios oficiales y URLs públicas relevantes | Inventario validado de activos públicos |
-| Agente de escaneo pasivo | Ejecutar checks seguros de HTTP, TLS, headers, CMS y disponibilidad | Evidencia técnica estructurada |
-| Agente de clasificación | Convertir señales en hallazgos, severidad y nivel de confianza | Lista de hallazgos priorizados |
-| Agente de scoring | Calcular score de riesgo y explicar por qué sube o baja | Score, tier y justificación |
-| Agente de remediación | Traducir hallazgos a pasos concretos para técnicos municipales | Plan de remediación y checklist |
-| Agente de comunicación | Adaptar el reporte para audiencia técnica, directiva o pública | Resumen ejecutivo, reporte técnico, mensaje de coordinación |
-| Agente de verificación | Reescanear después de cambios y comparar evidencia anterior/posterior | Estado corregido, pendiente o regresión |
+| Agente                   | Responsabilidad                                                       | Output                                                      |
+| ------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Agente de descubrimiento | Identificar municipios, dominios oficiales y URLs públicas relevantes | Inventario validado de activos públicos                     |
+| Agente de escaneo pasivo | Ejecutar checks seguros de HTTP, TLS, headers, CMS y disponibilidad   | Evidencia técnica estructurada                              |
+| Agente de clasificación  | Convertir señales en hallazgos, severidad y nivel de confianza        | Lista de hallazgos priorizados                              |
+| Agente de scoring        | Calcular score de riesgo y explicar por qué sube o baja               | Score, tier y justificación                                 |
+| Agente de remediación    | Traducir hallazgos a pasos concretos para técnicos municipales        | Plan de remediación y checklist                             |
+| Agente de comunicación   | Adaptar el reporte para audiencia técnica, directiva o pública        | Resumen ejecutivo, reporte técnico, mensaje de coordinación |
+| Agente de verificación   | Reescanear después de cambios y comparar evidencia anterior/posterior | Estado corregido, pendiente o regresión                     |
 
 ### Flujo de Remediación Automatizada
 
@@ -385,13 +385,13 @@ Si el scanner detecta que un sitio municipal no tiene headers de seguridad bási
 
 ### Métricas de Éxito
 
-| Métrica | Por qué importa |
-| --- | --- |
-| Tiempo de hallazgo a recomendación | Mide si el sistema acelera respuesta defensiva |
-| Porcentaje de hallazgos con evidencia suficiente | Evita reportes vagos o inventados |
-| Hallazgos corregidos después de reescaneo | Mide impacto real, no solo detección |
-| Municipios agrupados por fix común | Permite remediación a escala |
-| Reportes entendibles por no expertos | Mide utilidad para instituciones con poca capacidad técnica |
+| Métrica                                          | Por qué importa                                             |
+| ------------------------------------------------ | ----------------------------------------------------------- |
+| Tiempo de hallazgo a recomendación               | Mide si el sistema acelera respuesta defensiva              |
+| Porcentaje de hallazgos con evidencia suficiente | Evita reportes vagos o inventados                           |
+| Hallazgos corregidos después de reescaneo        | Mide impacto real, no solo detección                        |
+| Municipios agrupados por fix común               | Permite remediación a escala                                |
+| Reportes entendibles por no expertos             | Mide utilidad para instituciones con poca capacidad técnica |
 
 ## Diferenciación
 
@@ -419,15 +419,15 @@ El proyecto debe mantenerse claramente defensivo:
 
 ## Decisiones de Producto Abiertas
 
-| Decisión | Opciones | Dirección recomendada para MVP |
-| --- | --- | --- |
-| Geografía | México, toda LATAM, un solo país | México primero |
-| Fuente de datos | INEGI, portales oficiales, seed manual, directorios públicos | Empezar con fuentes oficiales/abiertas y validar manualmente |
-| Usuario | Municipio individual, coordinador multi-municipio, watchdog público | Coordinador multi-municipio |
-| Momento de escaneo | On-demand, batch precalculado, monitoreo programado | Batch inicial precalculado; reescaneo on-demand después |
-| Reportes | Solo hallazgos, recomendaciones, PDF, plan de acción | Recomendaciones con estructura lista para PDF |
-| Visibilidad | Mapa público, dashboard privado, híbrido | Agregados públicos; detalles sensibles privados |
-| Scoring | Suma simple de severidades, modelo ponderado, rúbrica experta | Rúbrica MVP ponderada y transparente |
+| Decisión           | Opciones                                                            | Dirección recomendada para MVP                               |
+| ------------------ | ------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Geografía          | México, toda LATAM, un solo país                                    | México primero                                               |
+| Fuente de datos    | INEGI, portales oficiales, seed manual, directorios públicos        | Empezar con fuentes oficiales/abiertas y validar manualmente |
+| Usuario            | Municipio individual, coordinador multi-municipio, watchdog público | Coordinador multi-municipio                                  |
+| Momento de escaneo | On-demand, batch precalculado, monitoreo programado                 | Batch inicial precalculado; reescaneo on-demand después      |
+| Reportes           | Solo hallazgos, recomendaciones, PDF, plan de acción                | Recomendaciones con estructura lista para PDF                |
+| Visibilidad        | Mapa público, dashboard privado, híbrido                            | Agregados públicos; detalles sensibles privados              |
+| Scoring            | Suma simple de severidades, modelo ponderado, rúbrica experta       | Rúbrica MVP ponderada y transparente                         |
 
 ## Posibles Pivots e Iteraciones
 
@@ -495,12 +495,12 @@ El camino más convincente es híbrido:
 
 ## Estructura Sugerida para la Reunión de 15 Minutos
 
-| Tiempo | Propósito |
-| --- | --- |
-| 0:00 a 5:00 | Presentar el pitch y estado actual del MVP |
-| 5:00 a 10:00 | Pedir crítica sobre alcance, usuario y diferenciación |
-| 10:00 a 13:00 | Decidir si continuar, acotar o pivotear |
-| 13:00 a 15:00 | Confirmar la siguiente prioridad de implementación |
+| Tiempo        | Propósito                                             |
+| ------------- | ----------------------------------------------------- |
+| 0:00 a 5:00   | Presentar el pitch y estado actual del MVP            |
+| 5:00 a 10:00  | Pedir crítica sobre alcance, usuario y diferenciación |
+| 10:00 a 13:00 | Decidir si continuar, acotar o pivotear               |
+| 13:00 a 15:00 | Confirmar la siguiente prioridad de implementación    |
 
 ## Siguientes Pasos Inmediatos
 

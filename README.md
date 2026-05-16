@@ -92,29 +92,29 @@ Assumptions:
 
 Risks and mitigations:
 
-| Risk | Mitigation |
-| --- | --- |
-| The product is misunderstood as an exploitation tool. | Lead with authorization, passive defaults, approval gates, rate limits, audit logs, and controlled validation only. |
-| Hackathon scope becomes too broad. | Build one vertical slice for one approved target before expanding target count or validation catalog. |
-| Live network behavior is slow, blocked, or legally sensitive. | Use deterministic fixtures and an owned demo target as the primary demo path. |
-| Hypotheses are mistaken for confirmed vulnerabilities. | Use explicit statuses: hypothesis, likely, confirmed, false positive, skipped, unresolved, halted. |
-| AI output overstates findings. | Generate findings deterministically; use AI only for wording grounded in structured inputs. |
-| Convex or Clerk configuration blocks the demo. | Keep fixture-backed reads and local report generation working without credentials. |
+| Risk                                                          | Mitigation                                                                                                          |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| The product is misunderstood as an exploitation tool.         | Lead with authorization, passive defaults, approval gates, rate limits, audit logs, and controlled validation only. |
+| Hackathon scope becomes too broad.                            | Build one vertical slice for one approved target before expanding target count or validation catalog.               |
+| Live network behavior is slow, blocked, or legally sensitive. | Use deterministic fixtures and an owned demo target as the primary demo path.                                       |
+| Hypotheses are mistaken for confirmed vulnerabilities.        | Use explicit statuses: hypothesis, likely, confirmed, false positive, skipped, unresolved, halted.                  |
+| AI output overstates findings.                                | Generate findings deterministically; use AI only for wording grounded in structured inputs.                         |
+| Convex or Clerk configuration blocks the demo.                | Keep fixture-backed reads and local report generation working without credentials.                                  |
 
 ## Tech Stack
 
-| Layer | Choice | Rationale |
-| --- | --- | --- |
-| App framework | TanStack Start, React, TypeScript | Existing repository stack; keeps UI, server routes, contracts, and scripts in one TypeScript codebase. |
-| Runtime | Node.js `24.15.0` | Current `package.json` engine pin. |
-| Package manager | `pnpm@11.1.2` | Current repository package manager. |
-| Backend and database | Convex | Existing backend choice with typed functions, generated API types, and real-time data sync. |
-| Auth | Clerk with Convex auth | Existing scaffold for protected operator/admin workflows. Fixture mode must not require auth. |
-| Agent/workflow layer | Mastra | Existing scaffold can host report and orchestrator workflow boundaries. Keep deterministic fallback. |
-| AI provider boundary | TanStack AI | Existing dependency for provider-agnostic wording/report assistance. Findings must stay evidence-grounded. |
-| Contracts | Zod and TypeScript | Runtime validation plus shared types for independent task execution. |
-| Reports | Existing local PDF/report code plus template fallback | A deterministic report path protects the demo when model credentials or hosted runtime are unavailable. |
-| Fixtures | JSON fixtures under `data/` | Keeps demo repeatable and safe without live services. |
+| Layer                | Choice                                                | Rationale                                                                                                  |
+| -------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| App framework        | TanStack Start, React, TypeScript                     | Existing repository stack; keeps UI, server routes, contracts, and scripts in one TypeScript codebase.     |
+| Runtime              | Node.js `24.15.0`                                     | Current `package.json` engine pin.                                                                         |
+| Package manager      | `pnpm@11.1.2`                                         | Current repository package manager.                                                                        |
+| Backend and database | Convex                                                | Existing backend choice with typed functions, generated API types, and real-time data sync.                |
+| Auth                 | Clerk with Convex auth                                | Existing scaffold for protected operator/admin workflows. Fixture mode must not require auth.              |
+| Agent/workflow layer | Mastra                                                | Existing scaffold can host report and orchestrator workflow boundaries. Keep deterministic fallback.       |
+| AI provider boundary | TanStack AI                                           | Existing dependency for provider-agnostic wording/report assistance. Findings must stay evidence-grounded. |
+| Contracts            | Zod and TypeScript                                    | Runtime validation plus shared types for independent task execution.                                       |
+| Reports              | Existing local PDF/report code plus template fallback | A deterministic report path protects the demo when model credentials or hosted runtime are unavailable.    |
+| Fixtures             | JSON fixtures under `data/`                           | Keeps demo repeatable and safe without live services.                                                      |
 
 ## Architecture
 
@@ -183,36 +183,36 @@ flowchart TB
 
 Issue [#64](https://github.com/jerif118/DEFF-ACC/issues/64) owns the exact TypeScript and Zod definitions. Downstream tasks may use local stubs with these names until #64 lands.
 
-| Contract | Purpose |
-| --- | --- |
-| `TargetProfile` | Submitted organization, canonical URL, contact, and business context. |
-| `AuthorizationScope` | Allowed assets, denied assets, time window, validation classes, rate limits, and forbidden actions. |
-| `WorkflowRun` | Current state, target, timestamps, and run-level status. |
-| `PassiveScanEvidence` | Browser-visible public evidence collected by the recon agent. |
-| `TechnologyFingerprint` | Evidence-backed technology or platform inference with confidence. |
-| `VulnerabilityHypothesis` | Security question mapped from public evidence, with severity estimate and validation class. |
-| `TestPlan` | Approval-ready low-impact validation plan with expected evidence, limits, and stop conditions. |
-| `ApprovalGate` | Pending, approved, denied, or expired human approval for a specific test plan. |
-| `ValidationResult` | Confirmed, not confirmed, skipped, halted, false-positive, or error result from controlled validation. |
-| `EvidenceEnvelope` | Normalized, minimized, redacted, and traceable evidence summary. |
-| `Finding` | Reportable risk item with status, severity, confidence, evidence refs, limitations, and remediation refs. |
-| `ReportArtifact` | Generated technical or friendly report metadata and file reference. |
-| `AuditEvent` | Decision, skip, approval, denial, halt, redaction, and report-generation record. |
+| Contract                  | Purpose                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `TargetProfile`           | Submitted organization, canonical URL, contact, and business context.                                     |
+| `AuthorizationScope`      | Allowed assets, denied assets, time window, validation classes, rate limits, and forbidden actions.       |
+| `WorkflowRun`             | Current state, target, timestamps, and run-level status.                                                  |
+| `PassiveScanEvidence`     | Browser-visible public evidence collected by the recon agent.                                             |
+| `TechnologyFingerprint`   | Evidence-backed technology or platform inference with confidence.                                         |
+| `VulnerabilityHypothesis` | Security question mapped from public evidence, with severity estimate and validation class.               |
+| `TestPlan`                | Approval-ready low-impact validation plan with expected evidence, limits, and stop conditions.            |
+| `ApprovalGate`            | Pending, approved, denied, or expired human approval for a specific test plan.                            |
+| `ValidationResult`        | Confirmed, not confirmed, skipped, halted, false-positive, or error result from controlled validation.    |
+| `EvidenceEnvelope`        | Normalized, minimized, redacted, and traceable evidence summary.                                          |
+| `Finding`                 | Reportable risk item with status, severity, confidence, evidence refs, limitations, and remediation refs. |
+| `ReportArtifact`          | Generated technical or friendly report metadata and file reference.                                       |
+| `AuditEvent`              | Decision, skip, approval, denial, halt, redaction, and report-generation record.                          |
 
 ## Task Inventory
 
-| ID | Title | Owner | Status | Dependencies | Link |
-| --- | --- | --- | --- | --- | --- |
-| #64 | Define target, scope, and evidence contracts | TBD | Open | None | https://github.com/jerif118/DEFF-ACC/issues/64 |
-| #65 | Persist generic workflow runs in Convex | TBD | Open | #64 | https://github.com/jerif118/DEFF-ACC/issues/65 |
-| #66 | Build target intake and authorization gate | TBD | Open | #64, optional #65 | https://github.com/jerif118/DEFF-ACC/issues/66 |
-| #67 | Adapt passive recon agent for generic targets | TBD | Open | #64 | https://github.com/jerif118/DEFF-ACC/issues/67 |
-| #68 | Generate fingerprints and vulnerability hypotheses | TBD | Open | #64, #67 or fixture evidence | https://github.com/jerif118/DEFF-ACC/issues/68 |
-| #69 | Implement orchestrator state machine and test planning | TBD | Open | #64, #66, #67, #68 or fixtures | https://github.com/jerif118/DEFF-ACC/issues/69 |
-| #70 | Add approval gate and controlled validation runner | TBD | Open | #64, #69 or fixture test plan | https://github.com/jerif118/DEFF-ACC/issues/70 |
-| #71 | Build risk panel and target detail experience | TBD | Open | #64, optional #65, #69, #70 | https://github.com/jerif118/DEFF-ACC/issues/71 |
-| #72 | Generate technical and friendly remediation PDFs | TBD | Open | #64, #68, #70, optional #71 | https://github.com/jerif118/DEFF-ACC/issues/72 |
-| #73 | Add demo runbook, safety checks, and fixture fallback | TBD | Open | #64 through #72 | https://github.com/jerif118/DEFF-ACC/issues/73 |
+| ID  | Title                                                  | Owner | Status | Dependencies                   | Link                                           |
+| --- | ------------------------------------------------------ | ----- | ------ | ------------------------------ | ---------------------------------------------- |
+| #64 | Define target, scope, and evidence contracts           | TBD   | Open   | None                           | https://github.com/jerif118/DEFF-ACC/issues/64 |
+| #65 | Persist generic workflow runs in Convex                | TBD   | Open   | #64                            | https://github.com/jerif118/DEFF-ACC/issues/65 |
+| #66 | Build target intake and authorization gate             | TBD   | Open   | #64, optional #65              | https://github.com/jerif118/DEFF-ACC/issues/66 |
+| #67 | Adapt passive recon agent for generic targets          | TBD   | Open   | #64                            | https://github.com/jerif118/DEFF-ACC/issues/67 |
+| #68 | Generate fingerprints and vulnerability hypotheses     | TBD   | Open   | #64, #67 or fixture evidence   | https://github.com/jerif118/DEFF-ACC/issues/68 |
+| #69 | Implement orchestrator state machine and test planning | TBD   | Open   | #64, #66, #67, #68 or fixtures | https://github.com/jerif118/DEFF-ACC/issues/69 |
+| #70 | Add approval gate and controlled validation runner     | TBD   | Open   | #64, #69 or fixture test plan  | https://github.com/jerif118/DEFF-ACC/issues/70 |
+| #71 | Build risk panel and target detail experience          | TBD   | Open   | #64, optional #65, #69, #70    | https://github.com/jerif118/DEFF-ACC/issues/71 |
+| #72 | Generate technical and friendly remediation PDFs       | TBD   | Open   | #64, #68, #70, optional #71    | https://github.com/jerif118/DEFF-ACC/issues/72 |
+| #73 | Add demo runbook, safety checks, and fixture fallback  | TBD   | Open   | #64 through #72                | https://github.com/jerif118/DEFF-ACC/issues/73 |
 
 ```mermaid
 flowchart TD
@@ -379,28 +379,28 @@ Do not edit generated files under `convex/_generated/` by hand. Run `pnpm convex
 
 Copy `.env.example` for local setup. The current repository recognizes these variables for live services:
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `VITE_CONVEX_URL` | Yes for live Convex | Convex URL used by the client. |
-| `CONVEX_DEPLOYMENT` | Yes for Convex tooling | Convex deployment identifier. |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Yes for auth UI | Clerk publishable key. |
-| `CLERK_SECRET_KEY` | Yes for protected server routes | Clerk server-side secret. |
-| `CLERK_JWT_ISSUER_DOMAIN` | Yes for Convex auth | Issuer configured in `convex/auth.config.ts`. |
-| `REPORT_AI_ENABLED` | No | Enable AI-assisted report wording. Default should stay deterministic. |
-| `AI_PROVIDER` | No | AI provider selected through TanStack AI. |
-| `AI_PROVIDER_MODEL` | No | Model identifier for report wording. |
-| `AI_PROVIDER_KEY` | No | Generic server-side provider key. |
-| `OPENROUTER_API_KEY` | No | OpenRouter key when used. |
-| `ANTHROPIC_API_KEY` | No | Anthropic key when used. |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | No | Gemini key when used. |
-| `SCAN_CONCURRENCY` | No | Passive scan concurrency limit. Default `5` in `scripts/scan-convex-args.ts`. |
-| `SCAN_TIMEOUT_MS` | No | Passive check timeout. Default `5000` ms. |
-| `SCAN_RETRIES` | No | Per-request retry budget for the passive scanner. Default `1`. |
-| `SCAN_DELAY_MS` | No | Delay between scan retries. Default `250` ms. |
-| `SCAN_FROM_FIXTURE` | No | When set to `1`, `pnpm scanner:persist` reads `data/scans/latest.scan-results.json` instead of hitting the network. |
-| `SCAN_FIXTURE_PATH` | No | Overrides the fixture file path used when `SCAN_FROM_FIXTURE=1`. |
-| `MUNICIPALITY_IDS` | No | Comma-separated `municipality.id` allowlist consumed by `pnpm scanner:persist` to scope live or fixture-backed runs. |
-| `PERSIST_BATCH_SIZE` | No | Number of `results` items forwarded per `convex run` invocation by `scripts/persist-via-convex.ts`. Default `10`; lower this if Convex rejects an oversized argument. |
+| Variable                       | Required                        | Purpose                                                                                                                                                               |
+| ------------------------------ | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_CONVEX_URL`              | Yes for live Convex             | Convex URL used by the client.                                                                                                                                        |
+| `CONVEX_DEPLOYMENT`            | Yes for Convex tooling          | Convex deployment identifier.                                                                                                                                         |
+| `VITE_CLERK_PUBLISHABLE_KEY`   | Yes for auth UI                 | Clerk publishable key.                                                                                                                                                |
+| `CLERK_SECRET_KEY`             | Yes for protected server routes | Clerk server-side secret.                                                                                                                                             |
+| `CLERK_JWT_ISSUER_DOMAIN`      | Yes for Convex auth             | Issuer configured in `convex/auth.config.ts`.                                                                                                                         |
+| `REPORT_AI_ENABLED`            | No                              | Enable AI-assisted report wording. Default should stay deterministic.                                                                                                 |
+| `AI_PROVIDER`                  | No                              | AI provider selected through TanStack AI.                                                                                                                             |
+| `AI_PROVIDER_MODEL`            | No                              | Model identifier for report wording.                                                                                                                                  |
+| `AI_PROVIDER_KEY`              | No                              | Generic server-side provider key.                                                                                                                                     |
+| `OPENROUTER_API_KEY`           | No                              | OpenRouter key when used.                                                                                                                                             |
+| `ANTHROPIC_API_KEY`            | No                              | Anthropic key when used.                                                                                                                                              |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | No                              | Gemini key when used.                                                                                                                                                 |
+| `SCAN_CONCURRENCY`             | No                              | Passive scan concurrency limit. Default `5` in `scripts/scan-convex-args.ts`.                                                                                         |
+| `SCAN_TIMEOUT_MS`              | No                              | Passive check timeout. Default `5000` ms.                                                                                                                             |
+| `SCAN_RETRIES`                 | No                              | Per-request retry budget for the passive scanner. Default `1`.                                                                                                        |
+| `SCAN_DELAY_MS`                | No                              | Delay between scan retries. Default `250` ms.                                                                                                                         |
+| `SCAN_FROM_FIXTURE`            | No                              | When set to `1`, `pnpm scanner:persist` reads `data/scans/latest.scan-results.json` instead of hitting the network.                                                   |
+| `SCAN_FIXTURE_PATH`            | No                              | Overrides the fixture file path used when `SCAN_FROM_FIXTURE=1`.                                                                                                      |
+| `MUNICIPALITY_IDS`             | No                              | Comma-separated `municipality.id` allowlist consumed by `pnpm scanner:persist` to scope live or fixture-backed runs.                                                  |
+| `PERSIST_BATCH_SIZE`           | No                              | Number of `results` items forwarded per `convex run` invocation by `scripts/persist-via-convex.ts`. Default `10`; lower this if Convex rejects an oversized argument. |
 
 ## Development Workflow
 
