@@ -1,20 +1,11 @@
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
-import { ConvexProvider, ConvexProviderWithAuth, ConvexReactClient } from "convex/react";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexProviderWithClerk } from "convex/react-clerk";
 import type { ReactNode } from "react";
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL;
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const convexClient = convexUrl ? new ConvexReactClient(convexUrl) : null;
-
-function useClerkConvexAuth() {
-  const { getToken, isLoaded, isSignedIn } = useAuth();
-
-  return {
-    isLoading: !isLoaded,
-    isAuthenticated: Boolean(isSignedIn),
-    fetchAccessToken: () => getToken({ template: "convex" }),
-  };
-}
 
 function ConvexAuthProvider({ children }: { children: ReactNode }) {
   if (!convexClient) {
@@ -22,9 +13,9 @@ function ConvexAuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ConvexProviderWithAuth client={convexClient} useAuth={useClerkConvexAuth}>
+    <ConvexProviderWithClerk client={convexClient} useAuth={useAuth}>
       {children}
-    </ConvexProviderWithAuth>
+    </ConvexProviderWithClerk>
   );
 }
 
