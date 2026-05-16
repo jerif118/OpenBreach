@@ -1,0 +1,14 @@
+{
+  "evidenceId": "evd_passive_001",
+  "runId": "run_001",
+  "targetId": "tgt_openbreach_001",
+  "collectedAt": "2026-05-16T10:00:00.000Z",
+  "sourceAgent": "agent-scanner-01",
+  "observationType": "response-header",
+  "rawData": {
+    "headerName": "server",
+    "headerValue": "nginx/1.24.0"
+  },
+  "canonicalUrl": "https://www.acme.com",
+  "evidenceRefs": []
+}

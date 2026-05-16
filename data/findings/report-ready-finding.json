@@ -1,0 +1,16 @@
+{
+  "findingId": "fnd_tls_weak_001",
+  "resultId": "rslt_hyp_tls_001",
+  "hypothesisId": "hyp_tls_weak_001",
+  "targetId": "tgt_openbreach_001",
+  "severity": "high",
+  "category": "tls",
+  "title": "Deprecated TLS version in use",
+  "description": "The target accepts TLS 1.0 and TLS 1.1 connections. Both versions are deprecated and considered insecure. TLS 1.2 or higher should be required.",
+  "evidenceIds": ["evd_passive_001"],
+  "cveId": "CVE-2016-6883",
+  "cweId": "CWE-326",
+  "createdAt": "2026-05-16T10:30:00.000Z",
+  "sourceAgent": "agent-validator-01",
+  "confirmedBy": "reviewer-sec-ops-01"
+}
