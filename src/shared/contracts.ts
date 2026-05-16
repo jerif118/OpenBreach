@@ -143,6 +143,50 @@ export const rawScanEvidenceSchema = z.object({
 
 export type RawScanEvidence = z.infer<typeof rawScanEvidenceSchema>;
 
+export const rawScanPersistenceResultSchema = rawScanEvidenceSchema
+  .omit({ municipalityId: true })
+  .extend({ municipalityExternalId: z.string().min(1) });
+
+export type RawScanPersistenceResult = z.infer<
+  typeof rawScanPersistenceResultSchema
+>;
+
+export const rawScanPersistenceArgsSchema = z.object({
+  results: z.array(rawScanPersistenceResultSchema),
+});
+
+export type RawScanPersistenceArgs = z.infer<typeof rawScanPersistenceArgsSchema>;
+
+export const enrichedScanPersistenceResultSchema = scanResultSchema
+  .omit({ municipalityId: true })
+  .extend({ municipalityExternalId: z.string().min(1) });
+
+export type EnrichedScanPersistenceResult = z.infer<
+  typeof enrichedScanPersistenceResultSchema
+>;
+
+export const enrichedScanPersistenceArgsSchema = z.object({
+  results: z.array(enrichedScanPersistenceResultSchema),
+});
+
+export type EnrichedScanPersistenceArgs = z.infer<
+  typeof enrichedScanPersistenceArgsSchema
+>;
+
+export const scanConvexEnvironmentSchema = z.object({
+  fromFixture: z.boolean(),
+  fixturePath: z.string().min(1),
+  municipalityIds: z.array(z.string().min(1)),
+  concurrency: z.number().int().min(1),
+  controls: z.object({
+    timeoutMs: z.number().nonnegative(),
+    retries: z.number().int().nonnegative(),
+    delayMs: z.number().nonnegative(),
+  }),
+});
+
+export type ScanConvexEnvironment = z.infer<typeof scanConvexEnvironmentSchema>;
+
 export const reportFindingSchema = scanFindingSchema
   .extend({
     confidence: z.enum(["low", "medium", "high"]).default("medium"),
@@ -156,6 +200,10 @@ export const reportFindingSchema = scanFindingSchema
     raw: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();
+
+export const reportPersistenceFindingSchema = reportFindingSchema
+  .omit({ raw: true })
+  .strip();
 
 export const reportSectionSchema = z.object({
   title: z.string().min(1),
@@ -247,6 +295,28 @@ export type ReportArtifactReference = z.infer<
 >;
 export type ReportArtifacts = z.infer<typeof reportArtifactsSchema>;
 
+export const reportPersistenceArgsSchema = z.object({
+  externalId: z.string().min(1),
+  municipalityExternalId: z.string().min(1),
+  scanResultExternalId: z.string().min(1).optional(),
+  status: z.literal("completed"),
+  generatedAt: z.string().datetime(),
+  summary: z.string().min(1),
+  priorityActions: z.array(z.string().min(1)),
+  findings: z.array(reportPersistenceFindingSchema),
+  generatedBy: z.enum(["deterministic-fallback", "ai-provider"]),
+  pdf: reportPdfReferenceSchema,
+  artifacts: reportArtifactsSchema,
+});
+
+export type ReportPersistenceArgs = z.infer<typeof reportPersistenceArgsSchema>;
+
+export const reportPersistencePayloadSchema = z.object({
+  results: z.array(reportPersistenceArgsSchema),
+});
+
+export type ReportPersistencePayload = z.infer<typeof reportPersistencePayloadSchema>;
+
 const reportMetadataBaseSchema = z.object({
   reportId: z.string().min(1),
   municipalityId: z.string().min(1),
@@ -320,6 +390,60 @@ export const generateRemediationReportResultSchema = z.discriminatedUnion(
 
 export type GenerateRemediationReportResult = z.infer<
   typeof generateRemediationReportResultSchema
+>;
+
+export const generateRemediationReportBatchRecordSchema = z.object({
+  municipalityId: z.string().min(1),
+  rank: z.number().int().positive().optional(),
+  result: generateRemediationReportResultSchema,
+});
+
+export type GenerateRemediationReportBatchRecord = z.infer<
+  typeof generateRemediationReportBatchRecordSchema
+>;
+
+export const generateRemediationReportBatchOutputSchema = z.object({
+  id: z.string().min(1),
+  generatedAt: z.string().datetime(),
+  provider: z.enum(["deterministic-fallback", "tanstack-ai"]),
+  summary: z.object({
+    requested: z.number().int().nonnegative(),
+    completed: z.number().int().nonnegative(),
+    failed: z.number().int().nonnegative(),
+  }),
+  results: z.array(generateRemediationReportBatchRecordSchema),
+});
+
+export type GenerateRemediationReportBatchOutput = z.infer<
+  typeof generateRemediationReportBatchOutputSchema
+>;
+
+export const reportGenerationCliOptionsSchema = z.object({
+  generatedAt: z.string().datetime(),
+  limit: z.number().int().min(1).max(1_000),
+  outputPath: z.string().min(1),
+});
+
+export type ReportGenerationCliOptions = z.infer<
+  typeof reportGenerationCliOptionsSchema
+>;
+
+export const reportGenerationArtifactSchema = z.object({
+  id: z.string().min(1),
+  generatedAt: z.string().datetime(),
+  provider: z.enum(["deterministic-fallback", "tanstack-ai"]),
+  selected: z.array(selectedMunicipalityReportContextSchema),
+  batch: generateRemediationReportBatchOutputSchema,
+  convexPersistenceArgs: z.array(reportPersistenceArgsSchema),
+  persistence: z.object({
+    argsCommand: z.string().min(1),
+    liveConvexCommand: z.string().min(1),
+    note: z.string().min(1),
+  }),
+});
+
+export type ReportGenerationArtifact = z.infer<
+  typeof reportGenerationArtifactSchema
 >;
 
 export const userProfileSchema = z.object({
