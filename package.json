@@ -30,6 +30,7 @@
     "report:pdfs": "node scripts/validate-report-pdfs.ts",
     "report:ai-provider": "node scripts/validate-report-ai-provider.ts",
     "report:persistence:validate": "node scripts/validate-report-persistence.ts",
+    "auth:writes:validate": "node scripts/validate-auth-writes.ts",
     "report:generate": "node scripts/generate-reports.ts",
     "report:persist:args": "node scripts/report-convex-args.ts",
     "report:generate:validate": "node scripts/validate-report-generation.ts",

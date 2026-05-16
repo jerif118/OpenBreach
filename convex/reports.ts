@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireOperatorOrAdmin } from "./auth";
 
 const severity = v.union(v.literal("info"), v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("critical"));
 
@@ -61,10 +62,7 @@ export const persistGenerated = mutation({
     error: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Authentication required to persist remediation reports.");
-    }
+    await requireOperatorOrAdmin(ctx);
 
     if (args.status === "completed") {
       if (!args.summary || !args.priorityActions || !args.findings || !args.generatedBy) {
@@ -100,10 +98,7 @@ export const createPlaceholder = mutation({
     summary: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Authentication required to create report placeholders.");
-    }
+    await requireOperatorOrAdmin(ctx);
 
     return await ctx.db.insert("remediationReports", {
       externalId: args.externalId,

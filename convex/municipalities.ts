@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { requireAdmin } from "./auth";
 
 const riskTier = v.union(
   v.literal("low"),
@@ -40,6 +41,8 @@ export const get = query({
 export const seed = mutation({
   args: { municipalities: v.array(seedMunicipality) },
   handler: async (ctx, args) => {
+    await requireAdmin(ctx);
+
     let inserted = 0;
     let updated = 0;
 

@@ -21,8 +21,8 @@ if (!reportsSource.includes("export const persistGenerated = mutation")) {
   throw new Error("reports.persistGenerated mutation must persist generated report status metadata.");
 }
 
-if (!reportsSource.includes("const identity = await ctx.auth.getUserIdentity()")) {
-  throw new Error("Report persistence writes must derive authorization from Convex auth identity.");
+if (!reportsSource.includes("requireOperatorOrAdmin")) {
+  throw new Error("Report persistence writes must require operator or admin authorization.");
 }
 
 if (reportsSource.includes("userId: v.") || reportsSource.includes("userIdentifier: v.")) {
