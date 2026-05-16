@@ -32,6 +32,9 @@ export default defineSchema({
     state: v.string(),
     websiteUrl: v.string(),
     population: v.optional(v.number()),
+    latitude: v.optional(v.number()),
+    longitude: v.optional(v.number()),
+    sourceUrl: v.optional(v.string()),
     riskTier: v.union(
       v.literal("low"),
       v.literal("medium"),
