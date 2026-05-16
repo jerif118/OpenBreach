@@ -24,3 +24,5 @@ yarn.lock
 .mcp.json
 *.bak
 opencode.jsonc
+
+.env.local
