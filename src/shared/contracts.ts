@@ -10,6 +10,9 @@ export const municipalitySchema = z.object({
   state: z.string().min(1),
   websiteUrl: z.string().url(),
   population: z.number().int().nonnegative().optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  sourceUrl: z.string().url().optional(),
   riskTier: z.enum(["low", "medium", "high", "critical"]),
 });
 
@@ -38,6 +41,13 @@ export type ScanFinding = z.infer<typeof scanFindingSchema>;
 export const riskLevelSchema = z.enum(["low", "medium", "high", "critical"]);
 
 export type RiskLevel = z.infer<typeof riskLevelSchema>;
+
+export const municipalityListItemSchema = municipalitySchema.extend({
+  riskScore: z.number().min(0).max(100),
+  riskLevel: riskLevelSchema,
+});
+
+export type MunicipalityListItem = z.infer<typeof municipalityListItemSchema>;
 
 export const scanResultSchema = z.object({
   id: z.string().min(1),
@@ -194,6 +204,14 @@ export const reportMetadataSchema = z.discriminatedUnion("status", [
 
 export type ReportMetadata = z.infer<typeof reportMetadataSchema>;
 
+export const municipalityDetailSchema = z.object({
+  municipality: municipalitySchema,
+  scan: scanResultSchema.nullable(),
+  report: reportMetadataSchema.nullable(),
+});
+
+export type MunicipalityDetail = z.infer<typeof municipalityDetailSchema>;
+
 export const selectedMunicipalityReportContextSchema = z.object({
   municipality: municipalitySchema,
   scan: scanResultSchema,
@@ -229,7 +247,7 @@ export type GenerateRemediationReportResult = z.infer<
 
 export const userProfileSchema = z.object({
   id: z.string().min(1),
-  clerkUserId: z.string().min(1),
+  tokenIdentifier: z.string().min(1),
   email: z.string().email().optional(),
   name: z.string().optional(),
   roles: z.array(appRoleSchema),
