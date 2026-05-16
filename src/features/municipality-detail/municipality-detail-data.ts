@@ -61,9 +61,12 @@ export const municipalityDetailMockItems = [
           category: "tls",
           severity: "high",
           title: "TLS certificate needs review",
-          description: "Observed public signals indicate the TLS configuration should be reviewed.",
-          evidence: "Certificate metadata reported a short remaining validity window.",
-          remediationHint: "Renew the certificate and verify automated renewal monitoring.",
+          description:
+            "Observed public signals indicate the TLS configuration should be reviewed.",
+          evidence:
+            "Certificate metadata reported a short remaining validity window.",
+          remediationHint:
+            "Renew the certificate and verify automated renewal monitoring.",
         },
       ],
     },
@@ -148,13 +151,19 @@ export const municipalityDetailMockItems = [
   },
 ] satisfies MunicipalityDetail[];
 
-export function getMunicipalityDetailSource(convexUrl: string | undefined): MunicipalityDetailSource {
+export function getMunicipalityDetailSource(
+  convexUrl: string | undefined,
+): MunicipalityDetailSource {
   return convexUrl ? "convex" : "mock";
 }
 
-export function getMockMunicipalityDetailState(id: string): MunicipalityDetailState {
+export function getMockMunicipalityDetailState(
+  id: string,
+): MunicipalityDetailState {
   return toMunicipalityDetailState(
-    municipalityDetailMockItems.find((detail) => detail.municipality.id === id) ?? null,
+    municipalityDetailMockItems.find(
+      (detail) => detail.municipality.id === id,
+    ) ?? null,
     "mock",
     id,
   );

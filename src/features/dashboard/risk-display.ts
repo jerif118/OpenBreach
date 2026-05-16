@@ -13,7 +13,8 @@ export const riskLegend: RiskDisplay[] = [
   {
     level: "critical",
     label: "Critical risk",
-    description: "Immediate public-service exposure or high-impact remediation priority.",
+    description:
+      "Immediate public-service exposure or high-impact remediation priority.",
     swatchClassName: "bg-rose-400 shadow-rose-400/30",
     markerClassName: "border-rose-100 bg-rose-400 shadow-rose-400/50",
     textClassName: "text-rose-200",
@@ -29,7 +30,8 @@ export const riskLegend: RiskDisplay[] = [
   {
     level: "medium",
     label: "Medium risk",
-    description: "Monitor closely and schedule remediation with service owners.",
+    description:
+      "Monitor closely and schedule remediation with service owners.",
     swatchClassName: "bg-amber-200 shadow-amber-200/30",
     markerClassName: "border-amber-50 bg-amber-200 shadow-amber-200/50",
     textClassName: "text-amber-100",
@@ -45,5 +47,8 @@ export const riskLegend: RiskDisplay[] = [
 ];
 
 export function getRiskDisplay(level: RiskLevel) {
-  return riskLegend.find((item) => item.level === level) ?? riskLegend[riskLegend.length - 1];
+  return (
+    riskLegend.find((item) => item.level === level) ??
+    riskLegend[riskLegend.length - 1]
+  );
 }

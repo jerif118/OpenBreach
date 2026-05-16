@@ -12,18 +12,22 @@ export const municipalitySeedRecordSchema = z.object({
   riskTier: z.enum(["low", "medium", "high", "critical"]).default("medium"),
 });
 
-export const municipalitySeedSchema = z.array(municipalitySeedRecordSchema).superRefine((records, ctx) => {
-  const ids = new Set<string>();
-  for (const [index, record] of records.entries()) {
-    if (ids.has(record.id)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `Duplicate municipality id: ${record.id}`,
-        path: [index, "id"],
-      });
+export const municipalitySeedSchema = z
+  .array(municipalitySeedRecordSchema)
+  .superRefine((records, ctx) => {
+    const ids = new Set<string>();
+    for (const [index, record] of records.entries()) {
+      if (ids.has(record.id)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Duplicate municipality id: ${record.id}`,
+          path: [index, "id"],
+        });
+      }
+      ids.add(record.id);
     }
-    ids.add(record.id);
-  }
-});
+  });
 
-export type MunicipalitySeedRecord = z.infer<typeof municipalitySeedRecordSchema>;
+export type MunicipalitySeedRecord = z.infer<
+  typeof municipalitySeedRecordSchema
+>;

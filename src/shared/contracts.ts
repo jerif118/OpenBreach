@@ -146,7 +146,9 @@ export type RawScanEvidence = z.infer<typeof rawScanEvidenceSchema>;
 export const reportFindingSchema = scanFindingSchema
   .extend({
     confidence: z.enum(["low", "medium", "high"]).default("medium"),
-    status: z.enum(["confirmed", "likely", "observed", "skipped", "unresolved"]).default("observed"),
+    status: z
+      .enum(["confirmed", "likely", "observed", "skipped", "unresolved"])
+      .default("observed"),
     affectedAssets: z.array(z.string().min(1)).default([]),
     evidenceSummary: z.string().min(1),
     remediationSteps: z.array(z.string().min(1)).default([]),
@@ -193,21 +195,35 @@ export const remediationReportVariantsSchema = z.object({
   friendly: remediationReportSchema,
 });
 
-export type RemediationReportVariants = z.infer<typeof remediationReportVariantsSchema>;
+export type RemediationReportVariants = z.infer<
+  typeof remediationReportVariantsSchema
+>;
 
-export const reportGenerationStatusSchema = z.enum(["pending", "completed", "failed"]);
+export const reportGenerationStatusSchema = z.enum([
+  "pending",
+  "completed",
+  "failed",
+]);
 
-export type ReportGenerationStatus = z.infer<typeof reportGenerationStatusSchema>;
+export type ReportGenerationStatus = z.infer<
+  typeof reportGenerationStatusSchema
+>;
 
 export const reportPdfReferenceSchema = z.object({
   storagePath: z
     .string()
     .min(1)
-    .regex(/^data\/reports\/[A-Za-z0-9._-]+\.pdf$/, "PDF path must stay within data/reports/"),
+    .regex(
+      /^data\/reports\/[A-Za-z0-9._-]+\.pdf$/,
+      "PDF path must stay within data/reports/",
+    ),
   fileName: z
     .string()
     .min(1)
-    .regex(/^[A-Za-z0-9._-]+\.pdf$/, "PDF file name must be a safe .pdf file name"),
+    .regex(
+      /^[A-Za-z0-9._-]+\.pdf$/,
+      "PDF file name must be a safe .pdf file name",
+    ),
   contentType: z.literal("application/pdf").default("application/pdf"),
   generatedAt: z.string().datetime().optional(),
   sizeBytes: z.number().int().nonnegative().optional(),
@@ -226,7 +242,9 @@ export const reportArtifactsSchema = z.object({
   friendly: reportArtifactReferenceSchema.optional(),
 });
 
-export type ReportArtifactReference = z.infer<typeof reportArtifactReferenceSchema>;
+export type ReportArtifactReference = z.infer<
+  typeof reportArtifactReferenceSchema
+>;
 export type ReportArtifacts = z.infer<typeof reportArtifactsSchema>;
 
 const reportMetadataBaseSchema = z.object({
@@ -279,23 +297,26 @@ export type SelectedMunicipalityReportContext = z.infer<
   typeof selectedMunicipalityReportContextSchema
 >;
 
-export const generateRemediationReportResultSchema = z.discriminatedUnion("status", [
-  z.object({
-    status: z.literal("pending"),
-    metadata: pendingReportMetadataSchema,
-  }),
-  z.object({
-    status: z.literal("completed"),
-    report: remediationReportSchema,
-    reports: remediationReportVariantsSchema,
-    metadata: completedReportMetadataSchema,
-  }),
-  z.object({
-    status: z.literal("failed"),
-    metadata: failedReportMetadataSchema,
-    error: z.string().min(1),
-  }),
-]);
+export const generateRemediationReportResultSchema = z.discriminatedUnion(
+  "status",
+  [
+    z.object({
+      status: z.literal("pending"),
+      metadata: pendingReportMetadataSchema,
+    }),
+    z.object({
+      status: z.literal("completed"),
+      report: remediationReportSchema,
+      reports: remediationReportVariantsSchema,
+      metadata: completedReportMetadataSchema,
+    }),
+    z.object({
+      status: z.literal("failed"),
+      metadata: failedReportMetadataSchema,
+      error: z.string().min(1),
+    }),
+  ],
+);
 
 export type GenerateRemediationReportResult = z.infer<
   typeof generateRemediationReportResultSchema
@@ -323,7 +344,8 @@ export const generateRemediationReportInputSchema = z
     if (!value.scan && value.sourceData === undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Report generation input requires scan data or sourceData for normalization.",
+        message:
+          "Report generation input requires scan data or sourceData for normalization.",
       });
     }
   });
