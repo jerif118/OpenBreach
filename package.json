@@ -17,10 +17,10 @@
     "risk:fixture": "node scripts/export-enriched-scan-fixture.ts",
     "risk:validate": "node scripts/validate-risk-scoring.ts",
     "risk:persist:args": "node scripts/risk-convex-args.ts",
-    "risk:persist": "node scripts/risk-convex-args.ts | node scripts/persist-via-convex.ts scanResults:upsertEnrichedMany",
+    "risk:persist": "convex run scanResults:upsertEnrichedMany \"$(node scripts/risk-convex-args.ts)\"",
     "scanner:persistence:validate": "node scripts/validate-scan-persistence.ts",
     "scanner:persist:args": "node scripts/scan-convex-args.ts",
-    "scanner:persist": "node scripts/scan-convex-args.ts | node scripts/persist-via-convex.ts rawScanResults:upsertMany",
+    "scanner:persist": "convex run rawScanResults:upsertMany \"$(node scripts/scan-convex-args.ts)\"",
     "municipalities:validate": "node scripts/validate-municipality-seed.ts",
     "municipalities:list:validate": "node scripts/validate-municipality-list.ts",
     "dashboard:data:validate": "node scripts/validate-dashboard-data-adapter.ts",
@@ -40,12 +40,11 @@
     "report:persistence:validate": "node scripts/validate-report-persistence.ts",
     "auth:writes:validate": "node scripts/validate-auth-writes.ts",
     "report:generate": "node scripts/generate-reports.ts",
-    "report:generate:all": "node scripts/generate-reports.ts --all",
     "report:persist:args": "node scripts/report-convex-args.ts",
-    "report:persist:fixture": "node scripts/report-fixture-persist-args.ts | node scripts/persist-via-convex.ts reports:seedFromFixture",
     "report:generate:validate": "node scripts/validate-report-generation.ts",
     "clean:hard": "node scripts/hard-clean.ts",
-    "clean:soft": "node scripts/soft-clean.ts"
+    "clean:soft": "node scripts/soft-clean.ts",
+    "openbreach:validate": "node scripts/validate-openbreach-contracts.ts"
   },
   "dependencies": {
     "@clerk/tanstack-react-start": "1.2.4",
