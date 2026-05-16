@@ -64,11 +64,5 @@
   "engines": {
     "node": "24.15.0"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@openrouter/sdk",
-      "@clerk/shared"
-    ]
-  },
   "packageManager": "pnpm@11.1.2+sha224.6d287705d0efa6c2ba7a74795dc72a7800f64840f2bc0961cedba029"
 }

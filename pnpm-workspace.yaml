@@ -1,5 +1,5 @@
 allowBuilds:
-  '@clerk/shared': true
-  '@openrouter/sdk': true
+  "@clerk/shared": true
+  "@openrouter/sdk": true
   esbuild: true
 saveExact: true
