@@ -100,7 +100,12 @@ export async function scanWebsite(
     ...httpEvidence,
     tls: tlsEvidence.tls,
     adminExposure: adminEvidence.adminExposure,
-    errors: [...baseEvidence.errors, ...httpEvidence.errors, ...tlsEvidence.errors, ...adminEvidence.errors],
+    errors: [
+      ...baseEvidence.errors,
+      ...httpEvidence.errors,
+      ...tlsEvidence.errors,
+      ...adminEvidence.errors,
+    ],
   };
 }
 
@@ -108,7 +113,12 @@ async function collectHttpEvidence(
   url: URL,
   controls: Required<ScannerControls>,
   options: PassiveScannerOptions,
-): Promise<Pick<RawScanEvidence, "reachable" | "finalUrl" | "httpStatus" | "headers" | "cms" | "errors">> {
+): Promise<
+  Pick<
+    RawScanEvidence,
+    "reachable" | "finalUrl" | "httpStatus" | "headers" | "cms" | "errors"
+  >
+> {
   const fetchImpl = options.fetch ?? fetch;
   const errors: RawScanEvidence["errors"] = [];
 
@@ -158,13 +168,21 @@ async function collectAdminExposure(
       );
       const response = shouldFallbackToGet(headResponse)
         ? await withRetries(
-            () => fetchWithTimeout(fetchImpl, checkUrl, controls.timeoutMs, "GET"),
+            () =>
+              fetchWithTimeout(fetchImpl, checkUrl, controls.timeoutMs, "GET"),
             controls,
             options.delay ?? delay,
           )
         : headResponse;
 
-      adminExposure.push(toAdminExposure(path, shouldFallbackToGet(headResponse) ? "GET" : "HEAD", response, checkUrl));
+      adminExposure.push(
+        toAdminExposure(
+          path,
+          shouldFallbackToGet(headResponse) ? "GET" : "HEAD",
+          response,
+          checkUrl,
+        ),
+      );
     } catch (error) {
       errors.push(toError("admin-exposure", error));
       adminExposure.push({
@@ -189,7 +207,11 @@ async function collectTlsEvidence(
 
   try {
     const tls = await withRetries(
-      () => (options.getTlsCertificate ?? getTlsCertificate)(url, controls.timeoutMs),
+      () =>
+        (options.getTlsCertificate ?? getTlsCertificate)(
+          url,
+          controls.timeoutMs,
+        ),
       controls,
       options.delay ?? delay,
     );
@@ -220,7 +242,11 @@ async function fetchWithTimeout(
 }
 
 function shouldFallbackToGet(response: Response): boolean {
-  return response.status === 403 || response.status === 405 || response.status === 501;
+  return (
+    response.status === 403 ||
+    response.status === 405 ||
+    response.status === 501
+  );
 }
 
 function toAdminExposure(
@@ -272,18 +298,26 @@ function selectHeaders(headers: Headers): Record<string, string> {
   return selected;
 }
 
-function detectCms(body: string, headers: Headers): NonNullable<RawScanEvidence["cms"]> {
+function detectCms(
+  body: string,
+  headers: Headers,
+): NonNullable<RawScanEvidence["cms"]> {
   const evidence: string[] = [];
   const lowerBody = body.toLowerCase();
   const poweredBy = headers.get("x-powered-by")?.toLowerCase() ?? "";
-  const generator = body.match(/<meta\s+[^>]*name=["']generator["'][^>]*content=["']([^"']+)["']/i)?.[1];
+  const generator = body.match(
+    /<meta\s+[^>]*name=["']generator["'][^>]*content=["']([^"']+)["']/i,
+  )?.[1];
   const generatorLower = generator?.toLowerCase() ?? "";
 
   if (generator) {
     evidence.push(`generator:${generator}`);
   }
 
-  const candidates: Array<{ name: Exclude<CmsName, "unknown">; markers: string[] }> = [
+  const candidates: Array<{
+    name: Exclude<CmsName, "unknown">;
+    markers: string[];
+  }> = [
     { name: "wordpress", markers: ["wordpress", "wp-content", "wp-includes"] },
     { name: "joomla", markers: ["joomla", "/administrator/"] },
     { name: "drupal", markers: ["drupal", "drupal-settings-json"] },
@@ -291,7 +325,10 @@ function detectCms(body: string, headers: Headers): NonNullable<RawScanEvidence[
 
   for (const candidate of candidates) {
     const matchedMarkers = candidate.markers.filter(
-      (marker) => lowerBody.includes(marker) || generatorLower.includes(marker) || poweredBy.includes(marker),
+      (marker) =>
+        lowerBody.includes(marker) ||
+        generatorLower.includes(marker) ||
+        poweredBy.includes(marker),
     );
     if (matchedMarkers.length > 0) {
       evidence.push(...matchedMarkers.map((marker) => `marker:${marker}`));
@@ -307,14 +344,20 @@ function detectCms(body: string, headers: Headers): NonNullable<RawScanEvidence[
   return { name: "unknown", confidence: 0, evidence };
 }
 
-function extractVersion(generator: string | undefined, cmsName: string): string | undefined {
+function extractVersion(
+  generator: string | undefined,
+  cmsName: string,
+): string | undefined {
   if (!generator?.toLowerCase().includes(cmsName)) {
     return undefined;
   }
   return generator.match(/\b\d+(?:\.\d+){0,3}\b/)?.[0];
 }
 
-async function getTlsCertificate(url: URL, timeoutMs: number): Promise<TlsEvidence> {
+async function getTlsCertificate(
+  url: URL,
+  timeoutMs: number,
+): Promise<TlsEvidence> {
   return new Promise((resolve, reject) => {
     const socket = connect({
       host: url.hostname,
@@ -356,7 +399,9 @@ function parseCertificateDate(value: string | undefined): string | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
-function formatIssuer(issuer: Record<string, unknown> | undefined): string | undefined {
+function formatIssuer(
+  issuer: Record<string, unknown> | undefined,
+): string | undefined {
   if (!issuer) {
     return undefined;
   }
@@ -371,7 +416,9 @@ function formatIssuer(issuer: Record<string, unknown> | undefined): string | und
   return firstIssuerValue;
 }
 
-export function resolveScannerControls(controls: ScannerControls | undefined): Required<ScannerControls> {
+export function resolveScannerControls(
+  controls: ScannerControls | undefined,
+): Required<ScannerControls> {
   return {
     timeoutMs: controls?.timeoutMs ?? DEFAULT_SCANNER_CONTROLS.timeoutMs,
     retries: controls?.retries ?? DEFAULT_SCANNER_CONTROLS.retries,
@@ -383,7 +430,10 @@ async function delay(milliseconds: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-function toError(stage: RawScanEvidence["errors"][number]["stage"], error: unknown) {
+function toError(
+  stage: RawScanEvidence["errors"][number]["stage"],
+  error: unknown,
+) {
   return {
     stage,
     message: error instanceof Error ? error.message : String(error),

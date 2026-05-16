@@ -21,7 +21,9 @@ const selected = selectTopRiskReportContexts({
 });
 
 if (selected.length !== 10) {
-  throw new Error(`Expected 10 selected report contexts, received ${selected.length}.`);
+  throw new Error(
+    `Expected 10 selected report contexts, received ${selected.length}.`,
+  );
 }
 
 for (const context of selected) {
@@ -37,7 +39,9 @@ for (let index = 1; index < selected.length; index += 1) {
   const current = selected[index];
 
   if (previous.scan.riskScore < current.scan.riskScore) {
-    throw new Error("Selected report contexts must be sorted by descending riskScore.");
+    throw new Error(
+      "Selected report contexts must be sorted by descending riskScore.",
+    );
   }
 
   if (previous.scan.riskScore === current.scan.riskScore) {
@@ -45,7 +49,9 @@ for (let index = 1; index < selected.length; index += 1) {
     const currentId = current.municipality.id;
 
     if (previousId.localeCompare(currentId) > 0) {
-      throw new Error("Risk score ties must be ordered by municipality id for deterministic output.");
+      throw new Error(
+        "Risk score ties must be ordered by municipality id for deterministic output.",
+      );
     }
   }
 }
@@ -56,7 +62,9 @@ selected.forEach((context, index) => {
   }
 
   if (context.scan.findings.length === 0) {
-    throw new Error("Selected report contexts must have at least one reportable finding.");
+    throw new Error(
+      "Selected report contexts must have at least one reportable finding.",
+    );
   }
 });
 
@@ -137,11 +145,18 @@ const smallSelection = selectTopRiskReportContexts({
 });
 
 if (smallSelection.length !== 2) {
-  throw new Error(`Expected all 2 reportable records, received ${smallSelection.length}.`);
+  throw new Error(
+    `Expected all 2 reportable records, received ${smallSelection.length}.`,
+  );
 }
 
-if (smallSelection.map((context) => context.municipality.id).join(",") !== "alpha,beta") {
-  throw new Error("Fewer-than-10 selection should preserve deterministic tie ordering.");
+if (
+  smallSelection.map((context) => context.municipality.id).join(",") !==
+  "alpha,beta"
+) {
+  throw new Error(
+    "Fewer-than-10 selection should preserve deterministic tie ordering.",
+  );
 }
 
 console.log("Report selection validation passed.");

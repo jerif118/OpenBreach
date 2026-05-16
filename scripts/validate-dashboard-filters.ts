@@ -14,10 +14,10 @@ const requiredRouteSnippets = [
   "<MexicoRiskMap state={filteredState} totalRows={totalRows} />",
   "<RankedRiskList state={filteredState} items={rankedItems} />",
   "DashboardFilters",
-  "htmlFor=\"risk-level-filter\"",
-  "id=\"risk-level-filter\"",
-  "htmlFor=\"state-filter\"",
-  "id=\"state-filter\"",
+  'htmlFor="risk-level-filter"',
+  'id="risk-level-filter"',
+  'htmlFor="state-filter"',
+  'id="state-filter"',
   "Clear filters",
   "hasActiveFilters",
   "No municipalities match the active filters",
@@ -26,14 +26,18 @@ const requiredRouteSnippets = [
 
 for (const snippet of requiredRouteSnippets) {
   if (!routeSource.includes(snippet)) {
-    throw new Error(`Dashboard filters are missing required behavior: ${snippet}`);
+    throw new Error(
+      `Dashboard filters are missing required behavior: ${snippet}`,
+    );
   }
 }
 
 const mapUsageCount = routeSource.match(/filteredState/g)?.length ?? 0;
 
 if (mapUsageCount < 2) {
-  throw new Error("Dashboard filters must share one filtered state between map and ranked list.");
+  throw new Error(
+    "Dashboard filters must share one filtered state between map and ranked list.",
+  );
 }
 
 console.log("Dashboard filter validation passed.");

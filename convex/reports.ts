@@ -2,7 +2,13 @@ import { v } from "convex/values";
 import { internalMutation, query, mutation } from "./_generated/server";
 import { requireOperatorOrAdmin } from "./auth";
 
-const severity = v.union(v.literal("info"), v.literal("low"), v.literal("medium"), v.literal("high"), v.literal("critical"));
+const severity = v.union(
+  v.literal("info"),
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+  v.literal("critical"),
+);
 
 const reportFinding = v.object({
   id: v.string(),
@@ -34,9 +40,16 @@ const reportFinding = v.object({
   verificationSteps: v.array(v.string()),
 });
 
-const reportStatus = v.union(v.literal("pending"), v.literal("completed"), v.literal("failed"));
+const reportStatus = v.union(
+  v.literal("pending"),
+  v.literal("completed"),
+  v.literal("failed"),
+);
 
-const generatedBy = v.union(v.literal("deterministic-fallback"), v.literal("ai-provider"));
+const generatedBy = v.union(
+  v.literal("deterministic-fallback"),
+  v.literal("ai-provider"),
+);
 
 const reportPdfReference = v.object({
   storagePath: v.string(),
@@ -62,7 +75,9 @@ export const getForMunicipality = query({
   handler: async (ctx, args) => {
     const reports = await ctx.db
       .query("remediationReports")
-      .withIndex("by_municipalityId_and_generatedAt", (q) => q.eq("municipalityId", args.municipalityId))
+      .withIndex("by_municipalityId_and_generatedAt", (q) =>
+        q.eq("municipalityId", args.municipalityId),
+      )
       .order("desc")
       .take(1);
 
@@ -89,7 +104,14 @@ export const persistGenerated = mutation({
     await requireOperatorOrAdmin(ctx);
 
     if (args.status === "completed") {
-      if (!args.summary || !args.priorityActions || !args.findings || !args.generatedBy || !args.pdf || !args.artifacts) {
+      if (
+        !args.summary ||
+        !args.priorityActions ||
+        !args.findings ||
+        !args.generatedBy ||
+        !args.pdf ||
+        !args.artifacts
+      ) {
         throw new Error(
           "Completed reports require summary, priority actions, findings, generator metadata, and both PDF artifact references.",
         );
@@ -151,7 +173,9 @@ export const seedFromFixture = internalMutation({
     for (const result of args.results) {
       const municipality = await ctx.db
         .query("municipalities")
-        .withIndex("by_externalId", (q) => q.eq("externalId", result.municipalityExternalId))
+        .withIndex("by_externalId", (q) =>
+          q.eq("externalId", result.municipalityExternalId),
+        )
         .unique();
 
       if (!municipality) {
@@ -185,7 +209,9 @@ export const seedFromFixture = internalMutation({
 
       const existing = await ctx.db
         .query("remediationReports")
-        .withIndex("by_externalId", (q) => q.eq("externalId", result.externalId))
+        .withIndex("by_externalId", (q) =>
+          q.eq("externalId", result.externalId),
+        )
         .unique();
 
       if (existing) {

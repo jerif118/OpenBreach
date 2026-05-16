@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
-import { rawScanEvidenceSchema, type RawScanEvidence } from "../src/shared/contracts.ts";
+import {
+  rawScanEvidenceSchema,
+  type RawScanEvidence,
+} from "../src/shared/contracts.ts";
 import { toRawScanPersistenceArgs } from "../src/scanner/persistence.ts";
 
 const rawEvidence: RawScanEvidence = rawScanEvidenceSchema.parse({

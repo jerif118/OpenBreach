@@ -12,7 +12,12 @@ const rawScanTls = v.object({
 });
 
 const rawScanCms = v.object({
-  name: v.union(v.literal("wordpress"), v.literal("joomla"), v.literal("drupal"), v.literal("unknown")),
+  name: v.union(
+    v.literal("wordpress"),
+    v.literal("joomla"),
+    v.literal("drupal"),
+    v.literal("unknown"),
+  ),
   version: v.optional(v.string()),
   confidence: v.number(),
   evidence: v.array(v.string()),
@@ -27,7 +32,12 @@ const rawScanAdminExposure = v.object({
 });
 
 const rawScanError = v.object({
-  stage: v.union(v.literal("http"), v.literal("tls"), v.literal("cms"), v.literal("admin-exposure")),
+  stage: v.union(
+    v.literal("http"),
+    v.literal("tls"),
+    v.literal("cms"),
+    v.literal("admin-exposure"),
+  ),
   message: v.string(),
 });
 
@@ -56,7 +66,9 @@ export const upsertMany = internalMutation({
     for (const result of args.results) {
       const municipality = await ctx.db
         .query("municipalities")
-        .withIndex("by_externalId", (q) => q.eq("externalId", result.municipalityExternalId))
+        .withIndex("by_externalId", (q) =>
+          q.eq("externalId", result.municipalityExternalId),
+        )
         .unique();
 
       if (!municipality) {
@@ -66,7 +78,9 @@ export const upsertMany = internalMutation({
 
       const existing = await ctx.db
         .query("rawScanResults")
-        .withIndex("by_externalId", (q) => q.eq("externalId", result.municipalityExternalId))
+        .withIndex("by_externalId", (q) =>
+          q.eq("externalId", result.municipalityExternalId),
+        )
         .unique();
 
       const document = {
@@ -117,6 +131,9 @@ export const latestByExternalId = query({
 export const listLatest = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    return await ctx.db.query("rawScanResults").order("desc").take(args.limit ?? 50);
+    return await ctx.db
+      .query("rawScanResults")
+      .order("desc")
+      .take(args.limit ?? 50);
   },
 });

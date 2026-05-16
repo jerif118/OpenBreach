@@ -9,7 +9,8 @@ export const Route = createFileRoute("/reports/$fileName")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const encodedFileName = new URL(request.url).pathname.split("/").at(-1) ?? "";
+        const encodedFileName =
+          new URL(request.url).pathname.split("/").at(-1) ?? "";
         let fileName: string;
 
         try {
@@ -23,7 +24,9 @@ export const Route = createFileRoute("/reports/$fileName")({
         }
 
         try {
-          const pdf = await readFile(join(process.cwd(), "data", "reports", fileName));
+          const pdf = await readFile(
+            join(process.cwd(), "data", "reports", fileName),
+          );
 
           return new Response(pdf, {
             headers: {

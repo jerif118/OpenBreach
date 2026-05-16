@@ -23,7 +23,8 @@ export const VULNERABLE_CMS_VERSIONS: CmsVulnerability[] = [
     severity: "high",
     description:
       "The scanner observed a WordPress 6.4 generator string. This MVP treats the version as a known-risk demo match when confidence is high, without claiming exploitation.",
-    remediationHint: "Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release.",
+    remediationHint:
+      "Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release.",
   },
   {
     cms: "joomla",
@@ -33,7 +34,8 @@ export const VULNERABLE_CMS_VERSIONS: CmsVulnerability[] = [
     severity: "high",
     description:
       "The scanner observed Joomla 3.10 with high confidence. End-of-support CMS versions increase exposure to public vulnerability classes.",
-    remediationHint: "Plan an upgrade to a supported Joomla release and verify extensions before migration.",
+    remediationHint:
+      "Plan an upgrade to a supported Joomla release and verify extensions before migration.",
   },
   {
     cms: "drupal",
@@ -43,18 +45,28 @@ export const VULNERABLE_CMS_VERSIONS: CmsVulnerability[] = [
     severity: "high",
     description:
       "The scanner observed Drupal 7 with high confidence. This indicates a known maintenance risk, not confirmed compromise.",
-    remediationHint: "Move the site to a supported Drupal release or apply an approved extended-support program.",
+    remediationHint:
+      "Move the site to a supported Drupal release or apply an approved extended-support program.",
   },
 ];
 
-export function findCmsVulnerability(cms: RawScanEvidence["cms"]): CmsVulnerability | undefined {
-  if (!cms || cms.name === "unknown" || !cms.version || cms.confidence < CMS_VULNERABILITY_CONFIDENCE_THRESHOLD) {
+export function findCmsVulnerability(
+  cms: RawScanEvidence["cms"],
+): CmsVulnerability | undefined {
+  if (
+    !cms ||
+    cms.name === "unknown" ||
+    !cms.version ||
+    cms.confidence < CMS_VULNERABILITY_CONFIDENCE_THRESHOLD
+  ) {
     return undefined;
   }
   const version = cms.version;
 
   return VULNERABLE_CMS_VERSIONS.find(
-    (entry) => entry.cms === cms.name && normalizeVersion(version).startsWith(normalizeVersion(entry.version)),
+    (entry) =>
+      entry.cms === cms.name &&
+      normalizeVersion(version).startsWith(normalizeVersion(entry.version)),
   );
 }
 

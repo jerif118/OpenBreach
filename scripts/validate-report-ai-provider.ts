@@ -29,7 +29,9 @@ if (!context) {
 const fallbackAdapter = createReportAiAdapter("");
 
 if (fallbackAdapter.provider !== "deterministic-fallback") {
-  throw new Error(`Expected deterministic fallback without credentials, received ${fallbackAdapter.provider}.`);
+  throw new Error(
+    `Expected deterministic fallback without credentials, received ${fallbackAdapter.provider}.`,
+  );
 }
 
 const providerReport: RemediationReport = buildDeterministicReportVariants(
@@ -64,7 +66,9 @@ const aiAdapter = createReportAiAdapter("test-provider-key", {
 });
 
 if (aiAdapter.provider !== "tanstack-ai") {
-  throw new Error(`Expected configured credentials to select tanstack-ai, received ${aiAdapter.provider}.`);
+  throw new Error(
+    `Expected configured credentials to select tanstack-ai, received ${aiAdapter.provider}.`,
+  );
 }
 
 const aiReports = remediationReportVariantsSchema.parse(
@@ -77,15 +81,21 @@ const aiReports = remediationReportVariantsSchema.parse(
 const aiReport = remediationReportSchema.parse(aiReports.technical);
 
 if (chatCalls !== 2) {
-  throw new Error(`Expected provider chat executor to be called twice, received ${chatCalls}.`);
+  throw new Error(
+    `Expected provider chat executor to be called twice, received ${chatCalls}.`,
+  );
 }
 
 if (aiReport.generatedBy !== "ai-provider") {
-  throw new Error(`Expected provider output to remain ai-provider, received ${aiReport.generatedBy}.`);
+  throw new Error(
+    `Expected provider output to remain ai-provider, received ${aiReport.generatedBy}.`,
+  );
 }
 
 if (aiReports.friendly.variant !== "friendly") {
-  throw new Error("Provider-backed generation must return the friendly report variant.");
+  throw new Error(
+    "Provider-backed generation must return the friendly report variant.",
+  );
 }
 
 const invalidAdapter = createReportAiAdapter("test-provider-key", {
@@ -101,7 +111,9 @@ const fallbackReports = await invalidAdapter.generateRemediationReportVariants({
 const fallbackReport = fallbackReports.technical;
 
 if (fallbackReport.generatedBy !== "deterministic-fallback") {
-  throw new Error("Invalid provider output must fall back to deterministic generation.");
+  throw new Error(
+    "Invalid provider output must fall back to deterministic generation.",
+  );
 }
 
 const dependencies = {
@@ -121,18 +133,27 @@ for (const excludedDependency of [
   "@aws/bedrock-agentcore",
 ]) {
   if (excludedDependency in dependencies) {
-    throw new Error(`Excluded AI dependency must not be present: ${excludedDependency}`);
+    throw new Error(
+      `Excluded AI dependency must not be present: ${excludedDependency}`,
+    );
   }
 }
 
-const adapterSource = await readFile(new URL("../src/ai/report-adapter.ts", import.meta.url), "utf8");
+const adapterSource = await readFile(
+  new URL("../src/ai/report-adapter.ts", import.meta.url),
+  "utf8",
+);
 
 if (!adapterSource.includes("@tanstack/ai-openrouter")) {
-  throw new Error("Provider adapter package should be imported inside src/ai/report-adapter.ts.");
+  throw new Error(
+    "Provider adapter package should be imported inside src/ai/report-adapter.ts.",
+  );
 }
 
 if (adapterSource.includes("@tanstack/ai-openai")) {
-  throw new Error("OpenAI adapter package should not be used for report generation.");
+  throw new Error(
+    "OpenAI adapter package should not be used for report generation.",
+  );
 }
 
 for (const path of [
@@ -142,8 +163,13 @@ for (const path of [
 ]) {
   const source = await readFile(new URL(path, import.meta.url), "utf8");
 
-  if (source.includes("@tanstack/ai-openrouter") || source.includes("@tanstack/ai-openai")) {
-    throw new Error(`Provider package detail leaked outside the adapter boundary: ${path}`);
+  if (
+    source.includes("@tanstack/ai-openrouter") ||
+    source.includes("@tanstack/ai-openai")
+  ) {
+    throw new Error(
+      `Provider package detail leaked outside the adapter boundary: ${path}`,
+    );
   }
 }
 
