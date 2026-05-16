@@ -5,6 +5,7 @@ import { toRawScanPersistenceArgs } from "../src/scanner/persistence.ts";
 import {
   municipalitySchema,
   rawScanEvidenceSchema,
+  scanConvexEnvironmentSchema,
   type RawScanEvidence,
 } from "../src/shared/contracts.ts";
 
@@ -14,15 +15,24 @@ const log = (message: string) => {
   process.stderr.write(`${message}\n`);
 };
 
-const fromFixture = process.env.SCAN_FROM_FIXTURE === "1";
-const fixturePath =
-  process.env.SCAN_FIXTURE_PATH ?? "data/scans/latest.scan-results.json";
+const environment = scanConvexEnvironmentSchema.parse({
+  fromFixture: process.env.SCAN_FROM_FIXTURE === "1",
+  fixturePath:
+    process.env.SCAN_FIXTURE_PATH ?? "data/scans/latest.scan-results.json",
+  municipalityIds: (process.env.MUNICIPALITY_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean),
+  concurrency: Number(process.env.SCAN_CONCURRENCY ?? "5"),
+  controls: {
+    timeoutMs: Number(process.env.SCAN_TIMEOUT_MS ?? "5000"),
+    retries: Number(process.env.SCAN_RETRIES ?? "1"),
+    delayMs: Number(process.env.SCAN_DELAY_MS ?? "250"),
+  },
+});
 
 const allRecords = municipalitySchema.array().parse(municipalities);
-const idFilter = (process.env.MUNICIPALITY_IDS ?? "")
-  .split(",")
-  .map((id) => id.trim())
-  .filter(Boolean);
+const idFilter = environment.municipalityIds;
 const records =
   idFilter.length === 0
     ? allRecords
@@ -35,11 +45,11 @@ if (idFilter.length > 0 && records.length === 0) {
 
 let results: RawScanEvidence[];
 
-if (fromFixture) {
-  log(`Loading scan results from fixture file: ${fixturePath}`);
+if (environment.fromFixture) {
+  log(`Loading scan results from fixture file: ${environment.fixturePath}`);
   const parsed = rawScanEvidenceSchema
     .array()
-    .parse(JSON.parse(await readFile(fixturePath, "utf8")));
+    .parse(JSON.parse(await readFile(environment.fixturePath, "utf8")));
 
   if (idFilter.length === 0) {
     results = parsed;
@@ -52,17 +62,10 @@ if (fromFixture) {
     `Loaded ${results.length} fixture scan result${results.length === 1 ? "" : "s"}.`,
   );
 } else {
-  const concurrency = Math.max(1, Number(process.env.SCAN_CONCURRENCY ?? "5"));
-  const controls = {
-    timeoutMs: Number(process.env.SCAN_TIMEOUT_MS ?? "5000"),
-    retries: Number(process.env.SCAN_RETRIES ?? "1"),
-    delayMs: Number(process.env.SCAN_DELAY_MS ?? "250"),
-  };
-
   log(
     `Running live passive scan against ${records.length} municipalit${
       records.length === 1 ? "y" : "ies"
-    } (concurrency=${concurrency}, timeoutMs=${controls.timeoutMs}, retries=${controls.retries}).`,
+    } (concurrency=${environment.concurrency}, timeoutMs=${environment.controls.timeoutMs}, retries=${environment.controls.retries}).`,
   );
   log(
     "Set SCAN_FROM_FIXTURE=1 to skip the network and reuse data/scans/latest.scan-results.json.",
@@ -70,12 +73,12 @@ if (fromFixture) {
 
   results = await runWithConcurrency(
     records,
-    concurrency,
+    environment.concurrency,
     async (municipality, index) => {
       const startedAt = Date.now();
       const result = await scanWebsite(municipality, {
         source: "convex",
-        controls,
+        controls: environment.controls,
       });
       const elapsedMs = Date.now() - startedAt;
       log(
