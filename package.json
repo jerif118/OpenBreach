@@ -8,6 +8,7 @@
     "build": "vite build && pnpm typecheck",
     "clean:hard": "node scripts/hard-clean.ts",
     "clean:soft": "node scripts/soft-clean.ts",
+    "contracts:test": "node scripts/test-boundary-schemas.ts",
     "convex:codegen": "convex codegen",
     "convex:dev": "convex dev",
     "dashboard:data:validate": "node scripts/validate-dashboard-data-adapter.ts",
