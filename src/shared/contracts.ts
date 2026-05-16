@@ -17,7 +17,15 @@ export type Municipality = z.infer<typeof municipalitySchema>;
 
 export const scanFindingSchema = z.object({
   id: z.string().min(1),
-  category: z.enum(["tls", "headers", "cms", "exposure", "availability"]),
+  category: z.enum([
+    "tls",
+    "headers",
+    "cms",
+    "exposure",
+    "admin-exposure",
+    "availability",
+    "known-vulnerability",
+  ]),
   severity: z.enum(["info", "low", "medium", "high", "critical"]),
   title: z.string().min(1),
   description: z.string().min(1),
@@ -27,12 +35,57 @@ export const scanFindingSchema = z.object({
 
 export type ScanFinding = z.infer<typeof scanFindingSchema>;
 
+export const riskLevelSchema = z.enum(["low", "medium", "high", "critical"]);
+
+export type RiskLevel = z.infer<typeof riskLevelSchema>;
+
 export const scanResultSchema = z.object({
   id: z.string().min(1),
   municipalityId: z.string().min(1),
   scannedAt: z.string().datetime(),
-  score: z.number().min(0).max(100),
+  requestedUrl: z.string().url().optional(),
+  finalUrl: z.string().url().optional(),
+  reachable: z.boolean().optional(),
+  httpStatus: z.number().int().min(100).max(599).optional(),
+  headers: z.record(z.string().min(1), z.string().min(1)).optional(),
+  tls: z
+    .object({
+      valid: z.boolean(),
+      expiresAt: z.string().datetime().optional(),
+      issuer: z.string().min(1).optional(),
+    })
+    .optional(),
+  cms: z
+    .object({
+      name: z.enum(["wordpress", "joomla", "drupal", "unknown"]),
+      version: z.string().min(1).optional(),
+      confidence: z.number().min(0).max(1),
+      evidence: z.array(z.string().min(1)),
+    })
+    .optional(),
+  adminExposure: z
+    .array(
+      z.object({
+        path: z.string().startsWith("/"),
+        method: z.enum(["HEAD", "GET"]).optional(),
+        reachable: z.boolean(),
+        httpStatus: z.number().int().min(100).max(599).optional(),
+        finalUrl: z.string().url().optional(),
+      }),
+    )
+    .optional(),
+  errors: z
+    .array(
+      z.object({
+        stage: z.enum(["http", "tls", "cms", "admin-exposure"]),
+        message: z.string().min(1),
+      }),
+    )
+    .optional(),
+  riskScore: z.number().min(0).max(100),
+  riskLevel: riskLevelSchema,
   findings: z.array(scanFindingSchema),
+  score: z.number().min(0).max(100).optional(),
 });
 
 export type ScanResult = z.infer<typeof scanResultSchema>;
