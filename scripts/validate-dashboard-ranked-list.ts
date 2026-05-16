@@ -34,8 +34,9 @@ const requiredDetailRouteSnippets = [
   "createFileRoute(\"/municipalities/$id\")",
   "Route.useParams()",
   "id",
-  "issue #8",
-  "full municipality detail",
+  "getMunicipalityDetailSource(import.meta.env.VITE_CONVEX_URL)",
+  "ReadyMunicipalityDetail",
+  "ProtectedOperationsPanel",
 ];
 
 for (const snippet of requiredDetailRouteSnippets) {
