@@ -3,8 +3,9 @@ import { spawnSync } from "node:child_process";
 
 import {
   generateRemediationReportResultSchema,
+  reportGenerationArtifactSchema,
+  reportPersistenceArgsSchema,
   reportPdfReferenceSchema,
-  selectedMunicipalityReportContextSchema,
 } from "../src/shared/contracts.ts";
 
 function parseJsonFromCommandOutput(stdout: string) {
@@ -82,21 +83,9 @@ if (!run.stdout.includes("Report generation complete")) {
 }
 
 const artifactPath = "data/reports/latest.report-generation.json";
-const artifact = JSON.parse(await readFile(artifactPath, "utf8")) as {
-  id?: string;
-  generatedAt?: string;
-  provider?: string;
-  selected?: unknown[];
-  batch?: {
-    summary?: {
-      requested?: number;
-      completed?: number;
-      failed?: number;
-    };
-    results?: Array<{ municipalityId?: string; result?: unknown }>;
-  };
-  convexPersistenceArgs?: unknown[];
-};
+const artifact = reportGenerationArtifactSchema.parse(
+  JSON.parse(await readFile(artifactPath, "utf8")),
+);
 
 if (artifact.id !== "latest-report-generation") {
   throw new Error(
@@ -116,9 +105,7 @@ if (artifact.provider !== "deterministic-fallback") {
   );
 }
 
-const selected = selectedMunicipalityReportContextSchema
-  .array()
-  .parse(artifact.selected);
+const selected = artifact.selected;
 
 if (selected.length === 0 || selected.length > 10) {
   throw new Error(
@@ -134,7 +121,7 @@ for (let index = 1; index < selected.length; index += 1) {
   }
 }
 
-if (artifact.batch?.summary?.requested !== selected.length) {
+if (artifact.batch.summary.requested !== selected.length) {
   throw new Error("Batch summary must count every selected report context.");
 }
 
@@ -147,7 +134,7 @@ if (
   );
 }
 
-const results = artifact.batch.results ?? [];
+const results = artifact.batch.results;
 
 if (results.length !== selected.length) {
   throw new Error(
@@ -185,7 +172,7 @@ for (const record of results) {
   }
 }
 
-const persistenceArgs = artifact.convexPersistenceArgs ?? [];
+const persistenceArgs = artifact.convexPersistenceArgs;
 
 if (persistenceArgs.length !== selected.length) {
   throw new Error(
@@ -194,13 +181,7 @@ if (persistenceArgs.length !== selected.length) {
 }
 
 for (const arg of persistenceArgs) {
-  const candidate = arg as {
-    status?: string;
-    pdf?: unknown;
-    artifacts?: { technical?: { pdf?: unknown }; friendly?: { pdf?: unknown } };
-    externalId?: string;
-    municipalityExternalId?: string;
-  };
+  const candidate = reportPersistenceArgsSchema.parse(arg);
 
   if (
     candidate.status !== "completed" ||
@@ -212,11 +193,9 @@ for (const arg of persistenceArgs) {
     );
   }
 
-  reportPdfReferenceSchema.parse(candidate.pdf);
-
   if (
-    !candidate.artifacts?.technical?.pdf ||
-    !candidate.artifacts?.friendly?.pdf
+    !candidate.artifacts.technical?.pdf ||
+    !candidate.artifacts.friendly?.pdf
   ) {
     throw new Error(
       "Convex persistence args must include both report artifact variants.",
