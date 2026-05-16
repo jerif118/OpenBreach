@@ -8,9 +8,15 @@ import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-
 import {
   generateRemediationReportResultSchema,
   municipalitySchema,
+  reportGenerationArtifactSchema,
+  reportGenerationCliOptionsSchema,
+  reportPersistenceArgsSchema,
+  reportPersistenceFindingSchema,
   scanResultSchema,
   selectedMunicipalityReportContextSchema,
   type GenerateRemediationReportResult,
+  type ReportGenerationCliOptions,
+  type ReportPersistenceArgs,
   type SelectedMunicipalityReportContext,
 } from "../src/shared/contracts.ts";
 
@@ -19,50 +25,19 @@ const DEFAULT_GENERATED_AT = new Date().toISOString();
 
 const MAX_LIMIT = 1_000;
 
-type CliOptions = {
-  generatedAt: string;
-  limit: number;
-  outputPath: string;
-};
-
-type ReportPersistenceArgs = {
-  externalId: string;
-  municipalityExternalId: string;
-  scanResultExternalId?: string;
-  status: "completed";
-  generatedAt: string;
-  summary: string;
-  priorityActions: string[];
-  findings: GenerateRemediationReportResult & { status: "completed" } extends {
-    report: { findings: infer Findings };
-  }
-    ? Findings
-    : never;
-  generatedBy: "deterministic-fallback" | "ai-provider";
-  pdf: NonNullable<
-    GenerateRemediationReportResult & { status: "completed" } extends {
-      metadata: { pdf?: infer Pdf };
-    }
-      ? Pdf
-      : never
-  >;
-  artifacts: NonNullable<
-    GenerateRemediationReportResult & { status: "completed" } extends {
-      metadata: { artifacts?: infer Artifacts };
-    }
-      ? Artifacts
-      : never
-  >;
-};
-
 function sanitizePersistenceFindings(
-  findings: ReportPersistenceArgs["findings"],
+  findings: Extract<
+    GenerateRemediationReportResult,
+    { status: "completed" }
+  >["report"]["findings"],
 ): ReportPersistenceArgs["findings"] {
-  return findings.map(({ raw: _raw, ...finding }) => finding);
+  return findings.map(({ raw: _raw, ...finding }) =>
+    reportPersistenceFindingSchema.parse(finding),
+  );
 }
 
-function readCliOptions(argv: string[]): CliOptions {
-  const options: CliOptions = {
+function readCliOptions(argv: string[]): ReportGenerationCliOptions {
+  const options = {
     generatedAt: DEFAULT_GENERATED_AT,
     limit: 10,
     outputPath: DEFAULT_OUTPUT_PATH,
@@ -79,7 +54,7 @@ function readCliOptions(argv: string[]): CliOptions {
     }
 
     if (flag === "--limit" && value) {
-      options.limit = Number.parseInt(value, 10);
+      options.limit = Number(value);
       index += 1;
       continue;
     }
@@ -95,15 +70,7 @@ function readCliOptions(argv: string[]): CliOptions {
     }
   }
 
-  if (
-    !Number.isInteger(options.limit) ||
-    options.limit < 1 ||
-    options.limit > MAX_LIMIT
-  ) {
-    throw new Error(`--limit must be an integer between 1 and ${MAX_LIMIT}.`);
-  }
-
-  return options;
+  return reportGenerationCliOptionsSchema.parse(options);
 }
 
 function toPersistenceArgs({
@@ -119,7 +86,7 @@ function toPersistenceArgs({
     );
   }
 
-  return {
+  return reportPersistenceArgsSchema.parse({
     externalId: result.report.id,
     municipalityExternalId: context.municipality.id,
     scanResultExternalId: context.scan.id,
@@ -131,7 +98,7 @@ function toPersistenceArgs({
     generatedBy: result.report.generatedBy,
     pdf: result.metadata.pdf,
     artifacts: result.metadata.artifacts,
-  };
+  });
 }
 
 const options = readCliOptions(process.argv.slice(2));
@@ -186,7 +153,7 @@ const convexPersistenceArgs: ReportPersistenceArgs[] = batch.results.map(
   },
 );
 
-const artifact = {
+const artifact = reportGenerationArtifactSchema.parse({
   id: batch.id,
   generatedAt: batch.generatedAt,
   provider: batch.provider,
@@ -198,7 +165,7 @@ const artifact = {
     liveConvexCommand: "convex run reports:persistGenerated '<args>'",
     note: "Replace fixture external IDs with live Convex document IDs and run with an authenticated Convex deployment.",
   },
-};
+});
 
 await mkdir(dirname(options.outputPath), { recursive: true });
 await writeFile(options.outputPath, `${JSON.stringify(artifact, null, 2)}\n`);
