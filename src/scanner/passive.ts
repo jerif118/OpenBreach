@@ -1,5 +1,9 @@
 import { connect } from "node:tls";
-import type { Municipality, RawScanEvidence } from "../shared/contracts.ts";
+import {
+  rawScanEvidenceSchema,
+  type Municipality,
+  type RawScanEvidence,
+} from "../shared/contracts.ts";
 
 export type ScannerControls = {
   timeoutMs?: number;
@@ -86,7 +90,7 @@ export async function scanWebsite(
     url = new URL(requestedUrl);
   } catch (error) {
     baseEvidence.errors.push(toError("http", error));
-    return baseEvidence;
+    return rawScanEvidenceSchema.parse(baseEvidence);
   }
 
   const [httpEvidence, tlsEvidence] = await Promise.all([
@@ -95,7 +99,7 @@ export async function scanWebsite(
   ]);
   const adminEvidence = await collectAdminExposure(url, controls, options);
 
-  return {
+  return rawScanEvidenceSchema.parse({
     ...baseEvidence,
     ...httpEvidence,
     tls: tlsEvidence.tls,
@@ -106,7 +110,7 @@ export async function scanWebsite(
       ...tlsEvidence.errors,
       ...adminEvidence.errors,
     ],
-  };
+  });
 }
 
 async function collectHttpEvidence(

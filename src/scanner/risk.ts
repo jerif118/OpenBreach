@@ -1,8 +1,9 @@
-import type {
-  RawScanEvidence,
-  RiskLevel,
-  ScanFinding,
-  ScanResult,
+import {
+  scanResultSchema,
+  type RawScanEvidence,
+  type RiskLevel,
+  type ScanFinding,
+  type ScanResult,
 } from "../shared/contracts.ts";
 import { findCmsVulnerability } from "./vulnerableCmsKnowledgeBase.ts";
 
@@ -39,7 +40,7 @@ export function enrichScanEvidence(evidence: RawScanEvidence): ScanResult {
     findings.reduce((total, finding) => total + findingWeight(finding.id), 0),
   );
 
-  return {
+  return scanResultSchema.parse({
     id: `scan-${evidence.municipalityId}-${evidence.scannedAt.slice(0, 10)}`,
     municipalityId: evidence.municipalityId,
     scannedAt: evidence.scannedAt,
@@ -56,7 +57,7 @@ export function enrichScanEvidence(evidence: RawScanEvidence): ScanResult {
     riskLevel: riskLevelForScore(riskScore),
     findings,
     score: riskScore,
-  };
+  });
 }
 
 export function enrichScanEvidenceBatch(
