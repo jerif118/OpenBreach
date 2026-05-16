@@ -40,7 +40,9 @@
     "report:persistence:validate": "node scripts/validate-report-persistence.ts",
     "auth:writes:validate": "node scripts/validate-auth-writes.ts",
     "report:generate": "node scripts/generate-reports.ts",
+    "report:generate:all": "node scripts/generate-reports.ts --all",
     "report:persist:args": "node scripts/report-convex-args.ts",
+    "report:persist:fixture": "node scripts/report-fixture-persist-args.ts | node scripts/persist-via-convex.ts reports:seedFromFixture",
     "report:generate:validate": "node scripts/validate-report-generation.ts",
     "clean:hard": "node scripts/hard-clean.ts",
     "clean:soft": "node scripts/soft-clean.ts"
