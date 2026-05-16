@@ -8,10 +8,12 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
 import type * as municipalities from "../municipalities.js";
 import type * as rawScanResults from "../rawScanResults.js";
 import type * as reports from "../reports.js";
 import type * as scanResults from "../scanResults.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -20,10 +22,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   municipalities: typeof municipalities;
   rawScanResults: typeof rawScanResults;
   reports: typeof reports;
   scanResults: typeof scanResults;
+  users: typeof users;
 }>;
 
 /**
