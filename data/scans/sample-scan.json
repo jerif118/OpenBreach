@@ -2,6 +2,16 @@
   "id": "scan-mx-yuc-merida-2026-01-01",
   "municipalityId": "mx-yuc-merida",
   "scannedAt": "2026-01-01T00:00:00.000Z",
+  "requestedUrl": "https://www.merida.gob.mx",
+  "finalUrl": "https://www.merida.gob.mx/",
+  "reachable": true,
+  "httpStatus": 200,
+  "headers": {
+    "server": "fixture-server",
+    "content-type": "text/html; charset=utf-8"
+  },
+  "riskScore": 68,
+  "riskLevel": "high",
   "score": 68,
   "findings": [
     {
