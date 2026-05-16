@@ -51,8 +51,8 @@ Assumptions:
 - Team size and hackathon duration were not provided, so the plan assumes a 3-5 person team and a 24-48 hour build window.
 - The repository is `jerif118/DEFF-ACC` at `https://github.com/jerif118/DEFF-ACC`.
 - Issues are enabled and have been created as the source task inventory.
-- The app can use TypeScript and should target Node.js 24+ when TanStack AI is enabled, because the TanStack AI README currently documents Node.js v24+ as a requirement.
-- The selected hosting provider may not support the required Node runtime immediately, so report generation must also work as an offline/local fixture pipeline.
+- The app can use TypeScript and should target Node.js 22.13+ for Mastra-backed AI/report paths, because current npm metadata for `@mastra/core` requires Node.js `>=22.13.0` while `@tanstack/ai` requires Node.js `>=18`.
+- The selected hosting provider needs explicit runtime configuration during implementation, so report generation must also work as an offline/local fixture pipeline if deployment setup is blocked.
 - The first implementation can be fixture-backed instead of database-backed.
 
 Risks and mitigations:
@@ -60,7 +60,7 @@ Risks and mitigations:
 - Public source quality may be uneven. Mitigation: store source URLs per municipality and accept a smaller verified seed dataset for the demo.
 - Passive CMS detection can produce false positives. Mitigation: display confidence and evidence, and avoid claiming confirmed compromise.
 - Live scanning may be slow or blocked. Mitigation: commit generated fixture data and demo from fixtures when needed.
-- Model credentials or hosted Node runtime support may be unavailable. Mitigation: isolate AI generation behind a Mastra/TanStack AI adapter and keep a deterministic report template fallback.
+- Model credentials or hosted runtime configuration may be unavailable. Mitigation: isolate AI generation behind a Mastra/TanStack AI adapter and keep a deterministic report template fallback.
 - Map implementation can consume too much time. Mitigation: use markers or a static basemap first; defer municipality polygons.
 
 ## Tech Stack
@@ -70,12 +70,12 @@ Recommended stack:
 | Layer | Choice | Rationale |
 | --- | --- | --- |
 | Full-stack web app | TanStack Start with React and TypeScript | The current docs describe TanStack Start as a full-stack React framework with SSR, streaming, API/server routes, server functions, Vite bundling, and universal deployment. This keeps the hackathon app in one TypeScript codebase. |
-| Runtime | Node.js 24+ for AI-enabled paths | TanStack AI currently documents Node.js v24+ as a requirement. If Vercel/Netlify runtime support is not available during the hackathon, generate reports locally and serve committed artifacts. |
+| Runtime | Node.js 22.13+ for Mastra-backed AI/report paths | Current npm metadata requires Node.js `>=22.13.0` for `@mastra/core` and `>=18` for `@tanstack/ai`. Configure the selected host explicitly and keep local report generation plus committed artifacts as the fallback path. |
 | Data storage | JSON fixtures in `data/` | Fastest credible path for a hackathon; easy to inspect, commit, and demo offline. |
 | Scanner and scoring | TypeScript scripts/modules | Shares contracts with the web app and avoids cross-language glue. Python can be added later only if a specific scanner library justifies it. |
 | Agent/workflow harness | Mastra | Mastra is a TypeScript framework for AI applications and agents, supports agents/tools/workflows, integrates with React/Node apps, and can also run standalone. This avoids AWS-specific runtime lock-in. |
 | AI SDK | TanStack AI | Provider-agnostic adapters, streaming/generation primitives, type-safe tools, observability events, and TanStack Start integration. Use it instead of Vercel AI SDK. |
-| Report generation | Mastra workflow plus local template fallback | The Mastra workflow owns report orchestration; TanStack AI owns provider calls; local templates protect the demo when model credentials or runtime support are missing. |
+| Report generation | Mastra workflow plus local template fallback | The Mastra workflow owns report orchestration; TanStack AI owns provider calls; local templates protect the demo when model credentials or hosted runtime configuration are missing. |
 | PDF rendering | Simple HTML-to-PDF or PDF library selected in #5 | Any solution is acceptable if PDFs are generated from the report contract and can be downloaded from the app. |
 | Map UI | Fast marker-based map or static SVG fallback | Markers with risk colors are enough for the demo; full municipal polygons are deferred. |
 
@@ -180,7 +180,7 @@ GET /api/reports/:municipalityId.pdf -> application/pdf | 404
 | #2 | Curate top-municipality seed dataset | TBD | Open | #1 | https://github.com/jerif118/DEFF-ACC/issues/2 |
 | #3 | Implement passive website scanner | TBD | Open | #1, #2 | https://github.com/jerif118/DEFF-ACC/issues/3 |
 | #4 | Add vulnerability matching and risk scoring | TBD | Open | #3 | https://github.com/jerif118/DEFF-ACC/issues/4 |
-| #5 | Generate remediation summaries and PDFs | TBD | Open | #4 | https://github.com/jerif118/DEFF-ACC/issues/5 |
+| #5 | Generate remediation reports with Mastra | TBD | Open | #4 | https://github.com/jerif118/DEFF-ACC/issues/5 |
 | #6 | Expose fixture-backed API routes | TBD | Open | #1, #2, #4, #5 | https://github.com/jerif118/DEFF-ACC/issues/6 |
 | #7 | Build interactive risk map dashboard | TBD | Open | #6, mock API allowed | https://github.com/jerif118/DEFF-ACC/issues/7 |
 | #8 | Build municipality detail and report flow | TBD | Open | #5, #6, mock detail allowed | https://github.com/jerif118/DEFF-ACC/issues/8 |
@@ -262,7 +262,7 @@ The executable app does not exist yet; [#1](https://github.com/jerif118/DEFF-ACC
 
 Prerequisites:
 
-- Node.js 24+ for TanStack AI-enabled report generation
+- Node.js 22.13+ for Mastra-backed AI/report generation
 - npm
 - Optional model-provider API key for AI-backed reports
 
