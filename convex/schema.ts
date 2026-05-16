@@ -16,7 +16,9 @@ const finding = v.object({
     v.literal("headers"),
     v.literal("cms"),
     v.literal("exposure"),
+    v.literal("admin-exposure"),
     v.literal("availability"),
+    v.literal("known-vulnerability"),
   ),
   severity,
   title: v.string(),
@@ -53,6 +55,13 @@ const rawScanError = v.object({
   message: v.string(),
 });
 
+const riskLevel = v.union(
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+  v.literal("critical"),
+);
+
 export default defineSchema({
   municipalities: defineTable({
     externalId: v.string(),
@@ -76,11 +85,23 @@ export default defineSchema({
     externalId: v.string(),
     municipalityId: v.id("municipalities"),
     scannedAt: v.string(),
-    score: v.number(),
+    requestedUrl: v.optional(v.string()),
+    finalUrl: v.optional(v.string()),
+    reachable: v.optional(v.boolean()),
+    httpStatus: v.optional(v.number()),
+    headers: v.optional(rawScanHeaders),
+    tls: v.optional(rawScanTls),
+    cms: v.optional(rawScanCms),
+    adminExposure: v.optional(v.array(rawScanAdminExposure)),
+    errors: v.optional(v.array(rawScanError)),
+    riskScore: v.optional(v.number()),
+    riskLevel: v.optional(riskLevel),
     findings: v.array(finding),
+    score: v.optional(v.number()),
   })
     .index("by_externalId", ["externalId"])
-    .index("by_municipalityId", ["municipalityId"]),
+    .index("by_municipalityId", ["municipalityId"])
+    .index("by_riskLevel", ["riskLevel"]),
   rawScanResults: defineTable({
     externalId: v.string(),
     municipalityId: v.id("municipalities"),
