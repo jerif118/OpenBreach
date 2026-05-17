@@ -1,30 +1,12 @@
 import { pushText } from "../src/reports/pdf-document.ts";
 
-function requiredMatchGroup(
-  match: RegExpMatchArray,
-  groupIndex: number,
-  description: string,
-): string {
-  const group = match[groupIndex];
+import {
+  requiredElement,
+  requiredMatchGroup,
+} from "./report-pdf-validation-helpers.ts";
 
-  if (group === undefined) {
-    throw new Error(`${description} is missing an expected capture group.`);
-  }
-
-  return group;
-}
-
-function requiredCommand(commands: readonly string[]): string {
-  const command = commands[0];
-
-  if (command === undefined) {
-    throw new Error(
-      "PDF text escaping must escape newlines, carriage returns, backslashes, and parentheses.",
-    );
-  }
-
-  return command;
-}
+const PDF_TEXT_ESCAPING_RULE =
+  "PDF text escaping must escape newlines, carriage returns, backslashes, and parentheses.";
 
 export function assertPdfTextEscapesLiteralControls(): void {
   const commands: string[] = [];
@@ -39,13 +21,11 @@ export function assertPdfTextEscapesLiteralControls(): void {
     text: "Line\nBreak\rReturn (path\\value)",
   });
 
-  const command = requiredCommand(commands);
+  const command = requiredElement(commands, 0, PDF_TEXT_ESCAPING_RULE);
   const expected = String.raw`BT /F1 12 Tf 0.000 0.000 0.000 rg 1.00 2.00 Td (Line\nBreak\rReturn \(path\\value\)) Tj ET`;
 
   if (command !== expected) {
-    throw new Error(
-      "PDF text escaping must escape newlines, carriage returns, backslashes, and parentheses.",
-    );
+    throw new Error(PDF_TEXT_ESCAPING_RULE);
   }
 }
 
