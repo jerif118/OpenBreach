@@ -19,15 +19,7 @@ const environment = readEnvironment();
 
 const allRecords = municipalitySchema.array().parse(municipalities);
 const idFilter = environment.municipalityIds;
-const records =
-  idFilter.length === 0
-    ? allRecords
-    : allRecords.filter((m) => idFilter.includes(m.id));
-
-if (idFilter.length > 0 && records.length === 0) {
-  log(`No municipalities matched MUNICIPALITY_IDS=${idFilter.join(",")}.`);
-  process.exit(1);
-}
+const records = selectMunicipalities(allRecords, idFilter);
 
 let results: RawScanEvidence[];
 
@@ -96,6 +88,23 @@ function readEnvironment() {
       delayMs: Number(process.env.SCAN_DELAY_MS ?? "250"),
     },
   });
+}
+
+function selectMunicipalities(
+  records: typeof allRecords,
+  idFilter: readonly string[],
+) {
+  const selected =
+    idFilter.length === 0
+      ? records
+      : records.filter((m) => idFilter.includes(m.id));
+
+  if (idFilter.length > 0 && selected.length === 0) {
+    log(`No municipalities matched MUNICIPALITY_IDS=${idFilter.join(",")}.`);
+    process.exit(1);
+  }
+
+  return selected;
 }
 
 function describeOutcome(result: RawScanEvidence): string {
