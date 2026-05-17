@@ -121,6 +121,42 @@ async function runTanStackChat({
   });
 }
 
+async function generateProviderReport({
+  chatExecutor,
+  input,
+  model,
+  provider,
+  providerKey,
+  variant,
+}: {
+  chatExecutor: ReportAiChatExecutor;
+  input: GenerateRemediationReportInput;
+  model: string;
+  provider: ReportAiAdapterProvider;
+  providerKey: string;
+  variant: ReportAudience;
+}): Promise<RemediationReport> {
+  const content = await chatExecutor({
+    model,
+    provider,
+    providerKey,
+    systemPrompts: [
+      variant === "technical"
+        ? reportAgent.instructions
+        : plainLanguageReportAgent.instructions,
+      "Return only valid JSON that matches the requested contract.",
+    ],
+    messages: [
+      {
+        role: "user",
+        content: buildProviderPrompt(input, variant),
+      },
+    ],
+  });
+
+  return parseProviderReport(content, variant);
+}
+
 async function generateProviderBackedVariants({
   chatExecutor,
   input,
@@ -133,34 +169,27 @@ async function generateProviderBackedVariants({
   model: string;
   provider: ReportAiAdapterProvider;
   providerKey: string;
-}) {
-  const results: Partial<Record<ReportAudience, RemediationReport>> = {};
-
-  for (const variant of ["technical", "friendly"] as const) {
-    const content = await chatExecutor({
-      model,
-      provider,
-      providerKey,
-      systemPrompts: [
-        variant === "technical"
-          ? reportAgent.instructions
-          : plainLanguageReportAgent.instructions,
-        "Return only valid JSON that matches the requested contract.",
-      ],
-      messages: [
-        {
-          role: "user",
-          content: buildProviderPrompt(input, variant),
-        },
-      ],
-    });
-
-    results[variant] = parseProviderReport(content, variant);
-  }
+}): Promise<RemediationReportVariants> {
+  const technical = await generateProviderReport({
+    chatExecutor,
+    input,
+    model,
+    provider,
+    providerKey,
+    variant: "technical",
+  });
+  const friendly = await generateProviderReport({
+    chatExecutor,
+    input,
+    model,
+    provider,
+    providerKey,
+    variant: "friendly",
+  });
 
   return remediationReportVariantsSchema.parse({
-    technical: results.technical,
-    friendly: results.friendly,
+    technical,
+    friendly,
   });
 }
 
