@@ -1,0 +1,18 @@
+{
+  "evidenceId": "evidence-dedup",
+  "targetId": "target-dedup",
+  "source": "fixture",
+  "collectedAt": "2026-05-17T00:00:00Z",
+  "requestedUrl": "https://example.com",
+  "reachable": true,
+  "httpStatus": 200,
+  "headers": {},
+  "cms": {
+    "name": "wordpress",
+    "version": "6.4",
+    "confidence": 0.9,
+    "evidence": ["generator:wordpress"]
+  },
+  "adminExposure": [],
+  "errors": []
+}

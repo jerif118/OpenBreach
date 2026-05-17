@@ -1,0 +1,20 @@
+{
+  "evidenceId": "evidence-partial",
+  "targetId": "target-partial",
+  "source": "fixture",
+  "collectedAt": "2026-05-17T00:00:00Z",
+  "requestedUrl": "https://example.com",
+  "reachable": true,
+  "httpStatus": 200,
+  "headers": {
+    "server": "nginx/1.18.0"
+  },
+  "cms": {
+    "name": "wordpress",
+    "version": "6.4",
+    "confidence": 0.3,
+    "evidence": ["generator:wordpress"]
+  },
+  "adminExposure": [],
+  "errors": []
+}

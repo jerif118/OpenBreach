@@ -1,0 +1,16 @@
+{
+  "evidenceId": "evidence-empty",
+  "targetId": "target-empty",
+  "source": "fixture",
+  "collectedAt": "2026-05-17T00:00:00Z",
+  "requestedUrl": "https://example.com",
+  "reachable": false,
+  "headers": {},
+  "adminExposure": [],
+  "errors": [
+    {
+      "stage": "http",
+      "message": "Connection refused"
+    }
+  ]
+}
