@@ -51,19 +51,23 @@ type ReportAiChatExecutor = (
   input: ReportAiChatExecutorInput,
 ) => Promise<string>;
 
-type GenerateProviderReportOptions = {
+type ProviderRuntime = {
   chatExecutor: ReportAiChatExecutor;
-  input: GenerateRemediationReportInput;
   model: string;
   provider: ReportAiAdapterProvider;
   providerKey: string;
+};
+
+type GenerateProviderReportOptions = {
+  input: GenerateRemediationReportInput;
+  runtime: ProviderRuntime;
   variant: ReportAudience;
 };
 
-type GenerateProviderBackedVariantsOptions = Omit<
-  GenerateProviderReportOptions,
-  "variant"
->;
+type GenerateProviderBackedVariantsOptions = {
+  input: GenerateRemediationReportInput;
+  runtime: ProviderRuntime;
+};
 
 export type CreateReportAiAdapterOptions = {
   chat?: ReportAiChatExecutor;
@@ -142,13 +146,12 @@ async function runTanStackChat({
 }
 
 async function generateProviderReport({
-  chatExecutor,
   input,
-  model,
-  provider,
-  providerKey,
+  runtime,
   variant,
 }: GenerateProviderReportOptions): Promise<RemediationReport> {
+  const { chatExecutor, model, provider, providerKey } = runtime;
+
   const content = await chatExecutor({
     model,
     provider,
@@ -169,26 +172,17 @@ async function generateProviderReport({
 }
 
 async function generateProviderBackedVariants({
-  chatExecutor,
   input,
-  model,
-  provider,
-  providerKey,
+  runtime,
 }: GenerateProviderBackedVariantsOptions): Promise<RemediationReportVariants> {
   const technical = await generateProviderReport({
-    chatExecutor,
     input,
-    model,
-    provider,
-    providerKey,
+    runtime,
     variant: "technical",
   });
   const friendly = await generateProviderReport({
-    chatExecutor,
     input,
-    model,
-    provider,
-    providerKey,
+    runtime,
     variant: "friendly",
   });
 
@@ -196,6 +190,43 @@ async function generateProviderBackedVariants({
     technical,
     friendly,
   });
+}
+
+function createProviderRuntime(
+  providerKey: string,
+  options: CreateReportAiAdapterOptions,
+): ProviderRuntime {
+  return {
+    chatExecutor: options.chat ?? runTanStackChat,
+    model: options.model ?? getConfiguredModel(),
+    provider: options.provider ?? getConfiguredProvider(),
+    providerKey,
+  };
+}
+
+function createProviderBackedReportAdapter(
+  providerKey: string,
+  options: CreateReportAiAdapterOptions,
+  fallbackAdapter: ReportAiAdapter,
+): ReportAiAdapter {
+  const runtime = createProviderRuntime(providerKey, options);
+  const generateRemediationReportVariants = async (
+    input: GenerateRemediationReportInput,
+  ): Promise<RemediationReportVariants> => {
+    try {
+      return await generateProviderBackedVariants({ input, runtime });
+    } catch {
+      return await fallbackAdapter.generateRemediationReportVariants(input);
+    }
+  };
+
+  return {
+    provider: TANSTACK_PROVIDER,
+    async generateRemediationReport(input): Promise<RemediationReport> {
+      return (await generateRemediationReportVariants(input)).technical;
+    },
+    generateRemediationReportVariants,
+  };
 }
 
 export function createReportAiAdapter(
@@ -208,32 +239,9 @@ export function createReportAiAdapter(
     return deterministicReportAdapter;
   }
 
-  const chatExecutor = options.chat ?? runTanStackChat;
-  const model = options.model ?? getConfiguredModel();
-  const provider = options.provider ?? getConfiguredProvider();
-  const generateRemediationReportVariants = async (
-    input: GenerateRemediationReportInput,
-  ): Promise<RemediationReportVariants> => {
-    try {
-      return await generateProviderBackedVariants({
-        chatExecutor,
-        input,
-        model,
-        provider,
-        providerKey,
-      });
-    } catch {
-      return await deterministicReportAdapter.generateRemediationReportVariants(
-        input,
-      );
-    }
-  };
-
-  return {
-    provider: TANSTACK_PROVIDER,
-    async generateRemediationReport(input): Promise<RemediationReport> {
-      return (await generateRemediationReportVariants(input)).technical;
-    },
-    generateRemediationReportVariants,
-  };
+  return createProviderBackedReportAdapter(
+    providerKey,
+    options,
+    deterministicReportAdapter,
+  );
 }
