@@ -1,13 +1,10 @@
 import { readFile } from "node:fs/promises";
+import { reportGenerationArtifactSchema } from "../src/shared/contracts.ts";
 
 const inputPath =
   process.argv[2] ?? "data/reports/latest.report-generation.json";
-const artifact = JSON.parse(await readFile(inputPath, "utf8")) as {
-  convexPersistenceArgs?: unknown[];
-};
-
-if (!Array.isArray(artifact.convexPersistenceArgs)) {
-  throw new Error(`${inputPath} does not contain convexPersistenceArgs.`);
-}
+const artifact = reportGenerationArtifactSchema.parse(
+  JSON.parse(await readFile(inputPath, "utf8")),
+);
 
 console.log(JSON.stringify(artifact.convexPersistenceArgs));

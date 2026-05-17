@@ -5,77 +5,134 @@ import { toRawScanPersistenceArgs } from "../src/scanner/persistence.ts";
 import {
   municipalitySchema,
   rawScanEvidenceSchema,
+  scanConvexEnvironmentSchema,
+  type Municipality,
   type RawScanEvidence,
+  type RawScanPersistenceArgs,
+  type ScanConvexEnvironment,
 } from "../src/shared/contracts.ts";
+
+type MunicipalitySelection =
+  | { ok: true; records: readonly Municipality[] }
+  | { ok: false; idFilter: readonly string[] };
+
+type ConcurrencySlot<R> = { value: R } | undefined;
 
 // stdout is reserved for the JSON payload that `convex run` consumes via
 // command substitution. All progress/diagnostic output must go to stderr.
-const log = (message: string) => {
+const log = (message: string): void => {
   process.stderr.write(`${message}\n`);
 };
 
-const fromFixture = process.env.SCAN_FROM_FIXTURE === "1";
-const fixturePath =
-  process.env.SCAN_FIXTURE_PATH ?? "data/scans/latest.scan-results.json";
+const environment = readEnvironment();
 
 const allRecords = municipalitySchema.array().parse(municipalities);
-const idFilter = (process.env.MUNICIPALITY_IDS ?? "")
-  .split(",")
-  .map((id) => id.trim())
-  .filter(Boolean);
-const records =
-  idFilter.length === 0
-    ? allRecords
-    : allRecords.filter((m) => idFilter.includes(m.id));
+const idFilter = environment.municipalityIds;
+const municipalitySelection = selectMunicipalities(allRecords, idFilter);
 
-if (idFilter.length > 0 && records.length === 0) {
-  log(`No municipalities matched MUNICIPALITY_IDS=${idFilter.join(",")}.`);
+if (!municipalitySelection.ok) {
+  log(
+    `No municipalities matched MUNICIPALITY_IDS=${municipalitySelection.idFilter.join(",")}.`,
+  );
   process.exit(1);
 }
 
-let results: RawScanEvidence[];
+const records = municipalitySelection.records;
+const results = environment.fromFixture
+  ? await loadFixtureResults(environment.fixturePath, idFilter, records)
+  : await runLiveScan(records, environment);
 
-if (fromFixture) {
+const persistenceArgs: RawScanPersistenceArgs =
+  toRawScanPersistenceArgs(results);
+process.stdout.write(JSON.stringify(persistenceArgs));
+
+function readEnvironment(): ScanConvexEnvironment {
+  return scanConvexEnvironmentSchema.parse({
+    fromFixture: process.env.SCAN_FROM_FIXTURE === "1",
+    fixturePath:
+      process.env.SCAN_FIXTURE_PATH ?? "data/scans/latest.scan-results.json",
+    municipalityIds: (process.env.MUNICIPALITY_IDS ?? "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean),
+    concurrency: Number(process.env.SCAN_CONCURRENCY ?? "5"),
+    controls: {
+      timeoutMs: Number(process.env.SCAN_TIMEOUT_MS ?? "5000"),
+      retries: Number(process.env.SCAN_RETRIES ?? "1"),
+      delayMs: Number(process.env.SCAN_DELAY_MS ?? "250"),
+    },
+  });
+}
+
+function selectMunicipalities(
+  records: readonly Municipality[],
+  idFilter: readonly string[],
+): MunicipalitySelection {
+  const selected =
+    idFilter.length === 0
+      ? records
+      : records.filter((m) => idFilter.includes(m.id));
+
+  if (idFilter.length > 0 && selected.length === 0) {
+    return { ok: false, idFilter };
+  }
+
+  return { ok: true, records: selected };
+}
+
+function filterFixtureResults(
+  results: RawScanEvidence[],
+  idFilter: readonly string[],
+  records: readonly Municipality[],
+): RawScanEvidence[] {
+  if (idFilter.length === 0) {
+    return results;
+  }
+
+  const allowedIds = new Set(records.map((m) => m.id));
+  return results.filter((r) => allowedIds.has(r.municipalityId));
+}
+
+async function loadFixtureResults(
+  fixturePath: string,
+  idFilter: readonly string[],
+  records: readonly Municipality[],
+): Promise<RawScanEvidence[]> {
   log(`Loading scan results from fixture file: ${fixturePath}`);
   const parsed = rawScanEvidenceSchema
     .array()
     .parse(JSON.parse(await readFile(fixturePath, "utf8")));
 
-  if (idFilter.length === 0) {
-    results = parsed;
-  } else {
-    const allowedIds = new Set(records.map((m) => m.id));
-    results = parsed.filter((r) => allowedIds.has(r.municipalityId));
-  }
+  const results = filterFixtureResults(parsed, idFilter, records);
 
   log(
     `Loaded ${results.length} fixture scan result${results.length === 1 ? "" : "s"}.`,
   );
-} else {
-  const concurrency = Math.max(1, Number(process.env.SCAN_CONCURRENCY ?? "5"));
-  const controls = {
-    timeoutMs: Number(process.env.SCAN_TIMEOUT_MS ?? "5000"),
-    retries: Number(process.env.SCAN_RETRIES ?? "1"),
-    delayMs: Number(process.env.SCAN_DELAY_MS ?? "250"),
-  };
 
+  return results;
+}
+
+async function runLiveScan(
+  records: readonly Municipality[],
+  environment: ScanConvexEnvironment,
+): Promise<RawScanEvidence[]> {
   log(
     `Running live passive scan against ${records.length} municipalit${
       records.length === 1 ? "y" : "ies"
-    } (concurrency=${concurrency}, timeoutMs=${controls.timeoutMs}, retries=${controls.retries}).`,
+    } (concurrency=${environment.concurrency}, timeoutMs=${environment.controls.timeoutMs}, retries=${environment.controls.retries}).`,
   );
   log(
     "Set SCAN_FROM_FIXTURE=1 to skip the network and reuse data/scans/latest.scan-results.json.",
   );
 
-  results = await runWithConcurrency(
+  const results = await runWithConcurrency(
     records,
-    concurrency,
+    environment.concurrency,
     async (municipality, index) => {
       const startedAt = Date.now();
       const result = await scanWebsite(municipality, {
         source: "convex",
-        controls,
+        controls: environment.controls,
       });
       const elapsedMs = Date.now() - startedAt;
       log(
@@ -87,9 +144,9 @@ if (fromFixture) {
 
   const reachableCount = results.filter((r) => r.reachable).length;
   log(`Live scan complete: ${reachableCount}/${results.length} reachable.`);
-}
 
-process.stdout.write(JSON.stringify(toRawScanPersistenceArgs(results)));
+  return results;
+}
 
 function describeOutcome(result: RawScanEvidence): string {
   if (result.reachable) {
@@ -101,10 +158,10 @@ function describeOutcome(result: RawScanEvidence): string {
 
 async function runWithConcurrency<T, R>(
   items: readonly T[],
-  concurrency: number,
+  concurrency: ScanConvexEnvironment["concurrency"],
   task: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
-  const out: R[] = new Array(items.length);
+  const out: Array<ConcurrencySlot<R>> = new Array(items.length);
   let cursor = 0;
 
   const workerCount = Math.min(concurrency, items.length);
@@ -115,10 +172,15 @@ async function runWithConcurrency<T, R>(
       if (index >= items.length) {
         return;
       }
-      out[index] = await task(items[index], index);
+      out[index] = { value: await task(items[index], index) };
     }
   });
 
   await Promise.all(workers);
-  return out;
+  return out.map((slot, index) => {
+    if (slot === undefined) {
+      throw new Error(`Concurrency worker did not produce result ${index}.`);
+    }
+    return slot.value;
+  });
 }

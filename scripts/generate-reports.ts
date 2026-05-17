@@ -3,114 +3,71 @@ import { dirname } from "node:path";
 
 import municipalitiesFixture from "../data/municipalities/municipalities.seed.json" with { type: "json" };
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
+import { assertCompleteReportBatch } from "../src/mastra/workflows/report-batch-completeness.ts";
 import { renderReportBatchPdfs } from "../src/mastra/workflows/report-workflow.ts";
 import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-tool.ts";
 import {
   generateRemediationReportResultSchema,
+  type GenerateRemediationReportBatchOutput,
   municipalitySchema,
+  type ReportGenerationArtifact,
+  reportGenerationArtifactSchema,
+  reportPersistenceArgsSchema,
+  reportPersistenceFindingSchema,
   scanResultSchema,
   selectedMunicipalityReportContextSchema,
   type GenerateRemediationReportResult,
+  type ReportPersistenceArgs,
   type SelectedMunicipalityReportContext,
 } from "../src/shared/contracts.ts";
+import { readCliOptions } from "./report-generation-cli.ts";
 
-const DEFAULT_OUTPUT_PATH = "data/reports/latest.report-generation.json";
-const DEFAULT_GENERATED_AT = new Date().toISOString();
+type ReportBatchOutput = GenerateRemediationReportBatchOutput;
+type ReportBatchRecord = ReportBatchOutput["results"][number];
 
-const MAX_LIMIT = 1_000;
-
-type CliOptions = {
-  generatedAt: string;
-  limit: number;
-  outputPath: string;
-};
-
-type ReportPersistenceArgs = {
-  externalId: string;
-  municipalityExternalId: string;
-  scanResultExternalId?: string;
-  status: "completed";
-  generatedAt: string;
-  summary: string;
-  priorityActions: string[];
-  findings: GenerateRemediationReportResult & { status: "completed" } extends {
-    report: { findings: infer Findings };
-  }
-    ? Findings
-    : never;
-  generatedBy: "deterministic-fallback" | "ai-provider";
-  pdf: NonNullable<
-    GenerateRemediationReportResult & { status: "completed" } extends {
-      metadata: { pdf?: infer Pdf };
-    }
-      ? Pdf
-      : never
-  >;
-  artifacts: NonNullable<
-    GenerateRemediationReportResult & { status: "completed" } extends {
-      metadata: { artifacts?: infer Artifacts };
-    }
-      ? Artifacts
-      : never
-  >;
-};
+type CompletedReportResult = Extract<
+  GenerateRemediationReportResult,
+  { status: "completed" }
+>;
 
 function sanitizePersistenceFindings(
-  findings: ReportPersistenceArgs["findings"],
+  findings: CompletedReportResult["report"]["findings"],
 ): ReportPersistenceArgs["findings"] {
-  return findings.map(({ raw: _raw, ...finding }) => finding);
+  return findings.map(({ raw: _raw, ...finding }) =>
+    reportPersistenceFindingSchema.parse(finding),
+  );
 }
 
-function readCliOptions(argv: string[]): CliOptions {
-  const options: CliOptions = {
-    generatedAt: DEFAULT_GENERATED_AT,
-    limit: 10,
-    outputPath: DEFAULT_OUTPUT_PATH,
-  };
+function requireSelectedContext(
+  selectedByMunicipalityId: Map<string, SelectedMunicipalityReportContext>,
+  municipalityId: string,
+): SelectedMunicipalityReportContext {
+  const context = selectedByMunicipalityId.get(municipalityId);
 
-  for (let index = 0; index < argv.length; index += 1) {
-    const flag = argv[index];
-    const value = argv[index + 1];
-
-    if (flag === "--generated-at" && value) {
-      options.generatedAt = value;
-      index += 1;
-      continue;
-    }
-
-    if (flag === "--limit" && value) {
-      options.limit = Number.parseInt(value, 10);
-      index += 1;
-      continue;
-    }
-
-    if (flag === "--all") {
-      options.limit = MAX_LIMIT;
-    }
-
-    if (flag === "--output" && value) {
-      options.outputPath = value;
-      index += 1;
-      continue;
-    }
+  if (!context) {
+    throw new Error(`Missing selected context for ${municipalityId}.`);
   }
 
-  if (
-    !Number.isInteger(options.limit) ||
-    options.limit < 1 ||
-    options.limit > MAX_LIMIT
-  ) {
-    throw new Error(`--limit must be an integer between 1 and ${MAX_LIMIT}.`);
+  return context;
+}
+
+function requireCompletedResult(
+  record: ReportBatchRecord,
+): CompletedReportResult {
+  const result = generateRemediationReportResultSchema.parse(record.result);
+
+  if (result.status !== "completed") {
+    throw new Error(`Expected completed report for ${record.municipalityId}.`);
   }
 
-  return options;
+  return result;
 }
 
 function toPersistenceArgs({
   result,
   context,
 }: {
-  result: Extract<GenerateRemediationReportResult, { status: "completed" }>;
+  result: CompletedReportResult;
   context: SelectedMunicipalityReportContext;
 }): ReportPersistenceArgs {
   if (!result.metadata.pdf || !result.metadata.artifacts) {
@@ -119,7 +76,7 @@ function toPersistenceArgs({
     );
   }
 
-  return {
+  return reportPersistenceArgsSchema.parse({
     externalId: result.report.id,
     municipalityExternalId: context.municipality.id,
     scanResultExternalId: context.scan.id,
@@ -131,7 +88,61 @@ function toPersistenceArgs({
     generatedBy: result.report.generatedBy,
     pdf: result.metadata.pdf,
     artifacts: result.metadata.artifacts,
-  };
+  });
+}
+
+function buildPersistenceArgs({
+  batch,
+  selected,
+}: {
+  batch: ReportBatchOutput;
+  selected: SelectedMunicipalityReportContext[];
+}): ReportPersistenceArgs[] {
+  const selectedByMunicipalityId = new Map(
+    selected.map((context) => [context.municipality.id, context]),
+  );
+
+  return batch.results.map((record) =>
+    toPersistenceArgs({
+      context: requireSelectedContext(
+        selectedByMunicipalityId,
+        record.municipalityId,
+      ),
+      result: requireCompletedResult(record),
+    }),
+  );
+}
+
+function buildArtifact({
+  batch,
+  selected,
+  convexPersistenceArgs,
+}: {
+  batch: ReportBatchOutput;
+  selected: SelectedMunicipalityReportContext[];
+  convexPersistenceArgs: ReportPersistenceArgs[];
+}): ReportGenerationArtifact {
+  return reportGenerationArtifactSchema.parse({
+    id: batch.id,
+    generatedAt: batch.generatedAt,
+    provider: batch.provider,
+    selected: selectedMunicipalityReportContextSchema.array().parse(selected),
+    batch,
+    convexPersistenceArgs,
+    persistence: {
+      argsCommand: "pnpm report:persist:args",
+      liveConvexCommand: "convex run reports:persistGenerated '<args>'",
+      note: "Replace fixture external IDs with live Convex document IDs and run with an authenticated Convex deployment.",
+    },
+  });
+}
+
+async function writeArtifact(
+  outputPath: string,
+  artifact: ReportGenerationArtifact,
+): Promise<void> {
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, `${JSON.stringify(artifact, null, 2)}\n`);
 }
 
 const options = readCliOptions(process.argv.slice(2));
@@ -158,50 +169,13 @@ const batch = await renderReportBatchPdfs({
   providerKey: "",
 });
 
-if (batch.summary.completed !== selected.length || batch.summary.failed !== 0) {
-  throw new Error(
-    "Fixture report generation must complete all selected records.",
-  );
-}
+assertCompleteReportBatch(batch, selected);
 
-const selectedByMunicipalityId = new Map(
-  selected.map((context) => [context.municipality.id, context]),
-);
-const convexPersistenceArgs: ReportPersistenceArgs[] = batch.results.map(
-  (record) => {
-    const result = generateRemediationReportResultSchema.parse(record.result);
-    const context = selectedByMunicipalityId.get(record.municipalityId);
+const convexPersistenceArgs = buildPersistenceArgs({ batch, selected });
 
-    if (!context) {
-      throw new Error(`Missing selected context for ${record.municipalityId}.`);
-    }
+const artifact = buildArtifact({ batch, selected, convexPersistenceArgs });
 
-    if (result.status !== "completed") {
-      throw new Error(
-        `Expected completed report for ${record.municipalityId}.`,
-      );
-    }
-
-    return toPersistenceArgs({ result, context });
-  },
-);
-
-const artifact = {
-  id: batch.id,
-  generatedAt: batch.generatedAt,
-  provider: batch.provider,
-  selected: selectedMunicipalityReportContextSchema.array().parse(selected),
-  batch,
-  convexPersistenceArgs,
-  persistence: {
-    argsCommand: "pnpm report:persist:args",
-    liveConvexCommand: "convex run reports:persistGenerated '<args>'",
-    note: "Replace fixture external IDs with live Convex document IDs and run with an authenticated Convex deployment.",
-  },
-};
-
-await mkdir(dirname(options.outputPath), { recursive: true });
-await writeFile(options.outputPath, `${JSON.stringify(artifact, null, 2)}\n`);
+await writeArtifact(options.outputPath, artifact);
 
 console.log(
   `Report generation complete: ${batch.summary.completed}/${batch.summary.requested} reports, ${convexPersistenceArgs.length} persistence payloads, artifact ${options.outputPath}`,

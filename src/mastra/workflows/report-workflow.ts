@@ -1,41 +1,31 @@
-import {
-  createReportAiAdapter,
-  type ReportAiProvider,
-} from "../../ai/report-adapter.ts";
-import { renderReportArtifacts } from "../../reports/pdf-renderer.ts";
+import { createReportAiAdapter } from "../../ai/report-adapter.ts";
 import {
   generateRemediationReportInputSchema,
+  generateRemediationReportBatchOutputSchema,
   generateRemediationReportResultSchema,
   selectedMunicipalityReportContextSchema,
+  type GenerateRemediationReportBatchOutput as ContractGenerateRemediationReportBatchOutput,
+  type GenerateRemediationReportBatchRecord as ContractGenerateRemediationReportBatchRecord,
   type GenerateRemediationReportInput,
   type GenerateRemediationReportResult,
+  type RemediationReport,
+  type RemediationReportVariants,
   type SelectedMunicipalityReportContext,
 } from "../../shared/contracts.ts";
+import { renderBatchPdfArtifacts } from "./report-pdf-rendering.ts";
 
 export type GenerateRemediationReportBatchInput = {
-  id?: string;
+  id?: ContractGenerateRemediationReportBatchOutput["id"];
   contexts: SelectedMunicipalityReportContext[];
-  generatedAt?: string;
+  generatedAt?: ContractGenerateRemediationReportBatchOutput["generatedAt"];
   providerKey?: string;
 };
 
-export type GenerateRemediationReportBatchRecord = {
-  municipalityId: string;
-  rank?: number;
-  result: GenerateRemediationReportResult;
-};
+export type GenerateRemediationReportBatchRecord =
+  ContractGenerateRemediationReportBatchRecord;
 
-export type GenerateRemediationReportBatchOutput = {
-  id: string;
-  generatedAt: string;
-  provider: ReportAiProvider;
-  summary: {
-    requested: number;
-    completed: number;
-    failed: number;
-  };
-  results: GenerateRemediationReportBatchRecord[];
-};
+export type GenerateRemediationReportBatchOutput =
+  ContractGenerateRemediationReportBatchOutput;
 
 export type RenderReportBatchPdfsInput = Omit<
   GenerateRemediationReportBatchInput,
@@ -47,16 +37,57 @@ export type RenderReportBatchPdfsInput = Omit<
 
 export async function generateRemediationReport(
   input: GenerateRemediationReportInput,
-) {
+): Promise<RemediationReport> {
   const adapter = createReportAiAdapter();
   return await adapter.generateRemediationReport(input);
 }
 
 export async function generateRemediationReportVariants(
   input: GenerateRemediationReportInput,
-) {
+): Promise<RemediationReportVariants> {
   const adapter = createReportAiAdapter();
   return await adapter.generateRemediationReportVariants(input);
+}
+
+function buildReportInput(
+  context: SelectedMunicipalityReportContext,
+  generatedAt: string,
+): GenerateRemediationReportInput {
+  return generateRemediationReportInputSchema.parse({
+    municipality: context.municipality,
+    scan: context.scan,
+    generatedAt,
+    sourceData: context,
+  });
+}
+
+function buildCompletedRecord({
+  context,
+  generatedAt,
+  reports,
+}: {
+  context: SelectedMunicipalityReportContext;
+  generatedAt: string;
+  reports: RemediationReportVariants;
+}): GenerateRemediationReportBatchRecord {
+  const report = reports.technical;
+
+  return {
+    municipalityId: context.municipality.id,
+    rank: context.rank,
+    result: generateRemediationReportResultSchema.parse({
+      status: "completed",
+      report,
+      reports,
+      metadata: {
+        reportId: report.id,
+        municipalityId: report.municipalityId,
+        status: "completed",
+        generatedAt: report.generatedAt,
+        updatedAt: generatedAt,
+      },
+    }),
+  };
 }
 
 function buildFailedResult({
@@ -98,31 +129,10 @@ export async function generateRemediationReportBatch({
 
     try {
       const context = selectedMunicipalityReportContextSchema.parse(rawContext);
-      const input = generateRemediationReportInputSchema.parse({
-        municipality: context.municipality,
-        scan: context.scan,
-        generatedAt,
-        sourceData: context,
-      });
+      const input = buildReportInput(context, generatedAt);
       const reports = await adapter.generateRemediationReportVariants(input);
-      const report = reports.technical;
 
-      results.push({
-        municipalityId: context.municipality.id,
-        rank: context.rank,
-        result: generateRemediationReportResultSchema.parse({
-          status: "completed",
-          report,
-          reports,
-          metadata: {
-            reportId: report.id,
-            municipalityId: report.municipalityId,
-            status: "completed",
-            generatedAt: report.generatedAt,
-            updatedAt: generatedAt,
-          },
-        }),
-      });
+      results.push(buildCompletedRecord({ context, generatedAt, reports }));
     } catch (error) {
       results.push({
         municipalityId,
@@ -136,7 +146,7 @@ export async function generateRemediationReportBatch({
     (result) => result.result.status === "completed",
   ).length;
 
-  return {
+  return generateRemediationReportBatchOutputSchema.parse({
     id,
     generatedAt,
     provider: adapter.provider,
@@ -146,7 +156,7 @@ export async function generateRemediationReportBatch({
       failed: results.length - completed,
     },
     results,
-  };
+  });
 }
 
 export async function renderReportBatchPdfs({
@@ -162,49 +172,16 @@ export async function renderReportBatchPdfs({
     generatedAt,
     providerKey,
   });
-  const contextByMunicipalityId = new Map(
-    contexts.map((context) => [context.municipality.id, context] as const),
-  );
-  const results: GenerateRemediationReportBatchRecord[] = [];
+  const results = await renderBatchPdfArtifacts({
+    batch,
+    contexts,
+    outputDirectory,
+  });
 
-  for (const record of batch.results) {
-    if (record.result.status !== "completed") {
-      results.push(record);
-      continue;
-    }
-
-    const context = contextByMunicipalityId.get(record.municipalityId);
-
-    if (!context) {
-      results.push(record);
-      continue;
-    }
-
-    const rendered = await renderReportArtifacts({
-      municipalityName: context.municipality.name,
-      reports: record.result.reports,
-      generatedAt: batch.generatedAt,
-      outputDirectory,
-    });
-
-    results.push({
-      ...record,
-      result: generateRemediationReportResultSchema.parse({
-        ...record.result,
-        metadata: {
-          ...record.result.metadata,
-          pdf: rendered.pdf,
-          artifacts: rendered.artifacts,
-          updatedAt: batch.generatedAt,
-        },
-      }),
-    });
-  }
-
-  return {
+  return generateRemediationReportBatchOutputSchema.parse({
     ...batch,
     results,
-  };
+  });
 }
 
 export const reportWorkflow = {
