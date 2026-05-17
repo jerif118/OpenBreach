@@ -19,6 +19,10 @@ type ReportSectionContent = {
   bullets: string[];
 };
 
+function pickEntryString(entry: unknown, keys: string[]): string | undefined {
+  return typeof entry === "string" ? entry : pickString(asObject(entry), keys);
+}
+
 export function deriveScopeSection(
   subject: NormalizedSubject,
   input: GenerateRemediationReportInput,
@@ -30,9 +34,7 @@ export function deriveScopeSection(
     subject.state ? `Region or state reference: ${subject.state}` : null,
     pickString(scope, ["targetType", "assetType", "scopeType"]),
     ...pickArray(scope, ["allowedAssets", "targets", "inScope"]).map((entry) =>
-      typeof entry === "string"
-        ? entry
-        : pickString(asObject(entry), ["name", "url", "path"]),
+      pickEntryString(entry, ["name", "url", "path"]),
     ),
   ]);
 
