@@ -5,6 +5,14 @@ import {
   reportPersistencePayloadSchema,
 } from "../src/shared/contracts.ts";
 
+const payloadSchemas = {
+  "rawScanResults:upsertMany": rawScanPersistenceArgsSchema,
+  "scanResults:upsertEnrichedMany": enrichedScanPersistenceArgsSchema,
+  "reports:seedFromFixture": reportPersistencePayloadSchema,
+} as const;
+
+type PayloadSchema = (typeof payloadSchemas)[keyof typeof payloadSchemas];
+
 // Stream `{ "results": [...] }` JSON on stdin and forward it to a Convex
 // mutation in chunks via the Convex CLI. Required because Linux enforces a
 // per-argv-element cap (MAX_ARG_STRLEN ~= 128 KB) that is much smaller than
@@ -18,18 +26,7 @@ if (!functionName) {
   );
 }
 
-const payloadSchemas = {
-  "rawScanResults:upsertMany": rawScanPersistenceArgsSchema,
-  "scanResults:upsertEnrichedMany": enrichedScanPersistenceArgsSchema,
-  "reports:seedFromFixture": reportPersistencePayloadSchema,
-} as const;
-
-const payloadSchema =
-  payloadSchemas[functionName as keyof typeof payloadSchemas];
-if (!payloadSchema) {
-  process.stderr.write(`No payload schema configured for ${functionName}.\n`);
-  process.exit(2);
-}
+const payloadSchema = resolvePayloadSchema(functionName);
 
 const batchSize = Math.max(
   1,
@@ -111,6 +108,15 @@ process.stderr.write(
 function exitWithInputError(message: string): never {
   process.stderr.write(`${message}\n`);
   process.exit(2);
+}
+
+function resolvePayloadSchema(functionName: string): PayloadSchema {
+  const payloadSchema =
+    payloadSchemas[functionName as keyof typeof payloadSchemas];
+  if (!payloadSchema) {
+    exitWithInputError(`No payload schema configured for ${functionName}.`);
+  }
+  return payloadSchema;
 }
 
 async function readStdin(): Promise<string> {
