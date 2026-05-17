@@ -46,7 +46,7 @@ export type NormalizedReportInput = {
   sourceData: unknown;
 };
 
-function deriveRemediationChecklist(findings: ReportFinding[]) {
+function deriveRemediationChecklist(findings: ReportFinding[]): string[] {
   const checklist = findings.flatMap((finding) => [
     ...finding.remediationSteps,
     `Confirm ownership for ${finding.title.toLowerCase()} before the next review cycle.`,
@@ -61,7 +61,7 @@ function deriveRemediationChecklist(findings: ReportFinding[]) {
   ).slice(0, 10);
 }
 
-function deriveVerificationGuidance(findings: ReportFinding[]) {
+function deriveVerificationGuidance(findings: ReportFinding[]): string[] {
   const guidance = findings.flatMap((finding) => finding.verificationSteps);
 
   return uniqueStrings(
@@ -109,7 +109,9 @@ export function normalizeReportInput(
   };
 }
 
-export function summarizeFindingsBySeverity(findings: ReportFinding[]) {
+export function summarizeFindingsBySeverity(
+  findings: ReportFinding[],
+): string[] {
   return severityLabels
     .map((severity) => {
       const count = findings.filter(
