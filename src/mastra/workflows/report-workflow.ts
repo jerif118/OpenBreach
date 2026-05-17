@@ -10,6 +10,7 @@ import {
   selectedMunicipalityReportContextSchema,
   type GenerateRemediationReportInput,
   type GenerateRemediationReportResult,
+  type RemediationReportVariants,
   type SelectedMunicipalityReportContext,
 } from "../../shared/contracts.ts";
 
@@ -72,6 +73,35 @@ function buildReportInput(
   });
 }
 
+function buildCompletedRecord({
+  context,
+  generatedAt,
+  reports,
+}: {
+  context: SelectedMunicipalityReportContext;
+  generatedAt: string;
+  reports: RemediationReportVariants;
+}): GenerateRemediationReportBatchRecord {
+  const report = reports.technical;
+
+  return {
+    municipalityId: context.municipality.id,
+    rank: context.rank,
+    result: generateRemediationReportResultSchema.parse({
+      status: "completed",
+      report,
+      reports,
+      metadata: {
+        reportId: report.id,
+        municipalityId: report.municipalityId,
+        status: "completed",
+        generatedAt: report.generatedAt,
+        updatedAt: generatedAt,
+      },
+    }),
+  };
+}
+
 function buildFailedResult({
   error,
   generatedAt,
@@ -113,24 +143,8 @@ export async function generateRemediationReportBatch({
       const context = selectedMunicipalityReportContextSchema.parse(rawContext);
       const input = buildReportInput(context, generatedAt);
       const reports = await adapter.generateRemediationReportVariants(input);
-      const report = reports.technical;
 
-      results.push({
-        municipalityId: context.municipality.id,
-        rank: context.rank,
-        result: generateRemediationReportResultSchema.parse({
-          status: "completed",
-          report,
-          reports,
-          metadata: {
-            reportId: report.id,
-            municipalityId: report.municipalityId,
-            status: "completed",
-            generatedAt: report.generatedAt,
-            updatedAt: generatedAt,
-          },
-        }),
-      });
+      results.push(buildCompletedRecord({ context, generatedAt, reports }));
     } catch (error) {
       results.push({
         municipalityId,
