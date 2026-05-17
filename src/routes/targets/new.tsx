@@ -23,7 +23,7 @@ function TargetsNewPage() {
   return (
     <OpenBreachAppFrame>
       <section className="mx-auto flex w-full max-w-7xl flex-col">
-        <header className="flex flex-col gap-4 border-b border-primary/20 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <header className="border-primary/20 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
           <TerminalHeader
             title="target new"
             subtitle="Register a new assessment target and initialize intake workflow."
@@ -31,7 +31,7 @@ function TargetsNewPage() {
           <div className="flex items-center gap-3">
             <Link
               to="/targets"
-              className="border border-outline/40 bg-transparent px-4 py-2 font-mono text-[10px] tracking-[0.22em] text-on-surface uppercase transition pixel-corner hover:bg-primary/10 hover:text-primary focus:ring-2 focus:ring-primary/30 focus:outline-none"
+              className="border-outline/40 text-on-surface pixel-corner hover:bg-primary/10 hover:text-primary focus:ring-primary/30 border bg-transparent px-4 py-2 font-mono text-[10px] tracking-[0.22em] uppercase transition focus:ring-2 focus:outline-none"
             >
               ← Back to list
             </Link>

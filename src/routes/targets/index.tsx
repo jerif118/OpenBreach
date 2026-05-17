@@ -26,16 +26,16 @@ function TargetListSkeleton() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="relative h-56 animate-pulse overflow-hidden border border-primary/10 bg-surface-container-low p-5 pixel-corner"
+          className="border-primary/10 bg-surface-container-low pixel-corner relative h-56 animate-pulse overflow-hidden border p-5"
         >
-          <div className="absolute inset-x-0 top-0 h-px bg-primary/15" />
-          <div className="h-4 w-1/3 bg-surface-container-high" />
-          <div className="mt-5 h-8 w-2/3 bg-surface-container-high" />
-          <div className="mt-3 h-4 w-1/2 bg-surface-container-high" />
+          <div className="bg-primary/15 absolute inset-x-0 top-0 h-px" />
+          <div className="bg-surface-container-high h-4 w-1/3" />
+          <div className="bg-surface-container-high mt-5 h-8 w-2/3" />
+          <div className="bg-surface-container-high mt-3 h-4 w-1/2" />
           <div className="mt-5 grid grid-cols-3 gap-3">
-            <div className="h-14 bg-surface" />
-            <div className="h-14 bg-surface" />
-            <div className="h-14 bg-surface" />
+            <div className="bg-surface h-14" />
+            <div className="bg-surface h-14" />
+            <div className="bg-surface h-14" />
           </div>
         </div>
       ))}
@@ -49,20 +49,20 @@ function TargetListSkeleton() {
 
 function CreationSuccessBanner() {
   return (
-    <div className="animate-terminal-glow mb-6 border border-secondary-fixed-dim/30 bg-secondary-fixed-dim/10 p-5 pixel-corner">
+    <div className="animate-terminal-glow border-secondary-fixed-dim/30 bg-secondary-fixed-dim/10 pixel-corner mb-6 border p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-mono text-sm text-secondary-fixed-dim">
+          <p className="text-secondary-fixed-dim font-mono text-sm">
             ✓ Target created successfully
           </p>
-          <p className="mt-1 font-mono text-xs text-on-surface-variant">
+          <p className="text-on-surface-variant mt-1 font-mono text-xs">
             The new target has been registered and is pending workflow
             activation.
           </p>
         </div>
         <Link
           to="/targets/new"
-          className="shrink-0 border border-secondary-fixed-dim/30 bg-secondary-fixed-dim/10 px-4 py-2 font-mono text-[10px] tracking-[0.22em] text-secondary-fixed-dim uppercase transition pixel-corner hover:bg-secondary-fixed-dim/15 focus:ring-2 focus:ring-secondary-fixed-dim/30 focus:outline-none"
+          className="border-secondary-fixed-dim/30 bg-secondary-fixed-dim/10 text-secondary-fixed-dim pixel-corner hover:bg-secondary-fixed-dim/15 focus:ring-secondary-fixed-dim/30 shrink-0 border px-4 py-2 font-mono text-[10px] tracking-[0.22em] uppercase transition focus:ring-2 focus:outline-none"
         >
           + Create Another
         </Link>
@@ -83,7 +83,7 @@ function TargetsIndexPage() {
   return (
     <OpenBreachAppFrame>
       <section className="mx-auto flex w-full max-w-7xl flex-col">
-        <header className="flex flex-col gap-4 border-b border-primary/20 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <header className="border-primary/20 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
           <TerminalHeader
             title="target list"
             subtitle="Registered assessment targets and their authorization status."
@@ -91,13 +91,13 @@ function TargetsIndexPage() {
           <div className="flex items-center gap-3">
             <Link
               to="/guardian"
-              className="border border-outline/40 bg-transparent px-4 py-2 font-mono text-[10px] tracking-[0.22em] text-on-surface uppercase transition pixel-corner hover:bg-primary/10 hover:text-primary focus:ring-2 focus:ring-primary/30 focus:outline-none"
+              className="border-outline/40 text-on-surface pixel-corner hover:bg-primary/10 hover:text-primary focus:ring-primary/30 border bg-transparent px-4 py-2 font-mono text-[10px] tracking-[0.22em] uppercase transition focus:ring-2 focus:outline-none"
             >
               ← Dashboard
             </Link>
             <Link
               to="/targets/new"
-              className="border border-primary/30 bg-primary/10 px-4 py-2 font-mono text-[10px] tracking-[0.22em] text-primary uppercase transition pixel-corner hover:bg-primary/15 focus:ring-2 focus:ring-primary/30 focus:outline-none"
+              className="border-primary/30 bg-primary/10 text-primary pixel-corner hover:bg-primary/15 focus:ring-primary/30 border px-4 py-2 font-mono text-[10px] tracking-[0.22em] uppercase transition focus:ring-2 focus:outline-none"
             >
               + New Target
             </Link>
@@ -110,8 +110,8 @@ function TargetsIndexPage() {
           {isLoading ? (
             <TargetListSkeleton />
           ) : error ? (
-            <div className="border border-error/30 bg-error/10 p-6 text-center pixel-corner">
-              <p className="font-mono text-sm text-error">
+            <div className="border-error/30 bg-error/10 pixel-corner border p-6 text-center">
+              <p className="text-error font-mono text-sm">
                 Error loading targets: {error.message}
               </p>
             </div>
