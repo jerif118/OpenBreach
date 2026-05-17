@@ -1,0 +1,230 @@
+{
+  "approvedTarget": {
+    "targetId": "target-example-public-site",
+    "organizationName": "Example Public Services",
+    "canonicalUrl": "https://www.example.org/",
+    "assetIds": ["asset-example-public-site"],
+    "status": "approved",
+    "summary": "Repository-local fixture target approved for passive validation examples only.",
+    "tags": ["fixture", "public-example", "passive-validation"]
+  },
+  "rejectedTarget": {
+    "targetId": "target-example-out-of-scope",
+    "organizationName": "Example Out Of Scope Organization",
+    "canonicalUrl": "https://example.net/",
+    "assetIds": ["asset-example-out-of-scope"],
+    "status": "rejected",
+    "summary": "Repository-local fixture target rejected because authorization is not recorded for this workflow.",
+    "tags": ["fixture", "out-of-scope"]
+  },
+  "authorizationScope": {
+    "scopeId": "scope-example-approved-passive",
+    "targetId": "target-example-public-site",
+    "status": "approved",
+    "authorizedBy": "example-fixture-authority",
+    "authorizedAt": "2026-01-01T00:00:00.000Z",
+    "startsAt": "2026-01-01T00:00:00.000Z",
+    "endsAt": "2026-01-31T00:00:00.000Z",
+    "allowedAssetIds": ["asset-example-public-site"],
+    "constraints": [
+      "Use passive, descriptive validation examples only.",
+      "Keep fixture content non-sensitive and independent of live network dependencies."
+    ]
+  },
+  "workflowRun": {
+    "workflowRunId": "workflow-example-passive-review",
+    "targetId": "target-example-public-site",
+    "scopeId": "scope-example-approved-passive",
+    "status": "approved",
+    "startedAt": "2026-01-01T00:00:00.000Z",
+    "completedAt": "2026-01-01T00:05:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "summary": "Deterministic passive validation workflow for the approved example target."
+  },
+  "passiveEvidence": {
+    "evidenceId": "evidence-example-landing-page",
+    "targetId": "target-example-public-site",
+    "assetId": "asset-example-public-site",
+    "observedAt": "2026-01-01T00:01:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "canonicalUrl": "https://www.example.org/",
+    "observation": "Passive fixture review recorded public landing page metadata and general response-header context.",
+    "evidenceReferences": []
+  },
+  "technologyFingerprint": {
+    "fingerprintId": "fingerprint-example-generic-web-server",
+    "targetId": "target-example-public-site",
+    "assetId": "asset-example-public-site",
+    "observedAt": "2026-01-01T00:01:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "technology": "Generic Example Web Server",
+    "category": "server",
+    "confidence": "medium",
+    "evidenceReferences": [
+      {
+        "evidenceId": "evidence-example-landing-page",
+        "description": "Passive landing page observation for the approved example target."
+      }
+    ]
+  },
+  "vulnerabilityHypothesis": {
+    "hypothesisId": "hypothesis-example-header-baseline",
+    "targetId": "target-example-public-site",
+    "assetId": "asset-example-public-site",
+    "createdAt": "2026-01-01T00:02:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "title": "Review security header baseline",
+    "summary": "Passive evidence suggests the target should document its standard security header baseline.",
+    "severity": "low",
+    "status": "hypothesis",
+    "confidence": "medium",
+    "evidenceReferences": [
+      {
+        "evidenceId": "evidence-example-landing-page",
+        "description": "Passive landing page observation for the approved example target."
+      }
+    ]
+  },
+  "testPlan": {
+    "testPlanId": "test-plan-example-passive-header-review",
+    "targetId": "target-example-public-site",
+    "scopeId": "scope-example-approved-passive",
+    "hypothesisIds": ["hypothesis-example-header-baseline"],
+    "status": "approved",
+    "createdAt": "2026-01-01T00:03:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "summary": "Review existing passive observations and produce high-level hardening guidance.",
+    "validationSteps": [
+      "Confirm fixture observations remain passive and descriptive.",
+      "Confirm report-ready text avoids operational testing instructions."
+    ]
+  },
+  "approvalGate": {
+    "approvalGateId": "approval-gate-example-passive-header-review",
+    "targetId": "target-example-public-site",
+    "testPlanId": "test-plan-example-passive-header-review",
+    "status": "approved",
+    "decidedAt": "2026-01-01T00:03:30.000Z",
+    "decidedBy": "example-fixture-approver",
+    "reason": "The plan stays within approved passive fixture review boundaries."
+  },
+  "validationResult": {
+    "validationResultId": "validation-result-example-header-baseline",
+    "targetId": "target-example-public-site",
+    "testPlanId": "test-plan-example-passive-header-review",
+    "status": "confirmed",
+    "validatedAt": "2026-01-01T00:04:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "summary": "Passive review confirmed a report-ready hardening observation for the fixture target.",
+    "evidenceReferences": [
+      {
+        "evidenceId": "evidence-example-landing-page",
+        "description": "Passive landing page observation for the approved example target."
+      }
+    ]
+  },
+  "evidenceEnvelope": {
+    "envelopeId": "envelope-example-passive-review",
+    "targetId": "target-example-public-site",
+    "createdAt": "2026-01-01T00:04:30.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "summary": "Passive fixture evidence bundle for the approved target workflow.",
+    "evidenceReferences": [
+      {
+        "evidenceId": "evidence-example-landing-page",
+        "description": "Passive landing page observation for the approved example target."
+      }
+    ]
+  },
+  "finding": {
+    "findingId": "finding-example-header-baseline",
+    "targetId": "target-example-public-site",
+    "assetIds": ["asset-example-public-site"],
+    "createdAt": "2026-01-01T00:05:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "title": "Document security header baseline",
+    "summary": "The approved example workflow produced a low-severity report-ready hardening observation from passive evidence.",
+    "severity": "low",
+    "status": "confirmed",
+    "evidenceReferences": [
+      {
+        "evidenceId": "evidence-example-landing-page",
+        "description": "Passive landing page observation for the approved example target."
+      }
+    ],
+    "remediationGuidance": "Review standard security header guidance and document the intended baseline for public web assets."
+  },
+  "reportArtifact": {
+    "reportId": "report-example-passive-review",
+    "targetId": "target-example-public-site",
+    "generatedAt": "2026-01-01T00:05:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "status": "approved",
+    "audience": "technical",
+    "title": "Example Passive Validation Report",
+    "summary": "Report-ready fixture summary for the approved public example target.",
+    "findingIds": ["finding-example-header-baseline"],
+    "evidenceReferences": [
+      {
+        "evidenceId": "evidence-example-landing-page",
+        "description": "Passive landing page observation for the approved example target."
+      }
+    ]
+  },
+  "auditEvent": {
+    "auditEventId": "audit-event-example-report-generated",
+    "targetId": "target-example-public-site",
+    "occurredAt": "2026-01-01T00:05:00.000Z",
+    "source": {
+      "type": "fixture",
+      "name": "sample-pivot-workflow",
+      "version": "1.0.0"
+    },
+    "actor": "sample-pivot-workflow-fixture",
+    "action": "report_generated",
+    "status": "confirmed",
+    "summary": "Generated the deterministic report artifact for the passive fixture workflow.",
+    "evidenceReferences": [
+      {
+        "evidenceId": "evidence-example-landing-page",
+        "description": "Passive landing page observation for the approved example target."
+      }
+    ]
+  }
+}
