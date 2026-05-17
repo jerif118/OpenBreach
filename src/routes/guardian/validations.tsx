@@ -22,7 +22,9 @@ export const Route = createFileRoute("/guardian/validations")({
 function SecurityValidations() {
   const { recentValidations, targets } = useOpenBreachPipeline();
   const approvedPlans = targets.filter((target) => !!target.testPlan).length;
-  const completedValidations = targets.filter((target) => !!target.validation).length;
+  const completedValidations = targets.filter(
+    (target) => !!target.validation,
+  ).length;
   const blockedTargets = targets.filter(
     (target) => target.approvalStatus === "rejected",
   ).length;
@@ -34,7 +36,7 @@ function SecurityValidations() {
         subtitle="Approval gates, workflow phases, and controlled validation outputs for every target in scope."
         action={
           <Link
-            className="font-mono text-[10px] text-primary uppercase hover:text-[#00e639]"
+            className="text-primary font-mono text-[10px] uppercase hover:text-[#00e639]"
             to="/guardian/reports"
           >
             Open reports
@@ -66,18 +68,18 @@ function SecurityValidations() {
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-[10px] lg:text-xs">
               <thead>
-                <tr className="border-b border-primary/10 text-[#b9cacb]">
+                <tr className="border-primary/10 border-b text-[#b9cacb]">
                   <th className="px-2 py-2 font-normal">TARGET</th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     PLAN
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     PHASE
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     RESULT
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     ACTION
                   </th>
                 </tr>
@@ -86,13 +88,13 @@ function SecurityValidations() {
                 {targets.map((target) => (
                   <tr key={target.targetId} className="hover:bg-primary/5">
                     <td className="px-2 py-3 text-[#00dbe9]">{target.name}</td>
-                    <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
+                    <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
                       {target.testPlan?.status?.toUpperCase() ?? "MISSING"}
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
+                    <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
                       {formatWorkflowPhase(target.latestRun?.currentPhase)}
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3">
+                    <td className="border-primary/10 border-l px-2 py-3">
                       <ToneBadge
                         label={
                           target.validation
@@ -108,7 +110,7 @@ function SecurityValidations() {
                         }
                       />
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3">
+                    <td className="border-primary/10 border-l px-2 py-3">
                       <Link
                         className="text-primary hover:text-[#00e639]"
                         to="/targets/$targetId"
@@ -135,11 +137,11 @@ function SecurityValidations() {
               .map((target) => (
                 <div
                   key={target.targetId}
-                  className="border border-primary/10 bg-[#131313]/70 p-4"
+                  className="border-primary/10 border bg-[#131313]/70 p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#00dbe9]">
+                      <p className="font-mono text-[10px] tracking-[0.2em] text-[#00dbe9] uppercase">
                         {target.name}
                       </p>
                       <p className="mt-1 font-mono text-[10px] text-[#b9cacb]">
@@ -166,7 +168,7 @@ function SecurityValidations() {
                   <p className="mt-4 font-mono text-[10px] leading-5 text-[#b9cacb]">
                     {target.validation?.summary ?? target.summary}
                   </p>
-                  <p className="mt-3 font-mono text-[10px] text-primary/60">
+                  <p className="text-primary/60 mt-3 font-mono text-[10px]">
                     {formatTimestamp(
                       target.validation?.executedAt ??
                         target.testPlan?.approvedAt ??

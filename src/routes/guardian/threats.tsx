@@ -20,8 +20,7 @@ export const Route = createFileRoute("/guardian/threats")({
 function ThreatsPage() {
   const { findings, targets } = useOpenBreachPipeline();
   const criticalOrHigh = findings.filter(
-    (finding) =>
-      finding.severity === "critical" || finding.severity === "high",
+    (finding) => finding.severity === "critical" || finding.severity === "high",
   ).length;
   const hypotheses = targets.filter((target) => !!target.hypothesis);
   const reportReady = findings.filter((finding) => finding.reportReady).length;
@@ -33,7 +32,7 @@ function ThreatsPage() {
         subtitle="Evidence-backed hypotheses and reportable findings produced by the approved validation pipeline."
         action={
           <Link
-            className="font-mono text-[10px] text-primary uppercase hover:text-[#00e639]"
+            className="text-primary font-mono text-[10px] uppercase hover:text-[#00e639]"
             to="/guardian/validations"
           >
             Review validations
@@ -66,14 +65,14 @@ function ThreatsPage() {
             {findings.map((finding) => (
               <div
                 key={finding.findingId}
-                className="border border-primary/10 bg-[#131313]/70 p-4"
+                className="border-primary/10 border bg-[#131313]/70 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#b9cacb]">
+                    <p className="font-mono text-[10px] tracking-[0.2em] text-[#b9cacb] uppercase">
                       {finding.targetName}
                     </p>
-                    <h3 className="mt-2 font-display text-base text-primary uppercase">
+                    <h3 className="font-display text-primary mt-2 text-base uppercase">
                       {finding.title}
                     </h3>
                   </div>
@@ -86,11 +85,11 @@ function ThreatsPage() {
                   {finding.description}
                 </p>
                 <div className="mt-4 flex items-center justify-between gap-3">
-                  <p className="font-mono text-[10px] text-primary/60">
+                  <p className="text-primary/60 font-mono text-[10px]">
                     {formatTimestamp(finding.createdAt)}
                   </p>
                   <Link
-                    className="font-mono text-[10px] text-primary hover:text-[#00e639]"
+                    className="text-primary font-mono text-[10px] hover:text-[#00e639]"
                     to="/targets/$targetId"
                     params={{ targetId: finding.targetId }}
                   >
@@ -111,10 +110,10 @@ function ThreatsPage() {
             {hypotheses.map((target) => (
               <div
                 key={target.targetId}
-                className="border border-primary/10 bg-[#131313]/70 p-4"
+                className="border-primary/10 border bg-[#131313]/70 p-4"
               >
                 <div className="flex items-center justify-between gap-3">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#00dbe9]">
+                  <p className="font-mono text-[10px] tracking-[0.2em] text-[#00dbe9] uppercase">
                     {target.name}
                   </p>
                   <ToneBadge
@@ -122,7 +121,7 @@ function ThreatsPage() {
                     tone={target.validation ? "green" : "amber"}
                   />
                 </div>
-                <h3 className="mt-3 font-display text-base text-primary uppercase">
+                <h3 className="font-display text-primary mt-3 text-base uppercase">
                   {target.hypothesis?.title ?? "No hypothesis attached"}
                 </h3>
                 <p className="mt-2 font-mono text-[10px] leading-5 text-[#b9cacb]">

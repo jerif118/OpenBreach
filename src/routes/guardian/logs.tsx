@@ -22,7 +22,7 @@ function LogsPage() {
         subtitle="Workflow and operator events recorded across intake, approval, validation, and reporting."
         action={
           <Link
-            className="font-mono text-[10px] text-primary uppercase hover:text-[#00e639]"
+            className="text-primary font-mono text-[10px] uppercase hover:text-[#00e639]"
             to="/guardian/validations"
           >
             Validation queue
@@ -34,14 +34,16 @@ function LogsPage() {
         {auditEvents.length === 0 ? (
           <EmptyPanel message="No audit events have been recorded yet." />
         ) : (
-          <div className="h-[32rem] overflow-auto border border-primary/10 bg-black/40 p-4 font-mono text-[10px]">
+          <div className="border-primary/10 h-[32rem] overflow-auto border bg-black/40 p-4 font-mono text-[10px]">
             {auditEvents.map((event) => (
               <div
                 key={event.id}
-                className="flex flex-col gap-1 border-b border-primary/5 py-3 text-[#b9cacb] md:flex-row md:items-center md:justify-between"
+                className="border-primary/5 flex flex-col gap-1 border-b py-3 text-[#b9cacb] md:flex-row md:items-center md:justify-between"
               >
                 <div className="flex flex-col gap-1">
-                  <span className="text-primary">[{formatTimestamp(event.timestamp)}]</span>
+                  <span className="text-primary">
+                    [{formatTimestamp(event.timestamp)}]
+                  </span>
                   <span className="text-[#00dbe9]">
                     {event.targetName} / {event.eventType}
                   </span>
