@@ -2,6 +2,7 @@ import type {
   GenerateRemediationReportInput,
   ReportFinding,
   RiskLevel,
+  ScanResult,
 } from "../shared/contracts.ts";
 import { scanResultSchema } from "../shared/contracts.ts";
 import {
@@ -25,7 +26,11 @@ export type NormalizedSubject = {
   state?: string;
 };
 
-export type ReportScanLike = {
+/**
+ * Subset of scan fields recoverable from unvalidated `sourceData.scan` when it
+ * does not satisfy {@link ScanResult}.
+ */
+export type LooseScanLike = {
   municipalityId?: string;
   requestedUrl?: string;
   finalUrl?: string;
@@ -37,9 +42,7 @@ export type ReportScanLike = {
   findings?: unknown[];
 };
 
-function toLooseScanLikeObject(
-  source: LooseRecord,
-): ReportScanLike {
+function toLooseScanLikeObject(source: LooseRecord): LooseScanLike {
   return {
     municipalityId: pickString(source, ["municipalityId"]),
     requestedUrl: pickString(source, ["requestedUrl"]),
@@ -55,7 +58,7 @@ function toLooseScanLikeObject(
 
 export function getScanLikeObject(
   input: GenerateRemediationReportInput,
-): ReportScanLike | null {
+): ScanResult | LooseScanLike | null {
   if (input.scan) {
     return input.scan;
   }
@@ -127,17 +130,12 @@ export function deriveSubject(
 
 function pickDirectRiskScore(
   source: LooseRecord | null,
-  scan: ReportScanLike | null,
+  scan: ScanResult | LooseScanLike | null,
 ): number | undefined {
   return (
     scan?.riskScore ??
     scan?.score ??
-    pickNumber(source, [
-      "riskScore",
-      "score",
-      "priorityScore",
-      "severityScore",
-    ])
+    pickNumber(source, ["riskScore", "score", "priorityScore", "severityScore"])
   );
 }
 
