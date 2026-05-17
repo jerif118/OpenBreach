@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
 
 import { renderBatchPdfArtifacts } from "../src/mastra/workflows/report-pdf-rendering.ts";
+import { createReportPdfFileTargetForVariant } from "../src/reports/pdf-file-reference.ts";
 import {
   renderReportBatchPdfs,
   type GenerateRemediationReportBatchOutput,
@@ -36,9 +37,16 @@ async function assertRenderedRecordContent(
 
   const pdf = reportPdfReferenceSchema.parse(record.result.metadata.pdf);
   const artifacts = record.result.metadata.artifacts;
+  const expectedTechnicalTarget = createReportPdfFileTargetForVariant({
+    municipalityId: record.municipalityId,
+    outputDirectory: "data/reports",
+    variant: "technical",
+  });
 
-  if (pdf.fileName !== `${record.municipalityId}-technical.pdf`) {
-    throw new Error("Technical PDF filenames must be based on municipality IDs.");
+  if (pdf.fileName !== expectedTechnicalTarget.fileName) {
+    throw new Error(
+      "Technical PDF filenames must be based on municipality IDs.",
+    );
   }
 
   if (!artifacts?.technical || !artifacts.friendly) {
@@ -95,11 +103,7 @@ async function assertRenderedRecordContent(
   );
   assertPdfIncludes(
     friendlyPdfContent,
-    [
-      context.municipality.name,
-      "Friendly Remediation Report",
-      "Quick summary",
-    ],
+    [context.municipality.name, "Friendly Remediation Report", "Quick summary"],
     "Friendly PDF is missing expected content",
   );
 }
@@ -119,7 +123,8 @@ export async function assertArtifactFailureGuards(
   firstContext: SelectedMunicipalityReportContext,
 ): Promise<void> {
   await assert.rejects(
-    () => renderBatchPdfArtifacts({ batch: output, contexts: contexts.slice(1) }),
+    () =>
+      renderBatchPdfArtifacts({ batch: output, contexts: contexts.slice(1) }),
     /Missing selected report context/,
   );
 
@@ -171,16 +176,45 @@ export async function assertUnsafeFilenameValidation(
     throw new Error("Unsafe filename validation record must complete.");
   }
 
-  const unsafePdf = reportPdfReferenceSchema.parse(
-    unsafeRecord.result.metadata.pdf,
-  );
+  const artifacts = unsafeRecord.result.metadata.artifacts;
 
-  if (unsafePdf.fileName !== "Unsafe_City_2026-technical.pdf") {
+  if (!artifacts?.technical || !artifacts.friendly) {
     throw new Error(
-      `Expected sanitized unsafe filename, received ${unsafePdf.fileName}.`,
+      "Unsafe filename validation metadata must include both report artifacts.",
     );
   }
 
-  await rm(unsafePdf.storagePath, { force: true });
-  await rm("data/reports/Unsafe_City_2026-friendly.pdf", { force: true });
+  const unsafePdf = reportPdfReferenceSchema.parse(
+    unsafeRecord.result.metadata.pdf,
+  );
+  const technicalPdf = reportPdfReferenceSchema.parse(artifacts.technical.pdf);
+  const friendlyPdf = reportPdfReferenceSchema.parse(artifacts.friendly.pdf);
+  const expectedTechnicalTarget = createReportPdfFileTargetForVariant({
+    municipalityId: "../Unsafe City/2026",
+    outputDirectory: "data/reports",
+    variant: "technical",
+  });
+  const expectedFriendlyTarget = createReportPdfFileTargetForVariant({
+    municipalityId: "../Unsafe City/2026",
+    outputDirectory: "data/reports",
+    variant: "friendly",
+  });
+
+  if (
+    unsafePdf.fileName !== expectedTechnicalTarget.fileName ||
+    technicalPdf.fileName !== expectedTechnicalTarget.fileName
+  ) {
+    throw new Error(
+      `Expected sanitized technical filename, received ${unsafePdf.fileName}.`,
+    );
+  }
+
+  if (friendlyPdf.fileName !== expectedFriendlyTarget.fileName) {
+    throw new Error(
+      `Expected sanitized friendly filename, received ${friendlyPdf.fileName}.`,
+    );
+  }
+
+  await rm(technicalPdf.storagePath, { force: true });
+  await rm(friendlyPdf.storagePath, { force: true });
 }
