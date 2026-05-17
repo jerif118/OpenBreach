@@ -209,6 +209,27 @@ assert.equal(
   false,
 );
 
+const notFoundEvidence = await scanWebsite(
+  {
+    id: "mx-test-not-found",
+    name: "Not Found",
+    state: "Test",
+    websiteUrl: "https://not-found.example.test",
+    riskTier: "medium",
+  },
+  {
+    now: () => scannedAt,
+    fetch: async () => makeResponse("not found", { status: 404 }),
+    getTlsCertificate: async () => ({ valid: true }),
+    delay: async () => undefined,
+    controls: { timeoutMs: 100, retries: 0, delayMs: 1 },
+  },
+);
+
+rawScanEvidenceSchema.parse(notFoundEvidence);
+assert.equal(notFoundEvidence.reachable, true);
+assert.equal(notFoundEvidence.httpStatus, 404);
+
 let retryAttempts = 0;
 let retryDelayCalls = 0;
 let tlsRetryAttempts = 0;
