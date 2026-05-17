@@ -17,12 +17,14 @@ type ReportPdfValidationInput = {
   selectedAt: string;
 };
 
+const REPORT_TEMPLATE_PATHS = [
+  "src/reports/templates/technical-report.md",
+  "src/reports/templates/friendly-report.md",
+  "src/reports/templates/README.md",
+] as const;
+
 async function assertTemplateDocumentation(): Promise<void> {
-  for (const templatePath of [
-    "src/reports/templates/technical-report.md",
-    "src/reports/templates/friendly-report.md",
-    "src/reports/templates/README.md",
-  ]) {
+  for (const templatePath of REPORT_TEMPLATE_PATHS) {
     const templateSource = await readFile(templatePath, "utf8");
 
     if (
