@@ -14,14 +14,10 @@ export const municipalitySeedRecordSchema = z.object({
 
 export const municipalitySeedSchema = z
   .array(municipalitySeedRecordSchema)
+  .min(50, {
+    message: "Municipality seed must contain at least 50 records.",
+  })
   .superRefine((records, ctx) => {
-    if (records.length < 50) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: `Municipality seed must contain at least 50 records; found ${records.length}.`,
-      });
-    }
-
     const ids = new Set<string>();
     for (const [index, record] of records.entries()) {
       if (ids.has(record.id)) {
