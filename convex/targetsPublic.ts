@@ -19,7 +19,9 @@ const MAX_LIST_LIMIT = 100;
 // Validation-level → scopeType mapper
 // ============================================================================
 
-function mapValidationLevel(level: string | undefined): "full" | "passive-only" | "limited" | "time-bound" {
+function mapValidationLevel(
+  level: string | undefined,
+): "full" | "passive-only" | "limited" | "time-bound" {
   switch (level) {
     case "strict":
       return "limited";
@@ -251,7 +253,9 @@ export const createFull = mutation({
       .unique();
 
     if (existing) {
-      throw new Error(`Target with targetId "${args.targetId}" already exists.`);
+      throw new Error(
+        `Target with targetId "${args.targetId}" already exists.`,
+      );
     }
 
     // -----------------------------------------------------------------------
@@ -262,7 +266,9 @@ export const createFull = mutation({
       ...(args.allowedAssets ? { allowedAssets: args.allowedAssets } : {}),
       ...(args.deniedAssets ? { deniedAssets: args.deniedAssets } : {}),
       ...(args.rateLimit ? { rateLimit: args.rateLimit } : {}),
-      ...(args.validationLevel ? { validationLevel: args.validationLevel } : {}),
+      ...(args.validationLevel
+        ? { validationLevel: args.validationLevel }
+        : {}),
     };
 
     // -----------------------------------------------------------------------

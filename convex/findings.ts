@@ -260,7 +260,11 @@ export const update = internalMutation({
 
     if (args.status !== undefined) {
       patch.status = args.status;
-      if (args.status === "confirmed" && !args.validationResultId && !doc.validationResultId) {
+      if (
+        args.status === "confirmed" &&
+        !args.validationResultId &&
+        !doc.validationResultId
+      ) {
         throw new Error(
           'Finding status "confirmed" requires a validationResultId.',
         );

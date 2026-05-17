@@ -83,7 +83,8 @@ export function validateTransition(
     );
   }
   if (!allowed.includes(nextStatus)) {
-    const allowedStr = allowed.length > 0 ? allowed.join(", ") : "none (terminal)";
+    const allowedStr =
+      allowed.length > 0 ? allowed.join(", ") : "none (terminal)";
     throw new Error(
       `Invalid transition from "${currentStatus}" to "${nextStatus}". Allowed: [${allowedStr}].`,
     );

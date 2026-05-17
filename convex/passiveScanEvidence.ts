@@ -156,9 +156,7 @@ export const upsert = internalMutation({
 
     const existing = await ctx.db
       .query("passiveScanEvidence")
-      .withIndex("by_evidenceId", (q) =>
-        q.eq("evidenceId", args.evidenceId),
-      )
+      .withIndex("by_evidenceId", (q) => q.eq("evidenceId", args.evidenceId))
       .unique();
 
     const document = {
@@ -184,7 +182,11 @@ export const upsert = internalMutation({
 
     if (existing) {
       await ctx.db.replace(existing._id, document);
-      return { id: existing._id, evidenceId: args.evidenceId, action: "updated" };
+      return {
+        id: existing._id,
+        evidenceId: args.evidenceId,
+        action: "updated",
+      };
     }
 
     const id = await ctx.db.insert("passiveScanEvidence", document);

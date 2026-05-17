@@ -1,15 +1,9 @@
 import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import {
-  requireOperatorOrAdmin,
-  requireApprover,
-  requireAdmin,
-} from "./auth";
+import { requireOperatorOrAdmin, requireApprover, requireAdmin } from "./auth";
 import type { ApprovalGateDto } from "./types";
-import {
-  validateApprovalGateTransition,
-} from "./lib/stateMachine";
+import { validateApprovalGateTransition } from "./lib/stateMachine";
 
 const MAX_LIST_LIMIT = 100;
 

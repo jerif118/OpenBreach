@@ -28,10 +28,10 @@ import type {
 
 /**
  * Check whether a Convex deployment URL is configured.
- * 
+ *
  * On the server (Convex runtime): always returns true — if code is running
  * inside a Convex function, Convex is obviously configured.
- * 
+ *
  * In the browser: checks VITE_CONVEX_URL to determine if the frontend
  * is pointed at a Convex deployment.
  */
@@ -121,9 +121,7 @@ export function mapFixtureToTargetProfileDto(
           country: String(
             (f.geography as Record<string, unknown>).country ?? "",
           ),
-          region: String(
-            (f.geography as Record<string, unknown>).region ?? "",
-          ),
+          region: String((f.geography as Record<string, unknown>).region ?? ""),
           city: String((f.geography as Record<string, unknown>).city ?? ""),
         }
       : undefined,
@@ -176,8 +174,7 @@ export function mapFixtureToTechnologyFingerprintDto(
     fingerprintId: String(f.fingerprintId ?? ""),
     targetId: String(f.targetId ?? ""),
     technology: String(f.technology ?? ""),
-    category:
-      (f.category as TechnologyFingerprintDto["category"]) ?? "other",
+    category: (f.category as TechnologyFingerprintDto["category"]) ?? "other",
     confidence: Number(f.confidence ?? 0),
     detectedAt: String(f.detectedAt ?? ""),
     version: f.version ? String(f.version) : undefined,
@@ -206,8 +203,7 @@ export function mapFixtureToVulnerabilityHypothesisDto(
     hypothesisId: String(f.hypothesisId ?? ""),
     targetId: String(f.targetId ?? ""),
     title: String(f.title ?? ""),
-    status:
-      (f.status as VulnerabilityHypothesisDto["status"]) ?? "hypothesis",
+    status: (f.status as VulnerabilityHypothesisDto["status"]) ?? "hypothesis",
     createdAt: String(f.createdAt ?? ""),
     proposedBy: String(f.proposedBy ?? ""),
     description: f.description ? String(f.description) : undefined,
@@ -250,9 +246,7 @@ export function mapFixtureToTestPlanDto(fixture: unknown): TestPlanDto {
 /**
  * Map a raw fixture object to an `ApprovalGateDto`.
  */
-export function mapFixtureToApprovalGateDto(
-  fixture: unknown,
-): ApprovalGateDto {
+export function mapFixtureToApprovalGateDto(fixture: unknown): ApprovalGateDto {
   const f = fixture as Record<string, unknown>;
   return {
     gateId: String(f.gateId ?? ""),
@@ -263,9 +257,7 @@ export function mapFixtureToApprovalGateDto(
     requestedBy: String(f.requestedBy ?? ""),
     approvedBy: f.approvedBy ? String(f.approvedBy) : undefined,
     approvedAt: f.approvedAt ? String(f.approvedAt) : undefined,
-    rejectionReason: f.rejectionReason
-      ? String(f.rejectionReason)
-      : undefined,
+    rejectionReason: f.rejectionReason ? String(f.rejectionReason) : undefined,
     bypassJustification: f.bypassJustification
       ? String(f.bypassJustification)
       : undefined,
@@ -314,9 +306,7 @@ export function mapFixtureToFindingDto(fixture: unknown): FindingDto {
     createdAt: String(f.createdAt ?? ""),
     category: f.category as FindingDto["category"] | undefined,
     evidence: f.evidence ? String(f.evidence) : undefined,
-    remediationHint: f.remediationHint
-      ? String(f.remediationHint)
-      : undefined,
+    remediationHint: f.remediationHint ? String(f.remediationHint) : undefined,
     affectedAssets: f.affectedAssets as string[] | undefined,
     confidence: f.confidence as FindingDto["confidence"] | undefined,
     cweId: f.cweId ? String(f.cweId) : undefined,
@@ -324,7 +314,8 @@ export function mapFixtureToFindingDto(fixture: unknown): FindingDto {
     validationResultId: f.validationResultId
       ? String(f.validationResultId)
       : undefined,
-    reportReady: f.reportReady !== undefined ? Boolean(f.reportReady) : undefined,
+    reportReady:
+      f.reportReady !== undefined ? Boolean(f.reportReady) : undefined,
     runId: f.runId ? String(f.runId) : undefined,
   };
 }
@@ -332,9 +323,7 @@ export function mapFixtureToFindingDto(fixture: unknown): FindingDto {
 /**
  * Map a raw fixture object to an `AuditEventDto`.
  */
-export function mapFixtureToAuditEventDto(
-  fixture: unknown,
-): AuditEventDto {
+export function mapFixtureToAuditEventDto(fixture: unknown): AuditEventDto {
   const f = fixture as Record<string, unknown>;
   return {
     eventId: String(f.eventId ?? ""),
@@ -363,7 +352,7 @@ export function mapFixtureToReportArtifactDto(
     title: String(f.title ?? ""),
     generatedAt: String(f.generatedAt ?? ""),
     status: (f.status as ReportArtifactDto["status"]) ?? "pending",
-    findings: f.findings as string[] ?? [],
+    findings: (f.findings as string[]) ?? [],
     sections: f.sections as ReportArtifactDto["sections"] | undefined,
     pdf: f.pdf as ReportArtifactDto["pdf"] | undefined,
     generatedBy: f.generatedBy as ReportArtifactDto["generatedBy"] | undefined,

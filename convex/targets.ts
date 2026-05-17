@@ -1,15 +1,8 @@
 import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import {
-  requireOperatorOrAdmin,
-  requireAnyRole,
-  ROLES,
-} from "./auth";
-import type {
-  TargetProfileDto,
-  TargetListItemDto,
-} from "./types";
+import { requireOperatorOrAdmin, requireAnyRole, ROLES } from "./auth";
+import type { TargetProfileDto, TargetListItemDto } from "./types";
 import {
   isConvexConfigured,
   loadFixture,
@@ -76,9 +69,7 @@ export const listDemo = internalQuery({
 
     if (!isConvexConfigured()) {
       try {
-        const fixture = await loadFixture<unknown>(
-          "target-approved-public",
-        );
+        const fixture = await loadFixture<unknown>("target-approved-public");
         const dto = mapFixtureToTargetProfileDto(fixture);
         return [dto];
       } catch {
@@ -104,9 +95,7 @@ export const getDemo = internalQuery({
   handler: async (ctx, args) => {
     if (!isConvexConfigured()) {
       try {
-        const fixture = await loadFixture<unknown>(
-          "target-approved-public",
-        );
+        const fixture = await loadFixture<unknown>("target-approved-public");
         const dto = mapFixtureToTargetProfileDto(fixture);
         return dto.targetId === args.targetId ? dto : null;
       } catch {
@@ -116,9 +105,7 @@ export const getDemo = internalQuery({
 
     const doc = await ctx.db
       .query("targets")
-      .withIndex("by_targetId", (q) =>
-        q.eq("targetId", args.targetId),
-      )
+      .withIndex("by_targetId", (q) => q.eq("targetId", args.targetId))
       .unique();
 
     if (!doc) return null;
