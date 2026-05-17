@@ -225,28 +225,29 @@ export function createReportAiAdapter(
   const chatExecutor = options.chat ?? runTanStackChat;
   const model = options.model ?? getConfiguredModel();
   const provider = options.provider ?? getConfiguredProvider();
+  const generateRemediationReportVariants = async (
+    input: GenerateRemediationReportInput,
+  ): Promise<RemediationReportVariants> => {
+    try {
+      return await generateProviderBackedVariants({
+        chatExecutor,
+        input,
+        model,
+        provider,
+        providerKey,
+      });
+    } catch {
+      return await deterministicReportAdapter.generateRemediationReportVariants(
+        input,
+      );
+    }
+  };
 
   return {
     provider: "tanstack-ai",
     async generateRemediationReport(input): Promise<RemediationReport> {
-      return (await this.generateRemediationReportVariants(input)).technical;
+      return (await generateRemediationReportVariants(input)).technical;
     },
-    async generateRemediationReportVariants(
-      input,
-    ): Promise<RemediationReportVariants> {
-      try {
-        return await generateProviderBackedVariants({
-          chatExecutor,
-          input,
-          model,
-          provider,
-          providerKey,
-        });
-      } catch {
-        return await deterministicReportAdapter.generateRemediationReportVariants(
-          input,
-        );
-      }
-    },
+    generateRemediationReportVariants,
   };
 }
