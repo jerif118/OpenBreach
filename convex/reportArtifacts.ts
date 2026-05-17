@@ -3,6 +3,7 @@ import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
 import type { ReportArtifactDto } from "./types";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -61,15 +62,24 @@ export const listByTarget = internalQuery({
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
-    let query = ctx.db
+    if (args.status) {
+      const status = args.status;
+      const docs = await ctx.db
+        .query("reportArtifacts")
+        .withIndex("by_targetId_and_status", (q) =>
+          q.eq("targetId", args.targetId).eq("status", status),
+        )
+        .take(limit);
+
+      return docs.map(toReportArtifactDto);
+    }
+
+    const query = ctx.db
       .query("reportArtifacts")
       .withIndex("by_targetId", (q) => q.eq("targetId", args.targetId));
 
     const docs = await query.take(limit);
-    const filtered = args.status
-      ? docs.filter((d) => d.status === args.status)
-      : docs;
-    return filtered.map(toReportArtifactDto);
+    return docs.map(toReportArtifactDto);
   },
 });
 
@@ -136,7 +146,7 @@ export const create = internalMutation({
     metadata: v.optional(v.record(v.string(), v.any())),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("reportArtifacts")
@@ -168,6 +178,18 @@ export const create = internalMutation({
       metadata: args.metadata,
     });
 
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "report-generated",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: {
+        artifactId: args.artifactId,
+        status: args.status,
+        variant: args.variant,
+      },
+    });
+
     return { id, artifactId: args.artifactId };
   },
 });
@@ -193,7 +215,7 @@ export const complete = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const doc = await ctx.db
       .query("reportArtifacts")
@@ -208,6 +230,14 @@ export const complete = internalMutation({
       status: "completed",
       pdf: args.pdf,
       sections: args.sections,
+    });
+
+    await appendAuditEvent(ctx, {
+      targetId: doc.targetId,
+      eventType: "report-completed",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: doc.runId,
+      details: { artifactId: args.artifactId, status: "completed" },
     });
 
     return { id: doc._id, artifactId: args.artifactId };
