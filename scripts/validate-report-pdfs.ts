@@ -16,6 +16,20 @@ import {
   assertPdfTextEscapesLiteralControls,
 } from "./report-pdf-validation-assertions.ts";
 
+function requiredElement<T>(
+  values: readonly T[],
+  index: number,
+  message: string,
+): T {
+  const value = values[index];
+
+  if (value === undefined) {
+    throw new Error(message);
+  }
+
+  return value;
+}
+
 const selectedAt = "2026-01-01T00:00:00.000Z";
 assertPdfTextEscapesLiteralControls();
 
@@ -32,6 +46,12 @@ if (contexts.length !== 2) {
     `Expected 2 selected contexts for PDF validation, received ${contexts.length}.`,
   );
 }
+
+const firstContext = requiredElement(
+  contexts,
+  0,
+  "Expected at least one selected context for PDF validation.",
+);
 
 for (const templatePath of [
   "src/reports/templates/technical-report.md",
@@ -166,9 +186,9 @@ await assert.rejects(
       batch: output,
       contexts: [
         {
-          ...contexts[0],
+          ...firstContext,
           scan: {
-            ...contexts[0].scan,
+            ...firstContext.scan,
             riskScore: 101,
           },
         },
@@ -181,9 +201,9 @@ await assert.rejects(
 const unsafeOutput = await renderReportBatchPdfs({
   contexts: [
     {
-      ...contexts[0],
+      ...firstContext,
       municipality: {
-        ...contexts[0].municipality,
+        ...firstContext.municipality,
         id: "../Unsafe City/2026",
       },
     },
