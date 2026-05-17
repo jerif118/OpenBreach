@@ -7,9 +7,7 @@
       "category": "server",
       "confidence": 0.7,
       "detectedAt": "2026-05-17T00:00:00.000Z",
-      "evidence": [
-        "header:server=nginx/1.18.0"
-      ]
+      "evidence": ["header:server=nginx/1.18.0"]
     },
     {
       "fingerprintId": "id-002",
@@ -18,9 +16,7 @@
       "category": "other",
       "confidence": 0.6,
       "detectedAt": "2026-05-17T00:00:00.000Z",
-      "evidence": [
-        "header:strict-transport-security=absent"
-      ]
+      "evidence": ["header:strict-transport-security=absent"]
     },
     {
       "fingerprintId": "id-003",
@@ -29,9 +25,7 @@
       "category": "other",
       "confidence": 0.6,
       "detectedAt": "2026-05-17T00:00:00.000Z",
-      "evidence": [
-        "header:content-security-policy=absent"
-      ]
+      "evidence": ["header:content-security-policy=absent"]
     },
     {
       "fingerprintId": "id-004",
@@ -40,9 +34,7 @@
       "category": "other",
       "confidence": 0.6,
       "detectedAt": "2026-05-17T00:00:00.000Z",
-      "evidence": [
-        "header:x-frame-options=absent"
-      ]
+      "evidence": ["header:x-frame-options=absent"]
     }
   ],
   "hypotheses": [
@@ -55,9 +47,7 @@
       "proposedBy": "analyzer",
       "description": "The response did not include Strict-Transport-Security, reducing protection against downgrade and man-in-the-middle attacks.",
       "cweId": "CWE-319",
-      "affectedComponents": [
-        "strict-transport-security"
-      ]
+      "affectedComponents": ["strict-transport-security"]
     },
     {
       "hypothesisId": "id-006",
@@ -68,9 +58,7 @@
       "proposedBy": "analyzer",
       "description": "The response did not include Content-Security-Policy, increasing risk of injection-driven content execution.",
       "cweId": "CWE-693",
-      "affectedComponents": [
-        "content-security-policy"
-      ]
+      "affectedComponents": ["content-security-policy"]
     },
     {
       "hypothesisId": "id-007",
@@ -80,9 +68,7 @@
       "createdAt": "2026-05-17T00:00:00.000Z",
       "proposedBy": "analyzer",
       "description": "The response did not include X-Frame-Options or CSP frame-ancestors, increasing clickjacking risk.",
-      "affectedComponents": [
-        "x-frame-options"
-      ]
+      "affectedComponents": ["x-frame-options"]
     }
   ]
 }
