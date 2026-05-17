@@ -25,11 +25,13 @@ const DEFAULT_GENERATED_AT = new Date().toISOString();
 
 const MAX_LIMIT = 1_000;
 
+type CompletedReportResult = Extract<
+  GenerateRemediationReportResult,
+  { status: "completed" }
+>;
+
 function sanitizePersistenceFindings(
-  findings: Extract<
-    GenerateRemediationReportResult,
-    { status: "completed" }
-  >["report"]["findings"],
+  findings: CompletedReportResult["report"]["findings"],
 ): ReportPersistenceArgs["findings"] {
   return findings.map(({ raw: _raw, ...finding }) =>
     reportPersistenceFindingSchema.parse(finding),
@@ -77,7 +79,7 @@ function toPersistenceArgs({
   result,
   context,
 }: {
-  result: Extract<GenerateRemediationReportResult, { status: "completed" }>;
+  result: CompletedReportResult;
   context: SelectedMunicipalityReportContext;
 }): ReportPersistenceArgs {
   if (!result.metadata.pdf || !result.metadata.artifacts) {
