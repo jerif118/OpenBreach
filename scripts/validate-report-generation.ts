@@ -1,6 +1,8 @@
+import assert from "node:assert/strict";
 import { readFile, stat } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 
+import { assertCompleteReportBatch } from "../src/mastra/workflows/report-batch-completeness.ts";
 import {
   generateRemediationReportResultSchema,
   reportGenerationArtifactSchema,
@@ -66,7 +68,7 @@ for (const dependency of forbiddenDependencies) {
 
 const run = spawnSync(
   "pnpm",
-  ["report:generate", "--", "--generated-at", "2026-01-01T00:00:00.000Z"],
+  ["report:generate", "--generated-at", "2026-01-01T00:00:00.000Z"],
   {
     encoding: "utf8",
   },
@@ -141,6 +143,29 @@ if (results.length !== selected.length) {
     "Batch results must include one record per selected context.",
   );
 }
+
+assertCompleteReportBatch(artifact.batch, selected);
+
+const [firstResult, secondResult] = results;
+if (!firstResult || !secondResult) {
+  throw new Error("Report generation validation needs at least two results.");
+}
+
+assert.throws(
+  () =>
+    assertCompleteReportBatch(
+      {
+        ...artifact.batch,
+        results: [
+          firstResult,
+          { ...secondResult, municipalityId: firstResult.municipalityId },
+          ...results.slice(2),
+        ],
+      },
+      selected,
+    ),
+  /Duplicate report result/,
+);
 
 for (const record of results) {
   const result = generateRemediationReportResultSchema.parse(record.result);
