@@ -79,7 +79,6 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
       setGlobalError(null);
 
       const rawInput: TargetIntakeInput = {
-        targetId,
         name,
         primaryUrl,
         classification,
@@ -127,7 +126,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           classification: validated.classification,
         });
         const result = await createTarget({
-          targetId: validated.targetId,
+          targetId: targetId,
           name: validated.name,
           primaryUrl: validated.primaryUrl,
           classification: validated.classification,

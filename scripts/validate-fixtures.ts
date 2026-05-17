@@ -38,11 +38,8 @@ import {
 
 import {
   type GenerateRemediationReportResult,
+  type GenerateRemediationReportBatchRecord,
 } from "../src/shared/contracts.ts";
-
-type GenerateRemediationReportBatchRecord = {
-  result: { status: string };
-};
 
 type CompletedReportRecord = GenerateRemediationReportBatchRecord & {
   result: Extract<GenerateRemediationReportResult, { status: "completed" }>;
