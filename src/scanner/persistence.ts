@@ -1,12 +1,11 @@
 import {
   rawScanEvidenceSchema,
   rawScanPersistenceArgsSchema,
-  type RawScanEvidence,
   type RawScanPersistenceArgs,
 } from "../shared/contracts.ts";
 
 export function toRawScanPersistenceArgs(
-  results: readonly RawScanEvidence[],
+  results: readonly unknown[],
 ): RawScanPersistenceArgs {
   return rawScanPersistenceArgsSchema.parse({
     results: results.map((result) => {
