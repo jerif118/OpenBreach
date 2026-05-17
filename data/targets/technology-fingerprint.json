@@ -1,0 +1,17 @@
+{
+  "fingerprintId": "fp-merida-nginx-001",
+  "targetId": "target-merida-001",
+  "technology": "Nginx",
+  "category": "server",
+  "confidence": 0.95,
+  "detectedAt": "2024-01-15T10:00:00Z",
+  "version": "1.18.0",
+  "versionConfidence": 0.9,
+  "evidence": ["Server header: nginx/1.18.0"],
+  "cpe": "cpe:2.3:a:nginx:nginx:1.18.0",
+  "runId": "run-merida-001",
+  "envelopeSource": "nmap-passive",
+  "envelopeRecordedAt": "2024-01-15T10:00:00Z",
+  "envelopeHash": "sha256:a1b2c3d4e5f6789012345678901234567890abcd",
+  "envelopeCollectedBy": "agent-passive-scanner"
+}

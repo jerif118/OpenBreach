@@ -1,0 +1,45 @@
+{
+  "artifactId": "report-merida-technical-001",
+  "targetId": "target-merida-001",
+  "variant": "technical",
+  "title": "Technical Remediation Report - Merida",
+  "generatedAt": "2024-01-15T11:00:00Z",
+  "status": "completed",
+  "findings": ["finding-merida-tls-001"],
+  "sections": [
+    {
+      "title": "Executive Summary",
+      "narrative": "The target system exhibits one high-severity TLS configuration issue that requires immediate attention.",
+      "bullets": [
+        "Deprecated TLS 1.0 is enabled",
+        "Certificate expires within 30 days"
+      ]
+    },
+    {
+      "title": "Methodology",
+      "narrative": "Validation was conducted using approved passive and semi-active techniques only.",
+      "bullets": [
+        "TLS version negotiation test",
+        "Certificate validity check"
+      ]
+    },
+    {
+      "title": "Findings Detail",
+      "narrative": "Detailed findings from the controlled validation run.",
+      "bullets": [
+        "Finding ID: finding-merida-tls-001",
+        "Severity: high",
+        "Status: confirmed"
+      ]
+    }
+  ],
+  "pdf": {
+    "storagePath": "data/reports/merida-technical-001.pdf",
+    "fileName": "merida-technical-001.pdf",
+    "contentType": "application/pdf",
+    "generatedAt": "2024-01-15T11:00:00Z",
+    "sizeBytes": 102400
+  },
+  "generatedBy": "template-engine",
+  "runId": "run-merida-001"
+}
