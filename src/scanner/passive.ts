@@ -16,6 +16,8 @@ export type ScannerControls = {
   delayMs?: number;
 };
 
+type ScannerControlName = keyof Required<ScannerControls>;
+
 export type TlsEvidence = NonNullable<RawScanEvidence["tls"]>;
 
 export type PassiveScannerOptions = {
@@ -112,10 +114,46 @@ export function resolveScannerControls(
   controls: ScannerControls | undefined,
 ): Required<ScannerControls> {
   return {
-    timeoutMs: controls?.timeoutMs ?? DEFAULT_SCANNER_CONTROLS.timeoutMs,
-    retries: controls?.retries ?? DEFAULT_SCANNER_CONTROLS.retries,
-    delayMs: controls?.delayMs ?? DEFAULT_SCANNER_CONTROLS.delayMs,
+    timeoutMs: resolveNonnegativeNumber(
+      "timeoutMs",
+      controls?.timeoutMs,
+      DEFAULT_SCANNER_CONTROLS.timeoutMs,
+    ),
+    retries: resolveNonnegativeInteger(
+      "retries",
+      controls?.retries,
+      DEFAULT_SCANNER_CONTROLS.retries,
+    ),
+    delayMs: resolveNonnegativeNumber(
+      "delayMs",
+      controls?.delayMs,
+      DEFAULT_SCANNER_CONTROLS.delayMs,
+    ),
   };
+}
+
+function resolveNonnegativeNumber(
+  name: ScannerControlName,
+  value: number | undefined,
+  defaultValue: number,
+): number {
+  const resolvedValue = value ?? defaultValue;
+  if (!Number.isFinite(resolvedValue) || resolvedValue < 0) {
+    throw new RangeError(`${name} must be a finite nonnegative number`);
+  }
+  return resolvedValue;
+}
+
+function resolveNonnegativeInteger(
+  name: ScannerControlName,
+  value: number | undefined,
+  defaultValue: number,
+): number {
+  const resolvedValue = resolveNonnegativeNumber(name, value, defaultValue);
+  if (!Number.isInteger(resolvedValue)) {
+    throw new RangeError(`${name} must be a nonnegative integer`);
+  }
+  return resolvedValue;
 }
 
 async function delay(milliseconds: number): Promise<void> {
