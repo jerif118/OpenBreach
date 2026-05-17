@@ -59,9 +59,6 @@ export class AnalyzerError extends Error {
 
 export type DedupKey = `${string}:${string}`;
 
-export function makeDedupKey(
-  technology: string,
-  category: string,
-): DedupKey {
+export function makeDedupKey(technology: string, category: string): DedupKey {
   return `${technology}:${category}`;
 }

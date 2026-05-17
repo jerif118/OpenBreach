@@ -4,7 +4,10 @@ import {
   type TechnologyFingerprint,
   type VulnerabilityHypothesis,
 } from "../../shared/contracts.ts";
-import { deduplicateFingerprints, deduplicateHypotheses } from "./deduplicate.ts";
+import {
+  deduplicateFingerprints,
+  deduplicateHypotheses,
+} from "./deduplicate.ts";
 import {
   toTechnologyFingerprint,
   toVulnerabilityHypothesis,
