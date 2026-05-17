@@ -10,6 +10,7 @@ import {
   pickObject,
   pickString,
   toSentence,
+  type LooseRecord,
   uniqueStrings,
 } from "./report-normalizer-utils.ts";
 import { getScanLikeObject } from "./report-subject-risk.ts";
@@ -23,6 +24,70 @@ function pickEntryString(entry: unknown, keys: string[]): string | undefined {
   return typeof entry === "string" ? entry : pickString(asObject(entry), keys);
 }
 
+function pickEntryStrings(
+  source: LooseRecord | null,
+  keys: string[],
+  entryKeys: string[],
+): Array<string | undefined> {
+  return pickArray(source, keys).map((entry) =>
+    pickEntryString(entry, entryKeys),
+  );
+}
+
+function authorizationFallbackNarrative(
+  authorized: boolean | undefined,
+): string {
+  if (authorized === false) {
+    return "The input indicates the target was not approved for additional validation. The report stays descriptive and limited to the provided evidence.";
+  }
+
+  if (authorized === true) {
+    return "The input indicates the target was approved within a bounded scope. The report remains limited to the supplied evidence and avoids exploit or payload guidance.";
+  }
+
+  return "No explicit authorization object was supplied. The report generator treated the input as evidence-only and did not add new tests or claims.";
+}
+
+function formatValidationResult(
+  entry: unknown,
+  index: number,
+): string | undefined {
+  const candidate = asObject(entry);
+
+  if (!candidate) return undefined;
+
+  const label =
+    pickString(candidate, ["title", "name"]) ?? `Validation ${index + 1}`;
+  const outcome =
+    pickString(candidate, ["status", "result", "outcome"]) ??
+    "status not provided";
+  const detail = pickString(candidate, ["summary", "details", "reason"]);
+  const detailSuffix = detail ? `. ${detail}` : "";
+
+  return toSentence(`${label}: ${outcome}${detailSuffix}`);
+}
+
+function missingLimitationMessages(
+  source: LooseRecord | null,
+  scan: unknown,
+  findings: ReportFinding[],
+): Array<string | null> {
+  return [
+    pickObject(source, ["authorizationScope", "scope"])
+      ? null
+      : "Authorization scope details were not fully supplied.",
+    pickArray(source, ["validationResults", "validations"]).length > 0
+      ? null
+      : "No explicit validation result set was supplied, so unresolved uncertainty remains.",
+    findings.length > 0
+      ? null
+      : "No structured findings were supplied; the report is limited to contextual guidance.",
+    scan
+      ? null
+      : "No scan-shaped object was supplied, so some transport details were inferred from generic input.",
+  ];
+}
+
 export function deriveScopeSection(
   subject: NormalizedSubject,
   input: GenerateRemediationReportInput,
@@ -33,9 +98,11 @@ export function deriveScopeSection(
     subject.websiteUrl ? `Primary public URL: ${subject.websiteUrl}` : null,
     subject.state ? `Region or state reference: ${subject.state}` : null,
     pickString(scope, ["targetType", "assetType", "scopeType"]),
-    ...pickArray(scope, ["allowedAssets", "targets", "inScope"]).map((entry) =>
-      pickEntryString(entry, ["name", "url", "path"]),
-    ),
+    ...pickEntryStrings(scope, ["allowedAssets", "targets", "inScope"], [
+      "name",
+      "url",
+      "path",
+    ]),
   ]);
 
   return {
@@ -63,33 +130,21 @@ export function deriveAuthorizationSection(
     "isApproved",
   ]);
   const bullets = uniqueStrings([
-    ...pickArray(scope, ["allowedActions", "validationClasses"]).map((entry) =>
-      pickEntryString(entry, ["name", "label"]),
-    ),
-    ...pickArray(scope, [
-      "forbiddenActions",
-      "deniedActions",
-      "outOfScope",
-    ]).map((entry) =>
-      pickEntryString(entry, ["name", "label"]),
+    ...pickEntryStrings(scope, ["allowedActions", "validationClasses"], [
+      "name",
+      "label",
+    ]),
+    ...pickEntryStrings(
+      scope,
+      ["forbiddenActions", "deniedActions", "outOfScope"],
+      ["name", "label"],
     ),
     pickString(scope, ["timeWindow", "approvalWindow"]),
     pickString(scope, ["rateLimit", "rateLimits"]),
   ]);
-  let fallbackNarrative =
-    "No explicit authorization object was supplied. The report generator treated the input as evidence-only and did not add new tests or claims.";
-
-  if (authorized === false) {
-    fallbackNarrative =
-      "The input indicates the target was not approved for additional validation. The report stays descriptive and limited to the provided evidence.";
-  } else if (authorized === true) {
-    fallbackNarrative =
-      "The input indicates the target was approved within a bounded scope. The report remains limited to the supplied evidence and avoids exploit or payload guidance.";
-  }
-
   const narrative =
     pickString(scope, ["summary", "authorizationSummary"]) ??
-    fallbackNarrative;
+    authorizationFallbackNarrative(authorized);
 
   return {
     narrative: toSentence(narrative),
@@ -107,12 +162,10 @@ export function deriveMethodologySection(
 ): ReportSectionContent {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
-  const explicitMethodology = pickArray(source, [
-    "methodology",
-    "steps",
-    "workflow",
-  ]).map((entry) =>
-    pickEntryString(entry, ["title", "summary", "description"]),
+  const explicitMethodology = pickEntryStrings(
+    source,
+    ["methodology", "steps", "workflow"],
+    ["title", "summary", "description"],
   );
 
   const bullets = uniqueStrings([
@@ -138,12 +191,11 @@ export function deriveSkippedTests(
   input: GenerateRemediationReportInput,
 ): string[] {
   const source = asObject(input.sourceData);
-  const explicitSkipped = pickArray(source, [
-    "skippedTests",
-    "skipped",
-    "deniedTests",
-    "notTested",
-  ]).map((entry) => pickEntryString(entry, ["summary", "reason", "name"]));
+  const explicitSkipped = pickEntryStrings(
+    source,
+    ["skippedTests", "skipped", "deniedTests", "notTested"],
+    ["summary", "reason", "name"],
+  );
 
   return uniqueStrings([
     ...explicitSkipped,
@@ -160,21 +212,7 @@ export function deriveValidationStatus(
     "validationResults",
     "validations",
     "results",
-  ]).map((entry, index) => {
-    const candidate = asObject(entry);
-
-    if (!candidate) return undefined;
-
-    const label =
-      pickString(candidate, ["title", "name"]) ?? `Validation ${index + 1}`;
-    const outcome =
-      pickString(candidate, ["status", "result", "outcome"]) ??
-      "status not provided";
-    const detail = pickString(candidate, ["summary", "details", "reason"]);
-    const detailSuffix = detail ? `. ${detail}` : "";
-
-    return toSentence(`${label}: ${outcome}${detailSuffix}`);
-  });
+  ]).map((entry, index) => formatValidationResult(entry, index));
   const validationSummaries = uniqueStrings(validations);
 
   return uniqueStrings([
@@ -198,27 +236,14 @@ export function deriveLimitations(
 ): string[] {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
-  const errors = pickArray(source, ["errors", "limitations"]).map((entry) =>
-    pickEntryString(entry, ["message", "summary", "reason"]),
-  );
-  const missingSections = [
-    pickObject(source, ["authorizationScope", "scope"])
-      ? null
-      : "Authorization scope details were not fully supplied.",
-    pickArray(source, ["validationResults", "validations"]).length > 0
-      ? null
-      : "No explicit validation result set was supplied, so unresolved uncertainty remains.",
-    findings.length > 0
-      ? null
-      : "No structured findings were supplied; the report is limited to contextual guidance.",
-    scan
-      ? null
-      : "No scan-shaped object was supplied, so some transport details were inferred from generic input.",
-  ];
-
+  const errors = pickEntryStrings(source, ["errors", "limitations"], [
+    "message",
+    "summary",
+    "reason",
+  ]);
   return uniqueStrings([
     ...errors,
-    ...missingSections,
+    ...missingLimitationMessages(source, scan, findings),
     "The report summarizes the provided evidence and should not be interpreted as proof of exploitability or breach.",
   ]);
 }
