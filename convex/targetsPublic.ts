@@ -7,46 +7,61 @@ import {
   loadFixture,
   mapFixtureToTargetProfileDto,
 } from "./lib/fixtureFallback";
+import type { AuditDetails, AuditEventDto } from "./types/audit";
+import type { AuthorizationScopeDto } from "./types/authorization";
 import type { TargetListItemDto, TargetProfileDto } from "./types/targets";
 import type { Doc } from "./_generated/dataModel";
 import type { WorkflowRunDto } from "./types/workflow";
 import { validateTargetDomainBounds } from "./targets.validators";
+import { decideTargetScope } from "../src/shared/target-scope-decision";
 
 const DEFAULT_LIST_LIMIT = 50;
 const MAX_LIST_LIMIT = 100;
 
-// ============================================================================
-// Validation-level → scopeType mapper
-// ============================================================================
-
-function mapValidationLevel(
-  level: string | undefined,
-): "full" | "passive-only" | "limited" | "time-bound" {
-  switch (level) {
-    case "strict":
-      return "limited";
-    case "moderate":
-      return "passive-only";
-    case "permissive":
-    case "full":
-    default:
-      return "full";
-  }
-}
-
 function buildEnrichedMetadata(args: {
   metadata?: Record<string, unknown>;
-  allowedAssets?: string[];
-  deniedAssets?: string[];
-  rateLimit?: number;
-  validationLevel?: string;
+  decisionMetadata: Record<string, unknown>;
 }): Record<string, unknown> {
   return {
     ...(args.metadata ?? {}),
-    ...(args.allowedAssets ? { allowedAssets: args.allowedAssets } : {}),
-    ...(args.deniedAssets ? { deniedAssets: args.deniedAssets } : {}),
-    ...(args.rateLimit !== undefined ? { rateLimit: args.rateLimit } : {}),
-    ...(args.validationLevel ? { validationLevel: args.validationLevel } : {}),
+    ...args.decisionMetadata,
+  };
+}
+
+function buildAuditDto(args: {
+  eventId: string;
+  targetId: string;
+  eventType: string;
+  actor: string;
+  timestamp: string;
+  runId?: string;
+  details?: AuditDetails;
+}): AuditEventDto {
+  return {
+    eventId: args.eventId,
+    targetId: args.targetId,
+    eventType: args.eventType,
+    actor: args.actor,
+    timestamp: args.timestamp,
+    runId: args.runId,
+    details: args.details,
+  };
+}
+
+function buildRejectedAuditDetails(args: {
+  reason: string;
+  primaryUrl: string;
+  validationLevel?: string;
+  allowedAssetCount: number;
+  deniedAssetCount: number;
+}): AuditDetails {
+  return {
+    auditDecision: "rejected",
+    reason: args.reason,
+    primaryUrl: args.primaryUrl,
+    validationLevel: args.validationLevel ?? "passive",
+    allowedAssetCount: args.allowedAssetCount,
+    deniedAssetCount: args.deniedAssetCount,
   };
 }
 
@@ -267,7 +282,13 @@ export const createFull = mutation({
     approverName: v.optional(v.string()),
     allowedAssets: v.optional(v.array(v.string())),
     deniedAssets: v.optional(v.array(v.string())),
-    validationLevel: v.optional(v.string()),
+    validationLevel: v.optional(
+      v.union(
+        v.literal("passive"),
+        v.literal("semiactive"),
+        v.literal("controlled_validation"),
+      ),
+    ),
     rateLimit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -279,6 +300,76 @@ export const createFull = mutation({
     const actor = profile.name ?? identity.tokenIdentifier;
     const nowISO = new Date().toISOString();
     validateTargetDomainBounds(args);
+    const scopeDecision = decideTargetScope({
+      primaryUrl: args.primaryUrl,
+      allowedAssets: args.allowedAssets,
+      deniedAssets: args.deniedAssets,
+      validationLevel: args.validationLevel,
+      rateLimit: args.rateLimit,
+    });
+
+    if (scopeDecision.status === "rejected") {
+      const runId = crypto.randomUUID();
+      const eventId = crypto.randomUUID();
+      const details = buildRejectedAuditDetails({
+        reason: scopeDecision.reason,
+        primaryUrl: args.primaryUrl,
+        validationLevel: args.validationLevel,
+        allowedAssetCount: args.allowedAssets?.length ?? 0,
+        deniedAssetCount: args.deniedAssets?.length ?? 0,
+      });
+
+      await appendAuditEvent(ctx, {
+        targetId: args.targetId,
+        eventType: "target-rejected",
+        actor,
+        eventId,
+        timestamp: nowISO,
+        runId,
+        details,
+      });
+
+      return {
+        decision: "rejected" as const,
+        targetId: args.targetId,
+        name: args.name,
+        riskTier: "medium" as const,
+        classification: args.classification,
+        runId,
+        status: "rejected" as const,
+        currentPhase: "intake" as const,
+        reason: scopeDecision.reason,
+        authorizationScope: null,
+        workflowRun: {
+          runId,
+          targetId: args.targetId,
+          status: "rejected" as const,
+          startedAt: nowISO,
+          abortedAt: nowISO,
+          abortedReason: scopeDecision.reason,
+          currentPhase: "intake" as const,
+          phases: [
+            {
+              phase: "intake" as const,
+              enteredAt: nowISO,
+              exitedAt: nowISO,
+              rejectionReason: scopeDecision.reason,
+            },
+          ],
+        },
+        auditEvents: [
+          buildAuditDto({
+            eventId,
+            targetId: args.targetId,
+            eventType: "target-rejected",
+            actor,
+            timestamp: nowISO,
+            runId,
+            details,
+          }),
+        ],
+      };
+    }
 
     // -----------------------------------------------------------------------
     // 1. Duplicate check
@@ -297,7 +388,10 @@ export const createFull = mutation({
     // -----------------------------------------------------------------------
     // 2. Merge extras into metadata
     // -----------------------------------------------------------------------
-    const enrichedMetadata = buildEnrichedMetadata(args);
+    const enrichedMetadata = buildEnrichedMetadata({
+      metadata: args.metadata,
+      decisionMetadata: scopeDecision.metadata,
+    });
 
     // -----------------------------------------------------------------------
     // 3. Insert target
@@ -320,13 +414,24 @@ export const createFull = mutation({
     // -----------------------------------------------------------------------
     // 4. Insert authorization scope
     // -----------------------------------------------------------------------
-    const scopeType = mapValidationLevel(args.validationLevel);
-    await ctx.db.insert("authorizationScopes", {
-      authorizationId: crypto.randomUUID(),
+    const authorizationId = crypto.randomUUID();
+    const authorizationScope: AuthorizationScopeDto = {
+      authorizationId,
       targetId: args.targetId,
-      scopeType,
+      scopeType: scopeDecision.scopeType,
       grantedBy: actor,
       grantedAt: nowISO,
+      constraints: scopeDecision.constraints,
+      isExpired: false,
+    };
+
+    await ctx.db.insert("authorizationScopes", {
+      authorizationId,
+      targetId: args.targetId,
+      scopeType: scopeDecision.scopeType,
+      grantedBy: actor,
+      grantedAt: nowISO,
+      constraints: scopeDecision.constraints,
     });
 
     // -----------------------------------------------------------------------
@@ -359,34 +464,69 @@ export const createFull = mutation({
     // -----------------------------------------------------------------------
     // 7. Insert audit event
     // -----------------------------------------------------------------------
+    const createdEventId = crypto.randomUUID();
+    const grantedEventId = crypto.randomUUID();
+    const workflowEventId = crypto.randomUUID();
+    const createdDetails: AuditDetails = {
+      approver: actor,
+      autoApproved: true,
+      auditDecision: scopeDecision.auditDecision,
+      validationLevel: scopeDecision.validationLevel,
+      scopeType: scopeDecision.scopeType,
+      rateLimit: scopeDecision.rateLimit,
+    };
     await appendAuditEvent(ctx, {
       targetId: args.targetId,
       eventType: "target-created",
       actor,
+      eventId: createdEventId,
+      timestamp: nowISO,
       runId,
-      details: { approver: actor, autoApproved: true },
+      details: createdDetails,
     });
 
+    const grantedDetails: AuditDetails = {
+      gateType: "intake",
+      autoApproved: true,
+    };
     await appendAuditEvent(ctx, {
       targetId: args.targetId,
       eventType: "approval-granted",
       actor,
+      eventId: grantedEventId,
+      timestamp: nowISO,
       runId,
-      details: { gateType: "intake", autoApproved: true },
+      details: grantedDetails,
     });
 
+    const workflowDetails: AuditDetails = {
+      phase: "intake",
+      status: "pending",
+    };
     await appendAuditEvent(ctx, {
       targetId: args.targetId,
       eventType: "workflow-started",
       actor,
+      eventId: workflowEventId,
+      timestamp: nowISO,
       runId,
-      details: { phase: "intake", status: "pending" },
+      details: workflowDetails,
     });
+
+    const workflowRun: WorkflowRunDto = {
+      runId,
+      targetId: args.targetId,
+      status: "pending",
+      startedAt: nowISO,
+      currentPhase: "intake",
+      phases: [{ phase: "intake", enteredAt: nowISO }],
+    };
 
     // -----------------------------------------------------------------------
     // 8. Return DTO
     // -----------------------------------------------------------------------
     return {
+      decision: "accepted" as const,
       targetId: args.targetId,
       name: args.name,
       riskTier: "medium" as const,
@@ -394,6 +534,37 @@ export const createFull = mutation({
       runId,
       status: "pending" as const,
       currentPhase: "intake" as const,
+      authorizationScope,
+      workflowRun,
+      auditEvents: [
+        buildAuditDto({
+          eventId: createdEventId,
+          targetId: args.targetId,
+          eventType: "target-created",
+          actor,
+          timestamp: nowISO,
+          runId,
+          details: createdDetails,
+        }),
+        buildAuditDto({
+          eventId: grantedEventId,
+          targetId: args.targetId,
+          eventType: "approval-granted",
+          actor,
+          timestamp: nowISO,
+          runId,
+          details: grantedDetails,
+        }),
+        buildAuditDto({
+          eventId: workflowEventId,
+          targetId: args.targetId,
+          eventType: "workflow-started",
+          actor,
+          timestamp: nowISO,
+          runId,
+          details: workflowDetails,
+        }),
+      ],
     };
   },
 });
