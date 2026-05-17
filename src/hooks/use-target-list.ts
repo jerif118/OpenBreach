@@ -48,24 +48,7 @@ function getFixtureTargets(): TargetListItemDto[] {
 // ============================================================================
 
 export function useTargetList(): UseTargetListReturn {
-  const isConfigured = !!import.meta.env.VITE_CONVEX_URL;
-
-  // Use conditional hook call to avoid undefined union type issues
-  const result = isConfigured
-    ? useQuery(api.targetsPublic.list, {})
-    : undefined;
-
-  // Fixture fallback when Convex is not configured
-  if (!isConfigured) {
-    try {
-      const fixtures = getFixtureTargets();
-      return { targets: fixtures, isLoading: false, error: null };
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error(String(err ?? "Unknown error"));
-      return { targets: [], isLoading: false, error };
-    }
-  }
+  const result = useQuery(api.targetsPublic.list, {});
 
   if (result === undefined) {
     return { targets: [], isLoading: true, error: null };

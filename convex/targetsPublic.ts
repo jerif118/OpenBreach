@@ -127,7 +127,7 @@ export const list = query({
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
-    // Fixture fallback for demo mode
+    // Fixture fallback for demo mode (only when Convex is not configured in browser)
     if (!isConvexConfigured()) {
       try {
         const fixture = await loadFixture<unknown>("target-approved-public");

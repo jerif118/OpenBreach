@@ -62,14 +62,17 @@ export function useTargetCreate(): UseTargetCreateReturn {
 
   const createTarget = useCallback(
     async (args: CreateTargetArgs): Promise<TargetCreateResult> => {
+      console.log("🔥 useTargetCreate: starting mutation with args:", args);
       setIsPending(true);
       setError(null);
 
       try {
         const result = await mutate(args);
+        console.log("🔥 useTargetCreate: mutation succeeded:", result);
         setData(result);
         return result;
       } catch (err) {
+        console.error("🔥 useTargetCreate: mutation failed:", err);
         const normalizedError =
           err instanceof Error
             ? err

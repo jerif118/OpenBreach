@@ -121,6 +121,11 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
         : undefined;
 
       try {
+        console.log("🚀 Calling createTarget with:", {
+          name: validated.name,
+          primaryUrl: validated.primaryUrl,
+          classification: validated.classification,
+        });
         const result = await createTarget({
           targetId: validated.targetId,
           name: validated.name,
@@ -132,13 +137,19 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           rateLimit: validated.rateLimit,
           approverName: validated.approverName,
         });
+        console.log("✅ createTarget succeeded:", result);
 
         if (onSuccess) {
           onSuccess(result);
         }
-      } catch {
-        // Error is already captured in apiError from the hook
-        setGlobalError(apiError?.message ?? "Target creation failed. Please try again.");
+      } catch (err) {
+        console.error("❌ createTarget failed:", err);
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        if (errorMessage.includes("Connection refused") || errorMessage.includes("WebSocket")) {
+          setGlobalError("[ERROR] Cannot connect to Convex backend. Please ensure 'pnpm convex:dev' is running.");
+        } else {
+          setGlobalError(apiError?.message ?? "Target creation failed. Please try again.");
+        }
       }
     },
     [
