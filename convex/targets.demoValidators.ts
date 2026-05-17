@@ -193,7 +193,9 @@ const findingValidator = v.object({
   evidence: v.optional(v.string()),
   remediationHint: v.optional(v.string()),
   affectedAssets: v.optional(v.array(v.string())),
-  confidence: v.optional(v.union(v.literal("low"), v.literal("medium"), v.literal("high"))),
+  confidence: v.optional(
+    v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+  ),
   cweId: v.optional(v.string()),
   cvssScore: v.optional(v.number()),
   validationResultId: v.optional(v.string()),
@@ -204,7 +206,11 @@ const findingValidator = v.object({
 const reportValidator = v.object({
   artifactId: v.string(),
   targetId: v.string(),
-  variant: v.union(v.literal("technical"), v.literal("friendly"), v.literal("executive")),
+  variant: v.union(
+    v.literal("technical"),
+    v.literal("friendly"),
+    v.literal("executive"),
+  ),
   title: v.string(),
   generatedAt: v.string(),
   status: v.union(
@@ -214,7 +220,15 @@ const reportValidator = v.object({
     v.literal("failed"),
   ),
   findings: v.array(v.string()),
-  sections: v.optional(v.array(v.object({ title: v.string(), narrative: v.string(), bullets: v.array(v.string()) }))),
+  sections: v.optional(
+    v.array(
+      v.object({
+        title: v.string(),
+        narrative: v.string(),
+        bullets: v.array(v.string()),
+      }),
+    ),
+  ),
   pdf: v.optional(
     v.object({
       storagePath: v.string(),
@@ -225,7 +239,11 @@ const reportValidator = v.object({
     }),
   ),
   generatedBy: v.optional(
-    v.union(v.literal("deterministic-fallback"), v.literal("ai-provider"), v.literal("template-engine")),
+    v.union(
+      v.literal("deterministic-fallback"),
+      v.literal("ai-provider"),
+      v.literal("template-engine"),
+    ),
   ),
   runId: v.optional(v.string()),
   metadata: v.optional(v.record(v.string(), v.any())),

@@ -2,10 +2,7 @@ import { v } from "convex/values";
 import { internalMutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
-import {
-  getDemoTargetDetail,
-  listDemoTargets,
-} from "./lib/targetDemoQueries";
+import { getDemoTargetDetail, listDemoTargets } from "./lib/targetDemoQueries";
 import {
   targetCardValidator,
   targetDetailValidator,
