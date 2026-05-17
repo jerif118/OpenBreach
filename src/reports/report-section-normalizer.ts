@@ -76,14 +76,20 @@ export function deriveAuthorizationSection(
     pickString(scope, ["timeWindow", "approvalWindow"]),
     pickString(scope, ["rateLimit", "rateLimits"]),
   ]);
+  let fallbackNarrative =
+    "No explicit authorization object was supplied. The report generator treated the input as evidence-only and did not add new tests or claims.";
+
+  if (authorized === false) {
+    fallbackNarrative =
+      "The input indicates the target was not approved for additional validation. The report stays descriptive and limited to the provided evidence.";
+  } else if (authorized === true) {
+    fallbackNarrative =
+      "The input indicates the target was approved within a bounded scope. The report remains limited to the supplied evidence and avoids exploit or payload guidance.";
+  }
 
   const narrative =
     pickString(scope, ["summary", "authorizationSummary"]) ??
-    (authorized === false
-      ? "The input indicates the target was not approved for additional validation. The report stays descriptive and limited to the provided evidence."
-      : authorized === true
-        ? "The input indicates the target was approved within a bounded scope. The report remains limited to the supplied evidence and avoids exploit or payload guidance."
-        : "No explicit authorization object was supplied. The report generator treated the input as evidence-only and did not add new tests or claims.");
+    fallbackNarrative;
 
   return {
     narrative: toSentence(narrative),
