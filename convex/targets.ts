@@ -3,19 +3,19 @@ import { internalMutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { requireOperatorOrAdmin, requireAnyRole, ROLES } from "./auth";
+import type { ApprovalGateDto } from "./types/approvals";
 import type {
-  ApprovalGateDto,
   DemoEvidenceSummaryDto,
   DemoTargetCardDto,
   DemoTargetDetailDto,
   DemoWorkflowRunSummaryDto,
-  FindingDto,
-  PassiveScanEvidenceDto,
-  ReportArtifactDto,
-  TargetProfileDto,
-  ValidationResultDto,
-  VulnerabilityHypothesisDto,
-} from "./types";
+} from "./types/demo";
+import type { FindingDto } from "./types/findings";
+import type { PassiveScanEvidenceDto } from "./types/passiveScan";
+import type { ReportArtifactDto } from "./types/reports";
+import type { TargetProfileDto } from "./types/targets";
+import type { ValidationResultDto } from "./types/validation";
+import type { VulnerabilityHypothesisDto } from "./types/hypotheses";
 
 const DEFAULT_LIST_LIMIT = 50;
 const MAX_LIST_LIMIT = 100;

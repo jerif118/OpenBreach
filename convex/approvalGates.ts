@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin, requireApprover, requireAdmin } from "./auth";
-import type { ApprovalGateDto } from "./types";
+import type { ApprovalGateDto } from "./types/approvals";
 import { validateApprovalGateTransition } from "./lib/stateMachine";
 import { appendAuditEvent } from "./lib/audit";
 
