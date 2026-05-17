@@ -10,12 +10,24 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TargetsIndexRouteImport } from './routes/targets/index'
+import { Route as TargetsNewRouteImport } from './routes/targets/new'
 import { Route as ReportsFileNameRouteImport } from './routes/reports/$fileName'
 import { Route as MunicipalitiesIdRouteImport } from './routes/municipalities.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TargetsIndexRoute = TargetsIndexRouteImport.update({
+  id: '/targets/',
+  path: '/targets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TargetsNewRoute = TargetsNewRouteImport.update({
+  id: '/targets/new',
+  path: '/targets/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsFileNameRoute = ReportsFileNameRouteImport.update({
@@ -33,30 +45,54 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/municipalities/$id': typeof MunicipalitiesIdRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/targets/new': typeof TargetsNewRoute
+  '/targets/': typeof TargetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/municipalities/$id': typeof MunicipalitiesIdRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/targets/new': typeof TargetsNewRoute
+  '/targets': typeof TargetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/municipalities/$id': typeof MunicipalitiesIdRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/targets/new': typeof TargetsNewRoute
+  '/targets/': typeof TargetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/municipalities/$id' | '/reports/$fileName'
+  fullPaths:
+    | '/'
+    | '/municipalities/$id'
+    | '/reports/$fileName'
+    | '/targets/new'
+    | '/targets/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/municipalities/$id' | '/reports/$fileName'
-  id: '__root__' | '/' | '/municipalities/$id' | '/reports/$fileName'
+  to:
+    | '/'
+    | '/municipalities/$id'
+    | '/reports/$fileName'
+    | '/targets/new'
+    | '/targets'
+  id:
+    | '__root__'
+    | '/'
+    | '/municipalities/$id'
+    | '/reports/$fileName'
+    | '/targets/new'
+    | '/targets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   MunicipalitiesIdRoute: typeof MunicipalitiesIdRoute
   ReportsFileNameRoute: typeof ReportsFileNameRoute
+  TargetsNewRoute: typeof TargetsNewRoute
+  TargetsIndexRoute: typeof TargetsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +102,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/targets/': {
+      id: '/targets/'
+      path: '/targets'
+      fullPath: '/targets/'
+      preLoaderRoute: typeof TargetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/targets/new': {
+      id: '/targets/new'
+      path: '/targets/new'
+      fullPath: '/targets/new'
+      preLoaderRoute: typeof TargetsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports/$fileName': {
@@ -89,6 +139,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   MunicipalitiesIdRoute: MunicipalitiesIdRoute,
   ReportsFileNameRoute: ReportsFileNameRoute,
+  TargetsNewRoute: TargetsNewRoute,
+  TargetsIndexRoute: TargetsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

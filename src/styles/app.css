@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+/* ============================================================================
+   Terminal animations
+   ============================================================================ */
+
+@keyframes terminal-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.08),
+      0 0 24px rgba(34, 211, 238, 0.04);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.14),
+      0 0 32px rgba(34, 211, 238, 0.08);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-terminal-glow {
+  animation: terminal-glow 3s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}

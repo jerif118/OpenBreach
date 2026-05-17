@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { z } from "zod";
 import municipalityFixture from "../data/municipalities/sample-municipality.json" with { type: "json" };
-import reportFixture from "../data/reports/sample-report.json" with { type: "json" };
+import reportGenerationFixture from "../data/reports/latest.report-generation.json" with { type: "json" };
 import scanFixture from "../data/scans/sample-scan.json" with { type: "json" };
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
 import rawScanEvidenceFixture from "../data/scans/sample-raw-scan-evidence.json" with { type: "json" };
@@ -15,6 +15,7 @@ import {
   passiveScanEvidenceSchema,
   rawScanEvidenceSchema,
   reportArtifactSchema,
+  reportGenerationArtifactSchema,
   reportGenerationStatusSchema,
   reportArtifactsSchema,
   reportMetadataSchema,
@@ -35,11 +36,42 @@ import {
 // Legacy fixture pipeline (hard-coded imports)
 // ============================================================
 
+import {
+  type GenerateRemediationReportResult,
+} from "../src/shared/contracts.ts";
+
+type GenerateRemediationReportBatchRecord = {
+  result: { status: string };
+};
+
+type CompletedReportRecord = GenerateRemediationReportBatchRecord & {
+  result: Extract<GenerateRemediationReportResult, { status: "completed" }>;
+};
+
+function isCompletedReportRecord(
+  record: GenerateRemediationReportBatchRecord,
+): record is CompletedReportRecord {
+  return record.result.status === "completed";
+}
+
 municipalitySchema.parse(municipalityFixture);
 scanResultSchema.parse(scanFixture);
 scanResultSchema.array().parse(enrichedScanFixture);
 rawScanEvidenceSchema.parse(rawScanEvidenceFixture);
-const report = remediationReportSchema.parse(reportFixture);
+const reportArtifact = reportGenerationArtifactSchema.parse(
+  reportGenerationFixture,
+);
+const firstCompletedReport = reportArtifact.batch.results.find(
+  isCompletedReportRecord,
+);
+
+if (!firstCompletedReport) {
+  throw new Error("Report generation fixture must include a completed report.");
+}
+
+const report = remediationReportSchema.parse(
+  firstCompletedReport.result.report,
+);
 
 reportGenerationStatusSchema.parse("completed");
 
