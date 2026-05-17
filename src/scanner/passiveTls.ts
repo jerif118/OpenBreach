@@ -5,6 +5,8 @@ export async function getTlsCertificate(
   url: URL,
   timeoutMs: number,
 ): Promise<TlsEvidence> {
+  assertFiniteNonnegativeTimeout(timeoutMs);
+
   return new Promise((resolve, reject) => {
     const socket = connect({
       host: url.hostname,
@@ -34,22 +36,29 @@ export async function getTlsCertificate(
       socket.destroy();
       reject(new Error("TLS certificate lookup timed out"));
     });
-    socket.once("error", reject);
+    socket.once("error", (error) => {
+      socket.destroy();
+      reject(error);
+    });
   });
 }
 
-function parseCertificateDate(value: string | undefined): string | undefined {
-  if (!value) {
+function assertFiniteNonnegativeTimeout(timeoutMs: number): void {
+  if (!Number.isFinite(timeoutMs) || timeoutMs < 0) {
+    throw new RangeError("timeoutMs must be a finite nonnegative number");
+  }
+}
+
+function parseCertificateDate(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length === 0) {
     return undefined;
   }
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
-function formatIssuer(
-  issuer: Record<string, unknown> | undefined,
-): string | undefined {
-  if (!issuer) {
+function formatIssuer(issuer: unknown): string | undefined {
+  if (!isRecord(issuer)) {
     return undefined;
   }
   const commonName = issuer.CN;
@@ -61,4 +70,8 @@ function formatIssuer(
     (value): value is string => typeof value === "string" && value.length > 0,
   );
   return firstIssuerValue;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
