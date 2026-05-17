@@ -11,24 +11,8 @@ import {
   createTargetArgsValidator,
   targetListArgsValidator,
   updateTargetArgsValidator,
+  validateTargetDomainBounds,
 } from "./targets.validators";
-
-/*
- * Smoke-test read safety patterns are implemented in lib/targetDemoQueries.ts:
- * .query("targets").take(limit)
- * .query("passiveScanEvidence")
-        .withIndex("by_targetId"
- * .query("vulnerabilityHypotheses")
-        .withIndex("by_targetId"
- * .query("approvalGates")
-        .withIndex("by_targetId"
- * .query("validationResults")
-        .withIndex("by_targetId"
- * .query("findings")
-        .withIndex("by_targetId"
- * .query("reportArtifacts")
-        .withIndex("by_targetId"
- */
 
 export const listDemo = query({
   args: targetListArgsValidator,
@@ -50,6 +34,7 @@ export const create = internalMutation({
   args: createTargetArgsValidator,
   handler: async (ctx, args) => {
     await requireOperatorOrAdmin(ctx);
+    validateTargetDomainBounds(args);
 
     const existing = await ctx.db
       .query("targets")
@@ -84,6 +69,7 @@ export const update = internalMutation({
   args: updateTargetArgsValidator,
   handler: async (ctx, args) => {
     await requireOperatorOrAdmin(ctx);
+    validateTargetDomainBounds(args);
 
     const doc = await ctx.db
       .query("targets")

@@ -29,6 +29,7 @@ export function toTargetProfileDto(doc: Doc<"targets">): TargetProfileDto {
     population: doc.population ?? undefined,
     latitude: doc.latitude ?? undefined,
     longitude: doc.longitude ?? undefined,
+    metadata: doc.metadata ?? undefined,
   };
 }
 

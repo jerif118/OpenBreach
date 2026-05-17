@@ -52,3 +52,36 @@ export const updateTargetArgsValidator = {
   longitude: v.optional(v.number()),
   metadata: v.optional(v.record(v.string(), v.any())),
 };
+
+export function validateTargetDomainBounds(args: {
+  population?: number;
+  latitude?: number;
+  longitude?: number;
+}) {
+  if (
+    args.population !== undefined &&
+    (!Number.isFinite(args.population) ||
+      !Number.isInteger(args.population) ||
+      args.population < 0)
+  ) {
+    throw new Error("Target population must be a non-negative integer.");
+  }
+
+  if (
+    args.latitude !== undefined &&
+    (!Number.isFinite(args.latitude) ||
+      args.latitude < -90 ||
+      args.latitude > 90)
+  ) {
+    throw new Error("Target latitude must be between -90 and 90.");
+  }
+
+  if (
+    args.longitude !== undefined &&
+    (!Number.isFinite(args.longitude) ||
+      args.longitude < -180 ||
+      args.longitude > 180)
+  ) {
+    throw new Error("Target longitude must be between -180 and 180.");
+  }
+}
