@@ -36,6 +36,12 @@ export type ReportScanLike = {
   findings?: unknown[];
 };
 
+function getSourceObject(
+  input: GenerateRemediationReportInput,
+): LooseRecord | null {
+  return asObject(input.sourceData);
+}
+
 function toLooseScanLikeObject(
   source: LooseRecord,
 ): ReportScanLike {
@@ -59,7 +65,7 @@ export function getScanLikeObject(
     return input.scan;
   }
 
-  const source = asObject(input.sourceData);
+  const source = getSourceObject(input);
   const scanCandidate = asObject(source?.scan);
 
   if (!scanCandidate) {
@@ -73,12 +79,16 @@ export function getScanLikeObject(
     : toLooseScanLikeObject(scanCandidate);
 }
 
+function getTargetObject(source: LooseRecord | null): LooseRecord | null {
+  return pickObject(source, ["target", "subject", "targetProfile"]);
+}
+
 export function deriveSubject(
   input: GenerateRemediationReportInput,
 ): NormalizedSubject {
-  const source = asObject(input.sourceData);
+  const source = getSourceObject(input);
   const scan = getScanLikeObject(input);
-  const target = pickObject(source, ["target", "subject", "targetProfile"]);
+  const target = getTargetObject(source);
 
   const id =
     input.municipality?.id ??
@@ -120,13 +130,11 @@ export function deriveSubject(
   } satisfies NormalizedSubject;
 }
 
-export function deriveRiskScore(
-  findings: ReportFinding[],
-  input: GenerateRemediationReportInput,
-): number {
-  const source = asObject(input.sourceData);
-  const scan = getScanLikeObject(input);
-  const directScore =
+function pickDirectRiskScore(
+  source: LooseRecord | null,
+  scan: ReportScanLike | null,
+): number | undefined {
+  return (
     scan?.riskScore ??
     scan?.score ??
     pickNumber(source, [
@@ -134,7 +142,17 @@ export function deriveRiskScore(
       "score",
       "priorityScore",
       "severityScore",
-    ]);
+    ])
+  );
+}
+
+export function deriveRiskScore(
+  findings: ReportFinding[],
+  input: GenerateRemediationReportInput,
+): number {
+  const source = getSourceObject(input);
+  const scan = getScanLikeObject(input);
+  const directScore = pickDirectRiskScore(source, scan);
 
   if (directScore !== undefined) {
     return Math.max(0, Math.min(100, directScore));
@@ -156,7 +174,7 @@ export function deriveRiskLevel(
   findings: ReportFinding[],
   input: GenerateRemediationReportInput,
 ): RiskLevel {
-  const source = asObject(input.sourceData);
+  const source = getSourceObject(input);
   const scan = getScanLikeObject(input);
 
   return normalizeRiskLevel(
