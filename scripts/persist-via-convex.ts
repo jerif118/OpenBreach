@@ -33,31 +33,8 @@ const batchSize = Math.max(
   Number(process.argv[3] ?? process.env.PERSIST_BATCH_SIZE ?? "10"),
 );
 
-const stdin = await readStdin();
-if (stdin.trim().length === 0) {
-  process.stderr.write("No payload received on stdin.\n");
-  process.exit(2);
-}
-
-let parsedPayload: unknown;
-try {
-  parsedPayload = JSON.parse(stdin);
-} catch (error) {
-  process.stderr.write(
-    `Failed to parse stdin as JSON: ${error instanceof Error ? error.message : String(error)}\n`,
-  );
-  process.exit(2);
-}
-
-let payload: { results: unknown[] };
-try {
-  payload = payloadSchema.parse(parsedPayload);
-} catch (error) {
-  process.stderr.write(
-    `Payload failed validation for ${functionName}: ${error instanceof Error ? error.message : String(error)}\n`,
-  );
-  process.exit(2);
-}
+const parsedPayload = await parseStdinJson();
+const payload = validatePayload(functionName, payloadSchema, parsedPayload);
 
 const total = payload.results.length;
 if (total === 0) {
@@ -117,6 +94,35 @@ function resolvePayloadSchema(functionName: string): PayloadSchema {
     exitWithInputError(`No payload schema configured for ${functionName}.`);
   }
   return payloadSchema;
+}
+
+async function parseStdinJson(): Promise<unknown> {
+  const stdin = await readStdin();
+  if (stdin.trim().length === 0) {
+    exitWithInputError("No payload received on stdin.");
+  }
+
+  try {
+    return JSON.parse(stdin);
+  } catch (error) {
+    exitWithInputError(
+      `Failed to parse stdin as JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+function validatePayload(
+  functionName: string,
+  payloadSchema: PayloadSchema,
+  parsedPayload: unknown,
+): { results: unknown[] } {
+  try {
+    return payloadSchema.parse(parsedPayload);
+  } catch (error) {
+    exitWithInputError(
+      `Payload failed validation for ${functionName}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 async function readStdin(): Promise<string> {
