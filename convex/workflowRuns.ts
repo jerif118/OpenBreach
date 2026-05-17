@@ -281,11 +281,23 @@ function normalizeListLimit(limit: number | undefined) {
 }
 
 function workflowStatusAuditEvent(status: Doc<"workflowRuns">["status"]) {
+  if (status === "pending") {
+    return "workflow-pending" as const;
+  }
+  if (status === "running") {
+    return "workflow-running" as const;
+  }
+  if (status === "paused") {
+    return "workflow-paused" as const;
+  }
   if (status === "completed") {
     return "workflow-completed" as const;
   }
-  if (status === "halted" || status === "failed" || status === "rejected") {
+  if (status === "halted") {
     return "workflow-halted" as const;
   }
-  return "workflow-started" as const;
+  if (status === "rejected") {
+    return "workflow-rejected" as const;
+  }
+  return "workflow-failed" as const;
 }
