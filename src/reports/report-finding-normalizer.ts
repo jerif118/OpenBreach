@@ -20,6 +20,40 @@ import {
   normalizeSeverity,
 } from "./report-finding-classifiers.ts";
 
+const FINDING_TITLE_KEYS = ["title", "name", "summary", "finding", "issue"];
+const FINDING_DESCRIPTION_KEYS = [
+  "description",
+  "details",
+  "context",
+  "summary",
+];
+const FINDING_EVIDENCE_KEYS = [
+  "evidenceSummary",
+  "evidence",
+  "proof",
+  "signal",
+  "observation",
+];
+const FINDING_REMEDIATION_KEYS = [
+  "remediationHint",
+  "remediation",
+  "recommendation",
+  "nextAction",
+  "action",
+];
+const FINDING_ID_KEYS = ["id", "slug", "key", "externalId"];
+const AFFECTED_ASSET_KEYS = [
+  "asset",
+  "target",
+  "url",
+  "endpoint",
+  "host",
+  "path",
+  "resource",
+];
+const AFFECTED_ASSET_ARRAY_KEYS = ["affectedAssets", "assets", "targets"];
+const AFFECTED_ASSET_ENTRY_KEYS = ["name", "url", "path"];
+
 function buildVerificationSteps(
   title: string,
   affectedAssets: string[],
@@ -59,53 +93,33 @@ function normalizeFinding(
   if (!source) return null;
 
   const title =
-    pickString(source, ["title", "name", "summary", "finding", "issue"]) ??
+    pickString(source, FINDING_TITLE_KEYS) ??
     `Observed finding ${index + 1}`;
   const description =
-    pickString(source, ["description", "details", "context", "summary"]) ??
+    pickString(source, FINDING_DESCRIPTION_KEYS) ??
     `Structured input indicates ${title.toLowerCase()} requires review.`;
   const evidenceSummary =
-    pickString(source, [
-      "evidenceSummary",
-      "evidence",
-      "proof",
-      "signal",
-      "observation",
-    ]) ??
+    pickString(source, FINDING_EVIDENCE_KEYS) ??
     "The normalized input included a reportable signal, but the original evidence summary was not explicit.";
   const remediationHint =
-    pickString(source, [
-      "remediationHint",
-      "remediation",
-      "recommendation",
-      "nextAction",
-      "action",
-    ]) ??
+    pickString(source, FINDING_REMEDIATION_KEYS) ??
     `Review ${title.toLowerCase()} with the responsible team and apply the standard mitigation.`;
   const severity = normalizeSeverity(
     source.severity ?? source.priority ?? source.riskLevel ?? source.score,
   );
   const confidence = normalizeConfidence(source.confidence, severity);
   const affectedAssets = uniqueStrings([
-    pickString(source, [
-      "asset",
-      "target",
-      "url",
-      "endpoint",
-      "host",
-      "path",
-      "resource",
-    ]),
-    ...pickArray(source, ["affectedAssets", "assets", "targets"]).map((entry) =>
+    pickString(source, AFFECTED_ASSET_KEYS),
+    ...pickArray(source, AFFECTED_ASSET_ARRAY_KEYS).map((entry) =>
       typeof entry === "string"
         ? entry
-        : pickString(asObject(entry), ["name", "url", "path"]),
+        : pickString(asObject(entry), AFFECTED_ASSET_ENTRY_KEYS),
     ),
   ]);
 
   return reportFindingSchema.parse({
     id:
-      pickString(source, ["id", "slug", "key", "externalId"]) ??
+      pickString(source, FINDING_ID_KEYS) ??
       `finding-${index + 1}-${slugify(title)}`,
     category: normalizeCategory(
       source.category,
