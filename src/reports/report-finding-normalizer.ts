@@ -10,6 +10,7 @@ import {
   severityScore,
   slugify,
   toSentence,
+  type LooseRecord,
   uniqueStrings,
 } from "./report-normalizer-utils.ts";
 import { getScanLikeObject } from "./report-subject-risk.ts";
@@ -53,6 +54,25 @@ const AFFECTED_ASSET_KEYS = [
 ];
 const AFFECTED_ASSET_ARRAY_KEYS = ["affectedAssets", "assets", "targets"];
 const AFFECTED_ASSET_ENTRY_KEYS = ["name", "url", "path"];
+
+type NormalizedFindingInput = Pick<
+  ReportFinding,
+  | "id"
+  | "category"
+  | "severity"
+  | "title"
+  | "description"
+  | "evidence"
+  | "evidenceSummary"
+  | "remediationHint"
+  | "remediationSteps"
+  | "verificationSteps"
+  | "status"
+  | "confidence"
+  | "affectedAssets"
+> & {
+  raw: LooseRecord;
+};
 
 function buildVerificationSteps(
   title: string,
@@ -117,7 +137,7 @@ function normalizeFinding(
     ),
   ]);
 
-  return reportFindingSchema.parse({
+  const normalizedFinding: NormalizedFindingInput = {
     id:
       pickString(source, FINDING_ID_KEYS) ??
       `finding-${index + 1}-${slugify(title)}`,
@@ -137,7 +157,9 @@ function normalizeFinding(
     confidence,
     affectedAssets,
     raw: source,
-  });
+  };
+
+  return reportFindingSchema.parse(normalizedFinding);
 }
 
 export function collectFindingCandidates(
