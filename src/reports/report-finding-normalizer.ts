@@ -74,6 +74,46 @@ type NormalizedFindingInput = Pick<
   raw: LooseRecord;
 };
 
+type FindingTextFields = {
+  title: string;
+  description: string;
+  evidenceSummary: string;
+  remediationHint: string;
+};
+
+function normalizeFindingTextFields(
+  source: LooseRecord,
+  index: number,
+): FindingTextFields {
+  const title =
+    pickString(source, FINDING_TITLE_KEYS) ??
+    `Observed finding ${index + 1}`;
+
+  return {
+    title,
+    description:
+      pickString(source, FINDING_DESCRIPTION_KEYS) ??
+      `Structured input indicates ${title.toLowerCase()} requires review.`,
+    evidenceSummary:
+      pickString(source, FINDING_EVIDENCE_KEYS) ??
+      "The normalized input included a reportable signal, but the original evidence summary was not explicit.",
+    remediationHint:
+      pickString(source, FINDING_REMEDIATION_KEYS) ??
+      `Review ${title.toLowerCase()} with the responsible team and apply the standard mitigation.`,
+  };
+}
+
+function normalizeAffectedAssets(source: LooseRecord): string[] {
+  return uniqueStrings([
+    pickString(source, AFFECTED_ASSET_KEYS),
+    ...pickArray(source, AFFECTED_ASSET_ARRAY_KEYS).map((entry) =>
+      typeof entry === "string"
+        ? entry
+        : pickString(asObject(entry), AFFECTED_ASSET_ENTRY_KEYS),
+    ),
+  ]);
+}
+
 function buildVerificationSteps(
   title: string,
   affectedAssets: string[],
@@ -104,40 +144,19 @@ function buildRemediationSteps(
   ]);
 }
 
-function normalizeFinding(
-  candidate: unknown,
+function buildNormalizedFindingInput(
+  source: LooseRecord,
   index: number,
-): ReportFinding | null {
-  const source = asObject(candidate);
-
-  if (!source) return null;
-
-  const title =
-    pickString(source, FINDING_TITLE_KEYS) ??
-    `Observed finding ${index + 1}`;
-  const description =
-    pickString(source, FINDING_DESCRIPTION_KEYS) ??
-    `Structured input indicates ${title.toLowerCase()} requires review.`;
-  const evidenceSummary =
-    pickString(source, FINDING_EVIDENCE_KEYS) ??
-    "The normalized input included a reportable signal, but the original evidence summary was not explicit.";
-  const remediationHint =
-    pickString(source, FINDING_REMEDIATION_KEYS) ??
-    `Review ${title.toLowerCase()} with the responsible team and apply the standard mitigation.`;
+): NormalizedFindingInput {
+  const { title, description, evidenceSummary, remediationHint } =
+    normalizeFindingTextFields(source, index);
   const severity = normalizeSeverity(
     source.severity ?? source.priority ?? source.riskLevel ?? source.score,
   );
   const confidence = normalizeConfidence(source.confidence, severity);
-  const affectedAssets = uniqueStrings([
-    pickString(source, AFFECTED_ASSET_KEYS),
-    ...pickArray(source, AFFECTED_ASSET_ARRAY_KEYS).map((entry) =>
-      typeof entry === "string"
-        ? entry
-        : pickString(asObject(entry), AFFECTED_ASSET_ENTRY_KEYS),
-    ),
-  ]);
+  const affectedAssets = normalizeAffectedAssets(source);
 
-  const normalizedFinding: NormalizedFindingInput = {
+  return {
     id:
       pickString(source, FINDING_ID_KEYS) ??
       `finding-${index + 1}-${slugify(title)}`,
@@ -158,8 +177,17 @@ function normalizeFinding(
     affectedAssets,
     raw: source,
   };
+}
 
-  return reportFindingSchema.parse(normalizedFinding);
+function normalizeFinding(
+  candidate: unknown,
+  index: number,
+): ReportFinding | null {
+  const source = asObject(candidate);
+
+  if (!source) return null;
+
+  return reportFindingSchema.parse(buildNormalizedFindingInput(source, index));
 }
 
 export function collectFindingCandidates(
