@@ -18,10 +18,7 @@
     {
       "title": "Methodology",
       "narrative": "Validation was conducted using approved passive and semi-active techniques only.",
-      "bullets": [
-        "TLS version negotiation test",
-        "Certificate validity check"
-      ]
+      "bullets": ["TLS version negotiation test", "Certificate validity check"]
     },
     {
       "title": "Findings Detail",

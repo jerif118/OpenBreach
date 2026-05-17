@@ -5,10 +5,7 @@
   "generatedAt": "2024-01-15T12:00:00Z",
   "title": "Remediation Report for Merida",
   "summary": "This report summarizes the security findings for Merida.",
-  "priorityActions": [
-    "Enable HSTS header",
-    "Update TLS configuration"
-  ],
+  "priorityActions": ["Enable HSTS header", "Update TLS configuration"],
   "findings": [
     {
       "id": "finding-header-missing-hsts",
