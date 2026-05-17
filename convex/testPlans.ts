@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin, requireApprover } from "./auth";
-import type { TestPlanDto } from "./types";
+import type { TestPlanDto } from "./types/testPlans";
 import { validateTestPlanTransition } from "./lib/stateMachine";
 
 const MAX_LIST_LIMIT = 100;

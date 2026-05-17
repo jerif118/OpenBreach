@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin, requireAdmin } from "./auth";
-import type { AuthorizationScopeDto } from "./types";
+import type { AuthorizationScopeDto } from "./types/authorization";
 
 const MAX_LIST_LIMIT = 100;
 

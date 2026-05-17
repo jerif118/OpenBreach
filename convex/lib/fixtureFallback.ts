@@ -9,18 +9,16 @@
  * use the VITE_CONVEX_URL check pattern and import fixtures directly.
  */
 
-import type {
-  TargetProfileDto,
-  PassiveScanEvidenceDto,
-  TechnologyFingerprintDto,
-  VulnerabilityHypothesisDto,
-  TestPlanDto,
-  ApprovalGateDto,
-  ValidationResultDto,
-  FindingDto,
-  AuditEventDto,
-  ReportArtifactDto,
-} from "../types";
+import type { TargetProfileDto } from "../types/targets";
+import type { PassiveScanEvidenceDto } from "../types/passiveScan";
+import type { TechnologyFingerprintDto } from "../types/technology";
+import type { VulnerabilityHypothesisDto } from "../types/hypotheses";
+import type { TestPlanDto } from "../types/testPlans";
+import type { ApprovalGateDto } from "../types/approvals";
+import type { ValidationResultDto } from "../types/validation";
+import type { FindingDto } from "../types/findings";
+import type { AuditEventDto } from "../types/audit";
+import type { ReportArtifactDto } from "../types/reports";
 
 // ============================================================================
 // Environment detection

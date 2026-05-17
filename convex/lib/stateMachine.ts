@@ -1,10 +1,7 @@
-import type {
-  WorkflowRunStatus,
-  ApprovalGateStatus,
-  VulnerabilityHypothesisStatus,
-  TestPlanStatus,
-  ValidTransitionMap,
-} from "../types";
+import type { WorkflowRunStatus, ValidTransitionMap } from "../types/workflow";
+import type { ApprovalGateStatus } from "../types/approvals";
+import type { VulnerabilityHypothesisStatus } from "../types/hypotheses";
+import type { TestPlanStatus } from "../types/testPlans";
 
 // ============================================================================
 // WorkflowRun State Machine

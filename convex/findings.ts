@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
-import type { FindingDto } from "./types";
+import type { FindingDto } from "./types/findings";
 import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;

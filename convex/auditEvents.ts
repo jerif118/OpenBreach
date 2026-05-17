@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import type { AuditEventDto } from "./types";
+import type { AuditEventDto } from "./types/audit";
 import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
