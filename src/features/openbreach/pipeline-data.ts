@@ -158,9 +158,7 @@ const APPROVED_WORKFLOW_RUN: WorkflowRunDto = {
   durationMs: 7_200_000,
 };
 
-function getObjectValue(
-  value: unknown,
-): Record<string, unknown> | undefined {
+function getObjectValue(value: unknown): Record<string, unknown> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
   }
@@ -190,9 +188,7 @@ function normalizeValidationLevel(value: unknown): ValidationLevel {
   return "passive";
 }
 
-function getRiskWeight(
-  riskTier: PipelineTargetRecord["riskTier"],
-): number {
+function getRiskWeight(riskTier: PipelineTargetRecord["riskTier"]): number {
   switch (riskTier) {
     case "critical":
       return 4;
@@ -400,18 +396,19 @@ function buildSessionRecord(target: StoredDemoTarget): PipelineTargetRecord {
     evidence: null,
     hypothesis: null,
     testPlan: null,
-    approvalGate: approvalStatus === "approved"
-      ? {
-          gateId: `${target.runId}-intake`,
-          targetId: target.targetId,
-          gateType: "intake",
-          status: "approved",
-          requestedAt: target.createdAt,
-          requestedBy: target.approverName ?? "operator",
-          approvedAt: target.createdAt,
-          approvedBy: target.approverName ?? "operator",
-        }
-      : null,
+    approvalGate:
+      approvalStatus === "approved"
+        ? {
+            gateId: `${target.runId}-intake`,
+            targetId: target.targetId,
+            gateType: "intake",
+            status: "approved",
+            requestedAt: target.createdAt,
+            requestedBy: target.approverName ?? "operator",
+            approvedAt: target.createdAt,
+            approvedBy: target.approverName ?? "operator",
+          }
+        : null,
     validation: null,
     findings: [],
     reportArtifact: null,
@@ -554,12 +551,15 @@ export function buildPipelineRecords(options: {
   storedTargets?: StoredDemoTarget[];
 }): PipelineTargetRecord[] {
   if (options.source === "fixture") {
-    return [...getFixturePipelineRecords(), ...(options.storedTargets ?? []).map(buildSessionRecord)].sort(
-      comparePipelineTargets,
-    );
+    return [
+      ...getFixturePipelineRecords(),
+      ...(options.storedTargets ?? []).map(buildSessionRecord),
+    ].sort(comparePipelineTargets);
   }
 
-  return (options.targets ?? []).map(buildConvexRecord).sort(comparePipelineTargets);
+  return (options.targets ?? [])
+    .map(buildConvexRecord)
+    .sort(comparePipelineTargets);
 }
 
 function comparePipelineTargets(
@@ -654,9 +654,7 @@ export function formatDurationMs(ms: number | undefined): string {
     .join(":");
 }
 
-export function buildPipelineAlerts(
-  targets: PipelineTargetRecord[],
-): {
+export function buildPipelineAlerts(targets: PipelineTargetRecord[]): {
   id: string;
   title: string;
   body: string;
