@@ -195,13 +195,26 @@ All fixes must be verified through:
 async function main() {
   console.log("Generating friendly report PDF...");
   const friendlyPdf = await buildStyledPdfDocument(sampleMarkdown, "friendly");
-  await writeFile("/Users/jerifcornejo/Downloads/friendly-report-preview.pdf", friendlyPdf);
-  console.log("Saved to /Users/jerifcornejo/Downloads/friendly-report-preview.pdf");
+  await writeFile(
+    "/Users/jerifcornejo/Downloads/friendly-report-preview.pdf",
+    friendlyPdf,
+  );
+  console.log(
+    "Saved to /Users/jerifcornejo/Downloads/friendly-report-preview.pdf",
+  );
 
   console.log("Generating technical report PDF...");
-  const technicalPdf = await buildStyledPdfDocument(technicalMarkdown, "technical");
-  await writeFile("/Users/jerifcornejo/Downloads/technical-report-preview.pdf", technicalPdf);
-  console.log("Saved to /Users/jerifcornejo/Downloads/technical-report-preview.pdf");
+  const technicalPdf = await buildStyledPdfDocument(
+    technicalMarkdown,
+    "technical",
+  );
+  await writeFile(
+    "/Users/jerifcornejo/Downloads/technical-report-preview.pdf",
+    technicalPdf,
+  );
+  console.log(
+    "Saved to /Users/jerifcornejo/Downloads/technical-report-preview.pdf",
+  );
 }
 
 main().catch(console.error);
