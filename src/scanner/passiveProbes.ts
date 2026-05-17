@@ -71,14 +71,16 @@ export async function collectAdminExposure(
   const adminExposure: RawScanEvidence["adminExposure"] = [];
 
   for (const path of adminExposurePaths) {
-    const checkUrl = new URL(path, baseUrl.origin);
     try {
+      assertAdminExposurePath(path);
+      const checkUrl = new URL(path, baseUrl.origin);
       const headResponse = await withRetries(
         () => fetchWithTimeout(fetchImpl, checkUrl, controls.timeoutMs, "HEAD"),
         controls,
         options.delay ?? delay,
       );
-      const response = shouldFallbackToGet(headResponse)
+      const fallbackToGet = shouldFallbackToGet(headResponse);
+      const response = fallbackToGet
         ? await withRetries(
             () =>
               fetchWithTimeout(fetchImpl, checkUrl, controls.timeoutMs, "GET"),
@@ -90,7 +92,7 @@ export async function collectAdminExposure(
       adminExposure.push(
         toAdminExposure(
           path,
-          shouldFallbackToGet(headResponse) ? "GET" : "HEAD",
+          fallbackToGet ? "GET" : "HEAD",
           response,
           checkUrl,
         ),
@@ -139,6 +141,7 @@ async function fetchWithTimeout(
   timeoutMs: number,
   method: SafeRequestMethod,
 ): Promise<Response> {
+  assertFiniteNonnegativeNumber("timeoutMs", timeoutMs);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -181,6 +184,8 @@ async function withRetries<T>(
   controls: Required<ScannerControls>,
   delayImpl: (milliseconds: number) => Promise<void>,
 ): Promise<T> {
+  assertNonnegativeInteger("retries", controls.retries);
+  assertFiniteNonnegativeNumber("delayMs", controls.delayMs);
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= controls.retries; attempt += 1) {
@@ -194,7 +199,32 @@ async function withRetries<T>(
     }
   }
 
-  throw lastError;
+  throw toThrowableError(lastError);
+}
+
+function assertAdminExposurePath(path: string): void {
+  if (!path.startsWith("/") || path.startsWith("//")) {
+    throw new Error(`Admin exposure path must be root-relative: ${path}`);
+  }
+}
+
+function assertFiniteNonnegativeNumber(name: string, value: number): void {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new RangeError(`${name} must be a finite nonnegative number`);
+  }
+}
+
+function assertNonnegativeInteger(name: string, value: number): void {
+  assertFiniteNonnegativeNumber(name, value);
+  if (!Number.isInteger(value)) {
+    throw new RangeError(`${name} must be a nonnegative integer`);
+  }
+}
+
+function toThrowableError(error: unknown): Error {
+  return error instanceof Error
+    ? error
+    : new Error(error === undefined ? "Operation failed" : String(error));
 }
 
 function selectHeaders(headers: Headers): Record<string, string> {
@@ -217,7 +247,7 @@ async function delay(milliseconds: number): Promise<void> {
 export function toError(
   stage: RawScanEvidence["errors"][number]["stage"],
   error: unknown,
-) {
+): RawScanEvidence["errors"][number] {
   return {
     stage,
     message: error instanceof Error ? error.message : String(error),
