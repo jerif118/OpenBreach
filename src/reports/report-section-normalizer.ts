@@ -106,9 +106,7 @@ export function deriveMethodologySection(
     "steps",
     "workflow",
   ]).map((entry) =>
-    typeof entry === "string"
-      ? entry
-      : pickString(asObject(entry), ["title", "summary", "description"]),
+    pickEntryString(entry, ["title", "summary", "description"]),
   );
 
   const bullets = uniqueStrings([
