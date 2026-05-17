@@ -103,6 +103,37 @@ const _rejectedWorkflowRun: WorkflowRunDto = (
 
 const errors: string[] = [];
 
+const targetsSource = fs.readFileSync("convex/targets.ts", "utf-8");
+const targetDemoQueriesSource = fs.readFileSync(
+  "convex/lib/targetDemoQueries.ts",
+  "utf-8",
+);
+const targetsDtoSource = fs.readFileSync("convex/targets.dto.ts", "utf-8");
+const targetValidatorsSource = fs.readFileSync(
+  "convex/targets.validators.ts",
+  "utf-8",
+);
+const geographyTypesSource = fs.readFileSync(
+  "convex/types/geography.ts",
+  "utf-8",
+);
+const workflowTypesSource = fs.readFileSync(
+  "convex/types/workflow.ts",
+  "utf-8",
+);
+const hypothesesTypesSource = fs.readFileSync(
+  "convex/types/hypotheses.ts",
+  "utf-8",
+);
+
+function stripComments(source: string) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
+}
+
+function expectSourceMatch(label: string, source: string, pattern: RegExp) {
+  expect(pattern.test(source), label);
+}
+
 function tryValidate(label: string, schema: unknown, data: unknown) {
   try {
     (schema as { parse: (v: unknown) => unknown }).parse(data);
@@ -276,56 +307,129 @@ for (const card of demoCards) {
   ]);
 }
 
-const targetsSource = fs.readFileSync("convex/targets.ts", "utf-8");
-if (/\.filter\s*\(/.test(targetsSource)) {
+const targetReadSources = stripComments(
+  `${targetsSource}\n${targetDemoQueriesSource}`,
+);
+const targetsRegistrationSource = stripComments(targetsSource);
+const targetDemoQueriesCode = stripComments(targetDemoQueriesSource);
+
+if (/\.filter\s*\(/.test(targetReadSources)) {
   errors.push("[FAIL] targets demo reads must not use Convex filter scans");
 }
-if (/\.collect\s*\(/.test(targetsSource)) {
+if (/\.collect\s*\(/.test(targetReadSources)) {
   errors.push("[FAIL] targets demo reads must not use unbounded collect reads");
+}
+if (targetsSource.includes("Smoke-test read safety patterns")) {
+  errors.push(
+    "[FAIL] targets demo read safety must be asserted against code, not comments in convex/targets.ts",
+  );
 }
 if (
   !/export const listDemo = query\(\{[\s\S]*returns: v\.array/.test(
-    targetsSource,
+    targetsRegistrationSource,
   )
 ) {
   errors.push("[FAIL] targets.listDemo must declare a return validator");
 }
 if (
   !/export const getDemo = query\(\{[\s\S]*returns: v\.union/.test(
-    targetsSource,
+    targetsRegistrationSource,
   )
 ) {
   errors.push("[FAIL] targets.getDemo must declare a return validator");
 }
 if (
   !/export const listDemo = query\(\{[\s\S]*args: targetListArgsValidator/.test(
-    targetsSource,
+    targetsRegistrationSource,
   )
 ) {
   errors.push("[FAIL] targets.listDemo must declare argument validators");
 }
 if (
   !/export const getDemo = query\(\{[\s\S]*args: \{ targetId: v\.string\(\) \}/.test(
-    targetsSource,
+    targetsRegistrationSource,
   )
 ) {
   errors.push("[FAIL] targets.getDemo must validate targetId arguments");
 }
 
+for (const [label, pattern] of [
+  [
+    "targets list query is bounded",
+    /\.query\("targets"\)[\s\S]*\.take\(limit\)/,
+  ],
+  [
+    "passive evidence detail query uses target index",
+    /\.query\("passiveScanEvidence"\)[\s\S]*\.withIndex\("by_targetId"[\s\S]*\.take\(DETAIL_SECTION_LIMIT\)/,
+  ],
+  [
+    "hypothesis detail query uses target index",
+    /\.query\("vulnerabilityHypotheses"\)[\s\S]*\.withIndex\("by_targetId"[\s\S]*\.take\(DETAIL_SECTION_LIMIT\)/,
+  ],
+  [
+    "approval detail query uses target index",
+    /\.query\("approvalGates"\)[\s\S]*\.withIndex\("by_targetId"[\s\S]*\.take\(DETAIL_SECTION_LIMIT\)/,
+  ],
+  [
+    "validation detail query uses target index",
+    /\.query\("validationResults"\)[\s\S]*\.withIndex\("by_targetId"[\s\S]*\.take\(DETAIL_SECTION_LIMIT\)/,
+  ],
+  [
+    "finding detail query uses target index",
+    /\.query\("findings"\)[\s\S]*\.withIndex\("by_targetId"[\s\S]*\.take\(DETAIL_SECTION_LIMIT\)/,
+  ],
+  [
+    "report detail query uses target index",
+    /\.query\("reportArtifacts"\)[\s\S]*\.withIndex\("by_targetId"[\s\S]*\.take\(DETAIL_SECTION_LIMIT\)/,
+  ],
+] as const) {
+  expectSourceMatch(
+    `targets demo read safety check missing code pattern: ${label}`,
+    targetDemoQueriesCode,
+    pattern,
+  );
+}
+
+expectSourceMatch(
+  "targets.listDemo must parallelize latest-run lookups",
+  targetDemoQueriesCode,
+  /Promise\.all\(\s*docs\.map/,
+);
+expectSourceMatch(
+  "validation finding counts must be queried by validationResultId instead of using the display-limited findings list",
+  targetDemoQueriesCode,
+  /by_validationResultId/,
+);
+if (!targetsDtoSource.includes("metadata: doc.metadata ?? undefined")) {
+  errors.push("[FAIL] target profile DTO mapper must preserve metadata");
+}
 for (const snippet of [
-  '.query("targets").take(limit)',
-  '.query("passiveScanEvidence")\n        .withIndex("by_targetId"',
-  '.query("vulnerabilityHypotheses")\n        .withIndex("by_targetId"',
-  '.query("approvalGates")\n        .withIndex("by_targetId"',
-  '.query("validationResults")\n        .withIndex("by_targetId"',
-  '.query("findings")\n        .withIndex("by_targetId"',
-  '.query("reportArtifacts")\n        .withIndex("by_targetId"',
+  "validateTargetDomainBounds",
+  "Number.isInteger(args.population)",
+  "args.population < 0",
+  "args.latitude < -90",
+  "args.latitude > 90",
+  "args.longitude < -180",
+  "args.longitude > 180",
 ]) {
-  if (!targetsSource.includes(snippet)) {
+  if (!targetValidatorsSource.includes(snippet)) {
     errors.push(
-      `[FAIL] targets demo read safety check missing source pattern: ${snippet}`,
+      `[FAIL] target domain bounds validation is missing: ${snippet}`,
     );
   }
+}
+if (/WorkflowPhaseName/.test(geographyTypesSource)) {
+  errors.push(
+    "[FAIL] WorkflowPhaseName belongs in workflow types, not geography types",
+  );
+}
+if (!/export type WorkflowPhaseName/.test(workflowTypesSource)) {
+  errors.push("[FAIL] workflow types must export WorkflowPhaseName");
+}
+if (!/status:\s*VulnerabilityHypothesisStatus/.test(hypothesesTypesSource)) {
+  errors.push(
+    "[FAIL] VulnerabilityHypothesisDto.status must reuse VulnerabilityHypothesisStatus",
+  );
 }
 
 // ============================================================================
