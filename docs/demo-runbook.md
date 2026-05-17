@@ -182,12 +182,15 @@ Run this only when a hosted URL exists. Otherwise mark hosted smoke as skipped a
 Use these commands for deterministic validation when live services are unavailable:
 
 ```bash
+pnpm pivot:validate
+pnpm pivot:smoke
 pnpm fixtures:validate
 pnpm scanner:validate
 pnpm risk:validate
 pnpm report:generate:validate
 pnpm dashboard:verify
 pnpm auth:writes:validate
+pnpm typecheck
 ```
 
 Useful fixture and report generation commands:
