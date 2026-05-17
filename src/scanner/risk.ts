@@ -2,6 +2,7 @@ import {
   scanResultSchema,
   type RawScanEvidence,
   type RiskLevel,
+  type ScanFinding,
   type ScanResult,
 } from "../shared/contracts.ts";
 import { generateFindings } from "./riskFindings.ts";
@@ -27,6 +28,31 @@ export const RISK_FINDING_WEIGHTS = {
   cmsDetected: 5,
   knownVulnerableCms: 35,
 } as const;
+
+const STATIC_FINDING_WEIGHTS = {
+  "finding-availability-unreachable": RISK_FINDING_WEIGHTS.unreachable,
+  "finding-tls-invalid": RISK_FINDING_WEIGHTS.invalidTls,
+  "finding-tls-expired": RISK_FINDING_WEIGHTS.expiredTls,
+  "finding-header-missing-hsts": RISK_FINDING_WEIGHTS.missingHsts,
+  "finding-header-missing-csp":
+    RISK_FINDING_WEIGHTS.missingContentSecurityPolicy,
+  "finding-header-missing-content-type-options":
+    RISK_FINDING_WEIGHTS.missingContentTypeOptions,
+  "finding-header-missing-frame-protection":
+    RISK_FINDING_WEIGHTS.missingFrameProtection,
+  "finding-admin-path-exposed": RISK_FINDING_WEIGHTS.exposedAdminPath,
+  "finding-cms-detected": RISK_FINDING_WEIGHTS.cmsDetected,
+} as const;
+
+type StaticWeightedFindingId = keyof typeof STATIC_FINDING_WEIGHTS;
+
+function isStaticWeightedFindingId(
+  id: ScanFinding["id"],
+): id is StaticWeightedFindingId {
+  return Object.hasOwn(STATIC_FINDING_WEIGHTS, id);
+}
+
+const KNOWN_VULNERABLE_FINDING_PREFIX = "finding-known-vulnerable-" as const;
 
 export function enrichScanEvidence(evidence: RawScanEvidence): ScanResult {
   const findings = generateFindings(evidence);
@@ -78,27 +104,13 @@ export function riskLevelForScore(score: number): RiskLevel {
   return "low";
 }
 
-function findingWeight(findingId: string): number {
-  if (findingId === "finding-availability-unreachable")
-    return RISK_FINDING_WEIGHTS.unreachable;
-  if (findingId === "finding-tls-invalid")
-    return RISK_FINDING_WEIGHTS.invalidTls;
-  if (findingId === "finding-tls-expired")
-    return RISK_FINDING_WEIGHTS.expiredTls;
-  if (findingId === "finding-header-missing-hsts")
-    return RISK_FINDING_WEIGHTS.missingHsts;
-  if (findingId === "finding-header-missing-csp")
-    return RISK_FINDING_WEIGHTS.missingContentSecurityPolicy;
-  if (findingId === "finding-header-missing-content-type-options")
-    return RISK_FINDING_WEIGHTS.missingContentTypeOptions;
-  if (findingId === "finding-header-missing-frame-protection")
-    return RISK_FINDING_WEIGHTS.missingFrameProtection;
-  if (findingId === "finding-admin-path-exposed")
-    return RISK_FINDING_WEIGHTS.exposedAdminPath;
-  if (findingId === "finding-cms-detected")
-    return RISK_FINDING_WEIGHTS.cmsDetected;
-  if (findingId.startsWith("finding-known-vulnerable-"))
+function findingWeight(findingId: ScanFinding["id"]): number {
+  if (isStaticWeightedFindingId(findingId)) {
+    return STATIC_FINDING_WEIGHTS[findingId];
+  }
+  if (findingId.startsWith(KNOWN_VULNERABLE_FINDING_PREFIX)) {
     return RISK_FINDING_WEIGHTS.knownVulnerableCms;
+  }
   return 0;
 }
 
