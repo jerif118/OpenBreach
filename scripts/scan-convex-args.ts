@@ -24,15 +24,10 @@ const records = selectMunicipalities(allRecords, idFilter);
 let results: RawScanEvidence[];
 
 if (environment.fromFixture) {
-  log(`Loading scan results from fixture file: ${environment.fixturePath}`);
-  const parsed = rawScanEvidenceSchema
-    .array()
-    .parse(JSON.parse(await readFile(environment.fixturePath, "utf8")));
-
-  results = filterFixtureResults(parsed, idFilter, records);
-
-  log(
-    `Loaded ${results.length} fixture scan result${results.length === 1 ? "" : "s"}.`,
+  results = await loadFixtureResults(
+    environment.fixturePath,
+    idFilter,
+    records,
   );
 } else {
   log(
@@ -113,6 +108,25 @@ function filterFixtureResults(
 
   const allowedIds = new Set(records.map((m) => m.id));
   return results.filter((r) => allowedIds.has(r.municipalityId));
+}
+
+async function loadFixtureResults(
+  fixturePath: string,
+  idFilter: readonly string[],
+  records: typeof allRecords,
+): Promise<RawScanEvidence[]> {
+  log(`Loading scan results from fixture file: ${fixturePath}`);
+  const parsed = rawScanEvidenceSchema
+    .array()
+    .parse(JSON.parse(await readFile(fixturePath, "utf8")));
+
+  const results = filterFixtureResults(parsed, idFilter, records);
+
+  log(
+    `Loaded ${results.length} fixture scan result${results.length === 1 ? "" : "s"}.`,
+  );
+
+  return results;
 }
 
 function describeOutcome(result: RawScanEvidence): string {
