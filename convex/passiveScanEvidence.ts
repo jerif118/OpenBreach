@@ -181,27 +181,18 @@ export const upsert = internalMutation({
       envelopeCollectedBy: args.envelopeCollectedBy,
     };
 
+    let id: Doc<"passiveScanEvidence">["_id"];
+    let action: "created" | "updated";
+
     if (existing) {
       await ctx.db.replace(existing._id, document);
-      await appendAuditEvent(ctx, {
-        targetId: args.targetId,
-        eventType: "evidence-recorded",
-        actor: actor.name ?? actor.tokenIdentifier,
-        runId: args.runId,
-        details: {
-          evidenceId: args.evidenceId,
-          source: args.source,
-          action: "updated",
-        },
-      });
-      return {
-        id: existing._id,
-        evidenceId: args.evidenceId,
-        action: "updated",
-      };
+      id = existing._id;
+      action = "updated";
+    } else {
+      id = await ctx.db.insert("passiveScanEvidence", document);
+      action = "created";
     }
 
-    const id = await ctx.db.insert("passiveScanEvidence", document);
     await appendAuditEvent(ctx, {
       targetId: args.targetId,
       eventType: "evidence-recorded",
@@ -210,10 +201,10 @@ export const upsert = internalMutation({
       details: {
         evidenceId: args.evidenceId,
         source: args.source,
-        action: "created",
+        action,
       },
     });
-    return { id, evidenceId: args.evidenceId, action: "created" };
+    return { id, evidenceId: args.evidenceId, action };
   },
 });
 
