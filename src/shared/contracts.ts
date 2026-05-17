@@ -1293,8 +1293,8 @@ export const reportArtifactSchema = z
     variant: z.enum(["technical", "friendly", "executive"]),
     title: nonEmptyStringSchema,
     generatedAt: isoDateTimeSchema,
-    status: z.enum(["pending", "completed", "failed"]),
-    findings: z.array(findingSchema).optional(),
+    status: z.enum(["pending", "generating", "completed", "failed"]),
+    findings: z.array(nonEmptyStringSchema).optional(),
     sections: z.array(reportSectionSchema).optional(),
     pdf: reportPdfReferenceSchema.optional(),
     generatedBy: z.enum([
