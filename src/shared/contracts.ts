@@ -1457,6 +1457,7 @@ export const targetListItemSchema = z.object({
 export type TargetListItem = z.infer<typeof targetListItemSchema>;
 
 export const targetIntakeInputSchema = z.object({
+  targetId: nonEmptyStringSchema.regex(/^[^\s]+$/, "no whitespace"),
   name: nonEmptyStringSchema,
   primaryUrl: urlHttpsSchema,
   classification: z.enum([
