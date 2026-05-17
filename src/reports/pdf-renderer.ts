@@ -44,14 +44,14 @@ export async function renderReportPdf({
   outputDirectory = DEFAULT_OUTPUT_DIRECTORY,
 }: RenderReportPdfInput): Promise<ReportPdfReference> {
   const markdown = await renderReportMarkdown({ municipalityName, report });
-  const pdf = buildStyledPdfDocument(markdown, report.variant);
+  const pdfBytes = await buildStyledPdfDocument(markdown, report.variant);
   const { fileName, storagePath } = createReportPdfFileTarget({
     report,
     outputDirectory,
   });
 
   await mkdir(dirname(storagePath), { recursive: true });
-  await writeFile(storagePath, pdf, "latin1");
+  await writeFile(storagePath, pdfBytes);
 
   const { size } = await stat(storagePath);
   return createReportPdfReference({
