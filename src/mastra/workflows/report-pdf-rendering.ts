@@ -44,9 +44,13 @@ function buildContextByMunicipalityId(
     const parsed =
       selectedMunicipalityReportContextSchema.safeParse(rawContext);
 
-    if (parsed.success) {
-      contextByMunicipalityId.set(parsed.data.municipality.id, parsed.data);
+    if (!parsed.success) {
+      throw new Error(
+        `Invalid selected report context: ${parsed.error.message}`,
+      );
     }
+
+    contextByMunicipalityId.set(parsed.data.municipality.id, parsed.data);
   }
 
   return contextByMunicipalityId;
@@ -56,7 +60,9 @@ export async function renderBatchPdfArtifacts({
   batch,
   contexts,
   outputDirectory,
-}: RenderBatchPdfArtifactsInput): Promise<GenerateRemediationReportBatchRecord[]> {
+}: RenderBatchPdfArtifactsInput): Promise<
+  GenerateRemediationReportBatchRecord[]
+> {
   const contextByMunicipalityId = buildContextByMunicipalityId(contexts);
   const results: GenerateRemediationReportBatchRecord[] = [];
 
@@ -69,8 +75,9 @@ export async function renderBatchPdfArtifacts({
     const context = contextByMunicipalityId.get(record.municipalityId);
 
     if (!context) {
-      results.push(record);
-      continue;
+      throw new Error(
+        `Missing selected report context for completed report ${record.municipalityId}.`,
+      );
     }
 
     const rendered = await renderReportArtifacts({
