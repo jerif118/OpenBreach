@@ -10,6 +10,17 @@ export type GeographyDto = {
   city: string;
 };
 
+export type WorkflowPhaseName =
+  | "intake"
+  | "passive-scan"
+  | "hypothesis"
+  | "test-planning"
+  | "approval"
+  | "execution"
+  | "validation"
+  | "reporting"
+  | "archived";
+
 // ============================================================================
 // Targets
 // ============================================================================
@@ -50,6 +61,41 @@ export type TargetListItemDto = {
   } | null;
 };
 
+export type DemoWorkflowRunSummaryDto = Pick<
+  WorkflowRunDto,
+  "runId" | "status" | "currentPhase"
+>;
+
+export type DemoTargetCardDto = TargetListItemDto & {
+  latestRun: DemoWorkflowRunSummaryDto | null;
+};
+
+export type DemoEvidenceSummaryDto = Pick<
+  PassiveScanEvidenceDto,
+  | "evidenceId"
+  | "source"
+  | "collectedAt"
+  | "requestedUrl"
+  | "reachable"
+  | "httpStatus"
+  | "cms"
+  | "adminExposure"
+  | "runId"
+> & {
+  errorCount: number;
+};
+
+export type DemoTargetDetailDto = {
+  target: TargetProfileDto;
+  latestRun: DemoWorkflowRunSummaryDto | null;
+  evidence: DemoEvidenceSummaryDto[];
+  hypotheses: VulnerabilityHypothesisDto[];
+  approvals: ApprovalGateDto[];
+  validationResults: ValidationResultDto[];
+  findings: FindingDto[];
+  reports: ReportArtifactDto[];
+};
+
 // ============================================================================
 // Authorization Scopes
 // ============================================================================
@@ -71,7 +117,7 @@ export type AuthorizationScopeDto = {
 // ============================================================================
 
 export type WorkflowPhaseDto = {
-  phase: string;
+  phase: WorkflowPhaseName;
   enteredAt: string;
   exitedAt?: string;
   rejectionReason?: string;
@@ -92,7 +138,7 @@ export type WorkflowRunDto = {
   completedAt?: string;
   abortedAt?: string;
   abortedReason?: string;
-  currentPhase?: string;
+  currentPhase?: WorkflowPhaseName;
   phases?: WorkflowPhaseDto[];
   durationMs?: number;
 };
