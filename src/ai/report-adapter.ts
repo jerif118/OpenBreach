@@ -25,6 +25,12 @@ export type ReportAiAdapter = {
 };
 
 type ReportAiAdapterProvider = "openrouter";
+type OpenRouterModel = Parameters<typeof createOpenRouterText>[0];
+type OpenRouterAdapter = ReturnType<typeof createOpenRouterText>;
+type ReportAiChatMessage = {
+  role: "user";
+  content: string;
+};
 
 const DEFAULT_ADAPTER_PROVIDER: ReportAiAdapterProvider = "openrouter";
 const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
@@ -35,7 +41,7 @@ const JSON_CONTRACT_SYSTEM_PROMPT =
 
 type ReportAiChatExecutorInput = {
   model: string;
-  messages: Array<{ role: "user"; content: string }>;
+  messages: ReportAiChatMessage[];
   provider: ReportAiAdapterProvider;
   providerKey: string;
   systemPrompts: string[];
@@ -44,6 +50,20 @@ type ReportAiChatExecutorInput = {
 type ReportAiChatExecutor = (
   input: ReportAiChatExecutorInput,
 ) => Promise<string>;
+
+type GenerateProviderReportOptions = {
+  chatExecutor: ReportAiChatExecutor;
+  input: GenerateRemediationReportInput;
+  model: string;
+  provider: ReportAiAdapterProvider;
+  providerKey: string;
+  variant: ReportAudience;
+};
+
+type GenerateProviderBackedVariantsOptions = Omit<
+  GenerateProviderReportOptions,
+  "variant"
+>;
 
 export type CreateReportAiAdapterOptions = {
   chat?: ReportAiChatExecutor;
@@ -68,6 +88,10 @@ function getConfiguredProvider(): ReportAiAdapterProvider {
 
 function getConfiguredModel(): string {
   return process.env.AI_PROVIDER_MODEL ?? DEFAULT_MODEL;
+}
+
+function toOpenRouterModel(model: string): OpenRouterModel {
+  return model as OpenRouterModel;
 }
 
 async function generateDeterministicReportVariants(
@@ -104,17 +128,9 @@ async function runTanStackChat({
   providerKey,
   systemPrompts,
 }: ReportAiChatExecutorInput): Promise<string> {
-  const adapters: Record<
-    ReportAiAdapterProvider,
-    () => ReturnType<typeof createOpenRouterText>
-  > = {
-    openrouter: () => {
-      const openRouterModel = model as Parameters<
-        typeof createOpenRouterText
-      >[0];
-
-      return createOpenRouterText(openRouterModel, providerKey);
-    },
+  const adapters: Record<ReportAiAdapterProvider, () => OpenRouterAdapter> = {
+    openrouter: () =>
+      createOpenRouterText(toOpenRouterModel(model), providerKey),
   };
 
   return await chat({
@@ -132,14 +148,7 @@ async function generateProviderReport({
   provider,
   providerKey,
   variant,
-}: {
-  chatExecutor: ReportAiChatExecutor;
-  input: GenerateRemediationReportInput;
-  model: string;
-  provider: ReportAiAdapterProvider;
-  providerKey: string;
-  variant: ReportAudience;
-}): Promise<RemediationReport> {
+}: GenerateProviderReportOptions): Promise<RemediationReport> {
   const content = await chatExecutor({
     model,
     provider,
@@ -165,13 +174,7 @@ async function generateProviderBackedVariants({
   model,
   provider,
   providerKey,
-}: {
-  chatExecutor: ReportAiChatExecutor;
-  input: GenerateRemediationReportInput;
-  model: string;
-  provider: ReportAiAdapterProvider;
-  providerKey: string;
-}): Promise<RemediationReportVariants> {
+}: GenerateProviderBackedVariantsOptions): Promise<RemediationReportVariants> {
   const technical = await generateProviderReport({
     chatExecutor,
     input,
