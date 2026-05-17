@@ -1,5 +1,6 @@
 import { readFile, rm } from "node:fs/promises";
 
+import { createReportPdfFileTargetForVariant } from "../src/reports/pdf-file-reference.ts";
 import {
   renderReportBatchPdfs,
   type GenerateRemediationReportBatchOutput,
@@ -23,6 +24,10 @@ const REPORT_TEMPLATE_PATHS = [
   "src/reports/templates/README.md",
 ] as const;
 
+const EDITABLE_REPORT_TEMPLATE_NAMES = REPORT_TEMPLATE_PATHS.filter(
+  (templatePath) => !templatePath.endsWith("README.md"),
+).map((templatePath) => templatePath.split("/").at(-1) ?? templatePath);
+
 async function assertTemplateDocumentation(): Promise<void> {
   for (const templatePath of REPORT_TEMPLATE_PATHS) {
     const templateSource = await readFile(templatePath, "utf8");
@@ -37,12 +42,15 @@ async function assertTemplateDocumentation(): Promise<void> {
       );
     }
 
-    if (
-      templatePath.endsWith("README.md") &&
-      !templateSource.includes("technical-report.md")
-    ) {
+    if (templatePath.endsWith("README.md")) {
+      const missingTemplateName = EDITABLE_REPORT_TEMPLATE_NAMES.find(
+        (templateName) => !templateSource.includes(templateName),
+      );
+
+      if (!missingTemplateName) continue;
+
       throw new Error(
-        "Report template README must document the editable template files.",
+        `Report template README must document editable template file ${missingTemplateName}.`,
       );
     }
   }
@@ -52,12 +60,15 @@ async function removeExistingReportPdfs(
   contexts: SelectedMunicipalityReportContext[],
 ): Promise<void> {
   for (const context of contexts) {
-    await rm(`data/reports/${context.municipality.id}-technical.pdf`, {
-      force: true,
-    });
-    await rm(`data/reports/${context.municipality.id}-friendly.pdf`, {
-      force: true,
-    });
+    for (const variant of ["technical", "friendly"] as const) {
+      const { storagePath } = createReportPdfFileTargetForVariant({
+        municipalityId: context.municipality.id,
+        outputDirectory: "data/reports",
+        variant,
+      });
+
+      await rm(storagePath, { force: true });
+    }
   }
 }
 
