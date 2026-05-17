@@ -26,6 +26,13 @@ export type ReportAiAdapter = {
 
 type ReportAiAdapterProvider = "openrouter";
 
+const DEFAULT_ADAPTER_PROVIDER: ReportAiAdapterProvider = "openrouter";
+const DEFAULT_MODEL = "anthropic/claude-sonnet-4";
+const DETERMINISTIC_PROVIDER = "deterministic-fallback";
+const TANSTACK_PROVIDER = "tanstack-ai";
+const JSON_CONTRACT_SYSTEM_PROMPT =
+  "Return only valid JSON that matches the requested contract.";
+
 type ReportAiChatExecutorInput = {
   model: string;
   messages: Array<{ role: "user"; content: string }>;
@@ -56,11 +63,11 @@ function getConfiguredProviderKey(): string | undefined {
 }
 
 function getConfiguredProvider(): ReportAiAdapterProvider {
-  return "openrouter";
+  return DEFAULT_ADAPTER_PROVIDER;
 }
 
 function getConfiguredModel(): string {
-  return process.env.AI_PROVIDER_MODEL ?? "anthropic/claude-sonnet-4";
+  return process.env.AI_PROVIDER_MODEL ?? DEFAULT_MODEL;
 }
 
 async function runTanStackChat({
@@ -114,7 +121,7 @@ async function generateProviderReport({
       variant === "technical"
         ? reportAgent.instructions
         : plainLanguageReportAgent.instructions,
-      "Return only valid JSON that matches the requested contract.",
+      JSON_CONTRACT_SYSTEM_PROMPT,
     ],
     messages: [
       {
@@ -168,7 +175,7 @@ export function createReportAiAdapter(
   options: CreateReportAiAdapterOptions = {},
 ): ReportAiAdapter {
   const deterministicReportAdapter: ReportAiAdapter = {
-    provider: "deterministic-fallback",
+    provider: DETERMINISTIC_PROVIDER,
     async generateRemediationReport(input): Promise<RemediationReport> {
       return (
         await deterministicReportAdapter.generateRemediationReportVariants(
@@ -182,7 +189,7 @@ export function createReportAiAdapter(
       const normalized = normalizeReportInput(input);
       return buildDeterministicReportVariants(
         normalized,
-        "deterministic-fallback",
+        DETERMINISTIC_PROVIDER,
         normalized.generatedAt,
       );
     },
@@ -214,7 +221,7 @@ export function createReportAiAdapter(
   };
 
   return {
-    provider: "tanstack-ai",
+    provider: TANSTACK_PROVIDER,
     async generateRemediationReport(input): Promise<RemediationReport> {
       return (await generateRemediationReportVariants(input)).technical;
     },
