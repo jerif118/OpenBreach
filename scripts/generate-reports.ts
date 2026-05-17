@@ -38,6 +38,17 @@ function sanitizePersistenceFindings(
   );
 }
 
+function assertCompleteBatch(
+  batch: Awaited<ReturnType<typeof renderReportBatchPdfs>>,
+  selectedCount: number,
+): void {
+  if (batch.summary.completed !== selectedCount || batch.summary.failed !== 0) {
+    throw new Error(
+      "Fixture report generation must complete all selected records.",
+    );
+  }
+}
+
 function readCliOptions(argv: string[]): ReportGenerationCliOptions {
   const options = {
     generatedAt: DEFAULT_GENERATED_AT,
@@ -127,11 +138,7 @@ const batch = await renderReportBatchPdfs({
   providerKey: "",
 });
 
-if (batch.summary.completed !== selected.length || batch.summary.failed !== 0) {
-  throw new Error(
-    "Fixture report generation must complete all selected records.",
-  );
-}
+assertCompleteBatch(batch, selected.length);
 
 const selectedByMunicipalityId = new Map(
   selected.map((context) => [context.municipality.id, context]),
