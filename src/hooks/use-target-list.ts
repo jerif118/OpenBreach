@@ -1,38 +1,18 @@
-import { useQuery } from "convex/react";
-
-import { api } from "../../convex/_generated/api.js";
-import type { DemoTargetCardDto } from "../../convex/types.js";
-import { buildDemoTargetListFromFixtures } from "../lib/target-demo-fallback.ts";
-
-// ============================================================================
-// Types
-// ============================================================================
+import type { PipelineTargetRecord } from "../features/openbreach/pipeline-data";
+import { useOpenBreachPipeline } from "./use-openbreach-pipeline";
 
 export interface UseTargetListReturn {
-  targets: DemoTargetCardDto[];
+  targets: PipelineTargetRecord[];
   isLoading: boolean;
   error: Error | null;
 }
 
-// ============================================================================
-// Hook
-// ============================================================================
-
 export function useTargetList(): UseTargetListReturn {
-  const isConfigured = !!import.meta.env.VITE_CONVEX_URL;
-  const result = useQuery(api.targets.listDemo, isConfigured ? {} : "skip");
+  const { isLoading, targets } = useOpenBreachPipeline();
 
-  if (!isConfigured) {
-    return {
-      targets: buildDemoTargetListFromFixtures(),
-      isLoading: false,
-      error: null,
-    };
-  }
-
-  if (result === undefined) {
-    return { targets: [], isLoading: true, error: null };
-  }
-
-  return { targets: result, isLoading: false, error: null };
+  return {
+    targets,
+    isLoading,
+    error: null,
+  };
 }
