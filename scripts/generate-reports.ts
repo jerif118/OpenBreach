@@ -47,7 +47,11 @@ function assertCompleteBatch(
   batch: ReportBatchOutput,
   selectedCount: number,
 ): void {
-  if (batch.summary.completed !== selectedCount || batch.summary.failed !== 0) {
+  if (
+    batch.summary.completed !== selectedCount ||
+    batch.summary.failed !== 0 ||
+    batch.results.length !== selectedCount
+  ) {
     throw new Error(
       "Fixture report generation must complete all selected records.",
     );
