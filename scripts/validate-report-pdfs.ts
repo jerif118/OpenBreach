@@ -1,7 +1,9 @@
+import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
 
 import municipalitiesFixture from "../data/municipalities/municipalities.seed.json" with { type: "json" };
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
+import { renderBatchPdfArtifacts } from "../src/mastra/workflows/report-pdf-rendering.ts";
 import { renderReportBatchPdfs } from "../src/mastra/workflows/report-workflow.ts";
 import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-tool.ts";
 import { pushText } from "../src/reports/pdf-document.ts";
@@ -201,6 +203,29 @@ for (const record of output.results) {
     }
   }
 }
+
+await assert.rejects(
+  () => renderBatchPdfArtifacts({ batch: output, contexts: contexts.slice(1) }),
+  /Missing selected report context/,
+);
+
+await assert.rejects(
+  () =>
+    renderBatchPdfArtifacts({
+      batch: output,
+      contexts: [
+        {
+          ...contexts[0],
+          scan: {
+            ...contexts[0].scan,
+            riskScore: 101,
+          },
+        },
+        ...contexts.slice(1),
+      ],
+    }),
+  /Invalid selected report context/,
+);
 
 const unsafeOutput = await renderReportBatchPdfs({
   contexts: [
