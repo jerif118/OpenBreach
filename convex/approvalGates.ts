@@ -1,9 +1,11 @@
 import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import { requireOperatorOrAdmin, requireApprover, requireAdmin } from "./auth";
-import type { ApprovalGateDto } from "./types";
+import { requireOperatorOrAdmin } from "./auth";
+import type { ApprovalGateDto } from "./types/approvals";
 import { validateApprovalGateTransition } from "./lib/stateMachine";
+import { appendAuditEvent } from "./lib/audit";
+import { buildApprovalGateStatusPatch } from "./lib/approvalGateStatusUpdates";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -91,7 +93,7 @@ export const create = internalMutation({
     runId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("approvalGates")
@@ -117,6 +119,18 @@ export const create = internalMutation({
       runId: args.runId,
     });
 
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "approval-requested",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: {
+        gateId: args.gateId,
+        gateType: args.gateType,
+        status: args.status,
+      },
+    });
+
     return { id, gateId: args.gateId };
   },
 });
@@ -130,7 +144,6 @@ export const updateStatus = internalMutation({
       v.literal("rejected"),
       v.literal("bypassed"),
     ),
-    approvedBy: v.optional(v.string()),
     approvedAt: v.optional(v.string()),
     rejectionReason: v.optional(v.string()),
     bypassJustification: v.optional(v.string()),
@@ -147,55 +160,8 @@ export const updateStatus = internalMutation({
 
     validateApprovalGateTransition(doc.status, args.status);
 
-    const patch: Partial<Doc<"approvalGates">> = {
-      status: args.status,
-    };
-
-    if (args.status === "approved") {
-      await requireApprover(ctx);
-      if (!args.approvedBy) {
-        throw new Error('Approval status "approved" requires approvedBy.');
-      }
-      if (!args.approvedAt) {
-        throw new Error('Approval status "approved" requires approvedAt.');
-      }
-      patch.approvedBy = args.approvedBy;
-      patch.approvedAt = args.approvedAt;
-      patch.rejectionReason = undefined;
-      patch.bypassJustification = undefined;
-    }
-
-    if (args.status === "rejected") {
-      await requireApprover(ctx);
-      if (!args.rejectionReason) {
-        throw new Error('Approval status "rejected" requires rejectionReason.');
-      }
-      patch.rejectionReason = args.rejectionReason;
-      patch.approvedBy = undefined;
-      patch.approvedAt = undefined;
-      patch.bypassJustification = undefined;
-    }
-
-    if (args.status === "bypassed") {
-      await requireAdmin(ctx);
-      if (!args.bypassJustification || args.bypassJustification.length < 10) {
-        throw new Error(
-          'Approval status "bypassed" requires bypassJustification of at least 10 characters.',
-        );
-      }
-      patch.bypassJustification = args.bypassJustification;
-      patch.approvedBy = undefined;
-      patch.approvedAt = undefined;
-      patch.rejectionReason = undefined;
-    }
-
-    if (args.status === "pending") {
-      // Reset approval fields when reverting to pending
-      patch.approvedBy = undefined;
-      patch.approvedAt = undefined;
-      patch.rejectionReason = undefined;
-      patch.bypassJustification = undefined;
-    }
+    // Emits approval-granted, approval-rejected, or manual-override before patching.
+    const patch = await buildApprovalGateStatusPatch(ctx, doc, args);
 
     await ctx.db.patch(doc._id, patch);
     return { id: doc._id, gateId: args.gateId };

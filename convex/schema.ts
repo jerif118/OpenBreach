@@ -256,22 +256,35 @@ const auditEventType = v.union(
   v.literal("target-updated"),
   v.literal("target-rejected"),
   v.literal("workflow-started"),
+  v.literal("workflow-pending"),
+  v.literal("workflow-running"),
+  v.literal("workflow-paused"),
   v.literal("workflow-completed"),
   v.literal("workflow-halted"),
+  v.literal("workflow-rejected"),
+  v.literal("workflow-failed"),
   v.literal("phase-changed"),
   v.literal("evidence-recorded"),
   v.literal("hypothesis-proposed"),
   v.literal("approval-requested"),
   v.literal("approval-granted"),
   v.literal("approval-rejected"),
+  v.literal("approval-reset"),
   v.literal("gate-approved"),
   v.literal("gate-rejected"),
   v.literal("finding-created"),
   v.literal("finding-updated"),
+  v.literal("validation-recorded"),
   v.literal("report-generated"),
+  v.literal("report-completed"),
   v.literal("auth-granted"),
   v.literal("auth-revoked"),
   v.literal("manual-override"),
+);
+
+const auditDetails = v.record(
+  v.string(),
+  v.union(v.string(), v.number(), v.boolean(), v.null()),
 );
 
 const reportArtifactVariant = v.union(
@@ -551,6 +564,7 @@ export default defineSchema({
   })
     .index("by_targetId", ["targetId"])
     .index("by_targetId_and_runId", ["targetId", "runId"])
+    .index("by_targetId_and_status", ["targetId", "status"])
     .index("by_hypothesisId", ["hypothesisId"]),
 
   testPlans: defineTable({
@@ -568,6 +582,7 @@ export default defineSchema({
     metadata: v.optional(v.record(v.string(), v.any())),
   })
     .index("by_targetId", ["targetId"])
+    .index("by_targetId_and_status", ["targetId", "status"])
     .index("by_planId", ["planId"]),
 
   approvalGates: defineTable({
@@ -626,6 +641,7 @@ export default defineSchema({
   })
     .index("by_targetId", ["targetId"])
     .index("by_targetId_and_runId", ["targetId", "runId"])
+    .index("by_targetId_and_severity", ["targetId", "severity"])
     .index("by_validationResultId", ["validationResultId"])
     .index("by_findingId", ["findingId"]),
 
@@ -636,7 +652,7 @@ export default defineSchema({
     actor: v.string(),
     timestamp: v.string(),
     runId: v.optional(v.string()),
-    details: v.optional(v.record(v.string(), v.any())),
+    details: v.optional(auditDetails),
     ipAddress: v.optional(v.string()),
     userAgent: v.optional(v.string()),
   })
@@ -665,5 +681,6 @@ export default defineSchema({
   })
     .index("by_targetId", ["targetId"])
     .index("by_targetId_and_variant", ["targetId", "variant"])
+    .index("by_targetId_and_status", ["targetId", "status"])
     .index("by_artifactId", ["artifactId"]),
 });

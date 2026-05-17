@@ -16,7 +16,9 @@ export interface TargetListCardProps {
   onClick?: (target: PipelineTargetRecord) => void;
 }
 
-function riskTierBadgeClasses(riskTier: PipelineTargetRecord["riskTier"]): string {
+function riskTierBadgeClasses(
+  riskTier: PipelineTargetRecord["riskTier"],
+): string {
   switch (riskTier) {
     case "low":
       return "border-primary/30 bg-primary/10 text-primary";
@@ -71,32 +73,32 @@ export function TargetListCard({ target, onClick }: TargetListCardProps) {
     <button
       type="button"
       onClick={handleClick}
-      className="group relative w-full overflow-hidden border border-primary/15 bg-surface-container-low p-5 text-left transition-colors pixel-corner hover:border-primary/35 hover:bg-surface-container hover:shadow-[0_0_24px_rgba(0,219,233,0.08)] focus:ring-2 focus:ring-primary/30 focus:outline-none"
+      className="group border-primary/15 bg-surface-container-low pixel-corner hover:border-primary/35 hover:bg-surface-container focus:ring-primary/30 relative w-full overflow-hidden border p-5 text-left transition-colors hover:shadow-[0_0_24px_rgba(0,219,233,0.08)] focus:ring-2 focus:outline-none"
     >
-      <div className="absolute inset-x-0 top-0 h-px bg-primary/25 transition group-hover:bg-secondary-fixed-dim/45" />
+      <div className="bg-primary/25 group-hover:bg-secondary-fixed-dim/45 absolute inset-x-0 top-0 h-px transition" />
 
       <div className="flex items-start justify-between gap-3">
-        <code className="font-mono text-[10px] tracking-[0.22em] text-secondary-fixed-dim uppercase sm:text-xs">
+        <code className="text-secondary-fixed-dim font-mono text-[10px] tracking-[0.22em] uppercase sm:text-xs">
           {target.targetId}
         </code>
         <span
-          className={`border px-2 py-1 font-mono text-[10px] tracking-[0.18em] uppercase pixel-corner ${riskTierBadgeClasses(target.riskTier)}`}
+          className={`pixel-corner border px-2 py-1 font-mono text-[10px] tracking-[0.18em] uppercase ${riskTierBadgeClasses(target.riskTier)}`}
         >
           {riskTierLabel(target.riskTier)}
         </span>
       </div>
 
-      <h3 className="mt-4 font-display text-2xl text-on-surface">
+      <h3 className="font-display text-on-surface mt-4 text-2xl">
         {target.name}
       </h3>
-      <p className="mt-2 break-all font-mono text-sm text-primary">
+      <p className="text-primary mt-2 font-mono text-sm break-all">
         {target.primaryUrl}
       </p>
-      <p className="mt-3 font-mono text-[10px] tracking-[0.2em] text-on-surface-variant uppercase">
+      <p className="text-on-surface-variant mt-3 font-mono text-[10px] tracking-[0.2em] uppercase">
         {formatClassification(target.classification)}
       </p>
 
-      <div className="mt-5 grid gap-3 border-t border-primary/10 pt-4 sm:grid-cols-2">
+      <div className="border-primary/10 mt-5 grid gap-3 border-t pt-4 sm:grid-cols-2">
         <CardFact
           label="Phase"
           value={formatCardPhase(target.latestRun?.currentPhase)}
@@ -113,8 +115,8 @@ export function TargetListCard({ target, onClick }: TargetListCardProps) {
         />
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-primary/10 pt-3">
-        <span className="font-mono text-[10px] tracking-[0.2em] text-on-surface-variant uppercase">
+      <div className="border-primary/10 mt-4 flex items-center justify-between gap-3 border-t pt-3">
+        <span className="text-on-surface-variant font-mono text-[10px] tracking-[0.2em] uppercase">
           Next: {target.nextActionLabel}
         </span>
         <span
@@ -139,11 +141,15 @@ function CardFact({
   tone?: "cyan" | "green" | "red" | "amber";
 }) {
   return (
-    <div className={`border border-primary/10 bg-surface px-3 py-3 ${className ?? ""}`.trim()}>
-      <p className="font-mono text-[10px] tracking-[0.14em] text-on-surface-variant uppercase">
+    <div
+      className={`border-primary/10 bg-surface border px-3 py-3 ${className ?? ""}`.trim()}
+    >
+      <p className="text-on-surface-variant font-mono text-[10px] tracking-[0.14em] uppercase">
         {label}
       </p>
-      <p className={`mt-2 break-words font-display text-base leading-tight ${tone ? toneClasses(tone) : "text-on-surface"}`}>
+      <p
+        className={`font-display mt-2 text-base leading-tight break-words ${tone ? toneClasses(tone) : "text-on-surface"}`}
+      >
         {value}
       </p>
     </div>

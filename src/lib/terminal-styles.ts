@@ -84,8 +84,7 @@ export const BUTTON_DANGER = `${BUTTON_BASE} ${ACCENT_DANGER_BG} ${ACCENT_DANGER
 // Page background
 // ============================================================================
 
-export const PAGE_BACKGROUND =
-  "min-h-screen bg-background text-on-background";
+export const PAGE_BACKGROUND = "min-h-screen bg-background text-on-background";
 
 // ============================================================================
 // Focus ring (global)

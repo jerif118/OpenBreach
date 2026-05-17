@@ -1008,14 +1008,27 @@ export const auditEventSchema = z.object({
     "target-updated",
     "target-rejected",
     "workflow-started",
+    "workflow-pending",
+    "workflow-running",
+    "workflow-paused",
     "workflow-completed",
     "workflow-halted",
+    "workflow-rejected",
+    "workflow-failed",
+    "phase-changed",
+    "hypothesis-proposed",
+    "approval-requested",
+    "approval-granted",
+    "approval-rejected",
+    "approval-reset",
     "gate-approved",
     "gate-rejected",
     "evidence-recorded",
     "finding-created",
     "finding-updated",
+    "validation-recorded",
     "report-generated",
+    "report-completed",
     "auth-granted",
     "auth-revoked",
     "manual-override",
@@ -1023,7 +1036,12 @@ export const auditEventSchema = z.object({
   actor: nonEmptyStringSchema,
   timestamp: isoDateTimeSchema,
   runId: nonEmptyStringSchema.optional(),
-  details: z.record(z.string(), z.unknown()).optional(),
+  details: z
+    .record(
+      z.string(),
+      z.union([z.string(), z.number(), z.boolean(), z.null()]),
+    )
+    .optional(),
   ipAddress: z
     .string()
     .optional()
@@ -1196,6 +1214,54 @@ export const targetListItemSchema = z.object({
 
 export type TargetListItem = z.infer<typeof targetListItemSchema>;
 
+export const demoWorkflowRunSummarySchema = z.object({
+  runId: nonEmptyStringSchema,
+  status: z.enum([
+    "pending",
+    "running",
+    "paused",
+    "completed",
+    "halted",
+    "rejected",
+    "failed",
+  ]),
+  currentPhase: workflowPhaseSchema.shape.phase.optional(),
+});
+
+export const demoTargetCardSchema = targetListItemSchema.extend({
+  latestRun: demoWorkflowRunSummarySchema.nullable(),
+});
+
+export type DemoTargetCard = z.infer<typeof demoTargetCardSchema>;
+
+export const demoEvidenceSummarySchema = z.object({
+  evidenceId: nonEmptyStringSchema,
+  source: passiveScanEvidenceSchema.shape.source,
+  collectedAt: isoDateTimeSchema,
+  requestedUrl: z.string().url(),
+  reachable: z.boolean(),
+  httpStatus: z.number().int().min(100).max(599).optional(),
+  cms: passiveScanEvidenceSchema.shape.cms,
+  adminExposure: passiveScanEvidenceSchema.shape.adminExposure,
+  runId: nonEmptyStringSchema.optional(),
+  errorCount: z.number().int().nonnegative(),
+});
+
+export type DemoEvidenceSummary = z.infer<typeof demoEvidenceSummarySchema>;
+
+export const demoTargetDetailSchema = z.object({
+  target: targetProfileSchema,
+  latestRun: demoWorkflowRunSummarySchema.nullable(),
+  evidence: z.array(demoEvidenceSummarySchema),
+  hypotheses: z.array(vulnerabilityHypothesisSchema),
+  approvals: z.array(approvalGateSchema),
+  validationResults: z.array(validationResultSchema),
+  findings: z.array(findingSchema),
+  reports: z.array(reportArtifactSchema),
+});
+
+export type DemoTargetDetail = z.infer<typeof demoTargetDetailSchema>;
+
 export const targetIntakeInputSchema = z.object({
   targetId: nonEmptyStringSchema.regex(/^[^\s]+$/, "no whitespace"),
   name: nonEmptyStringSchema,
@@ -1209,7 +1275,7 @@ export const targetIntakeInputSchema = z.object({
   allowedAssets: z.string().optional(),
   deniedAssets: z.string().optional(),
   validationLevel: z.enum(["passive", "semiactive", "controlled_validation"]),
-  rateLimit: z.coerce.number().int().positive().default(10),
+  rateLimit: z.coerce.number().int().nonnegative().default(10),
   approverName: z.string().optional(),
 });
 

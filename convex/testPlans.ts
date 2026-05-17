@@ -1,15 +1,36 @@
 import { v } from "convex/values";
-import { internalQuery, internalMutation } from "./_generated/server";
+import {
+  internalMutation,
+  internalQuery,
+  type DatabaseReader,
+} from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin, requireApprover } from "./auth";
-import type { TestPlanDto } from "./types";
+import type { TestPlanDto, TestPlanStatus } from "./types/testPlans";
 import { validateTestPlanTransition } from "./lib/stateMachine";
 
 const MAX_LIST_LIMIT = 100;
+const APPROVAL_REQUIRED_STATUSES = new Set<TestPlanStatus>([
+  "approved",
+  "executing",
+  "completed",
+]);
 
-// ============================================================================
-// DTO Mapper
-// ============================================================================
+const testPlanStatus = v.union(
+  v.literal("draft"),
+  v.literal("pending-approval"),
+  v.literal("approved"),
+  v.literal("rejected"),
+  v.literal("executing"),
+  v.literal("completed"),
+  v.literal("cancelled"),
+);
+
+const testStep = v.object({
+  stepId: v.string(),
+  description: v.string(),
+  expectedOutcome: v.optional(v.string()),
+});
 
 function toTestPlanDto(doc: Doc<"testPlans">): TestPlanDto {
   return {
@@ -33,79 +54,53 @@ function toTestPlanDto(doc: Doc<"testPlans">): TestPlanDto {
   };
 }
 
-// ============================================================================
-// Queries
-// ============================================================================
-
 export const listByTarget = internalQuery({
   args: {
     targetId: v.string(),
-    status: v.optional(
-      v.union(
-        v.literal("draft"),
-        v.literal("pending-approval"),
-        v.literal("approved"),
-        v.literal("rejected"),
-        v.literal("executing"),
-        v.literal("completed"),
-        v.literal("cancelled"),
-      ),
-    ),
+    status: v.optional(testPlanStatus),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
-    let query = ctx.db
+    if (args.status) {
+      const status = args.status;
+      const docs = await ctx.db
+        .query("testPlans")
+        .withIndex("by_targetId_and_status", (q) =>
+          q.eq("targetId", args.targetId).eq("status", status),
+        )
+        .take(limit);
+
+      return docs.map(toTestPlanDto);
+    }
+
+    const query = ctx.db
       .query("testPlans")
       .withIndex("by_targetId", (q) => q.eq("targetId", args.targetId));
 
     const docs = await query.take(limit);
-    const filtered = args.status
-      ? docs.filter((d) => d.status === args.status)
-      : docs;
-    return filtered.map(toTestPlanDto);
+    return docs.map(toTestPlanDto);
   },
 });
 
 export const get = internalQuery({
   args: { planId: v.string() },
   handler: async (ctx, args) => {
-    const doc = await ctx.db
-      .query("testPlans")
-      .withIndex("by_planId", (q) => q.eq("planId", args.planId))
-      .unique();
+    const doc = await getTestPlanByPlanId(ctx, args.planId);
 
     return doc ? toTestPlanDto(doc) : null;
   },
 });
-
-// ============================================================================
-// Mutations
-// ============================================================================
 
 export const create = internalMutation({
   args: {
     planId: v.string(),
     targetId: v.string(),
     title: v.string(),
-    status: v.union(
-      v.literal("draft"),
-      v.literal("pending-approval"),
-      v.literal("approved"),
-      v.literal("rejected"),
-      v.literal("executing"),
-      v.literal("completed"),
-      v.literal("cancelled"),
-    ),
+    status: testPlanStatus,
     createdAt: v.string(),
-    steps: v.array(
-      v.object({
-        stepId: v.string(),
-        description: v.string(),
-        expectedOutcome: v.optional(v.string()),
-      }),
-    ),
+    steps: v.array(testStep),
     hypothesisIds: v.optional(v.array(v.string())),
     approver: v.optional(v.string()),
     approvedAt: v.optional(v.string()),
@@ -116,10 +111,7 @@ export const create = internalMutation({
   handler: async (ctx, args) => {
     await requireOperatorOrAdmin(ctx);
 
-    const existing = await ctx.db
-      .query("testPlans")
-      .withIndex("by_planId", (q) => q.eq("planId", args.planId))
-      .unique();
+    const existing = await getTestPlanByPlanId(ctx, args.planId);
 
     if (existing) {
       throw new Error(`TestPlan "${args.planId}" already exists.`);
@@ -148,26 +140,8 @@ export const update = internalMutation({
   args: {
     planId: v.string(),
     title: v.optional(v.string()),
-    status: v.optional(
-      v.union(
-        v.literal("draft"),
-        v.literal("pending-approval"),
-        v.literal("approved"),
-        v.literal("rejected"),
-        v.literal("executing"),
-        v.literal("completed"),
-        v.literal("cancelled"),
-      ),
-    ),
-    steps: v.optional(
-      v.array(
-        v.object({
-          stepId: v.string(),
-          description: v.string(),
-          expectedOutcome: v.optional(v.string()),
-        }),
-      ),
-    ),
+    status: v.optional(testPlanStatus),
+    steps: v.optional(v.array(testStep)),
     hypothesisIds: v.optional(v.array(v.string())),
     approver: v.optional(v.string()),
     approvedAt: v.optional(v.string()),
@@ -178,10 +152,7 @@ export const update = internalMutation({
   handler: async (ctx, args) => {
     await requireOperatorOrAdmin(ctx);
 
-    const doc = await ctx.db
-      .query("testPlans")
-      .withIndex("by_planId", (q) => q.eq("planId", args.planId))
-      .unique();
+    const doc = await getTestPlanByPlanId(ctx, args.planId);
 
     if (!doc) {
       throw new Error(`TestPlan "${args.planId}" not found.`);
@@ -201,26 +172,7 @@ export const update = internalMutation({
     if (args.status !== undefined) {
       validateTestPlanTransition(doc.status, args.status);
       patch.status = args.status;
-
-      // approved/executing/completed require approver+approvedAt
-      if (
-        ["approved", "executing", "completed"].includes(args.status) &&
-        !args.approver &&
-        !doc.approver
-      ) {
-        throw new Error(
-          `TestPlan status "${args.status}" requires an approver.`,
-        );
-      }
-      if (
-        ["approved", "executing", "completed"].includes(args.status) &&
-        !args.approvedAt &&
-        !doc.approvedAt
-      ) {
-        throw new Error(
-          `TestPlan status "${args.status}" requires approvedAt.`,
-        );
-      }
+      requireApprovalFields(args.status, args, doc);
     }
 
     if (args.approver !== undefined) patch.approver = args.approver;
@@ -240,10 +192,7 @@ export const approve = internalMutation({
   handler: async (ctx, args) => {
     await requireApprover(ctx);
 
-    const doc = await ctx.db
-      .query("testPlans")
-      .withIndex("by_planId", (q) => q.eq("planId", args.planId))
-      .unique();
+    const doc = await getTestPlanByPlanId(ctx, args.planId);
 
     if (!doc) {
       throw new Error(`TestPlan "${args.planId}" not found.`);
@@ -261,10 +210,6 @@ export const approve = internalMutation({
   },
 });
 
-// ============================================================================
-// Helpers
-// ============================================================================
-
 function normalizeListLimit(limit: number | undefined) {
   if (limit === undefined) {
     return MAX_LIST_LIMIT;
@@ -275,4 +220,30 @@ function normalizeListLimit(limit: number | undefined) {
     );
   }
   return limit;
+}
+
+async function getTestPlanByPlanId(
+  ctx: { db: DatabaseReader },
+  planId: string,
+) {
+  return await ctx.db
+    .query("testPlans")
+    .withIndex("by_planId", (q) => q.eq("planId", planId))
+    .unique();
+}
+
+function requireApprovalFields(
+  status: TestPlanStatus,
+  args: { approver?: string; approvedAt?: string },
+  doc: Doc<"testPlans">,
+) {
+  if (!APPROVAL_REQUIRED_STATUSES.has(status)) {
+    return;
+  }
+  if (!args.approver && !doc.approver) {
+    throw new Error(`TestPlan status "${status}" requires an approver.`);
+  }
+  if (!args.approvedAt && !doc.approvedAt) {
+    throw new Error(`TestPlan status "${status}" requires approvedAt.`);
+  }
 }

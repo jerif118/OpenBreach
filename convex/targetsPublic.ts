@@ -1,16 +1,16 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
-import type { Doc } from "./_generated/dataModel";
-import type {
-  TargetProfileDto,
-  TargetListItemDto,
-  WorkflowRunDto,
-} from "./types";
+import { mutation, query } from "./_generated/server";
+import { requireOperatorOrAdmin } from "./auth";
+import { appendAuditEvent } from "./lib/audit";
 import {
   isConvexConfigured,
   loadFixture,
   mapFixtureToTargetProfileDto,
 } from "./lib/fixtureFallback";
+import type { TargetListItemDto, TargetProfileDto } from "./types/targets";
+import type { Doc } from "./_generated/dataModel";
+import type { WorkflowRunDto } from "./types/workflow";
+import { validateTargetDomainBounds } from "./targets.validators";
 
 const DEFAULT_LIST_LIMIT = 50;
 const MAX_LIST_LIMIT = 100;
@@ -32,6 +32,22 @@ function mapValidationLevel(
     default:
       return "full";
   }
+}
+
+function buildEnrichedMetadata(args: {
+  metadata?: Record<string, unknown>;
+  allowedAssets?: string[];
+  deniedAssets?: string[];
+  rateLimit?: number;
+  validationLevel?: string;
+}): Record<string, unknown> {
+  return {
+    ...(args.metadata ?? {}),
+    ...(args.allowedAssets ? { allowedAssets: args.allowedAssets } : {}),
+    ...(args.deniedAssets ? { deniedAssets: args.deniedAssets } : {}),
+    ...(args.rateLimit !== undefined ? { rateLimit: args.rateLimit } : {}),
+    ...(args.validationLevel ? { validationLevel: args.validationLevel } : {}),
+  };
 }
 
 // ============================================================================
@@ -220,9 +236,7 @@ export const get = query({
 // ============================================================================
 
 /**
- * Public mutation: atomic 5-insert orchestration for target intake.
- *
- * MVP: NO auth check — any user may submit.
+ * Protected public mutation: atomic target intake orchestration.
  * Creates target + authorization scope + workflow run + approval gate + audit event
  * atomically within a single Convex transaction.
  */
@@ -257,8 +271,14 @@ export const createFull = mutation({
     rateLimit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const actor = args.approverName ?? "anonymous";
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required.");
+    }
+    const profile = await requireOperatorOrAdmin(ctx);
+    const actor = profile.name ?? identity.tokenIdentifier;
     const nowISO = new Date().toISOString();
+    validateTargetDomainBounds(args);
 
     // -----------------------------------------------------------------------
     // 1. Duplicate check
@@ -277,15 +297,7 @@ export const createFull = mutation({
     // -----------------------------------------------------------------------
     // 2. Merge extras into metadata
     // -----------------------------------------------------------------------
-    const enrichedMetadata: Record<string, unknown> = {
-      ...(args.metadata ?? {}),
-      ...(args.allowedAssets ? { allowedAssets: args.allowedAssets } : {}),
-      ...(args.deniedAssets ? { deniedAssets: args.deniedAssets } : {}),
-      ...(args.rateLimit ? { rateLimit: args.rateLimit } : {}),
-      ...(args.validationLevel
-        ? { validationLevel: args.validationLevel }
-        : {}),
-    };
+    const enrichedMetadata = buildEnrichedMetadata(args);
 
     // -----------------------------------------------------------------------
     // 3. Insert target
@@ -347,14 +359,28 @@ export const createFull = mutation({
     // -----------------------------------------------------------------------
     // 7. Insert audit event
     // -----------------------------------------------------------------------
-    await ctx.db.insert("auditEvents", {
-      eventId: crypto.randomUUID(),
+    await appendAuditEvent(ctx, {
       targetId: args.targetId,
       eventType: "target-created",
       actor,
-      timestamp: nowISO,
       runId,
       details: { approver: actor, autoApproved: true },
+    });
+
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "approval-granted",
+      actor,
+      runId,
+      details: { gateType: "intake", autoApproved: true },
+    });
+
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "workflow-started",
+      actor,
+      runId,
+      details: { phase: "intake", status: "pending" },
     });
 
     // -----------------------------------------------------------------------

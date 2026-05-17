@@ -182,13 +182,29 @@ Run this only when a hosted URL exists. Otherwise mark hosted smoke as skipped a
 Use these commands for deterministic validation when live services are unavailable:
 
 ```bash
+pnpm pivot:validate
+pnpm pivot:smoke
 pnpm fixtures:validate
 pnpm scanner:validate
 pnpm risk:validate
 pnpm report:generate:validate
 pnpm dashboard:verify
 pnpm auth:writes:validate
+pnpm typecheck
 ```
+
+`pnpm pivot:validate` is the aggregate persistence check. It runs `typecheck`, `contracts:test`, `fixtures:validate`, `auth:writes:validate`, and `pivot:smoke`. `pnpm pivot:smoke` validates the implemented Issue #65 demo contract: `targets.listDemo()`, `targets.getDemo({ targetId })`, fixture DTO parity, bounded reads, indexed detail reads, and unknown-target `null` behavior. Run `pnpm convex:codegen` only when Convex function references or generated API expectations change.
+
+### Pivot Persistence Contract
+
+Downstream UI and workflow tasks should consume the implemented persistence boundary instead of Convex table internals:
+
+- Public demo reads are `targets.listDemo()` for target cards and `targets.getDemo({ targetId })` for target detail DTOs.
+- Browser UI should use `useTargetList`, `useTargetDetail`, or `src/lib/target-demo-fallback.ts` outputs so live reads and fixture reads stay shape-compatible.
+- When `VITE_CONVEX_URL` is absent, the hooks skip Convex reads and build deterministic DTOs from `data/targets/*.json`.
+- Fixture data covers approved/rejected targets plus evidence, hypotheses, approval gates, validation results, findings, reports, technology fingerprints, test plans, and audit events.
+- Scanner, orchestrator, approval, validation, finding, report, workflow, and audit writes are protected or internal mutation paths. They must derive actor identity server-side and append audit events for accepted/rejected intake and sensitive workflow changes.
+- Fixture fallback is read-only. It is not fixture write-back persistence, mandatory live Convex, production authorization document storage, billing, scheduled continuous scanning, hosted deployment readiness, live scanning, generic UI implementation, or multi-tenant isolation.
 
 Useful fixture and report generation commands:
 

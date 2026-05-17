@@ -1,14 +1,15 @@
 import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import { requireOperatorOrAdmin } from "./auth";
-import type { AuditEventDto } from "./types";
+import type { AuditEventDto } from "./types/audit";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
-// ============================================================================
-// DTO Mapper
-// ============================================================================
+const auditDetailsValidator = v.record(
+  v.string(),
+  v.union(v.string(), v.number(), v.boolean(), v.null()),
+);
 
 function toAuditEventDto(doc: Doc<"auditEvents">): AuditEventDto {
   return {
@@ -23,10 +24,6 @@ function toAuditEventDto(doc: Doc<"auditEvents">): AuditEventDto {
     userAgent: doc.userAgent ?? undefined,
   };
 }
-
-// ============================================================================
-// Queries
-// ============================================================================
 
 export const listByTarget = internalQuery({
   args: {
@@ -48,10 +45,6 @@ export const listByTarget = internalQuery({
   },
 });
 
-// ============================================================================
-// Mutations
-// ============================================================================
-
 export const append = internalMutation({
   args: {
     eventId: v.string(),
@@ -61,19 +54,27 @@ export const append = internalMutation({
       v.literal("target-updated"),
       v.literal("target-rejected"),
       v.literal("workflow-started"),
+      v.literal("workflow-pending"),
+      v.literal("workflow-running"),
+      v.literal("workflow-paused"),
       v.literal("workflow-completed"),
       v.literal("workflow-halted"),
+      v.literal("workflow-rejected"),
+      v.literal("workflow-failed"),
       v.literal("phase-changed"),
       v.literal("evidence-recorded"),
       v.literal("hypothesis-proposed"),
       v.literal("approval-requested"),
       v.literal("approval-granted"),
       v.literal("approval-rejected"),
+      v.literal("approval-reset"),
       v.literal("gate-approved"),
       v.literal("gate-rejected"),
       v.literal("finding-created"),
       v.literal("finding-updated"),
+      v.literal("validation-recorded"),
       v.literal("report-generated"),
+      v.literal("report-completed"),
       v.literal("auth-granted"),
       v.literal("auth-revoked"),
       v.literal("manual-override"),
@@ -81,32 +82,14 @@ export const append = internalMutation({
     actor: v.string(),
     timestamp: v.string(),
     runId: v.optional(v.string()),
-    details: v.optional(v.record(v.string(), v.any())),
+    details: v.optional(auditDetailsValidator),
     ipAddress: v.optional(v.string()),
     userAgent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
-
-    const id = await ctx.db.insert("auditEvents", {
-      eventId: args.eventId,
-      targetId: args.targetId,
-      eventType: args.eventType,
-      actor: args.actor,
-      timestamp: args.timestamp,
-      runId: args.runId,
-      details: args.details,
-      ipAddress: args.ipAddress,
-      userAgent: args.userAgent,
-    });
-
-    return { id, eventId: args.eventId };
+    return appendAuditEvent(ctx, args);
   },
 });
-
-// ============================================================================
-// Helpers
-// ============================================================================
 
 function normalizeListLimit(limit: number | undefined) {
   if (limit === undefined) {

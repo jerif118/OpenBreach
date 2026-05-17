@@ -19,9 +19,9 @@ export function ThreatMapControls({
   onSeverityFilterChange: (severity: ThreatSeverityFilter) => void;
 }) {
   return (
-    <div className="inline-flex max-w-[340px] flex-col gap-2 border border-primary/15 bg-[#101516]/88 p-2.5 backdrop-blur-sm">
+    <div className="border-primary/15 inline-flex max-w-[340px] flex-col gap-2 border bg-[#101516]/88 p-2.5 backdrop-blur-sm">
       <div>
-        <p className="font-mono text-[10px] tracking-[0.24em] text-primary/50 uppercase">
+        <p className="text-primary/50 font-mono text-[10px] tracking-[0.24em] uppercase">
           Severity Filter
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -31,7 +31,7 @@ export function ThreatMapControls({
             return (
               <button
                 key={option.value}
-                className={`border px-3 py-2 font-mono text-[10px] tracking-[0.2em] uppercase transition-colors pixel-corner ${getFilterButtonClassName(option.value, isActive)}`}
+                className={`pixel-corner border px-3 py-2 font-mono text-[10px] tracking-[0.2em] uppercase transition-colors ${getFilterButtonClassName(option.value, isActive)}`}
                 type="button"
                 onClick={() => onSeverityFilterChange(option.value)}
               >
@@ -49,7 +49,9 @@ function getFilterButtonClassName(
   severity: ThreatSeverityFilter,
   isActive: boolean,
 ) {
-  const activeClassName = isActive ? "text-white shadow-[0_0_18px_rgba(0,219,233,0.16)]" : "";
+  const activeClassName = isActive
+    ? "text-white shadow-[0_0_18px_rgba(0,219,233,0.16)]"
+    : "";
 
   if (severity === "low") {
     return `${activeClassName} border-[#00dbe9]/40 text-[#7df4ff] hover:bg-[#00dbe9]/10`;

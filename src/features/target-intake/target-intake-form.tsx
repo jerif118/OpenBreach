@@ -157,7 +157,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           errorMessage.includes("WebSocket")
         ) {
           setGlobalError(
-            "[ERROR] Cannot connect to Convex backend. Please ensure 'pnpm convex:dev' is running.",
+            "Cannot connect to Convex backend. Please ensure 'pnpm convex:dev' is running.",
           );
         } else {
           setGlobalError(
@@ -278,7 +278,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           <div className="w-full">
             <label htmlFor="allowedAssets" className={LABEL_BASE}>
               Allowed Assets
-              <span className="ml-1 text-on-surface-variant/60">
+              <span className="text-on-surface-variant/60 ml-1">
                 (comma-separated URLs)
               </span>
             </label>
@@ -301,7 +301,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           <div className="w-full">
             <label htmlFor="deniedAssets" className={LABEL_BASE}>
               Denied Assets
-              <span className="ml-1 text-on-surface-variant/60">
+              <span className="text-on-surface-variant/60 ml-1">
                 (comma-separated URLs)
               </span>
             </label>
@@ -354,8 +354,8 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
 
         {/* Global error */}
         {globalError && (
-          <div className="animate-shake border border-error/30 bg-error/10 p-4 pixel-corner">
-            <p className="font-mono text-sm text-error">
+          <div className="animate-shake border-error/30 bg-error/10 pixel-corner border p-4">
+            <p className="text-error font-mono text-sm">
               [ERROR] {globalError}
             </p>
           </div>
@@ -371,7 +371,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           >
             {isPending ? (
               <span className="flex items-center gap-2">
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-secondary-fixed-dim/30 border-t-secondary-fixed-dim" />
+                <span className="border-secondary-fixed-dim/30 border-t-secondary-fixed-dim inline-block h-4 w-4 animate-spin rounded-full border-2" />
                 Processing…
               </span>
             ) : (
@@ -379,7 +379,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
             )}
           </Button>
           {isPending && (
-            <span className="font-mono text-sm text-on-surface-variant">
+            <span className="text-on-surface-variant font-mono text-sm">
               Submitting to Convex…
             </span>
           )}

@@ -2,7 +2,8 @@ import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
-import type { PassiveScanEvidenceDto } from "./types";
+import type { PassiveScanEvidenceDto } from "./types/passiveScan";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -152,7 +153,7 @@ export const upsert = internalMutation({
     envelopeCollectedBy: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("passiveScanEvidence")
@@ -180,17 +181,30 @@ export const upsert = internalMutation({
       envelopeCollectedBy: args.envelopeCollectedBy,
     };
 
+    let id: Doc<"passiveScanEvidence">["_id"];
+    let action: "created" | "updated";
+
     if (existing) {
       await ctx.db.replace(existing._id, document);
-      return {
-        id: existing._id,
-        evidenceId: args.evidenceId,
-        action: "updated",
-      };
+      id = existing._id;
+      action = "updated";
+    } else {
+      id = await ctx.db.insert("passiveScanEvidence", document);
+      action = "created";
     }
 
-    const id = await ctx.db.insert("passiveScanEvidence", document);
-    return { id, evidenceId: args.evidenceId, action: "created" };
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "evidence-recorded",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: {
+        evidenceId: args.evidenceId,
+        source: args.source,
+        action,
+      },
+    });
+    return { id, evidenceId: args.evidenceId, action };
   },
 });
 

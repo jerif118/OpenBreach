@@ -2,8 +2,9 @@ import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
-import type { WorkflowRunDto } from "./types";
+import type { WorkflowRunDto } from "./types/workflow";
 import { validateWorkflowRunTransition } from "./lib/stateMachine";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -106,7 +107,7 @@ export const create = internalMutation({
     ),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("workflowRuns")
@@ -135,6 +136,14 @@ export const create = internalMutation({
       phases,
     });
 
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "workflow-started",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: { status: args.status, phase: args.currentPhase ?? null },
+    });
+
     return { id, runId: args.runId };
   },
 });
@@ -156,7 +165,7 @@ export const updatePhase = internalMutation({
     reason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const doc = await ctx.db
       .query("workflowRuns")
@@ -190,6 +199,14 @@ export const updatePhase = internalMutation({
       phases,
     });
 
+    await appendAuditEvent(ctx, {
+      targetId: doc.targetId,
+      eventType: "phase-changed",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: { phase: args.newPhase, reason: args.reason ?? null },
+    });
+
     return { id: doc._id, runId: args.runId };
   },
 });
@@ -211,7 +228,7 @@ export const updateStatus = internalMutation({
     abortedReason: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const doc = await ctx.db
       .query("workflowRuns")
@@ -234,6 +251,15 @@ export const updateStatus = internalMutation({
       patch.abortedReason = args.abortedReason;
 
     await ctx.db.patch(doc._id, patch);
+
+    await appendAuditEvent(ctx, {
+      targetId: doc.targetId,
+      eventType: workflowStatusAuditEvent(args.status),
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: { status: args.status, reason: args.abortedReason ?? null },
+    });
+
     return { id: doc._id, runId: args.runId };
   },
 });
@@ -252,4 +278,26 @@ function normalizeListLimit(limit: number | undefined) {
     );
   }
   return limit;
+}
+
+function workflowStatusAuditEvent(status: Doc<"workflowRuns">["status"]) {
+  if (status === "pending") {
+    return "workflow-pending" as const;
+  }
+  if (status === "running") {
+    return "workflow-running" as const;
+  }
+  if (status === "paused") {
+    return "workflow-paused" as const;
+  }
+  if (status === "completed") {
+    return "workflow-completed" as const;
+  }
+  if (status === "halted") {
+    return "workflow-halted" as const;
+  }
+  if (status === "rejected") {
+    return "workflow-rejected" as const;
+  }
+  return "workflow-failed" as const;
 }

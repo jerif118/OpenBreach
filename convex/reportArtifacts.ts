@@ -2,13 +2,39 @@ import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
-import type { ReportArtifactDto } from "./types";
+import type { ReportArtifactDto } from "./types/reports";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
-// ============================================================================
-// DTO Mapper
-// ============================================================================
+const reportArtifactStatusValidator = v.union(
+  v.literal("pending"),
+  v.literal("generating"),
+  v.literal("completed"),
+  v.literal("failed"),
+);
+
+const reportArtifactVariantValidator = v.union(
+  v.literal("technical"),
+  v.literal("friendly"),
+  v.literal("executive"),
+);
+
+const reportArtifactSectionValidator = v.object({
+  title: v.string(),
+  narrative: v.string(),
+  bullets: v.array(v.string()),
+});
+
+const reportArtifactSectionsValidator = v.array(reportArtifactSectionValidator);
+
+const reportArtifactPdfValidator = v.object({
+  storagePath: v.string(),
+  fileName: v.string(),
+  contentType: v.literal("application/pdf"),
+  generatedAt: v.optional(v.string()),
+  sizeBytes: v.optional(v.number()),
+});
 
 function toReportArtifactDto(doc: Doc<"reportArtifacts">): ReportArtifactDto {
   return {
@@ -41,35 +67,33 @@ function toReportArtifactDto(doc: Doc<"reportArtifacts">): ReportArtifactDto {
   };
 }
 
-// ============================================================================
-// Queries
-// ============================================================================
-
 export const listByTarget = internalQuery({
   args: {
     targetId: v.string(),
-    status: v.optional(
-      v.union(
-        v.literal("pending"),
-        v.literal("generating"),
-        v.literal("completed"),
-        v.literal("failed"),
-      ),
-    ),
+    status: v.optional(reportArtifactStatusValidator),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
-    let query = ctx.db
+    if (args.status) {
+      const status = args.status;
+      const docs = await ctx.db
+        .query("reportArtifacts")
+        .withIndex("by_targetId_and_status", (q) =>
+          q.eq("targetId", args.targetId).eq("status", status),
+        )
+        .take(limit);
+
+      return docs.map(toReportArtifactDto);
+    }
+
+    const query = ctx.db
       .query("reportArtifacts")
       .withIndex("by_targetId", (q) => q.eq("targetId", args.targetId));
 
     const docs = await query.take(limit);
-    const filtered = args.status
-      ? docs.filter((d) => d.status === args.status)
-      : docs;
-    return filtered.map(toReportArtifactDto);
+    return docs.map(toReportArtifactDto);
   },
 });
 
@@ -85,46 +109,17 @@ export const get = internalQuery({
   },
 });
 
-// ============================================================================
-// Mutations
-// ============================================================================
-
 export const create = internalMutation({
   args: {
     artifactId: v.string(),
     targetId: v.string(),
-    variant: v.union(
-      v.literal("technical"),
-      v.literal("friendly"),
-      v.literal("executive"),
-    ),
+    variant: reportArtifactVariantValidator,
     title: v.string(),
     generatedAt: v.string(),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("generating"),
-      v.literal("completed"),
-      v.literal("failed"),
-    ),
+    status: reportArtifactStatusValidator,
     findings: v.array(v.string()),
-    sections: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          narrative: v.string(),
-          bullets: v.array(v.string()),
-        }),
-      ),
-    ),
-    pdf: v.optional(
-      v.object({
-        storagePath: v.string(),
-        fileName: v.string(),
-        contentType: v.literal("application/pdf"),
-        generatedAt: v.optional(v.string()),
-        sizeBytes: v.optional(v.number()),
-      }),
-    ),
+    sections: v.optional(reportArtifactSectionsValidator),
+    pdf: v.optional(reportArtifactPdfValidator),
     generatedBy: v.optional(
       v.union(
         v.literal("deterministic-fallback"),
@@ -136,7 +131,7 @@ export const create = internalMutation({
     metadata: v.optional(v.record(v.string(), v.any())),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("reportArtifacts")
@@ -168,6 +163,18 @@ export const create = internalMutation({
       metadata: args.metadata,
     });
 
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "report-generated",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: {
+        artifactId: args.artifactId,
+        status: args.status,
+        variant: args.variant,
+      },
+    });
+
     return { id, artifactId: args.artifactId };
   },
 });
@@ -175,25 +182,11 @@ export const create = internalMutation({
 export const complete = internalMutation({
   args: {
     artifactId: v.string(),
-    pdf: v.object({
-      storagePath: v.string(),
-      fileName: v.string(),
-      contentType: v.literal("application/pdf"),
-      generatedAt: v.optional(v.string()),
-      sizeBytes: v.optional(v.number()),
-    }),
-    sections: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          narrative: v.string(),
-          bullets: v.array(v.string()),
-        }),
-      ),
-    ),
+    pdf: reportArtifactPdfValidator,
+    sections: v.optional(reportArtifactSectionsValidator),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const doc = await ctx.db
       .query("reportArtifacts")
@@ -210,13 +203,17 @@ export const complete = internalMutation({
       sections: args.sections,
     });
 
+    await appendAuditEvent(ctx, {
+      targetId: doc.targetId,
+      eventType: "report-completed",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: doc.runId,
+      details: { artifactId: args.artifactId, status: "completed" },
+    });
+
     return { id: doc._id, artifactId: args.artifactId };
   },
 });
-
-// ============================================================================
-// Helpers
-// ============================================================================
 
 function normalizeListLimit(limit: number | undefined) {
   if (limit === undefined) {

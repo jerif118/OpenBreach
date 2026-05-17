@@ -27,7 +27,9 @@ export function ThreatMapPanel() {
     const filteredEntries =
       severityFilter === "all"
         ? mockThreatEntries
-        : mockThreatEntries.filter((entry) => entry.severity === severityFilter);
+        : mockThreatEntries.filter(
+            (entry) => entry.severity === severityFilter,
+          );
 
     if (!filteredEntries.length) {
       if (selectedEntryId) {
@@ -42,8 +44,8 @@ export function ThreatMapPanel() {
   }, [selectedEntryId, severityFilter]);
 
   return (
-    <section className="relative overflow-hidden border border-primary/30 bg-[#131313] p-2">
-      <div className="absolute right-0 top-0 z-10 border-b border-l border-primary/30 bg-[#131313]/80 p-2 font-mono text-[10px] text-primary/50 uppercase backdrop-blur-sm">
+    <section className="border-primary/30 relative overflow-hidden border bg-[#131313] p-2">
+      <div className="border-primary/30 text-primary/50 absolute top-0 right-0 z-10 border-b border-l bg-[#131313]/80 p-2 font-mono text-[10px] uppercase backdrop-blur-sm">
         Threat_Map.live
       </div>
       <div className="relative">
@@ -53,7 +55,7 @@ export function ThreatMapPanel() {
           onSelectEntry={(entry) => setSelectedEntryId(entry.id)}
         />
 
-        <div className="pointer-events-none absolute left-4 top-4 z-10">
+        <div className="pointer-events-none absolute top-4 left-4 z-10">
           <div className="pointer-events-auto">
             <ThreatMapControls
               severityFilter={severityFilter}
@@ -61,8 +63,6 @@ export function ThreatMapPanel() {
             />
           </div>
         </div>
-
-        
       </div>
     </section>
   );
@@ -78,13 +78,13 @@ function ThreatZoneCard({
   onToggle: () => void;
 }) {
   return (
-    <div className="border border-primary/15 bg-[#101516]/92 p-3 backdrop-blur-sm">
+    <div className="border-primary/15 border bg-[#101516]/92 p-3 backdrop-blur-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] tracking-[0.24em] text-primary/50 uppercase">
+          <p className="text-primary/50 font-mono text-[10px] tracking-[0.24em] uppercase">
             Selected Zone
           </p>
-          <h3 className="font-display mt-2 truncate text-base text-primary uppercase lg:text-lg">
+          <h3 className="font-display text-primary mt-2 truncate text-base uppercase lg:text-lg">
             {entry ? entry.title : "No Active Zone"}
           </h3>
           <p className="mt-2 font-mono text-[10px] text-[#b9cacb]">
@@ -96,7 +96,7 @@ function ThreatZoneCard({
 
         <button
           aria-expanded={expanded}
-          className="flex h-9 w-9 items-center justify-center border border-primary/20 bg-black/30 font-mono text-primary transition-colors hover:bg-primary/10"
+          className="border-primary/20 text-primary hover:bg-primary/10 flex h-9 w-9 items-center justify-center border bg-black/30 font-mono transition-colors"
           type="button"
           onClick={onToggle}
         >
@@ -109,9 +109,12 @@ function ThreatZoneCard({
       </div>
 
       {expanded ? (
-        <div className="mt-4 space-y-4 border-t border-primary/10 pt-4">
+        <div className="border-primary/10 mt-4 space-y-4 border-t pt-4">
           <div className="grid grid-cols-2 gap-3">
-            <StatChip label="Threats" value={entry ? String(entry.alerts) : "--"} />
+            <StatChip
+              label="Threats"
+              value={entry ? String(entry.alerts) : "--"}
+            />
             <StatChip
               label="Coverage"
               value={entry ? getThreatCoverage(entry) : "--"}
@@ -133,7 +136,7 @@ function ThreatZoneCard({
             <ActionButton label="Export zone summary" tone="muted" />
           </div>
 
-          <p className="font-mono text-[10px] text-primary/45">
+          <p className="text-primary/45 font-mono text-[10px]">
             {entry ? formatThreatTimestamp(entry.createdAt) : ""}
           </p>
         </div>
@@ -185,8 +188,8 @@ function StatChip({
             : "text-white";
 
   return (
-    <div className="border border-primary/10 bg-[#131313]/60 p-3">
-      <p className="font-mono text-[10px] text-primary/50 uppercase">{label}</p>
+    <div className="border-primary/10 border bg-[#131313]/60 p-3">
+      <p className="text-primary/50 font-mono text-[10px] uppercase">{label}</p>
       <p className={`font-display mt-1 text-sm ${toneClassName}`}>{value}</p>
     </div>
   );
@@ -208,7 +211,7 @@ function ActionButton({
 
   return (
     <button
-      className={`border px-3 py-2 text-left font-mono text-[10px] uppercase transition-colors pixel-corner ${className}`}
+      className={`pixel-corner border px-3 py-2 text-left font-mono text-[10px] uppercase transition-colors ${className}`}
       type="button"
     >
       {label}

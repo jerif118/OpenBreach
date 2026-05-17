@@ -1,10 +1,7 @@
-import type {
-  WorkflowRunStatus,
-  ApprovalGateStatus,
-  VulnerabilityHypothesisStatus,
-  TestPlanStatus,
-  ValidTransitionMap,
-} from "../types";
+import type { WorkflowRunStatus, ValidTransitionMap } from "../types/workflow";
+import type { ApprovalGateStatus } from "../types/approvals";
+import type { VulnerabilityHypothesisStatus } from "../types/hypotheses";
+import type { TestPlanStatus } from "../types/testPlans";
 
 // ============================================================================
 // WorkflowRun State Machine
@@ -28,9 +25,9 @@ export const WORKFLOW_RUN_INITIAL_STATUS: WorkflowRunStatus = "pending";
 
 export const APPROVAL_GATE_TRANSITIONS: ValidTransitionMap = {
   pending: ["approved", "rejected", "bypassed"],
-  approved: [],
-  rejected: [],
-  bypassed: [],
+  approved: ["pending"],
+  rejected: ["pending"],
+  bypassed: ["pending"],
 } as const;
 
 export const APPROVAL_GATE_INITIAL_STATUS: ApprovalGateStatus = "pending";

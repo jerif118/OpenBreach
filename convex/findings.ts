@@ -1,8 +1,14 @@
-import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
-import type { FindingDto } from "./types";
+import type { FindingDto } from "./types/findings";
+import { appendAuditEvent } from "./lib/audit";
+import {
+  createArgs,
+  listByTargetArgs,
+  listByValidationResultArgs,
+  updateArgs,
+} from "./findings.validators";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -37,39 +43,33 @@ function toFindingDto(doc: Doc<"findings">): FindingDto {
 // ============================================================================
 
 export const listByTarget = internalQuery({
-  args: {
-    targetId: v.string(),
-    severity: v.optional(
-      v.union(
-        v.literal("info"),
-        v.literal("low"),
-        v.literal("medium"),
-        v.literal("high"),
-        v.literal("critical"),
-      ),
-    ),
-    limit: v.optional(v.number()),
-  },
+  args: listByTargetArgs,
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
-    let query = ctx.db
+    if (args.severity) {
+      const severity = args.severity;
+      const docs = await ctx.db
+        .query("findings")
+        .withIndex("by_targetId_and_severity", (q) =>
+          q.eq("targetId", args.targetId).eq("severity", severity),
+        )
+        .take(limit);
+
+      return docs.map(toFindingDto);
+    }
+
+    const query = ctx.db
       .query("findings")
       .withIndex("by_targetId", (q) => q.eq("targetId", args.targetId));
 
     const docs = await query.take(limit);
-    const filtered = args.severity
-      ? docs.filter((d) => d.severity === args.severity)
-      : docs;
-    return filtered.map(toFindingDto);
+    return docs.map(toFindingDto);
   },
 });
 
 export const listByValidationResult = internalQuery({
-  args: {
-    validationResultId: v.string(),
-    limit: v.optional(v.number()),
-  },
+  args: listByValidationResultArgs,
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
@@ -89,54 +89,9 @@ export const listByValidationResult = internalQuery({
 // ============================================================================
 
 export const create = internalMutation({
-  args: {
-    findingId: v.string(),
-    targetId: v.string(),
-    title: v.string(),
-    description: v.string(),
-    severity: v.union(
-      v.literal("info"),
-      v.literal("low"),
-      v.literal("medium"),
-      v.literal("high"),
-      v.literal("critical"),
-    ),
-    status: v.union(
-      v.literal("observed"),
-      v.literal("confirmed"),
-      v.literal("likely"),
-      v.literal("skipped"),
-      v.literal("unresolved"),
-      v.literal("false-positive"),
-    ),
-    createdAt: v.string(),
-    category: v.optional(
-      v.union(
-        v.literal("tls"),
-        v.literal("headers"),
-        v.literal("cms"),
-        v.literal("exposure"),
-        v.literal("admin-exposure"),
-        v.literal("availability"),
-        v.literal("known-vulnerability"),
-        v.literal("configuration"),
-        v.literal("logic"),
-      ),
-    ),
-    evidence: v.optional(v.string()),
-    remediationHint: v.optional(v.string()),
-    affectedAssets: v.optional(v.array(v.string())),
-    confidence: v.optional(
-      v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
-    ),
-    cweId: v.optional(v.string()),
-    cvssScore: v.optional(v.number()),
-    validationResultId: v.optional(v.string()),
-    reportReady: v.optional(v.boolean()),
-    runId: v.optional(v.string()),
-  },
+  args: createArgs,
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("findings")
@@ -174,61 +129,26 @@ export const create = internalMutation({
       runId: args.runId,
     });
 
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "finding-created",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: {
+        findingId: args.findingId,
+        severity: args.severity,
+        status: args.status,
+      },
+    });
+
     return { id, findingId: args.findingId };
   },
 });
 
 export const update = internalMutation({
-  args: {
-    findingId: v.string(),
-    title: v.optional(v.string()),
-    description: v.optional(v.string()),
-    severity: v.optional(
-      v.union(
-        v.literal("info"),
-        v.literal("low"),
-        v.literal("medium"),
-        v.literal("high"),
-        v.literal("critical"),
-      ),
-    ),
-    status: v.optional(
-      v.union(
-        v.literal("observed"),
-        v.literal("confirmed"),
-        v.literal("likely"),
-        v.literal("skipped"),
-        v.literal("unresolved"),
-        v.literal("false-positive"),
-      ),
-    ),
-    category: v.optional(
-      v.union(
-        v.literal("tls"),
-        v.literal("headers"),
-        v.literal("cms"),
-        v.literal("exposure"),
-        v.literal("admin-exposure"),
-        v.literal("availability"),
-        v.literal("known-vulnerability"),
-        v.literal("configuration"),
-        v.literal("logic"),
-      ),
-    ),
-    evidence: v.optional(v.string()),
-    remediationHint: v.optional(v.string()),
-    affectedAssets: v.optional(v.array(v.string())),
-    confidence: v.optional(
-      v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
-    ),
-    cweId: v.optional(v.string()),
-    cvssScore: v.optional(v.number()),
-    validationResultId: v.optional(v.string()),
-    reportReady: v.optional(v.boolean()),
-    runId: v.optional(v.string()),
-  },
+  args: updateArgs,
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const doc = await ctx.db
       .query("findings")
@@ -272,6 +192,14 @@ export const update = internalMutation({
     }
 
     await ctx.db.patch(doc._id, patch);
+    await appendAuditEvent(ctx, {
+      targetId: doc.targetId,
+      eventType: "finding-updated",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId ?? doc.runId,
+      details: { findingId: args.findingId, status: args.status ?? doc.status },
+    });
+
     return { id: doc._id, findingId: args.findingId };
   },
 });

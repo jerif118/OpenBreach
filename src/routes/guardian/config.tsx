@@ -36,7 +36,7 @@ function PlatformConfiguration() {
         subtitle="Scope, validation level, and rate-limit rules that keep the workflow aligned with the authorized defensive boundary."
         action={
           <Link
-            className="font-mono text-[10px] text-primary uppercase hover:text-[#00e639]"
+            className="text-primary font-mono text-[10px] uppercase hover:text-[#00e639]"
             to="/targets/new"
           >
             Register target
@@ -68,18 +68,18 @@ function PlatformConfiguration() {
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-[10px] lg:text-xs">
               <thead>
-                <tr className="border-b border-primary/10 text-[#b9cacb]">
+                <tr className="border-primary/10 border-b text-[#b9cacb]">
                   <th className="px-2 py-2 font-normal">TARGET</th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     CLASS
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     LEVEL
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     RATE
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     STATUS
                   </th>
                 </tr>
@@ -88,23 +88,24 @@ function PlatformConfiguration() {
                 {targets.map((target) => (
                   <tr key={target.targetId} className="hover:bg-primary/5">
                     <td className="px-2 py-3 text-[#00dbe9]">{target.name}</td>
-                    <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
+                    <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
                       {formatClassification(target.classification)}
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
-                      {target.validationLevel.replaceAll("_", " ").toUpperCase()}
+                    <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
+                      {target.validationLevel
+                        .replaceAll("_", " ")
+                        .toUpperCase()}
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
+                    <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
                       {target.rateLimit} rpm
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3">
+                    <td className="border-primary/10 border-l px-2 py-3">
                       <ToneBadge
                         label={formatWorkflowStatus(target.latestRun?.status)}
                         tone={
                           target.approvalStatus === "rejected"
                             ? "red"
-                            : target.validationLevel ===
-                                "controlled_validation"
+                            : target.validationLevel === "controlled_validation"
                               ? "green"
                               : "amber"
                         }
