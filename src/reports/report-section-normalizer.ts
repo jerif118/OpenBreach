@@ -14,10 +14,15 @@ import {
 } from "./report-normalizer-utils.ts";
 import { getScanLikeObject } from "./report-subject-risk.ts";
 
+type ReportSectionContent = {
+  narrative: string;
+  bullets: string[];
+};
+
 export function deriveScopeSection(
   subject: NormalizedSubject,
   input: GenerateRemediationReportInput,
-) {
+): ReportSectionContent {
   const source = asObject(input.sourceData);
   const scope = pickObject(source, ["scope", "authorizationScope"]);
   const scopeBullets = uniqueStrings([
@@ -47,7 +52,7 @@ export function deriveScopeSection(
 
 export function deriveAuthorizationSection(
   input: GenerateRemediationReportInput,
-) {
+): ReportSectionContent {
   const source = asObject(input.sourceData);
   const scope = pickObject(source, ["authorizationScope", "scope"]);
   const authorized = pickBoolean(scope, [
@@ -95,7 +100,7 @@ export function deriveAuthorizationSection(
 
 export function deriveMethodologySection(
   input: GenerateRemediationReportInput,
-) {
+): ReportSectionContent {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
   const explicitMethodology = pickArray(source, [
@@ -127,7 +132,9 @@ export function deriveMethodologySection(
   };
 }
 
-export function deriveSkippedTests(input: GenerateRemediationReportInput) {
+export function deriveSkippedTests(
+  input: GenerateRemediationReportInput,
+): string[] {
   const source = asObject(input.sourceData);
   const explicitSkipped = [
     ...pickArray(source, [
@@ -148,7 +155,9 @@ export function deriveSkippedTests(input: GenerateRemediationReportInput) {
   ]);
 }
 
-export function deriveValidationStatus(input: GenerateRemediationReportInput) {
+export function deriveValidationStatus(
+  input: GenerateRemediationReportInput,
+): string[] {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
   const validations = pickArray(source, [
@@ -188,7 +197,7 @@ export function deriveValidationStatus(input: GenerateRemediationReportInput) {
 export function deriveLimitations(
   input: GenerateRemediationReportInput,
   findings: ReportFinding[],
-) {
+): string[] {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
   const errors = pickArray(source, ["errors", "limitations"]).map((entry) =>
