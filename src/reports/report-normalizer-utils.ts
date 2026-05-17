@@ -16,26 +16,26 @@ export const severityLabels: ReportFinding["severity"][] = [
   "info",
 ];
 
-export function asObject(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return null;
-  }
-
-  return value as Record<string, unknown>;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-export function asArray(value: unknown) {
+export function asObject(value: unknown): Record<string, unknown> | null {
+  return isRecord(value) ? value : null;
+}
+
+export function asArray(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
 
-export function normalizeWhitespace(value: string) {
+export function normalizeWhitespace(value: string): string {
   return value
     .replace(/[\r\n\t]+/g, " ")
     .replace(/\s{2,}/g, " ")
     .trim();
 }
 
-export function toSentence(value: string) {
+export function toSentence(value: string): string {
   const normalized = normalizeWhitespace(value);
 
   if (!normalized) {
@@ -48,7 +48,7 @@ export function toSentence(value: string) {
 export function pickString(
   source: Record<string, unknown> | null,
   keys: string[],
-) {
+): string | undefined {
   if (!source) {
     return undefined;
   }
@@ -67,7 +67,7 @@ export function pickString(
 export function pickNumber(
   source: Record<string, unknown> | null,
   keys: string[],
-) {
+): number | undefined {
   if (!source) {
     return undefined;
   }
@@ -94,7 +94,7 @@ export function pickNumber(
 export function pickBoolean(
   source: Record<string, unknown> | null,
   keys: string[],
-) {
+): boolean | undefined {
   if (!source) {
     return undefined;
   }
@@ -113,7 +113,7 @@ export function pickBoolean(
 export function pickObject(
   source: Record<string, unknown> | null,
   keys: string[],
-) {
+): Record<string, unknown> | null {
   if (!source) {
     return null;
   }
@@ -132,7 +132,7 @@ export function pickObject(
 export function pickArray(
   source: Record<string, unknown> | null,
   keys: string[],
-) {
+): unknown[] {
   if (!source) {
     return [];
   }
@@ -148,7 +148,7 @@ export function pickArray(
   return [];
 }
 
-export function slugify(value: string) {
+export function slugify(value: string): string {
   return (
     normalizeWhitespace(value)
       .toLowerCase()
@@ -157,12 +157,14 @@ export function slugify(value: string) {
   );
 }
 
-export function uniqueStrings(values: Array<string | undefined | null>) {
+export function uniqueStrings(
+  values: Array<string | undefined | null>,
+): string[] {
   return [
     ...new Set(
       values
         .map((value) => (value ? normalizeWhitespace(value) : ""))
-        .filter(Boolean),
+        .filter((value): value is string => value.length > 0),
     ),
   ];
 }
