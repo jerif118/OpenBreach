@@ -72,9 +72,7 @@ function deriveVerificationGuidance(findings: ReportFinding[]): string[] {
   ).slice(0, 10);
 }
 
-export function normalizeReportInput(
-  rawInput: unknown,
-): NormalizedReportInput {
+export function normalizeReportInput(rawInput: unknown): NormalizedReportInput {
   const input = generateRemediationReportInputSchema.parse(rawInput);
   const findings = collectFindingCandidates(input);
   const riskScore = deriveRiskScore(findings, input);
@@ -88,7 +86,7 @@ export function normalizeReportInput(
     generatedAt:
       input.generatedAt ??
       pickString(looseSourcePayload(input), ["generatedAt"]) ??
-      new Date("2026-01-01T00:00:00.000Z").toISOString(),
+      new Date().toISOString(),
     subject,
     riskScore,
     riskLevel,
