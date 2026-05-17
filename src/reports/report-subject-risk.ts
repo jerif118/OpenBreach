@@ -6,6 +6,7 @@ import type {
 import { scanResultSchema } from "../shared/contracts.ts";
 import {
   asObject,
+  looseSourcePayload,
   normalizeRiskLevel,
   pickArray,
   pickBoolean,
@@ -36,12 +37,6 @@ export type ReportScanLike = {
   findings?: unknown[];
 };
 
-function getSourceObject(
-  input: GenerateRemediationReportInput,
-): LooseRecord | null {
-  return asObject(input.sourceData);
-}
-
 function toLooseScanLikeObject(
   source: LooseRecord,
 ): ReportScanLike {
@@ -65,7 +60,7 @@ export function getScanLikeObject(
     return input.scan;
   }
 
-  const source = getSourceObject(input);
+  const source = looseSourcePayload(input);
   const scanCandidate = asObject(source?.scan);
 
   if (!scanCandidate) {
@@ -86,7 +81,7 @@ function getTargetObject(source: LooseRecord | null): LooseRecord | null {
 export function deriveSubject(
   input: GenerateRemediationReportInput,
 ): NormalizedSubject {
-  const source = getSourceObject(input);
+  const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
   const target = getTargetObject(source);
 
@@ -150,7 +145,7 @@ export function deriveRiskScore(
   findings: ReportFinding[],
   input: GenerateRemediationReportInput,
 ): number {
-  const source = getSourceObject(input);
+  const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
   const directScore = pickDirectRiskScore(source, scan);
 
@@ -174,7 +169,7 @@ export function deriveRiskLevel(
   findings: ReportFinding[],
   input: GenerateRemediationReportInput,
 ): RiskLevel {
-  const source = getSourceObject(input);
+  const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
 
   return normalizeRiskLevel(
