@@ -2,9 +2,9 @@ import type {
   GenerateRemediationReportInput,
   ReportFinding,
 } from "../shared/contracts.ts";
-import type { NormalizedSubject } from "./report-subject-risk.ts";
 import {
   asObject,
+  looseSourcePayload,
   pickArray,
   pickBoolean,
   pickObject,
@@ -13,7 +13,7 @@ import {
   type LooseRecord,
   uniqueStrings,
 } from "./report-normalizer-utils.ts";
-import { getScanLikeObject } from "./report-subject-risk.ts";
+import { getScanLikeObject, type NormalizedSubject } from "./report-subject-risk.ts";
 
 type ReportSectionContent = {
   narrative: string;
@@ -92,7 +92,7 @@ export function deriveScopeSection(
   subject: NormalizedSubject,
   input: GenerateRemediationReportInput,
 ): ReportSectionContent {
-  const source = asObject(input.sourceData);
+  const source = looseSourcePayload(input);
   const scope = pickObject(source, ["scope", "authorizationScope"]);
   const scopeBullets = uniqueStrings([
     subject.websiteUrl ? `Primary public URL: ${subject.websiteUrl}` : null,
@@ -122,7 +122,7 @@ export function deriveScopeSection(
 export function deriveAuthorizationSection(
   input: GenerateRemediationReportInput,
 ): ReportSectionContent {
-  const source = asObject(input.sourceData);
+  const source = looseSourcePayload(input);
   const scope = pickObject(source, ["authorizationScope", "scope"]);
   const authorized = pickBoolean(scope, [
     "authorized",
@@ -160,7 +160,7 @@ export function deriveAuthorizationSection(
 export function deriveMethodologySection(
   input: GenerateRemediationReportInput,
 ): ReportSectionContent {
-  const source = asObject(input.sourceData);
+  const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
   const explicitMethodology = pickEntryStrings(
     source,
@@ -190,7 +190,7 @@ export function deriveMethodologySection(
 export function deriveSkippedTests(
   input: GenerateRemediationReportInput,
 ): string[] {
-  const source = asObject(input.sourceData);
+  const source = looseSourcePayload(input);
   const explicitSkipped = pickEntryStrings(
     source,
     ["skippedTests", "skipped", "deniedTests", "notTested"],
@@ -206,7 +206,7 @@ export function deriveSkippedTests(
 export function deriveValidationStatus(
   input: GenerateRemediationReportInput,
 ): string[] {
-  const source = asObject(input.sourceData);
+  const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
   const validations = pickArray(source, [
     "validationResults",
@@ -234,7 +234,7 @@ export function deriveLimitations(
   input: GenerateRemediationReportInput,
   findings: ReportFinding[],
 ): string[] {
-  const source = asObject(input.sourceData);
+  const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
   const errors = pickEntryStrings(source, ["errors", "limitations"], [
     "message",
