@@ -64,18 +64,14 @@ export function deriveAuthorizationSection(
   ]);
   const bullets = uniqueStrings([
     ...pickArray(scope, ["allowedActions", "validationClasses"]).map((entry) =>
-      typeof entry === "string"
-        ? entry
-        : pickString(asObject(entry), ["name", "label"]),
+      pickEntryString(entry, ["name", "label"]),
     ),
     ...pickArray(scope, [
       "forbiddenActions",
       "deniedActions",
       "outOfScope",
     ]).map((entry) =>
-      typeof entry === "string"
-        ? entry
-        : pickString(asObject(entry), ["name", "label"]),
+      pickEntryString(entry, ["name", "label"]),
     ),
     pickString(scope, ["timeWindow", "approvalWindow"]),
     pickString(scope, ["rateLimit", "rateLimits"]),
