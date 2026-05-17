@@ -168,6 +168,18 @@ function runBatch(
     );
     process.exit(result.status);
   }
+  if (result.signal) {
+    process.stderr.write(
+      `Batch ${batchIndex + 1} terminated by signal ${result.signal}; aborting.\n`,
+    );
+    process.exit(1);
+  }
+  if (result.status === null) {
+    process.stderr.write(
+      `Batch ${batchIndex + 1} ended without an exit status; aborting.\n`,
+    );
+    process.exit(1);
+  }
 }
 
 async function readStdin(): Promise<string> {
