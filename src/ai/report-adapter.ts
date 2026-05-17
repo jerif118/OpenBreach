@@ -70,6 +70,27 @@ function getConfiguredModel(): string {
   return process.env.AI_PROVIDER_MODEL ?? DEFAULT_MODEL;
 }
 
+async function generateDeterministicReportVariants(
+  input: GenerateRemediationReportInput,
+): Promise<RemediationReportVariants> {
+  const normalized = normalizeReportInput(input);
+  return buildDeterministicReportVariants(
+    normalized,
+    DETERMINISTIC_PROVIDER,
+    normalized.generatedAt,
+  );
+}
+
+function createDeterministicReportAdapter(): ReportAiAdapter {
+  return {
+    provider: DETERMINISTIC_PROVIDER,
+    async generateRemediationReport(input): Promise<RemediationReport> {
+      return (await generateDeterministicReportVariants(input)).technical;
+    },
+    generateRemediationReportVariants: generateDeterministicReportVariants,
+  };
+}
+
 function getAudienceInstructions(variant: ReportAudience): string {
   return variant === "technical"
     ? reportAgent.instructions
@@ -178,26 +199,7 @@ export function createReportAiAdapter(
   providerKey = getConfiguredProviderKey(),
   options: CreateReportAiAdapterOptions = {},
 ): ReportAiAdapter {
-  const deterministicReportAdapter: ReportAiAdapter = {
-    provider: DETERMINISTIC_PROVIDER,
-    async generateRemediationReport(input): Promise<RemediationReport> {
-      return (
-        await deterministicReportAdapter.generateRemediationReportVariants(
-          input,
-        )
-      ).technical;
-    },
-    async generateRemediationReportVariants(
-      input,
-    ): Promise<RemediationReportVariants> {
-      const normalized = normalizeReportInput(input);
-      return buildDeterministicReportVariants(
-        normalized,
-        DETERMINISTIC_PROVIDER,
-        normalized.generatedAt,
-      );
-    },
-  };
+  const deterministicReportAdapter = createDeterministicReportAdapter();
 
   if (!providerKey) {
     return deterministicReportAdapter;
