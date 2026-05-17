@@ -792,7 +792,10 @@ export const targetProfileSchema = z
     metadata: z.record(z.string(), z.unknown()).optional(),
   })
   .superRefine((val, ctx) => {
-    if (val.classification === "public-sector" && val.population === undefined) {
+    if (
+      val.classification === "public-sector" &&
+      val.population === undefined
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "population SHOULD be present for public-sector",
@@ -1005,9 +1008,7 @@ export const technologyFingerprintSchema = z
       });
     }
   });
-export type TechnologyFingerprint = z.infer<
-  typeof technologyFingerprintSchema
->;
+export type TechnologyFingerprint = z.infer<typeof technologyFingerprintSchema>;
 
 // --- T-007: VulnerabilityHypothesis ---
 export const vulnerabilityHypothesisSchema = z
@@ -1234,7 +1235,10 @@ export const validationResultSchema = z
     metadata: z.record(z.string(), z.unknown()).optional(),
   })
   .superRefine((val, ctx) => {
-    if (val.status === "failed" && (!val.findings || val.findings.length === 0)) {
+    if (
+      val.status === "failed" &&
+      (!val.findings || val.findings.length === 0)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "at least one Finding required when status is failed",
@@ -1280,7 +1284,12 @@ export const auditEventSchema = z.object({
   timestamp: isoDateTimeSchema,
   runId: nonEmptyStringSchema.optional(),
   details: z.record(z.string(), z.unknown()).optional(),
-  ipAddress: z.string().optional().refine((v) => !v || /^(?:\d{1,3}\.){3}\d{1,3}$/.test(v), { message: "invalid IP address" }),
+  ipAddress: z
+    .string()
+    .optional()
+    .refine((v) => !v || /^(?:\d{1,3}\.){3}\d{1,3}$/.test(v), {
+      message: "invalid IP address",
+    }),
   userAgent: nonEmptyStringSchema.optional(),
 });
 export type AuditEvent = z.infer<typeof auditEventSchema>;
@@ -1297,11 +1306,9 @@ export const reportArtifactSchema = z
     findings: z.array(nonEmptyStringSchema).optional(),
     sections: z.array(reportSectionSchema).optional(),
     pdf: reportPdfReferenceSchema.optional(),
-    generatedBy: z.enum([
-      "deterministic-fallback",
-      "ai-provider",
-      "template-engine",
-    ]).optional(),
+    generatedBy: z
+      .enum(["deterministic-fallback", "ai-provider", "template-engine"])
+      .optional(),
     runId: nonEmptyStringSchema.optional(),
     metadata: z.record(z.string(), z.unknown()).optional(),
   })
@@ -1416,9 +1423,7 @@ export const evidenceEnvelopeSchema = z.discriminatedUnion("payloadType", [
 export type EvidenceEnvelope = z.infer<typeof evidenceEnvelopeSchema>;
 
 // --- T-015: Backward-compat mapper ---
-export function municipalityToTargetProfile(
-  m: Municipality,
-): TargetProfile {
+export function municipalityToTargetProfile(m: Municipality): TargetProfile {
   return {
     targetId: m.id,
     name: m.name,
