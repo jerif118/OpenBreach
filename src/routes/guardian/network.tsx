@@ -36,7 +36,7 @@ function NetworkPage() {
         subtitle="Authorized assets, scope constraints, and passive collection readiness across the current pipeline."
         action={
           <Link
-            className="font-mono text-[10px] text-primary uppercase hover:text-[#00e639]"
+            className="text-primary font-mono text-[10px] uppercase hover:text-[#00e639]"
             to="/guardian/evidence"
           >
             Open evidence
@@ -68,21 +68,21 @@ function NetworkPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left font-mono text-[10px] lg:text-xs">
               <thead>
-                <tr className="border-b border-primary/10 text-[#b9cacb]">
+                <tr className="border-primary/10 border-b text-[#b9cacb]">
                   <th className="px-2 py-2 font-normal">TARGET</th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     ALLOWED
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     DENIED
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     LEVEL
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     RATE
                   </th>
-                  <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                  <th className="border-primary/10 border-l px-2 py-2 font-normal">
                     PHASE
                   </th>
                 </tr>
@@ -104,21 +104,25 @@ function NetworkPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3">
+                    <td className="border-primary/10 border-l px-2 py-3">
                       {target.allowedAssets.length}
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3">
+                    <td className="border-primary/10 border-l px-2 py-3">
                       {target.deniedAssets.length}
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
-                      {target.validationLevel.replaceAll("_", " ").toUpperCase()}
+                    <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
+                      {target.validationLevel
+                        .replaceAll("_", " ")
+                        .toUpperCase()}
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
+                    <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
                       {target.rateLimit} rpm
                     </td>
-                    <td className="border-l border-primary/10 px-2 py-3">
+                    <td className="border-primary/10 border-l px-2 py-3">
                       <ToneBadge
-                        label={formatWorkflowPhase(target.latestRun?.currentPhase)}
+                        label={formatWorkflowPhase(
+                          target.latestRun?.currentPhase,
+                        )}
                         tone={
                           target.approvalStatus === "rejected"
                             ? "red"
@@ -141,10 +145,10 @@ function NetworkPage() {
           {targets.map((target) => (
             <div
               key={target.targetId}
-              className="border border-primary/10 bg-[#131313]/70 p-4"
+              className="border-primary/10 border bg-[#131313]/70 p-4"
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="font-mono text-[10px] uppercase text-[#00dbe9]">
+                <p className="font-mono text-[10px] text-[#00dbe9] uppercase">
                   {target.targetId}
                 </p>
                 <ToneBadge
@@ -161,7 +165,7 @@ function NetworkPage() {
               <p className="mt-3 font-mono text-[10px] leading-5 text-[#b9cacb]">
                 {target.summary}
               </p>
-              <div className="mt-4 h-1 bg-primary/10">
+              <div className="bg-primary/10 mt-4 h-1">
                 <div
                   className="h-full bg-[linear-gradient(90deg,_rgba(0,230,57,0.95),_rgba(0,219,233,0.55))]"
                   style={{ width: `${target.coverage}%` }}

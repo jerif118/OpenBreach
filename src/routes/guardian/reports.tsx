@@ -33,7 +33,7 @@ function SecurityReports() {
         subtitle="Report readiness, artifact status, and downloadable technical or friendly PDFs mapped to the pipeline."
         action={
           <Link
-            className="font-mono text-[10px] text-primary uppercase hover:text-[#00e639]"
+            className="text-primary font-mono text-[10px] uppercase hover:text-[#00e639]"
             to="/guardian/validations"
           >
             Validation queue
@@ -65,11 +65,11 @@ function SecurityReports() {
             {targets.map((target) => (
               <div
                 key={target.targetId}
-                className="border border-primary/10 bg-[#131313]/70 p-4"
+                className="border-primary/10 border bg-[#131313]/70 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#00dbe9]">
+                    <p className="font-mono text-[10px] tracking-[0.2em] text-[#00dbe9] uppercase">
                       {target.name}
                     </p>
                     <p className="mt-2 font-mono text-[10px] text-[#b9cacb]">
@@ -91,11 +91,11 @@ function SecurityReports() {
                   />
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-3">
-                  <p className="font-mono text-[10px] text-primary/60">
+                  <p className="text-primary/60 font-mono text-[10px]">
                     {formatTimestamp(target.reportArtifact?.generatedAt)}
                   </p>
                   <Link
-                    className="font-mono text-[10px] text-primary hover:text-[#00e639]"
+                    className="text-primary font-mono text-[10px] hover:text-[#00e639]"
                     to="/targets/$targetId"
                     params={{ targetId: target.targetId }}
                   >
@@ -116,7 +116,7 @@ function SecurityReports() {
             {reportDownloads.map((download) => (
               <a
                 key={download.id}
-                className="flex items-center justify-between gap-3 border border-primary/10 bg-[#131313]/70 px-4 py-4 font-mono text-[10px] text-primary transition-colors hover:bg-primary/10"
+                className="border-primary/10 text-primary hover:bg-primary/10 flex items-center justify-between gap-3 border bg-[#131313]/70 px-4 py-4 font-mono text-[10px] transition-colors"
                 href={download.href}
               >
                 <div>
