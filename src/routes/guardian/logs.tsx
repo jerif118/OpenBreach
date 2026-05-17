@@ -1,50 +1,64 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
+
+import { formatTimestamp } from "../../features/openbreach/pipeline-data";
+import {
+  EmptyPanel,
+  GuardianHeader,
+  GuardianPanel,
+} from "../../features/openbreach/guardian-ui";
+import { useOpenBreachPipeline } from "../../hooks/use-openbreach-pipeline";
 
 export const Route = createFileRoute("/guardian/logs")({
   component: LogsPage,
 });
 
 function LogsPage() {
-  const logs = [
-    { time: "10:42:01", level: "INFO", message: "System startup complete" },
-    { time: "10:42:05", level: "INFO", message: "Network interface eth0 UP" },
-    { time: "10:43:22", level: "WARN", message: "High memory usage detected: 89%" },
-    { time: "10:44:01", level: "INFO", message: "Security scan initiated" },
-    { time: "10:45:33", level: "ERROR", message: "Failed login attempt from 192.168.1.45" },
-    { time: "10:46:12", level: "INFO", message: "Firewall rule updated" },
-  ];
+  const { auditEvents } = useOpenBreachPipeline();
 
   return (
     <div className="space-y-8">
-      <header className="mb-8">
-        <h1 className="font-display text-2xl text-primary uppercase tracking-wider">
-          System Logs
-        </h1>
-        <p className="font-mono text-[10px] text-on-surface-variant mt-2">
-          Real-time system event monitoring
-        </p>
-      </header>
-
-      <div className="terminal-border bg-black border-primary/20 p-4 font-mono text-[10px] h-96 overflow-auto">
-        {logs.map((log, index) => (
-          <div
-            key={index}
-            className={`flex gap-4 py-1 border-b border-primary/5 ${
-              log.level === "ERROR" ? "text-error" :
-              log.level === "WARN" ? "text-secondary-fixed-dim" :
-              "text-on-surface-variant"
-            }`}
+      <GuardianHeader
+        title="Audit Logs"
+        subtitle="Workflow and operator events recorded across intake, approval, validation, and reporting."
+        action={
+          <Link
+            className="font-mono text-[10px] text-primary uppercase hover:text-[#00e639]"
+            to="/guardian/validations"
           >
-            <span className="text-primary/50">[{log.time}]</span>
-            <span className={`font-bold ${
-              log.level === "ERROR" ? "text-error" :
-              log.level === "WARN" ? "text-secondary-fixed-dim" :
-              "text-secondary-fixed-dim"
-            }`}>[{log.level}]</span>
-            <span>{log.message}</span>
+            Validation queue
+          </Link>
+        }
+      />
+
+      <GuardianPanel title="Event Stream">
+        {auditEvents.length === 0 ? (
+          <EmptyPanel message="No audit events have been recorded yet." />
+        ) : (
+          <div className="h-[32rem] overflow-auto border border-primary/10 bg-black/40 p-4 font-mono text-[10px]">
+            {auditEvents.map((event) => (
+              <div
+                key={event.id}
+                className="flex flex-col gap-1 border-b border-primary/5 py-3 text-[#b9cacb] md:flex-row md:items-center md:justify-between"
+              >
+                <div className="flex flex-col gap-1">
+                  <span className="text-primary">[{formatTimestamp(event.timestamp)}]</span>
+                  <span className="text-[#00dbe9]">
+                    {event.targetName} / {event.eventType}
+                  </span>
+                  <span>{event.actor}</span>
+                </div>
+                <Link
+                  className="text-primary hover:text-[#00e639]"
+                  to="/targets/$targetId"
+                  params={{ targetId: event.targetId }}
+                >
+                  Open target
+                </Link>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        )}
+      </GuardianPanel>
     </div>
   );
 }

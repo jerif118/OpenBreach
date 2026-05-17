@@ -15,47 +15,77 @@ export function OpenBreachAppFrame({ children }: { children: ReactNode }) {
 }
 
 function SideNavBar() {
+  const items = [
+    { exact: true, icon: "grid_view", label: "OVERVIEW", to: "/guardian" },
+    { icon: "travel_explore", label: "TARGETS", to: "/targets" },
+    { icon: "lan", label: "NETWORK", to: "/guardian/network" },
+    { icon: "security", label: "THREATS", to: "/guardian/threats" },
+    { icon: "database", label: "EVIDENCE", to: "/guardian/evidence" },
+    {
+      icon: "verified_user",
+      label: "VALIDATIONS",
+      to: "/guardian/validations",
+    },
+    { icon: "description", label: "REPORTS", to: "/guardian/reports" },
+    { icon: "terminal", label: "LOGS", to: "/guardian/logs" },
+    { icon: "settings", label: "CONFIG", to: "/guardian/config" },
+  ] as const;
+
   return (
-    <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-primary/10 bg-[#0e0e0e] pt-16 md:flex">
-      <div className="mb-8 flex flex-col gap-2 px-6">
-        <h2 className="font-display text-2xl tracking-[0.2em] text-primary">
-          OPENBREACH
-        </h2>
-        <p className="font-mono text-[10px] tracking-[0.28em] text-[#00dbe9] uppercase">
+    <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-primary/10 bg-surface-container-lowest pt-16 md:flex">
+      <div className="mb-6 border-b border-primary/10 px-6 pb-6">
+        <div className="terminal-wordmark text-[2rem] leading-none text-primary">
+          OPEN CREACH
+        </div>
+        <p className="mt-2 font-mono text-[10px] tracking-[0.28em] text-on-surface-variant uppercase">
           Authorized Validation Grid
         </p>
-        <div className="mt-4 flex items-center gap-3">
-          <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden border border-primary/40 bg-[#131313] pixel-corner">
+        <div className="mt-5 flex items-center gap-3 border border-primary/10 bg-surface-container-low px-3 py-3 pixel-corner">
+          <div className="flex h-10 w-10 items-center justify-center border border-primary/20 bg-surface pixel-corner">
             <span className="material-symbols-outlined text-primary">
               verified_user
             </span>
           </div>
           <div>
-            <p className="font-mono text-xs tracking-widest text-[#00dbe9] uppercase crt-glow">
+            <p className="font-display text-sm text-primary uppercase">
               OPERATOR_01
             </p>
-            <p className="font-mono text-[10px] text-[#00e639] uppercase">
-              STATUS: VERIFIED
+            <p className="mt-1 font-mono text-[10px] text-secondary-fixed-dim uppercase">
+              STATUS: ENCRYPTED
             </p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-grow flex-col gap-2">
-        <NavItem exact icon="grid_view" label="OVERVIEW" to="/guardian/" />
-        <NavItem icon="lan" label="NETWORK" to="/guardian/network" />
-        <NavItem icon="security" label="THREATS" to="/guardian/threats" />
-        <NavItem icon="terminal" label="LOGS" to="/guardian/logs" />
-        <NavItem icon="settings" label="CONFIG" to="/guardian/config" />
+      <div className="flex flex-grow flex-col gap-1 overflow-y-auto pb-4">
+        {items.map((item) => (
+          <NavItem
+            key={item.to}
+            exact={"exact" in item ? item.exact : undefined}
+            icon={item.icon}
+            label={item.label}
+            to={item.to}
+          />
+        ))}
       </div>
 
-      <div className="p-6">
-        <button className="group flex w-full items-center justify-center gap-2 border border-primary bg-[#131313] py-3 font-mono text-xs tracking-widest text-primary uppercase transition-colors pixel-corner hover:bg-primary/10">
+      <div className="space-y-3 p-6">
+        <Link
+          className="group flex w-full items-center justify-center gap-2 border border-primary/30 bg-surface px-3 py-3 font-mono text-[10px] tracking-[0.22em] text-primary uppercase transition-colors pixel-corner hover:bg-primary/10"
+          to="/targets/new"
+        >
           <span className="material-symbols-outlined group-hover:animate-pulse">
-            radar
+            add_circle
           </span>
-          START_SWEEP
-        </button>
+          REGISTER_TARGET
+        </Link>
+        <Link
+          className="group flex w-full items-center justify-center gap-2 border border-secondary-fixed-dim/40 bg-secondary-fixed-dim/5 px-3 py-3 font-mono text-[10px] tracking-[0.22em] text-secondary-fixed-dim uppercase transition-colors pixel-corner hover:bg-secondary-fixed-dim/10"
+          to="/guardian/reports"
+        >
+          <span className="material-symbols-outlined">download</span>
+          OPEN_REPORTS
+        </Link>
       </div>
     </nav>
   );
@@ -77,9 +107,9 @@ function NavItem({
       activeOptions={{ exact }}
       activeProps={{
         className:
-          "flex items-center gap-4 border-l-4 border-[#00e639] bg-[#13ff43]/10 px-4 py-3 font-mono text-xs tracking-widest text-[#00e639] uppercase translate-x-1 crt-glow",
+          "flex items-center gap-4 border-l-4 border-secondary-fixed-dim bg-secondary-container/10 px-4 py-3 font-mono text-[10px] tracking-[0.22em] text-secondary-fixed-dim uppercase transition-all sm:text-xs",
       }}
-      className="flex items-center gap-4 px-4 py-3 font-mono text-xs tracking-widest text-[#b9cacb] uppercase transition-all hover:bg-primary/5 hover:text-primary"
+      className="flex items-center gap-4 px-4 py-3 font-mono text-[10px] tracking-[0.22em] text-on-surface-variant uppercase transition-all hover:bg-primary/5 hover:text-primary sm:text-xs"
       to={to}
     >
       <span className="material-symbols-outlined">{icon}</span>
@@ -90,25 +120,25 @@ function NavItem({
 
 function TopNavBarMobile() {
   return (
-    <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-primary/10 bg-[#131313]/90 px-4 backdrop-blur-md md:hidden">
+    <nav className="sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b border-primary/10 bg-surface/90 px-4 backdrop-blur-md md:hidden">
       <div>
-        <h1 className="font-display text-2xl tracking-[0.16em] text-primary uppercase crt-glow">
-          OB
+        <h1 className="terminal-wordmark text-xl leading-none text-primary">
+          OPEN CREACH
         </h1>
-        <p className="font-mono text-[9px] tracking-[0.24em] text-[#00dbe9] uppercase">
-          OpenBreach
+        <p className="mt-1 font-mono text-[9px] tracking-[0.24em] text-on-surface-variant uppercase">
+          Control Plane
         </p>
       </div>
       <div className="flex gap-4">
-        <button className="text-[#b9cacb] hover:text-primary">
+        <Link className="text-[#b9cacb] hover:text-primary" to="/targets">
           <span className="material-symbols-outlined">security</span>
-        </button>
-        <button className="text-[#b9cacb] hover:text-primary">
+        </Link>
+        <Link className="text-[#b9cacb] hover:text-primary" to="/guardian/validations">
           <span className="material-symbols-outlined">sensors</span>
-        </button>
-        <button className="text-[#b9cacb] hover:text-primary">
+        </Link>
+        <Link className="text-[#b9cacb] hover:text-primary" to="/guardian/reports">
           <span className="material-symbols-outlined">terminal</span>
-        </button>
+        </Link>
       </div>
     </nav>
   );

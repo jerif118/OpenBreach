@@ -3,6 +3,10 @@ import { useMutation } from "convex/react";
 
 import { api } from "../../convex/_generated/api.js";
 import type { TargetProfileDto } from "../../convex/types.js";
+import {
+  writeStoredDemoTarget,
+  type ValidationLevel,
+} from "../features/openbreach/pipeline-data";
 
 // ============================================================================
 // Types
@@ -57,22 +61,56 @@ export function useTargetCreate(): UseTargetCreateReturn {
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [data, setData] = useState<TargetCreateResult | null>(null);
+  const isConfigured = Boolean(import.meta.env.VITE_CONVEX_URL);
 
-  const mutate = useMutation(api.targetsPublic.createFull);
+  const mutate = isConfigured
+    ? useMutation(api.targetsPublic.createFull)
+    : null;
 
   const createTarget = useCallback(
     async (args: CreateTargetArgs): Promise<TargetCreateResult> => {
-      console.log("🔥 useTargetCreate: starting mutation with args:", args);
       setIsPending(true);
       setError(null);
 
       try {
-        const result = await mutate(args);
-        console.log("🔥 useTargetCreate: mutation succeeded:", result);
+        let result: TargetCreateResult;
+
+        if (!mutate) {
+          const createdAt = new Date().toISOString();
+          const runId = crypto.randomUUID();
+          result = {
+            targetId: args.targetId,
+            name: args.name,
+            riskTier: "medium",
+            classification: args.classification,
+            runId,
+            status: "pending",
+            currentPhase: "intake",
+          };
+
+          writeStoredDemoTarget({
+            targetId: args.targetId,
+            name: args.name,
+            primaryUrl: args.primaryUrl,
+            classification: args.classification,
+            riskTier: "medium",
+            createdAt,
+            runId,
+            status: "pending",
+            currentPhase: "intake",
+            approverName: args.approverName,
+            validationLevel: args.validationLevel as ValidationLevel | undefined,
+            rateLimit: args.rateLimit,
+            allowedAssets: args.allowedAssets,
+            deniedAssets: args.deniedAssets,
+          });
+        } else {
+          result = await mutate(args);
+        }
+
         setData(result);
         return result;
       } catch (err) {
-        console.error("🔥 useTargetCreate: mutation failed:", err);
         const normalizedError =
           err instanceof Error
             ? err

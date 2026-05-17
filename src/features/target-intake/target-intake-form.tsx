@@ -278,7 +278,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           <div className="w-full">
             <label htmlFor="allowedAssets" className={LABEL_BASE}>
               Allowed Assets
-              <span className="ml-1 text-slate-500">
+              <span className="ml-1 text-on-surface-variant/60">
                 (comma-separated URLs)
               </span>
             </label>
@@ -301,7 +301,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           <div className="w-full">
             <label htmlFor="deniedAssets" className={LABEL_BASE}>
               Denied Assets
-              <span className="ml-1 text-slate-500">
+              <span className="ml-1 text-on-surface-variant/60">
                 (comma-separated URLs)
               </span>
             </label>
@@ -354,8 +354,8 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
 
         {/* Global error */}
         {globalError && (
-          <div className="animate-shake rounded-2xl border border-red-400/20 bg-red-400/10 p-4">
-            <p className="font-mono text-sm text-red-300">
+          <div className="animate-shake border border-error/30 bg-error/10 p-4 pixel-corner">
+            <p className="font-mono text-sm text-error">
               [ERROR] {globalError}
             </p>
           </div>
@@ -367,11 +367,11 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
             variant="primary"
             type="submit"
             disabled={isPending}
-            className="border-emerald-300/30 bg-emerald-300/10 text-emerald-100 hover:bg-emerald-300/20 focus:ring-emerald-200/40"
+            className="border-secondary-fixed-dim/30 bg-secondary-fixed-dim/10 text-secondary-fixed-dim hover:bg-secondary-fixed-dim/15 focus:ring-secondary-fixed-dim/30"
           >
             {isPending ? (
               <span className="flex items-center gap-2">
-                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-emerald-300/30 border-t-emerald-300" />
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-secondary-fixed-dim/30 border-t-secondary-fixed-dim" />
                 Processing…
               </span>
             ) : (
@@ -379,7 +379,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
             )}
           </Button>
           {isPending && (
-            <span className="font-mono text-sm text-slate-400">
+            <span className="font-mono text-sm text-on-surface-variant">
               Submitting to Convex…
             </span>
           )}

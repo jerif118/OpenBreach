@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TargetsIndexRouteImport } from './routes/targets/index'
 import { Route as GuardianIndexRouteImport } from './routes/guardian/index'
 import { Route as TargetsNewRouteImport } from './routes/targets/new'
+import { Route as TargetsTargetIdRouteImport } from './routes/targets/$targetId'
 import { Route as ReportsFileNameRouteImport } from './routes/reports/$fileName'
 import { Route as GuardianValidationsRouteImport } from './routes/guardian/validations'
 import { Route as GuardianThreatsRouteImport } from './routes/guardian/threats'
@@ -46,6 +47,11 @@ const GuardianIndexRoute = GuardianIndexRouteImport.update({
 const TargetsNewRoute = TargetsNewRouteImport.update({
   id: '/targets/new',
   path: '/targets/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TargetsTargetIdRoute = TargetsTargetIdRouteImport.update({
+  id: '/targets/$targetId',
+  path: '/targets/$targetId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsFileNameRoute = ReportsFileNameRouteImport.update({
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian/': typeof GuardianIndexRoute
   '/targets/': typeof TargetsIndexRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian': typeof GuardianIndexRoute
   '/targets': typeof TargetsIndexRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian/': typeof GuardianIndexRoute
   '/targets/': typeof TargetsIndexRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$fileName'
+    | '/targets/$targetId'
     | '/targets/new'
     | '/guardian/'
     | '/targets/'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$fileName'
+    | '/targets/$targetId'
     | '/targets/new'
     | '/guardian'
     | '/targets'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$fileName'
+    | '/targets/$targetId'
     | '/targets/new'
     | '/guardian/'
     | '/targets/'
@@ -185,6 +197,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GuardianRoute: typeof GuardianRouteWithChildren
   ReportsFileNameRoute: typeof ReportsFileNameRoute
+  TargetsTargetIdRoute: typeof TargetsTargetIdRoute
   TargetsNewRoute: typeof TargetsNewRoute
   TargetsIndexRoute: typeof TargetsIndexRoute
 }
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       path: '/targets/new'
       fullPath: '/targets/new'
       preLoaderRoute: typeof TargetsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/targets/$targetId': {
+      id: '/targets/$targetId'
+      path: '/targets/$targetId'
+      fullPath: '/targets/$targetId'
+      preLoaderRoute: typeof TargetsTargetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports/$fileName': {
@@ -315,6 +335,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GuardianRoute: GuardianRouteWithChildren,
   ReportsFileNameRoute: ReportsFileNameRoute,
+  TargetsTargetIdRoute: TargetsTargetIdRoute,
   TargetsNewRoute: TargetsNewRoute,
   TargetsIndexRoute: TargetsIndexRoute,
 }

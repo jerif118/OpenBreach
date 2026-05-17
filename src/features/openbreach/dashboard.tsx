@@ -1,139 +1,314 @@
+import { Link } from "@tanstack/react-router";
+
 import { ThreatMapPanel } from "../../components/threat-map/ThreatMapPanel";
+import {
+  formatTimestamp,
+  formatWorkflowPhase,
+  formatWorkflowStatus,
+} from "./pipeline-data";
+import { useDashboardData } from "../../hooks/use-dashboard-data";
+import {
+  getTargetLastUpdated,
+  getTargetStatusTone,
+} from "../../hooks/use-openbreach-pipeline";
 
 export function OpenBreachDashboard() {
+  const {
+    alerts,
+    metrics,
+    recentValidations,
+    reportDownloads,
+    stageSummary,
+    targets,
+    isLoading,
+  } = useDashboardData();
+
   return (
     <div className="space-y-8">
-      <header className="mb-8 flex flex-col justify-between gap-4 border-b border-primary/20 pb-4 md:flex-row md:items-end">
+      <header className="flex flex-col justify-between gap-4 border-b border-primary/20 pb-4 lg:flex-row lg:items-end">
         <div>
           <h1 className="font-display flex items-center gap-3 text-xl tracking-[0.14em] text-[#00dbe9] uppercase lg:text-2xl">
             <span className="material-symbols-outlined text-2xl lg:text-3xl">
               travel_explore
             </span>
-            OpenBreach Control Plane
+            Open Creach Control Plane
           </h1>
           <p className="mt-2 font-mono text-[10px] text-[#b9cacb] lg:text-xs">
-            Live visibility for approved assets, validation status, and response
-            posture.
+            Authorized intake, passive evidence, approval gates, validation,
+            and report delivery in one operational dashboard.
           </p>
         </div>
-        <div className="flex items-center gap-2 border border-[#00e639]/30 bg-[#13ff43]/10 px-3 py-1 font-mono text-[10px] text-[#00e639] pixel-corner lg:text-xs">
-          <span className="block h-2 w-2 bg-[#00e639] crt-glow" />
-          MONITORING_ACTIVE
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 border border-[#00e639]/30 bg-[#13ff43]/10 px-3 py-1 font-mono text-[10px] text-[#00e639] pixel-corner lg:text-xs">
+            <span className="block h-2 w-2 bg-[#00e639] crt-glow" />
+            PIPELINE_ACTIVE
+          </div>
+          <Link
+            className="border border-primary/40 px-3 py-2 font-mono text-[10px] text-primary uppercase transition-colors pixel-corner hover:bg-primary/10 lg:text-xs"
+            to="/targets/new"
+          >
+            Register Target
+          </Link>
+          <Link
+            className="border border-[#00e639]/30 px-3 py-2 font-mono text-[10px] text-[#00e639] uppercase transition-colors pixel-corner hover:bg-[#00e639]/10 lg:text-xs"
+            to="/guardian/reports"
+          >
+            Open Reports
+          </Link>
         </div>
       </header>
 
-      <section className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <MetricCard label="Approved Assets" value="1,024" />
-        <MetricCard label="Active Checks" value="8,192" />
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <MetricCard
-          icon="warning"
-          label="Critical Alerts"
-          value="03"
-          variant="error"
+          label="Targets In Scope"
+          value={
+            isLoading || !metrics ? "--" : metrics.targetsInScope.toString()
+          }
         />
-        <MetricCard label="Coverage" value="96%" variant="green" />
+        <MetricCard
+          label="Pending Actions"
+          value={isLoading || !metrics ? "--" : metrics.pendingGates.toString()}
+        />
+        <MetricCard
+          label="Reports Ready"
+          tone="green"
+          value={isLoading || !metrics ? "--" : metrics.reportsReady.toString()}
+        />
+        <MetricCard
+          label="Coverage"
+          tone="cyan"
+          value={isLoading || !metrics ? "--" : `${metrics.coverage}%`}
+        />
       </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="flex flex-col gap-4 lg:col-span-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.7fr_1fr]">
+        <div className="flex flex-col gap-4">
           <ThreatMapPanel />
 
-          <div className="relative overflow-hidden border border-primary/15 bg-[#2a2a2a] p-4">
+          <section className="relative overflow-hidden border border-primary/15 bg-[#2a2a2a] p-4">
             <div className="absolute inset-0 scanlines opacity-20" />
             <div className="relative z-10">
-              <h3 className="font-display mb-4 flex items-center gap-2 border-b border-primary/20 pb-2 text-base text-primary uppercase lg:text-lg">
-                <span className="material-symbols-outlined">history</span>
-                Recent Validations
-              </h3>
+              <div className="mb-4 flex items-center justify-between gap-4 border-b border-primary/10 pb-3">
+                <h2 className="font-display text-base text-primary uppercase lg:text-lg">
+                  Pipeline Flow
+                </h2>
+                <Link
+                  className="font-mono text-[10px] text-primary/70 uppercase hover:text-primary"
+                  to="/guardian/validations"
+                >
+                  Review validations
+                </Link>
+              </div>
+              <div className="grid gap-3 md:grid-cols-5">
+                {stageSummary.map((stage) => (
+                  <div
+                    key={stage.label}
+                    className="border border-primary/10 bg-[#131313]/80 p-4"
+                  >
+                    <p className="font-mono text-[10px] uppercase text-[#b9cacb]">
+                      {stage.label}
+                    </p>
+                    <p className="font-display mt-3 text-2xl text-primary">
+                      {stage.value.toString().padStart(2, "0")}
+                    </p>
+                    <div className="mt-4 h-1 bg-primary/10">
+                      <div
+                        className="h-full bg-[linear-gradient(90deg,_rgba(0,230,57,0.95),_rgba(0,219,233,0.55))]"
+                        style={{
+                          width: `${targets.length ? Math.min(100, Math.round((stage.value / targets.length) * 100)) : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="relative overflow-hidden border border-primary/15 bg-[#2a2a2a] p-4">
+            <div className="absolute inset-0 scanlines opacity-20" />
+            <div className="relative z-10">
+              <div className="mb-4 flex items-center justify-between gap-4 border-b border-primary/10 pb-3">
+                <h2 className="font-display text-base text-primary uppercase lg:text-lg">
+                  Target Queue
+                </h2>
+                <Link
+                  className="font-mono text-[10px] text-primary/70 uppercase hover:text-primary"
+                  to="/targets"
+                >
+                  Open registry
+                </Link>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-left font-mono text-[10px] lg:text-xs">
                   <thead>
                     <tr className="border-b border-primary/10 text-[#b9cacb]">
-                      <th className="px-2 py-2 font-normal">ID</th>
+                      <th className="px-2 py-2 font-normal">TARGET</th>
                       <th className="border-l border-primary/10 px-2 py-2 font-normal">
-                        TARGET
-                      </th>
-                      <th className="border-l border-primary/10 px-2 py-2 font-normal">
-                        DURATION
+                        PHASE
                       </th>
                       <th className="border-l border-primary/10 px-2 py-2 font-normal">
                         STATUS
                       </th>
+                      <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                        UPDATED
+                      </th>
+                      <th className="border-l border-primary/10 px-2 py-2 font-normal">
+                        ACTION
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <ValidationRow
-                      duration="00:04:12"
-                      id="run_0x8F2"
-                      status="CLEARED"
-                      statusTone="green"
-                      target="public-api.prod"
-                    />
-                    <ValidationRow
-                      duration="00:01:45"
-                      id="run_0x8F1"
-                      status="REVIEW"
-                      statusTone="red"
-                      target="identity.edge"
-                    />
-                    <ValidationRow
-                      duration="00:12:30"
-                      id="run_0x8F0"
-                      status="RUNNING"
-                      statusTone="cyan"
-                      target="citizen-portal"
-                    />
+                    {targets.length === 0 ? (
+                      <tr>
+                        <td className="px-2 py-3 text-[#b9cacb]" colSpan={5}>
+                          No targets available.
+                        </td>
+                      </tr>
+                    ) : (
+                      targets.slice(0, 6).map((target) => (
+                        <tr key={target.targetId} className="hover:bg-primary/5">
+                          <td className="px-2 py-3 text-[#00dbe9]">
+                            <div className="flex flex-col gap-1">
+                              <span>{target.name}</span>
+                              <span className="text-[9px] text-[#b9cacb]">
+                                {target.targetId}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
+                            {formatWorkflowPhase(target.latestRun?.currentPhase)}
+                          </td>
+                          <td className="border-l border-primary/10 px-2 py-3">
+                            <StatusPill
+                              label={formatWorkflowStatus(target.latestRun?.status)}
+                              tone={getTargetStatusTone(target)}
+                            />
+                          </td>
+                          <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
+                            {getTargetLastUpdated(target)}
+                          </td>
+                          <td className="border-l border-primary/10 px-2 py-3">
+                            <Link
+                              className="text-primary hover:text-[#00e639]"
+                              to="/targets/$targetId"
+                              params={{ targetId: target.targetId }}
+                            >
+                              {target.nextActionLabel}
+                            </Link>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="relative overflow-hidden border border-[#ffb4ab]/40 bg-[#2a2a2a] p-4">
+          <section className="relative overflow-hidden border border-[#ffb4ab]/40 bg-[#2a2a2a] p-4">
             <div className="absolute left-0 top-0 h-1 w-full bg-[#ffb4ab]/50" />
-            <h3 className="font-display mb-4 flex items-center gap-2 text-base text-[#ffb4ab] uppercase lg:text-lg">
+            <h2 className="font-display mb-4 flex items-center gap-2 text-base text-[#ffb4ab] uppercase lg:text-lg">
               <span className="material-symbols-outlined">gpp_bad</span>
               Live Alerts
-            </h3>
+            </h2>
             <div className="flex flex-col gap-3 font-mono text-[10px]">
-              <AlertCard
-                body="Header baseline drift detected on public-api.prod"
-                timestamp="10:38:22"
-                title="POLICY_MISMATCH"
-              />
-              <AlertCard
-                body="Auth callback exposed a permissive redirect pattern"
-                timestamp="09:15:04"
-                title="REDIRECT_ANOMALY"
-              />
-              <AlertCard
-                body="Rate limit backlog building on citizen-portal uploads"
-                timestamp="08:42:11"
-                title="QUEUE_PRESSURE"
-              />
+              {alerts.length === 0 ? (
+                <AlertCard
+                  body="No critical alerts are active in the current snapshot."
+                  timestamp="--"
+                  title="PIPELINE_CLEAR"
+                />
+              ) : (
+                alerts.map((alert) => (
+                  <AlertCard
+                    key={alert.id}
+                    body={alert.body}
+                    timestamp={formatTimestamp(alert.timestamp)}
+                    title={alert.title}
+                  />
+                ))
+              )}
             </div>
-          </div>
+          </section>
 
-          <div className="border border-primary/30 bg-[#131313] p-4">
-            <p className="mb-2 font-mono text-[10px] text-primary">
-              &gt;_ OpenBreach_Command
-            </p>
-            <div className="flex overflow-hidden border border-primary/50 pixel-corner transition-colors focus-within:border-primary">
-              <span className="flex items-center bg-primary/10 px-3 py-2 font-mono text-primary">
-                $
-              </span>
-              <input
-                className="w-full border-none bg-transparent font-mono text-[10px] text-[#00dbe9] placeholder:text-primary/30 focus:ring-0 lg:text-xs"
-                placeholder="run approved validation..."
-                type="text"
-              />
-              <button className="material-symbols-outlined bg-primary/20 px-3 text-primary transition-colors hover:bg-primary hover:text-[#00363a]">
-                keyboard_return
-              </button>
+          <section className="border border-primary/15 bg-[#2a2a2a] p-4">
+            <div className="mb-4 flex items-center justify-between gap-4 border-b border-primary/10 pb-3">
+              <h2 className="font-display text-base text-primary uppercase lg:text-lg">
+                Recent Validations
+              </h2>
+              <Link
+                className="font-mono text-[10px] text-primary/70 uppercase hover:text-primary"
+                to="/guardian/validations"
+              >
+                Open queue
+              </Link>
             </div>
-          </div>
+            <div className="space-y-3">
+              {recentValidations.length === 0 ? (
+                <p className="font-mono text-[10px] text-[#b9cacb]">
+                  No validations available.
+                </p>
+              ) : (
+                recentValidations.slice(0, 4).map((validation) => (
+                  <div
+                    key={validation.id}
+                    className="border border-primary/10 bg-[#131313]/70 p-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-[10px] text-[#00dbe9]">
+                          {validation.id}
+                        </p>
+                        <p className="mt-1 font-mono text-[10px] text-[#b9cacb]">
+                          {validation.target}
+                        </p>
+                      </div>
+                      <StatusPill
+                        label={validation.status}
+                        tone={validation.statusTone}
+                      />
+                    </div>
+                    <p className="mt-2 font-mono text-[10px] text-[#b9cacb]">
+                      Duration: {validation.duration}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+
+          <section className="border border-primary/15 bg-[#2a2a2a] p-4">
+            <div className="mb-4 flex items-center justify-between gap-4 border-b border-primary/10 pb-3">
+              <h2 className="font-display text-base text-primary uppercase lg:text-lg">
+                Report Downloads
+              </h2>
+              <Link
+                className="font-mono text-[10px] text-primary/70 uppercase hover:text-primary"
+                to="/guardian/reports"
+              >
+                View library
+              </Link>
+            </div>
+            <div className="space-y-3">
+              {reportDownloads.slice(0, 4).map((download) => (
+                <a
+                  key={download.id}
+                  className="flex items-center justify-between gap-3 border border-primary/10 bg-[#131313]/70 px-3 py-3 font-mono text-[10px] text-primary transition-colors hover:bg-primary/10"
+                  href={download.href}
+                >
+                  <span>{download.label}</span>
+                  <span className="material-symbols-outlined text-sm">
+                    download
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -143,78 +318,54 @@ export function OpenBreachDashboard() {
 function MetricCard({
   label,
   value,
-  variant,
-  icon,
+  tone = "default",
 }: {
   label: string;
   value: string;
-  variant?: "default" | "error" | "green";
-  icon?: string;
+  tone?: "default" | "green" | "cyan";
 }) {
-  const isError = variant === "error";
-  const isGreen = variant === "green";
+  const toneClassName =
+    tone === "green"
+      ? "text-[#00e639]"
+      : tone === "cyan"
+        ? "text-[#00dbe9]"
+        : "text-white";
 
   return (
-    <div
-      className={`group relative overflow-hidden border border-primary/15 bg-[#2a2a2a] p-4 ${isError ? "border-[#ffb4ab]/30 bg-[#ffb4ab]/5" : ""}`}
-    >
+    <div className="group relative overflow-hidden border border-primary/15 bg-[#2a2a2a] p-4">
       <div className="absolute inset-0 scanlines opacity-30" />
-      <div className="absolute left-0 top-0 h-1 w-1 bg-primary/50" />
-      <p
-        className={`relative z-10 mb-2 font-mono text-[10px] uppercase ${isError ? "text-[#ffb4ab]" : "text-[#b9cacb]"}`}
-      >
-        {icon ? (
-          <span className="material-symbols-outlined mr-1 text-sm">{icon}</span>
-        ) : null}
+      <p className="relative z-10 mb-2 font-mono text-[10px] uppercase text-[#b9cacb]">
         {label}
       </p>
-      <p
-        className={`font-display relative z-10 text-xl transition-all group-hover:crt-glow lg:text-2xl ${isError ? "text-[#ffb4ab]" : isGreen ? "text-[#00e639]" : "text-[#00dbe9]"}`}
-      >
+      <p className={`font-display relative z-10 text-xl transition-all group-hover:crt-glow lg:text-2xl ${toneClassName}`}>
         {value}
       </p>
     </div>
   );
 }
 
-function ValidationRow({
-  id,
-  target,
-  duration,
-  status,
-  statusTone,
+function StatusPill({
+  label,
+  tone,
 }: {
-  id: string;
-  target: string;
-  duration: string;
-  status: string;
-  statusTone: "green" | "red" | "cyan";
+  label: string;
+  tone: "green" | "red" | "cyan" | "amber";
 }) {
   const toneClassName =
-    statusTone === "green"
+    tone === "green"
       ? "border-[#ecffe3] bg-[#ecffe3]/10 text-[#00e639]"
-      : statusTone === "red"
+      : tone === "red"
         ? "border-[#ffb4ab] bg-[#ffb4ab]/10 text-[#ffb4ab]"
-        : "border-primary bg-primary/10 text-[#00dbe9]";
+        : tone === "amber"
+          ? "border-[#ffd580] bg-[#ffd580]/10 text-[#ffd580]"
+          : "border-primary bg-primary/10 text-[#00dbe9]";
 
   return (
-    <tr className="transition-colors hover:bg-primary/5">
-      <td className="px-2 py-3 text-[#00dbe9]">{id}</td>
-      <td className="px-2 py-3">{target}</td>
-      <td className="border-l border-primary/10 px-2 py-3 text-[#b9cacb]">
-        {duration}
-      </td>
-      <td className="border-l border-primary/10 px-2 py-3">
-        <span
-          className={`inline-flex items-center gap-2 border px-2 py-1 pixel-corner ${toneClassName}`}
-        >
-          {status}
-          {statusTone === "cyan" ? (
-            <span className="h-1 w-1 animate-ping rounded-full bg-current" />
-          ) : null}
-        </span>
-      </td>
-    </tr>
+    <span
+      className={`inline-flex items-center gap-2 border px-2 py-1 pixel-corner ${toneClassName}`}
+    >
+      {label}
+    </span>
   );
 }
 
@@ -228,15 +379,14 @@ function AlertCard({
   body: string;
 }) {
   return (
-    <div className="border-l-2 border-[#ffb4ab] bg-[#ffb4ab]/5 py-1 pl-3 transition-colors hover:bg-[#ffb4ab]/10">
-      <p className="mb-1 text-[#ffb4ab] crt-glow">[{timestamp}] {title}</p>
-      <p className="text-[#b9cacb]">{body}</p>
-      <button
-        className="mt-2 text-[10px] text-[#00dbe9] uppercase hover:underline"
-        type="button"
-      >
-        Investigate &gt;&gt;
-      </button>
+    <div className="border border-[#ffb4ab]/20 bg-[#131313]/80 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-mono text-[10px] text-[#ffb4ab]">{title}</p>
+        <p className="font-mono text-[10px] text-[#b9cacb]">{timestamp}</p>
+      </div>
+      <p className="mt-2 font-mono text-[10px] leading-5 text-[#e5e2e1]">
+        {body}
+      </p>
     </div>
   );
 }

@@ -10,16 +10,38 @@ import type {
 import { peruOutlineGeoJson } from "./peruOutlineGeoJson";
 import type { ThreatEntry } from "./threatMapTypes";
 
-const MAP_CENTER: [number, number] = [-71.6, -15.35];
 const MAP_STYLE: StyleSpecification = {
   version: 8,
-  sources: {},
+  glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
+  sources: {
+    "carto-dark": {
+      type: "raster",
+      tiles: [
+        "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
+        "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
+        "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
+        "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
+      ],
+      tileSize: 256,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    },
+  },
   layers: [
     {
       id: "threat-map-background",
       type: "background",
       paint: {
         "background-color": "#041015",
+      },
+    },
+    {
+      id: "threat-map-basemap",
+      type: "raster",
+      source: "carto-dark",
+      paint: {
+        "raster-opacity": 0.85,
+        "raster-saturation": -0.25,
       },
     },
   ],
@@ -32,12 +54,6 @@ const MAP_HEAT_LAYER_ID = "threat-entries-heat";
 const MAP_CRITICAL_LAYER_ID = "threat-entries-critical";
 const MAP_POINTS_LAYER_ID = "threat-entries-points";
 const MAP_SELECTION_LAYER_ID = "threat-entries-selection";
-const SOUTH_PERU_BOUNDS = {
-  maxLat: -11.2,
-  maxLng: -68.6,
-  minLat: -19.1,
-  minLng: -76.9,
-};
 
 const heatmapColor: ExpressionSpecification = [
   "interpolate",
@@ -46,15 +62,17 @@ const heatmapColor: ExpressionSpecification = [
   0,
   "rgba(0, 0, 0, 0)",
   0.15,
-  "rgba(0, 219, 233, 0.18)",
+  "rgba(0, 219, 233, 0.08)",
   0.3,
-  "rgba(19, 255, 67, 0.34)",
-  0.5,
-  "rgba(255, 209, 102, 0.64)",
-  0.72,
-  "rgba(255, 94, 120, 0.82)",
+  "rgba(0, 219, 233, 0.16)",
+  0.48,
+  "rgba(19, 255, 67, 0.22)",
+  0.66,
+  "rgba(255, 209, 102, 0.3)",
+  0.82,
+  "rgba(255, 94, 120, 0.38)",
   1,
-  "rgba(255, 68, 125, 0.98)",
+  "rgba(255, 68, 125, 0.46)",
 ];
 
 const severityColor: ExpressionSpecification = [
@@ -72,6 +90,14 @@ const severityColor: ExpressionSpecification = [
 ];
 
 type ThreatGeoJsonData = Exclude<GeoJSONSourceSpecification["data"], string>;
+type ThreatMapBounds = {
+  maxLat: number;
+  maxLng: number;
+  minLat: number;
+  minLng: number;
+};
+const PERU_VIEW_BOUNDS = getGeoJsonBounds();
+const MAP_CENTER = getBoundsCenter(PERU_VIEW_BOUNDS);
 
 export function ThreatGeoMap({
   entries,
@@ -137,7 +163,7 @@ export function ThreatGeoMap({
           source: MAP_REGION_SOURCE_ID,
           paint: {
             "fill-color": "#08212a",
-            "fill-opacity": 0.55,
+            "fill-opacity": 0.18,
           },
         });
 
@@ -169,35 +195,35 @@ export function ThreatGeoMap({
               ["linear"],
               ["zoom"],
               4,
-              0.85,
+              0.45,
               6.5,
-              1.4,
+              0.75,
               9,
-              2.1,
+              1.15,
             ],
             "heatmap-opacity": [
               "interpolate",
               ["linear"],
               ["zoom"],
               4,
-              0.82,
+              0.42,
               8,
-              0.66,
+              0.26,
               10,
-              0.44,
+              0.12,
             ],
             "heatmap-radius": [
               "interpolate",
               ["linear"],
               ["zoom"],
               4,
-              22,
+              14,
               6,
-              34,
+              22,
               8,
-              54,
+              30,
               10,
-              70,
+              38,
             ],
             "heatmap-weight": [
               "interpolate",
@@ -217,19 +243,19 @@ export function ThreatGeoMap({
           source: MAP_SOURCE_ID,
           filter: ["==", ["get", "severity"], "critical"],
           paint: {
-            "circle-blur": 1,
-            "circle-color": "rgba(255, 68, 125, 0.18)",
-            "circle-opacity": 0.9,
+            "circle-blur": 0.7,
+            "circle-color": "rgba(255, 68, 125, 0.14)",
+            "circle-opacity": 0.55,
             "circle-radius": [
               "interpolate",
               ["linear"],
               ["zoom"],
               4,
-              14,
+              10,
               7,
-              22,
+              16,
               9,
-              30,
+              22,
             ],
           },
         });
@@ -243,25 +269,25 @@ export function ThreatGeoMap({
             "circle-opacity": [
               "case",
               ["==", ["get", "severity"], "critical"],
-              0.98,
-              0.72,
+              0.94,
+              0.84,
             ],
             "circle-radius": [
               "interpolate",
               ["linear"],
               ["zoom"],
               4,
-              ["+", 3, ["*", ["get", "score"], 5]],
+              ["+", 2.4, ["*", ["get", "score"], 3.2]],
               8,
-              ["+", 6, ["*", ["get", "score"], 10]],
+              ["+", 4.2, ["*", ["get", "score"], 5.5]],
             ],
             "circle-stroke-color": "rgba(219, 252, 255, 0.85)",
-            "circle-stroke-opacity": 0.75,
+            "circle-stroke-opacity": 0.68,
             "circle-stroke-width": [
               "case",
               ["==", ["get", "severity"], "critical"],
-              1.6,
-              0.9,
+              1.2,
+              0.8,
             ],
           },
         });
@@ -279,12 +305,12 @@ export function ThreatGeoMap({
               ["linear"],
               ["zoom"],
               4,
-              10,
               8,
-              18,
+              8,
+              14,
             ],
             "circle-stroke-color": "#dbfcff",
-            "circle-stroke-width": 1.4,
+            "circle-stroke-width": 1.1,
           },
         });
 
@@ -318,7 +344,7 @@ export function ThreatGeoMap({
           }
         });
 
-        fitMapToEntries(map, entriesRef.current);
+        fitMapToThreatViewport(map);
         window.addEventListener("resize", handleResize);
         requestAnimationFrame(handleResize);
 
@@ -346,7 +372,7 @@ export function ThreatGeoMap({
 
     const source = map.getSource(MAP_SOURCE_ID) as GeoJSONSource | undefined;
     source?.setData(buildThreatGeoJson(entries));
-    fitMapToEntries(map, entries);
+    fitMapToThreatViewport(map);
   }, [entries]);
 
   useEffect(() => {
@@ -362,86 +388,11 @@ export function ThreatGeoMap({
   }, [selectedEntryId]);
 
   return (
-    <div className="relative h-[420px] overflow-hidden border border-primary/20 bg-[#05090b] pixel-corner lg:h-[540px]">
+    <div className="relative h-[420px] overflow-hidden border border-primary/20 bg-[#04090c] pixel-corner lg:h-[540px]">
       <div ref={containerRef} className="absolute inset-0" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,219,233,0.08),transparent_42%),linear-gradient(180deg,rgba(3,9,13,0.04),rgba(3,9,13,0.58))]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(0,219,233,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,219,233,0.04)_1px,transparent_1px)] bg-[size:48px_48px]" />
-      <div className="pointer-events-none absolute inset-0 scanlines opacity-18" />
-      <svg
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-        preserveAspectRatio="none"
-        viewBox="0 0 100 100"
-      >
-        <defs>
-          <filter
-            height="180%"
-            id="threat-map-blur"
-            width="180%"
-            x="-40%"
-            y="-40%"
-          >
-            <feGaussianBlur stdDeviation="3.6" />
-          </filter>
-        </defs>
-
-        <path
-          d={PERU_OUTLINE_PATH}
-          fill="rgba(8,33,42,0.55)"
-          stroke="rgba(88,237,248,0.52)"
-          strokeWidth="0.38"
-        />
-
-        {entries.map((entry) => {
-          const point = projectThreatCoordinate(entry.lng, entry.lat);
-          const radius = 5 + entry.score * 6 + entry.alerts * 0.35;
-
-          return (
-            <circle
-              key={`${entry.id}-heat`}
-              cx={point.x}
-              cy={point.y}
-              fill={getThreatHeatColor(entry.severity)}
-              filter="url(#threat-map-blur)"
-              opacity={0.28}
-              r={radius}
-            />
-          );
-        })}
-
-        {entries.map((entry) => {
-          const point = projectThreatCoordinate(entry.lng, entry.lat);
-          const isSelected = entry.id === selectedEntryId;
-          const pointRadius = isSelected ? 1.4 : entry.severity === "critical" ? 1.2 : 0.8;
-
-          return (
-            <g key={entry.id}>
-              {isSelected ? (
-                <circle
-                  cx={point.x}
-                  cy={point.y}
-                  fill="none"
-                  opacity={0.85}
-                  r={3.2}
-                  stroke="#dbfcff"
-                  strokeWidth="0.35"
-                />
-              ) : null}
-              <circle
-                cx={point.x}
-                cy={point.y}
-                fill={getThreatMarkerColor(entry.severity)}
-                opacity={0.96}
-                r={pointRadius}
-                stroke="rgba(219,252,255,0.92)"
-                strokeWidth="0.2"
-                style={{ pointerEvents: "auto" }}
-                onClick={() => onSelectEntry(entry)}
-              />
-            </g>
-          );
-        })}
-      </svg>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,219,233,0.04),transparent_40%),linear-gradient(180deg,rgba(3,9,13,0.02),rgba(3,9,13,0.44))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(0,219,233,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,219,233,0.03)_1px,transparent_1px)] bg-[size:48px_48px]" />
+      <div className="pointer-events-none absolute inset-0 scanlines opacity-10" />
 
       {!entries.length ? (
         <div className="absolute inset-0 flex items-center justify-center bg-black/45 p-6 text-center">
@@ -508,41 +459,16 @@ function findNearestEntry(
   return nearestEntry;
 }
 
-function fitMapToEntries(map: MapLibreMap, entries: ThreatEntry[]) {
-  if (!entries.length) {
-    return;
-  }
-
-  if (entries.length === 1) {
-    map.easeTo({
-      center: [entries[0].lng, entries[0].lat],
-      duration: 700,
-      zoom: 7.2,
-    });
-    return;
-  }
-
-  let minLng = entries[0].lng;
-  let maxLng = entries[0].lng;
-  let minLat = entries[0].lat;
-  let maxLat = entries[0].lat;
-
-  for (const entry of entries) {
-    minLng = Math.min(minLng, entry.lng);
-    maxLng = Math.max(maxLng, entry.lng);
-    minLat = Math.min(minLat, entry.lat);
-    maxLat = Math.max(maxLat, entry.lat);
-  }
-
+function fitMapToThreatViewport(map: MapLibreMap) {
   map.fitBounds(
     [
-      [minLng, minLat],
-      [maxLng, maxLat],
+      [PERU_VIEW_BOUNDS.minLng, PERU_VIEW_BOUNDS.minLat],
+      [PERU_VIEW_BOUNDS.maxLng, PERU_VIEW_BOUNDS.maxLat],
     ],
     {
       duration: 700,
-      maxZoom: 7.4,
-      padding: { top: 54, right: 54, bottom: 54, left: 54 },
+      maxZoom: 5.9,
+      padding: { top: 42, right: 42, bottom: 42, left: 42 },
     },
   );
 }
@@ -573,67 +499,38 @@ function degreesToRadians(degrees: number) {
   return (degrees * Math.PI) / 180;
 }
 
-function getThreatHeatColor(severity: ThreatEntry["severity"]) {
-  if (severity === "critical") {
-    return "#ff5d85";
-  }
-
-  if (severity === "high") {
-    return "#ffd166";
-  }
-
-  if (severity === "medium") {
-    return "#00e639";
-  }
-
-  return "#00dbe9";
-}
-
-function getThreatMarkerColor(severity: ThreatEntry["severity"]) {
-  if (severity === "critical") {
-    return "#ff89ab";
-  }
-
-  if (severity === "high") {
-    return "#ffd166";
-  }
-
-  if (severity === "medium") {
-    return "#72ff70";
-  }
-
-  return "#7df4ff";
-}
-
-function projectThreatCoordinate(longitude: number, latitude: number) {
-  const x =
-    ((longitude - SOUTH_PERU_BOUNDS.minLng) /
-      (SOUTH_PERU_BOUNDS.maxLng - SOUTH_PERU_BOUNDS.minLng)) *
-    100;
-  const y =
-    ((SOUTH_PERU_BOUNDS.maxLat - latitude) /
-      (SOUTH_PERU_BOUNDS.maxLat - SOUTH_PERU_BOUNDS.minLat)) *
-    100;
-
-  return { x, y };
-}
-
-function buildPeruOutlinePath() {
+function getGeoJsonBounds(): ThreatMapBounds {
   const feature = peruOutlineGeoJson.features[0];
-  if (!feature || feature.geometry.type !== "Polygon") {
-    return "";
+  const ring =
+    feature && feature.geometry.type === "Polygon"
+      ? feature.geometry.coordinates[0]
+      : [];
+
+  let minLng = Number.POSITIVE_INFINITY;
+  let maxLng = Number.NEGATIVE_INFINITY;
+  let minLat = Number.POSITIVE_INFINITY;
+  let maxLat = Number.NEGATIVE_INFINITY;
+
+  for (const coordinate of ring) {
+    const [longitude, latitude] = coordinate;
+    minLng = Math.min(minLng, longitude);
+    maxLng = Math.max(maxLng, longitude);
+    minLat = Math.min(minLat, latitude);
+    maxLat = Math.max(maxLat, latitude);
   }
 
-  const ring = feature.geometry.coordinates[0];
-
-  return ring
-    .map((coordinate, index) => {
-      const [longitude, latitude] = coordinate;
-      const point = projectThreatCoordinate(longitude, latitude);
-      return `${index === 0 ? "M" : "L"} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
-    })
-    .join(" ")
-    .concat(" Z");
+  return {
+    maxLat,
+    maxLng,
+    minLat,
+    minLng,
+  };
 }
 
-const PERU_OUTLINE_PATH = buildPeruOutlinePath();
+function getBoundsCenter(bounds: ThreatMapBounds): [number, number] {
+  return [
+    (bounds.minLng + bounds.maxLng) / 2,
+    (bounds.minLat + bounds.maxLat) / 2,
+  ];
+}
+

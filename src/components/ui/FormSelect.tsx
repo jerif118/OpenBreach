@@ -69,7 +69,7 @@ export function FormSelect({
             <option
               key={opt.value}
               value={opt.value}
-              className="bg-slate-900 text-slate-200"
+              className="bg-surface-container-high text-on-surface"
             >
               {opt.label}
             </option>

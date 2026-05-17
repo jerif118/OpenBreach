@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { mockThreatEntries } from "./mockThreatEntries";
 import { ThreatGeoMap } from "./ThreatGeoMap";
@@ -138,9 +139,21 @@ function ThreatZoneCard({
           </div>
 
           <div className="flex flex-col gap-2">
-            <ActionButton label="Open evidence trail" tone="primary" />
-            <ActionButton label="Queue re-validation" tone="secondary" />
-            <ActionButton label="Export zone summary" tone="muted" />
+            <ActionButton
+              label="Open evidence trail"
+              to="/guardian/evidence"
+              tone="primary"
+            />
+            <ActionButton
+              label="Queue re-validation"
+              to="/guardian/validations"
+              tone="secondary"
+            />
+            <ActionButton
+              label="Export zone summary"
+              to="/guardian/reports"
+              tone="muted"
+            />
           </div>
 
           <p className="font-mono text-[10px] text-primary/45">
@@ -205,9 +218,11 @@ function StatChip({
 function ActionButton({
   label,
   tone,
+  to,
 }: {
   label: string;
   tone: "primary" | "secondary" | "muted";
+  to: string;
 }) {
   const className =
     tone === "primary"
@@ -217,11 +232,11 @@ function ActionButton({
         : "border-outline text-on-surface-variant hover:bg-white/5";
 
   return (
-    <button
-      className={`border px-3 py-2 text-left font-mono text-[10px] uppercase transition-colors pixel-corner ${className}`}
-      type="button"
+    <Link
+      className={`block border px-3 py-2 text-left font-mono text-[10px] uppercase transition-colors pixel-corner ${className}`}
+      to={to}
     >
       {label}
-    </button>
+    </Link>
   );
 }
