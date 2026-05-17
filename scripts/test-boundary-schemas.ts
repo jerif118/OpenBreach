@@ -147,7 +147,9 @@ assert.equal(invalidRawPersistenceArgs.success, false);
 
 assert.equal(
   enrichedScanPersistenceArgsSchema.safeParse({
-    results: [{ ...scanResult, municipalityExternalId: scanResult.municipalityId }],
+    results: [
+      { ...scanResult, municipalityExternalId: scanResult.municipalityId },
+    ],
   }).success,
   true,
 );
@@ -225,15 +227,34 @@ const invalidNonFiniteEnvironment = scanConvexEnvironmentSchema.safeParse({
   },
 });
 assert.equal(invalidNonFiniteEnvironment.success, false);
+assert.deepEqual(
+  invalidNonFiniteEnvironment.error.issues
+    .map((issue) => issue.path.join("."))
+    .sort(),
+  ["concurrency", "controls.delayMs", "controls.timeoutMs"],
+);
+
+assert.equal(
+  scanConvexEnvironmentSchema.safeParse({
+    fromFixture: false,
+    fixturePath: "",
+    municipalityIds: [],
+    concurrency: 0,
+    controls: { timeoutMs: -1, retries: -1, delayMs: -1 },
+  }).success,
+  false,
+);
+
+const assetId = "asset-example-public-site";
 
 const targetProfile: TargetProfile = {
-  targetId: "target-mx-yuc-merida",
-  name: "Municipio de Merida",
-  primaryUrl: "https://merida.gob.mx",
-  riskTier: "medium",
+  targetId: "target-example-public-site",
+  name: "Example Public Services",
+  primaryUrl: "https://www.example.org/",
+  riskTier: "low",
   classification: "public-sector",
-  population: 995129,
-  geography: { country: "Mexico", region: "Yucatan", city: "Merida" },
+  population: 1000,
+  metadata: { assets: [assetId] },
 };
 
 assert.equal(targetProfileSchema.safeParse(targetProfile).success, true);
@@ -241,42 +262,61 @@ assert.equal(targetProfileSchema.safeParse(targetProfile).success, true);
 const invalidTargetProfile = targetProfileSchema.safeParse({
   name: "Example Public Services",
   primaryUrl: "https://www.example.org/",
+  riskTier: "low",
+  classification: "public-sector",
 });
 assert.equal(invalidTargetProfile.success, false);
+assert.deepEqual(
+  invalidTargetProfile.error.issues.map((issue) => issue.path.join(".")),
+  ["targetId"],
+);
+
+assert.equal(
+  targetProfileSchema.safeParse({
+    ...targetProfile,
+    primaryUrl: "http://example.org/",
+  }).success,
+  false,
+);
 
 const authorizationScope: AuthorizationScope = {
-  authorizationId: "auth-mx-yuc-merida",
+  authorizationId: "auth-example-approved",
   targetId: targetProfile.targetId,
   scopeType: "passive-only",
-  grantedBy: "City Program Owner",
+  grantedBy: "example-authority",
   grantedAt: scannedAt,
-  constraints: ["Passive validation only."],
-  evidenceUrl: targetProfile.primaryUrl,
+  constraints: ["Passive validation only for this boundary test."],
 };
 
 const workflowRun: WorkflowRun = {
-  runId: "run-mx-yuc-merida-001",
+  runId: "workflow-example-run",
   targetId: targetProfile.targetId,
-  status: "pending",
+  status: "running",
   startedAt: scannedAt,
+  currentPhase: "passive-scan",
 };
 
 const passiveEvidence: PassiveScanEvidence = {
-  evidenceId: "evidence-mx-yuc-merida-001",
+  evidenceId: "evidence-example-main-page",
   targetId: targetProfile.targetId,
   source: "fixture",
   collectedAt: scannedAt,
   requestedUrl: targetProfile.primaryUrl,
   reachable: true,
+  httpStatus: 200,
+  headers: { server: "fixture" },
+  runId: workflowRun.runId,
 };
 
 const fingerprint: TechnologyFingerprint = {
   fingerprintId: "fingerprint-mx-yuc-merida-wp",
   targetId: targetProfile.targetId,
-  technology: "WordPress",
-  category: "cms",
-  confidence: 0.85,
+  technology: "Example Web Server",
+  category: "server",
+  confidence: 0.8,
   detectedAt: scannedAt,
+  evidence: [passiveEvidence.evidenceId],
+  runId: workflowRun.runId,
 };
 
 const hypothesis: VulnerabilityHypothesis = {
@@ -285,66 +325,113 @@ const hypothesis: VulnerabilityHypothesis = {
   title: "Header hardening review",
   status: "hypothesis",
   createdAt: scannedAt,
-  proposedBy: "operator",
+  proposedBy: "boundary-contract-test",
+  description:
+    "Passive evidence suggests security header configuration should be reviewed.",
+  affectedComponents: [assetId],
+  runId: workflowRun.runId,
 };
 
 const testPlan: TestPlan = {
-  planId: "plan-mx-yuc-merida-001",
+  planId: "test-plan-example-passive-review",
   targetId: targetProfile.targetId,
+  hypothesisIds: [hypothesis.hypothesisId],
   title: "Passive header review",
-  status: "draft",
+  status: "approved",
   createdAt: scannedAt,
-  steps: [{ stepId: "step-1", description: "Review headers" }],
+  steps: [
+    {
+      stepId: "step-passive-review",
+      description: "Confirm the passive observation remains descriptive.",
+    },
+  ],
+  approver: "example-approver",
+  approvedAt: scannedAt,
+  runId: workflowRun.runId,
 };
 
 const approvalGate: ApprovalGate = {
-  gateId: "gate-mx-yuc-merida-001",
+  gateId: "approval-example-passive-review",
   targetId: targetProfile.targetId,
-  gateType: "intake",
-  status: "pending",
+  gateType: "test-plan",
+  status: "approved",
   requestedAt: scannedAt,
-  requestedBy: "operator",
+  requestedBy: "boundary-contract-test",
+  approvedBy: "example-approver",
+  approvedAt: scannedAt,
+  linkedArtifactId: testPlan.planId,
+  runId: workflowRun.runId,
 };
 
 const validationResult: ValidationResult = {
-  resultId: "validation-mx-yuc-merida-001",
+  resultId: "validation-example-header-review",
   targetId: targetProfile.targetId,
+  testPlanId: testPlan.planId,
   status: "passed",
   executedAt: scannedAt,
-  executedBy: "operator",
+  executedBy: "boundary-contract-test",
+  summary: "Passive validation confirmed the descriptive observation.",
+  evidenceRefs: [passiveEvidence.evidenceId],
+  runId: workflowRun.runId,
+};
+
+const evidenceEnvelope: EvidenceEnvelope = {
+  envelopeId: "envelope-example-passive-evidence",
+  targetId: targetProfile.targetId,
+  source: "fixture",
+  recordedAt: scannedAt,
+  payloadType: "passive-scan",
+  payload: passiveEvidence,
+  runId: workflowRun.runId,
 };
 
 const finding: Finding = {
   findingId: "finding-mx-yuc-merida-001",
   targetId: targetProfile.targetId,
-  title: "Missing security headers",
-  description: "HSTS header is not set",
-  severity: "medium",
-  status: "observed",
+  title: "Review security header baseline",
+  description: "A safe passive review identified a hardening opportunity.",
+  severity: "low",
+  status: "confirmed",
   createdAt: scannedAt,
+  evidence: passiveEvidence.evidenceId,
+  remediationHint: "Review standard security header configuration guidance.",
+  affectedAssets: [assetId],
+  validationResultId: validationResult.resultId,
+  runId: workflowRun.runId,
 };
 
 const reportArtifact: ReportArtifact = {
-  artifactId: "artifact-mx-yuc-merida-001",
+  artifactId: "report-example-passive-review",
   targetId: targetProfile.targetId,
   variant: "technical",
-  title: "Technical Remediation Report",
+  title: "Example passive validation report",
   generatedAt: scannedAt,
-  status: "pending",
+  status: "completed",
+  findings: [finding.findingId],
+  pdf,
+  runId: workflowRun.runId,
 };
 
 const auditEvent: AuditEvent = {
-  eventId: "audit-mx-yuc-merida-001",
+  eventId: "audit-example-report-generated",
   targetId: targetProfile.targetId,
-  eventType: "target-created",
-  actor: "operator",
+  eventType: "report-generated",
+  actor: "boundary-contract-test",
   timestamp: scannedAt,
+  runId: workflowRun.runId,
+  details: { artifactId: reportArtifact.artifactId },
 };
 
 assert.equal(targetProfileSchema.safeParse(targetProfile).success, true);
-assert.equal(authorizationScopeSchema.safeParse(authorizationScope).success, true);
+assert.equal(
+  authorizationScopeSchema.safeParse(authorizationScope).success,
+  true,
+);
 assert.equal(workflowRunSchema.safeParse(workflowRun).success, true);
-assert.equal(passiveScanEvidenceSchema.safeParse(passiveEvidence).success, true);
+assert.equal(
+  passiveScanEvidenceSchema.safeParse(passiveEvidence).success,
+  true,
+);
 assert.equal(technologyFingerprintSchema.safeParse(fingerprint).success, true);
 assert.equal(vulnerabilityHypothesisSchema.safeParse(hypothesis).success, true);
 assert.equal(testPlanSchema.safeParse(testPlan).success, true);
@@ -358,12 +445,17 @@ assert.equal(
   technologyFingerprintSchema.safeParse({
     ...fingerprint,
     detectedAt: "not-a-date",
+    evidence: [],
   }).success,
   false,
 );
 
 assert.equal(
-  findingSchema.safeParse({ ...finding, extraField: "not allowed" }).success,
+  findingSchema.safeParse({
+    ...finding,
+    status: "confirmed",
+    validationResultId: undefined,
+  }).success,
   false,
 );
 
