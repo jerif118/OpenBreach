@@ -127,6 +127,25 @@ function buildFailedResult({
   });
 }
 
+function addRenderedMetadata(
+  record: GenerateRemediationReportBatchRecord,
+  rendered: Awaited<ReturnType<typeof renderReportArtifacts>>,
+  generatedAt: string,
+): GenerateRemediationReportBatchRecord {
+  return {
+    ...record,
+    result: generateRemediationReportResultSchema.parse({
+      ...record.result,
+      metadata: {
+        ...record.result.metadata,
+        pdf: rendered.pdf,
+        artifacts: rendered.artifacts,
+        updatedAt: generatedAt,
+      },
+    }),
+  };
+}
+
 export async function generateRemediationReportBatch({
   id = `report-batch-${new Date().toISOString()}`,
   contexts,
@@ -209,18 +228,7 @@ export async function renderReportBatchPdfs({
       outputDirectory,
     });
 
-    results.push({
-      ...record,
-      result: generateRemediationReportResultSchema.parse({
-        ...record.result,
-        metadata: {
-          ...record.result.metadata,
-          pdf: rendered.pdf,
-          artifacts: rendered.artifacts,
-          updatedAt: batch.generatedAt,
-        },
-      }),
-    });
+    results.push(addRenderedMetadata(record, rendered, batch.generatedAt));
   }
 
   return generateRemediationReportBatchOutputSchema.parse({
