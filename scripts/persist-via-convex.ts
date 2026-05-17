@@ -13,10 +13,9 @@ import {
 
 const functionName = process.argv[2];
 if (!functionName) {
-  process.stderr.write(
-    "Usage: node scripts/persist-via-convex.ts <function-name> [batch-size]\n",
+  exitWithInputError(
+    "Usage: node scripts/persist-via-convex.ts <function-name> [batch-size]",
   );
-  process.exit(2);
 }
 
 const payloadSchemas = {
@@ -108,6 +107,11 @@ for (let batchIndex = 0; batchIndex < batchCount; batchIndex += 1) {
 process.stderr.write(
   `Forwarded ${total} result${total === 1 ? "" : "s"} successfully.\n`,
 );
+
+function exitWithInputError(message: string): never {
+  process.stderr.write(`${message}\n`);
+  process.exit(2);
+}
 
 async function readStdin(): Promise<string> {
   let buffer = "";
