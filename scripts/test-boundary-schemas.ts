@@ -2,15 +2,41 @@ import assert from "node:assert/strict";
 import { readCliOptions } from "./report-generation-cli.ts";
 import { municipalitySeedSchema } from "../src/shared/municipalitySeed.ts";
 import {
+  approvalGateSchema,
+  auditEventSchema,
+  authorizationScopeSchema,
+  evidenceEnvelopeSchema,
   enrichedScanPersistenceArgsSchema,
+  findingSchema,
+  passiveScanEvidenceSchema,
   rawScanPersistenceArgsSchema,
   REPORT_GENERATION_MAX_LIMIT,
+  reportArtifactSchema,
   reportGenerationArtifactSchema,
   reportGenerationCliOptionsSchema,
   reportPersistencePayloadSchema,
   scanConvexEnvironmentSchema,
+  targetProfileSchema,
+  technologyFingerprintSchema,
+  testPlanSchema,
+  validationResultSchema,
+  vulnerabilityHypothesisSchema,
+  workflowRunSchema,
+  type ApprovalGate,
+  type AuditEvent,
+  type AuthorizationScope,
+  type EvidenceEnvelope,
+  type Finding,
+  type PassiveScanEvidence,
   type RawScanEvidence,
+  type ReportArtifact,
   type ScanResult,
+  type TargetProfile,
+  type TechnologyFingerprint,
+  type TestPlan,
+  type ValidationResult,
+  type VulnerabilityHypothesis,
+  type WorkflowRun,
 } from "../src/shared/contracts.ts";
 
 const scannedAt = "2026-01-01T00:00:00.000Z";
@@ -222,6 +248,221 @@ assert.equal(
     concurrency: 0,
     controls: { timeoutMs: -1, retries: -1, delayMs: -1 },
   }).success,
+  false,
+);
+
+const pivotSource = {
+  type: "fixture" as const,
+  name: "boundary-contract-test",
+  version: "1.0.0",
+};
+
+const evidenceReference = {
+  evidenceId: "evidence-example-main-page",
+  description: "Passive observation from the target landing page.",
+};
+
+const targetProfile: TargetProfile = {
+  targetId: "target-example-public-site",
+  organizationName: "Example Public Services",
+  canonicalUrl: "https://www.example.org/",
+  assetIds: ["asset-example-public-site"],
+  status: "approved",
+  summary: "Authorized public-facing example target.",
+  tags: [],
+};
+
+assert.equal(targetProfileSchema.safeParse(targetProfile).success, true);
+
+const invalidTargetProfile = targetProfileSchema.safeParse({
+  organizationName: "Example Public Services",
+  canonicalUrl: "https://www.example.org/",
+  assetIds: ["asset-example-public-site"],
+  status: "approved",
+});
+assert.equal(invalidTargetProfile.success, false);
+assert.deepEqual(
+  invalidTargetProfile.error.issues.map((issue) => issue.path.join(".")),
+  ["targetId"],
+);
+
+assert.equal(
+  targetProfileSchema.safeParse({ ...targetProfile, municipalityId: "legacy" })
+    .success,
+  false,
+);
+
+const authorizationScope: AuthorizationScope = {
+  scopeId: "scope-example-approved",
+  targetId: targetProfile.targetId,
+  status: "approved",
+  authorizedBy: "example-authority",
+  authorizedAt: scannedAt,
+  startsAt: scannedAt,
+  allowedAssetIds: targetProfile.assetIds,
+  constraints: ["Passive validation only for this boundary test."],
+};
+
+const workflowRun: WorkflowRun = {
+  workflowRunId: "workflow-example-run",
+  targetId: targetProfile.targetId,
+  scopeId: authorizationScope.scopeId,
+  status: "approved",
+  startedAt: scannedAt,
+  source: pivotSource,
+  summary: "Boundary test workflow run.",
+};
+
+const passiveEvidence: PassiveScanEvidence = {
+  evidenceId: evidenceReference.evidenceId,
+  targetId: targetProfile.targetId,
+  assetId: targetProfile.assetIds[0] ?? "asset-example-public-site",
+  observedAt: scannedAt,
+  source: pivotSource,
+  canonicalUrl: targetProfile.canonicalUrl,
+  observation: "The target returned a public landing page response.",
+  evidenceReferences: [],
+};
+
+const fingerprint: TechnologyFingerprint = {
+  fingerprintId: "fingerprint-example-server",
+  targetId: targetProfile.targetId,
+  assetId: passiveEvidence.assetId,
+  observedAt: scannedAt,
+  source: pivotSource,
+  technology: "Example Web Server",
+  category: "server",
+  confidence: "medium",
+  evidenceReferences: [evidenceReference],
+};
+
+const hypothesis: VulnerabilityHypothesis = {
+  hypothesisId: "hypothesis-example-header-hardening",
+  targetId: targetProfile.targetId,
+  assetId: passiveEvidence.assetId,
+  createdAt: scannedAt,
+  source: pivotSource,
+  title: "Header hardening review",
+  summary:
+    "Passive evidence suggests security header configuration should be reviewed.",
+  severity: "low",
+  status: "hypothesis",
+  confidence: "medium",
+  evidenceReferences: [evidenceReference],
+};
+
+const testPlan: TestPlan = {
+  testPlanId: "test-plan-example-passive-review",
+  targetId: targetProfile.targetId,
+  scopeId: authorizationScope.scopeId,
+  hypothesisIds: [hypothesis.hypothesisId],
+  status: "approved",
+  createdAt: scannedAt,
+  source: pivotSource,
+  summary: "Review passive evidence and document safe remediation guidance.",
+  validationSteps: ["Confirm the passive observation remains descriptive."],
+};
+
+const approvalGate: ApprovalGate = {
+  approvalGateId: "approval-example-passive-review",
+  targetId: targetProfile.targetId,
+  testPlanId: testPlan.testPlanId,
+  status: "approved",
+  decidedAt: scannedAt,
+  decidedBy: "example-approver",
+  reason: "The plan stays within passive, authorized validation boundaries.",
+};
+
+const validationResult: ValidationResult = {
+  validationResultId: "validation-example-header-review",
+  targetId: targetProfile.targetId,
+  testPlanId: testPlan.testPlanId,
+  status: "confirmed",
+  validatedAt: scannedAt,
+  source: pivotSource,
+  summary: "Passive validation confirmed the descriptive observation.",
+  evidenceReferences: [evidenceReference],
+};
+
+const evidenceEnvelope: EvidenceEnvelope = {
+  envelopeId: "envelope-example-passive-evidence",
+  targetId: targetProfile.targetId,
+  createdAt: scannedAt,
+  source: pivotSource,
+  summary: "Passive evidence bundle for the boundary contract test.",
+  evidenceReferences: [evidenceReference],
+};
+
+const finding: Finding = {
+  findingId: "finding-example-header-hardening",
+  targetId: targetProfile.targetId,
+  assetIds: [passiveEvidence.assetId],
+  createdAt: scannedAt,
+  source: pivotSource,
+  title: "Review security header baseline",
+  summary: "A safe passive review identified a hardening opportunity.",
+  severity: "low",
+  status: "confirmed",
+  evidenceReferences: [evidenceReference],
+  remediationGuidance:
+    "Review standard security header configuration guidance.",
+};
+
+const reportArtifact: ReportArtifact = {
+  reportId: "report-example-passive-review",
+  targetId: targetProfile.targetId,
+  generatedAt: scannedAt,
+  source: pivotSource,
+  status: "approved",
+  audience: "technical",
+  title: "Example passive validation report",
+  summary: "Report-ready summary of safe passive validation findings.",
+  findingIds: [finding.findingId],
+  evidenceReferences: [evidenceReference],
+};
+
+const auditEvent: AuditEvent = {
+  auditEventId: "audit-example-report-generated",
+  targetId: targetProfile.targetId,
+  occurredAt: scannedAt,
+  source: pivotSource,
+  actor: "boundary-contract-test",
+  action: "report_generated",
+  status: "confirmed",
+  summary: "Generated the report artifact for the boundary contract test.",
+  evidenceReferences: [evidenceReference],
+};
+
+assert.equal(
+  authorizationScopeSchema.safeParse(authorizationScope).success,
+  true,
+);
+assert.equal(workflowRunSchema.safeParse(workflowRun).success, true);
+assert.equal(
+  passiveScanEvidenceSchema.safeParse(passiveEvidence).success,
+  true,
+);
+assert.equal(technologyFingerprintSchema.safeParse(fingerprint).success, true);
+assert.equal(vulnerabilityHypothesisSchema.safeParse(hypothesis).success, true);
+assert.equal(testPlanSchema.safeParse(testPlan).success, true);
+assert.equal(approvalGateSchema.safeParse(approvalGate).success, true);
+assert.equal(validationResultSchema.safeParse(validationResult).success, true);
+assert.equal(evidenceEnvelopeSchema.safeParse(evidenceEnvelope).success, true);
+assert.equal(findingSchema.safeParse(finding).success, true);
+assert.equal(reportArtifactSchema.safeParse(reportArtifact).success, true);
+assert.equal(auditEventSchema.safeParse(auditEvent).success, true);
+
+assert.equal(
+  technologyFingerprintSchema.safeParse({
+    ...fingerprint,
+    observedAt: "not-a-date",
+    evidenceReferences: [],
+  }).success,
+  false,
+);
+
+assert.equal(
+  findingSchema.safeParse({ ...finding, credentials: "not allowed" }).success,
   false,
 );
 
