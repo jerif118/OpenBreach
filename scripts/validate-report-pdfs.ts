@@ -6,64 +6,15 @@ import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json
 import { renderBatchPdfArtifacts } from "../src/mastra/workflows/report-pdf-rendering.ts";
 import { renderReportBatchPdfs } from "../src/mastra/workflows/report-workflow.ts";
 import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-tool.ts";
-import { pushText } from "../src/reports/pdf-document.ts";
 import {
   municipalitySchema,
   reportPdfReferenceSchema,
   scanResultSchema,
 } from "../src/shared/contracts.ts";
-
-function assertPdfTextEscapesLiteralControls(): void {
-  const commands: string[] = [];
-
-  pushText({
-    commands,
-    fontKey: "F1",
-    fontSize: 12,
-    color: [0, 0, 0],
-    x: 1,
-    y: 2,
-    text: "Line\nBreak\rReturn (path\\value)",
-  });
-
-  const [command] = commands;
-  const expected =
-    "BT /F1 12 Tf 0.000 0.000 0.000 rg 1.00 2.00 Td (Line\\nBreak\\rReturn \\(path\\\\value\\)) Tj ET";
-
-  if (command !== expected) {
-    throw new Error(
-      "PDF text escaping must escape newlines, carriage returns, backslashes, and parentheses.",
-    );
-  }
-}
-
-function assertPageTreeReferencesPageObjects(pdfContent: string): void {
-  const objects = new Map<number, string>();
-
-  for (const match of pdfContent.matchAll(
-    /^(\d+) 0 obj\n([\s\S]*?)\nendobj/gm,
-  )) {
-    objects.set(Number(match[1]), match[2]);
-  }
-
-  const pagesObject = objects.get(2);
-  const kidsMatch = pagesObject?.match(/\/Kids \[([^\]]+)\]/);
-
-  if (!kidsMatch) {
-    throw new Error("Generated PDF page tree is missing /Kids references.");
-  }
-
-  for (const pageRef of kidsMatch[1].matchAll(/(\d+) 0 R/g)) {
-    const pageObjectId = Number(pageRef[1]);
-    const pageObject = objects.get(pageObjectId);
-
-    if (!pageObject || !/\/Type\s+\/Page\b/.test(pageObject)) {
-      throw new Error(
-        `Generated PDF /Kids references non-page object ${pageObjectId}.`,
-      );
-    }
-  }
-}
+import {
+  assertPageTreeReferencesPageObjects,
+  assertPdfTextEscapesLiteralControls,
+} from "./report-pdf-validation-assertions.ts";
 
 const selectedAt = "2026-01-01T00:00:00.000Z";
 assertPdfTextEscapesLiteralControls();
