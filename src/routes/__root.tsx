@@ -16,11 +16,12 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "DEFF-ACC",
+        title: "OpenBreach",
       },
       {
         name: "description",
-        content: "Passive municipal cyber risk map MVP.",
+        content:
+          "OpenBreach target intake and authorization gate for public-target validation workflows.",
       },
     ],
     links: [

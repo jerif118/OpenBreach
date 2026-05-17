@@ -1,0 +1,34 @@
+{
+  "targetProfile": {
+    "targetId": "target-private-001",
+    "name": "Private Bank Corp",
+    "primaryUrl": "https://private-bank.example.com",
+    "riskTier": "high",
+    "classification": "private"
+  },
+  "approvalGate": {
+    "gateId": "gate-private-001",
+    "targetId": "target-private-001",
+    "gateType": "intake",
+    "status": "rejected",
+    "requestedAt": "2024-01-15T09:00:00Z",
+    "requestedBy": "system",
+    "rejectionReason": "Target classification 'private' is out of scope"
+  },
+  "workflowRun": {
+    "runId": "run-private-001",
+    "targetId": "target-private-001",
+    "status": "rejected",
+    "startedAt": "2024-01-15T09:00:00Z",
+    "abortedAt": "2024-01-15T09:05:00Z",
+    "abortedReason": "Target rejected at intake gate",
+    "phases": [
+      {
+        "phase": "intake",
+        "enteredAt": "2024-01-15T09:00:00Z",
+        "exitedAt": "2024-01-15T09:05:00Z",
+        "rejectionReason": "Target classification 'private' is out of scope"
+      }
+    ]
+  }
+}

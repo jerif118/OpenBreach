@@ -1,0 +1,11 @@
+{
+  "gateId": "gate-merida-testplan-001",
+  "targetId": "target-merida-001",
+  "gateType": "test-plan",
+  "status": "approved",
+  "requestedAt": "2024-01-15T10:10:00Z",
+  "requestedBy": "operator-alice",
+  "approvedBy": "operator-alice",
+  "approvedAt": "2024-01-15T10:15:00Z",
+  "linkedArtifactId": "plan-merida-001"
+}

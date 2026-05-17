@@ -23,6 +23,7 @@
     "fixtures:validate": "node scripts/validate-fixtures.ts && node scripts/validate-municipality-seed.ts",
     "format": "oxfmt --write",
     "format:check": "oxfmt --check",
+    "intake:validate": "node scripts/validate-target-intake.ts",
     "lint": "run-p --continue-on-error \"lint:*\"",
     "lint:oxfmt": "oxfmt --check",
     "lint:types": "tsc --build --pretty",

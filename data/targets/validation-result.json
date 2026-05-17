@@ -1,0 +1,25 @@
+{
+  "resultId": "result-merida-001",
+  "targetId": "target-merida-001",
+  "status": "failed",
+  "executedAt": "2024-01-15T10:30:00Z",
+  "executedBy": "agent-test-runner",
+  "findings": [
+    {
+      "findingId": "finding-merida-tls-001",
+      "targetId": "target-merida-001",
+      "title": "TLS 1.0 Enabled",
+      "description": "The server supports TLS 1.0, which is deprecated.",
+      "severity": "high",
+      "status": "confirmed",
+      "createdAt": "2024-01-15T10:30:00Z",
+      "category": "tls",
+      "confidence": "high",
+      "reportReady": true,
+      "validationResultId": "result-merida-001",
+      "affectedAssets": ["https://www.merida.gob.mx"]
+    }
+  ],
+  "summary": "Validation failed due to deprecated TLS configuration.",
+  "evidenceRefs": ["evidence-merida-ssl-001"]
+}

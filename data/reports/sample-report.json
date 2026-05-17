@@ -1,0 +1,74 @@
+{
+  "id": "report-mx-yuc-merida",
+  "municipalityId": "mx-yuc-merida",
+  "variant": "technical",
+  "generatedAt": "2024-01-15T12:00:00Z",
+  "title": "Remediation Report for Merida",
+  "summary": "This report summarizes the security findings for Merida.",
+  "priorityActions": ["Enable HSTS header", "Update TLS configuration"],
+  "findings": [
+    {
+      "id": "finding-header-missing-hsts",
+      "category": "headers",
+      "severity": "medium",
+      "title": "Missing HTTP Strict Transport Security",
+      "description": "A baseline browser security response header was not observed.",
+      "evidence": "strict-transport-security was not present in the selected response headers.",
+      "remediationHint": "Enable HSTS after confirming HTTPS is stable for the site and subdomains.",
+      "confidence": "medium",
+      "status": "observed",
+      "affectedAssets": [],
+      "evidenceSummary": "HSTS header was missing from the HTTP response.",
+      "remediationSteps": ["Configure HSTS header in web server."],
+      "verificationSteps": ["Verify HSTS header is present in response."]
+    }
+  ],
+  "sections": {
+    "scope": {
+      "title": "Scope",
+      "narrative": "The scope of this assessment includes the public-facing web infrastructure.",
+      "bullets": []
+    },
+    "authorization": {
+      "title": "Authorization",
+      "narrative": "This assessment was conducted with proper authorization.",
+      "bullets": []
+    },
+    "methodology": {
+      "title": "Methodology",
+      "narrative": "Passive scanning and non-intrusive observation were used.",
+      "bullets": []
+    },
+    "findingsOverview": {
+      "title": "Findings Overview",
+      "narrative": "One finding was identified during the assessment.",
+      "bullets": []
+    },
+    "skippedTests": {
+      "title": "Skipped Tests",
+      "narrative": "No tests were skipped.",
+      "bullets": []
+    },
+    "validationStatus": {
+      "title": "Validation Status",
+      "narrative": "All findings have been validated.",
+      "bullets": []
+    },
+    "limitations": {
+      "title": "Limitations",
+      "narrative": "Assessment was limited to passive observation.",
+      "bullets": []
+    },
+    "remediationChecklist": {
+      "title": "Remediation Checklist",
+      "narrative": "Follow the priority actions to remediate findings.",
+      "bullets": ["Enable HSTS header"]
+    },
+    "verificationGuidance": {
+      "title": "Verification Guidance",
+      "narrative": "Verify remediation by re-running passive scan.",
+      "bullets": []
+    }
+  },
+  "generatedBy": "deterministic-fallback"
+}
