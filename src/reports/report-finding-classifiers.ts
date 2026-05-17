@@ -66,7 +66,7 @@ export function normalizeSeverity(value: unknown): ReportFinding["severity"] {
 
   if (typeof value !== "string") return "medium";
 
-  const normalized = value.toLowerCase();
+  const normalized = value.trim().toLowerCase();
 
   if (CRITICAL_SEVERITY_ALIASES.has(normalized)) {
     return "critical";
@@ -83,7 +83,7 @@ export function normalizeCategory(
   fallbackText: string,
 ): ReportFinding["category"] {
   if (typeof value === "string") {
-    const normalized = value.toLowerCase();
+    const normalized = value.trim().toLowerCase();
 
     if (isReportFindingCategory(normalized)) {
       return normalized;
@@ -149,7 +149,7 @@ export function normalizeConfidence(
   }
 
   if (typeof value === "string") {
-    const normalized = value.toLowerCase();
+    const normalized = value.trim().toLowerCase();
 
     if (isReportFindingConfidence(normalized)) {
       return normalized;
@@ -166,7 +166,7 @@ export function normalizeFindingStatus(
 ): ReportFinding["status"] {
   if (typeof value !== "string") return "observed";
 
-  const normalized = value.toLowerCase();
+  const normalized = value.trim().toLowerCase();
 
   if (normalized === "confirmed") return "confirmed";
 
