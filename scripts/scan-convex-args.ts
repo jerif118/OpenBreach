@@ -29,12 +29,7 @@ if (environment.fromFixture) {
     .array()
     .parse(JSON.parse(await readFile(environment.fixturePath, "utf8")));
 
-  if (idFilter.length === 0) {
-    results = parsed;
-  } else {
-    const allowedIds = new Set(records.map((m) => m.id));
-    results = parsed.filter((r) => allowedIds.has(r.municipalityId));
-  }
+  results = filterFixtureResults(parsed, idFilter, records);
 
   log(
     `Loaded ${results.length} fixture scan result${results.length === 1 ? "" : "s"}.`,
@@ -105,6 +100,19 @@ function selectMunicipalities(
   }
 
   return selected;
+}
+
+function filterFixtureResults(
+  results: RawScanEvidence[],
+  idFilter: readonly string[],
+  records: typeof allRecords,
+): RawScanEvidence[] {
+  if (idFilter.length === 0) {
+    return results;
+  }
+
+  const allowedIds = new Set(records.map((m) => m.id));
+  return results.filter((r) => allowedIds.has(r.municipalityId));
 }
 
 function describeOutcome(result: RawScanEvidence): string {
