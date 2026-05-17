@@ -22,6 +22,22 @@ function mapValidationLevel(
   }
 }
 
+function buildEnrichedMetadata(args: {
+  metadata?: Record<string, unknown>;
+  allowedAssets?: string[];
+  deniedAssets?: string[];
+  rateLimit?: number;
+  validationLevel?: string;
+}): Record<string, unknown> {
+  return {
+    ...(args.metadata ?? {}),
+    ...(args.allowedAssets ? { allowedAssets: args.allowedAssets } : {}),
+    ...(args.deniedAssets ? { deniedAssets: args.deniedAssets } : {}),
+    ...(args.rateLimit ? { rateLimit: args.rateLimit } : {}),
+    ...(args.validationLevel ? { validationLevel: args.validationLevel } : {}),
+  };
+}
+
 // ============================================================================
 // Mutations
 // ============================================================================
@@ -87,15 +103,7 @@ export const createFull = mutation({
     // -----------------------------------------------------------------------
     // 2. Merge extras into metadata
     // -----------------------------------------------------------------------
-    const enrichedMetadata: Record<string, unknown> = {
-      ...(args.metadata ?? {}),
-      ...(args.allowedAssets ? { allowedAssets: args.allowedAssets } : {}),
-      ...(args.deniedAssets ? { deniedAssets: args.deniedAssets } : {}),
-      ...(args.rateLimit ? { rateLimit: args.rateLimit } : {}),
-      ...(args.validationLevel
-        ? { validationLevel: args.validationLevel }
-        : {}),
-    };
+    const enrichedMetadata = buildEnrichedMetadata(args);
 
     // -----------------------------------------------------------------------
     // 3. Insert target
