@@ -268,7 +268,9 @@ const auditEventType = v.union(
   v.literal("gate-rejected"),
   v.literal("finding-created"),
   v.literal("finding-updated"),
+  v.literal("validation-recorded"),
   v.literal("report-generated"),
+  v.literal("report-completed"),
   v.literal("auth-granted"),
   v.literal("auth-revoked"),
   v.literal("manual-override"),
@@ -551,6 +553,7 @@ export default defineSchema({
   })
     .index("by_targetId", ["targetId"])
     .index("by_targetId_and_runId", ["targetId", "runId"])
+    .index("by_targetId_and_status", ["targetId", "status"])
     .index("by_hypothesisId", ["hypothesisId"]),
 
   testPlans: defineTable({
@@ -568,6 +571,7 @@ export default defineSchema({
     metadata: v.optional(v.record(v.string(), v.any())),
   })
     .index("by_targetId", ["targetId"])
+    .index("by_targetId_and_status", ["targetId", "status"])
     .index("by_planId", ["planId"]),
 
   approvalGates: defineTable({
@@ -626,6 +630,7 @@ export default defineSchema({
   })
     .index("by_targetId", ["targetId"])
     .index("by_targetId_and_runId", ["targetId", "runId"])
+    .index("by_targetId_and_severity", ["targetId", "severity"])
     .index("by_validationResultId", ["validationResultId"])
     .index("by_findingId", ["findingId"]),
 
@@ -665,5 +670,6 @@ export default defineSchema({
   })
     .index("by_targetId", ["targetId"])
     .index("by_targetId_and_variant", ["targetId", "variant"])
+    .index("by_targetId_and_status", ["targetId", "status"])
     .index("by_artifactId", ["artifactId"]),
 });
