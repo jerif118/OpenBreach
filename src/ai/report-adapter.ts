@@ -70,6 +70,12 @@ function getConfiguredModel(): string {
   return process.env.AI_PROVIDER_MODEL ?? DEFAULT_MODEL;
 }
 
+function getAudienceInstructions(variant: ReportAudience): string {
+  return variant === "technical"
+    ? reportAgent.instructions
+    : plainLanguageReportAgent.instructions;
+}
+
 async function runTanStackChat({
   messages,
   model,
@@ -118,9 +124,7 @@ async function generateProviderReport({
     provider,
     providerKey,
     systemPrompts: [
-      variant === "technical"
-        ? reportAgent.instructions
-        : plainLanguageReportAgent.instructions,
+      getAudienceInstructions(variant),
       JSON_CONTRACT_SYSTEM_PROMPT,
     ],
     messages: [
