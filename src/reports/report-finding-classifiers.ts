@@ -97,7 +97,7 @@ export function normalizeSeverity(value: unknown): ReportFinding["severity"] {
     return matchThreshold(value, SEVERITY_THRESHOLD_RULES) ?? "info";
   }
 
-  if (typeof value !== "string") return "medium";
+  if (typeof value !== "string") return "info";
 
   const normalized = value.trim().toLowerCase();
 
