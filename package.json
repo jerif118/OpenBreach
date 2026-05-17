@@ -41,6 +41,7 @@
     "report:persist:args": "node scripts/report-convex-args.ts",
     "report:persist:fixture": "node scripts/report-fixture-persist-args.ts | node scripts/persist-via-convex.ts reports:seedFromFixture",
     "report:persistence:validate": "node scripts/validate-report-persistence.ts",
+    "report:review-fixes:validate": "node scripts/validate-report-review-fixes.ts",
     "report:select": "node scripts/validate-report-selection.ts",
     "report:smoke": "node scripts/report-smoke.ts",
     "risk:fixture": "node scripts/export-enriched-scan-fixture.ts",
