@@ -22,28 +22,34 @@ import {
   normalizeSeverity,
 } from "./report-finding-classifiers.ts";
 
-const FINDING_TITLE_KEYS = ["title", "name", "summary", "finding", "issue"];
+const FINDING_TITLE_KEYS = [
+  "title",
+  "name",
+  "summary",
+  "finding",
+  "issue",
+] as const;
 const FINDING_DESCRIPTION_KEYS = [
   "description",
   "details",
   "context",
   "summary",
-];
+] as const;
 const FINDING_EVIDENCE_KEYS = [
   "evidenceSummary",
   "evidence",
   "proof",
   "signal",
   "observation",
-];
+] as const;
 const FINDING_REMEDIATION_KEYS = [
   "remediationHint",
   "remediation",
   "recommendation",
   "nextAction",
   "action",
-];
-const FINDING_ID_KEYS = ["id", "slug", "key", "externalId"];
+] as const;
+const FINDING_ID_KEYS = ["id", "slug", "key", "externalId"] as const;
 const AFFECTED_ASSET_KEYS = [
   "asset",
   "target",
@@ -52,9 +58,13 @@ const AFFECTED_ASSET_KEYS = [
   "host",
   "path",
   "resource",
-];
-const AFFECTED_ASSET_ARRAY_KEYS = ["affectedAssets", "assets", "targets"];
-const AFFECTED_ASSET_ENTRY_KEYS = ["name", "url", "path"];
+] as const;
+const AFFECTED_ASSET_ARRAY_KEYS = [
+  "affectedAssets",
+  "assets",
+  "targets",
+] as const;
+const AFFECTED_ASSET_ENTRY_KEYS = ["name", "url", "path"] as const;
 
 type NormalizedFindingInput = Pick<
   ReportFinding,
@@ -87,8 +97,7 @@ function normalizeFindingTextFields(
   index: number,
 ): FindingTextFields {
   const title =
-    pickString(source, FINDING_TITLE_KEYS) ??
-    `Observed finding ${index + 1}`;
+    pickString(source, FINDING_TITLE_KEYS) ?? `Observed finding ${index + 1}`;
 
   return {
     title,
