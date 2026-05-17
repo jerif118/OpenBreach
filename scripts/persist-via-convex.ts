@@ -49,14 +49,14 @@ if (total === 0) {
   process.exit(0);
 }
 
-const batchCount = Math.ceil(total / batchSize);
+const batchCount = getBatchCount(total, batchSize);
 process.stderr.write(
   `Forwarding ${total} result${total === 1 ? "" : "s"} to ${functionName} in ${batchCount} batch${
     batchCount === 1 ? "" : "es"
   } of up to ${batchSize}.\n`,
 );
 
-runBatches(functionName, payload.results, batchSize, batchCount);
+runBatches(functionName, payload.results, batchSize);
 
 process.stderr.write(
   `Forwarded ${total} result${total === 1 ? "" : "s"} successfully.\n`,
@@ -125,13 +125,17 @@ function runBatches(
   functionName: MutationName,
   results: readonly unknown[],
   batchSize: number,
-  batchCount: number,
 ): void {
+  const batchCount = getBatchCount(results.length, batchSize);
   for (let batchIndex = 0; batchIndex < batchCount; batchIndex += 1) {
     const start = batchIndex * batchSize;
     const slice = results.slice(start, start + batchSize);
     runBatch(functionName, batchIndex, batchCount, slice);
   }
+}
+
+function getBatchCount(total: number, batchSize: number): number {
+  return Math.ceil(total / batchSize);
 }
 
 function runBatch(
