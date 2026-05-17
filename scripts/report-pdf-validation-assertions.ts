@@ -8,6 +8,16 @@ import {
 const PDF_TEXT_ESCAPING_RULE =
   "PDF text escaping must escape newlines, carriage returns, backslashes, and parentheses.";
 
+const PDF_OBJECT_PATTERN = /^(\d+) 0 obj\n([\s\S]*?)\nendobj/gm;
+
+function requiredPdfObjectId(raw: string, label: string): number {
+  const id = Number(raw);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new Error(`Invalid ${label}: ${raw}.`);
+  }
+  return id;
+}
+
 export function assertPdfTextEscapesLiteralControls(): void {
   const commands: string[] = [];
 
@@ -32,11 +42,12 @@ export function assertPdfTextEscapesLiteralControls(): void {
 export function assertPageTreeReferencesPageObjects(pdfContent: string): void {
   const objects = new Map<number, string>();
 
-  for (const match of pdfContent.matchAll(
-    /^(\d+) 0 obj\n([\s\S]*?)\nendobj/gm,
-  )) {
-    const objectId = Number(requiredMatchGroup(match, 1, "PDF object"));
-    const objectContent = requiredMatchGroup(match, 2, "PDF object");
+  for (const match of pdfContent.matchAll(PDF_OBJECT_PATTERN)) {
+    const objectId = requiredPdfObjectId(
+      requiredMatchGroup(match, 1, "PDF object id"),
+      "PDF object id",
+    );
+    const objectContent = requiredMatchGroup(match, 2, "PDF object body");
 
     objects.set(objectId, objectContent);
   }
@@ -51,8 +62,9 @@ export function assertPageTreeReferencesPageObjects(pdfContent: string): void {
   const kidsReferences = requiredMatchGroup(kidsMatch, 1, "PDF page tree /Kids");
 
   for (const pageRef of kidsReferences.matchAll(/(\d+) 0 R/g)) {
-    const pageObjectId = Number(
-      requiredMatchGroup(pageRef, 1, "PDF page reference"),
+    const pageObjectId = requiredPdfObjectId(
+      requiredMatchGroup(pageRef, 1, "PDF page reference id"),
+      "PDF page reference id",
     );
     const pageObject = objects.get(pageObjectId);
 
