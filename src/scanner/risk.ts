@@ -115,5 +115,6 @@ function findingWeight(findingId: ScanFinding["id"]): number {
 }
 
 function clampScore(score: number): number {
-  return Math.min(100, Math.max(0, Math.round(score)));
+  const rounded = Number.isNaN(score) ? 0 : Math.round(score);
+  return Math.min(100, Math.max(0, rounded));
 }
