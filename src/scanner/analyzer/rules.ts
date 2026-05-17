@@ -14,7 +14,11 @@ import { TLS_EXPIRY_DAYS } from "./types.ts";
 
 export function serverHeaderRule(
   evidence: PassiveScanEvidence,
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     TechnologyFingerprint,
@@ -30,7 +34,10 @@ export function serverHeaderRule(
   if (!server) return [];
 
   const match = HEADER_PATTERNS.find(
-    (p) => p.header === "server" && p.category === "server" && p.pattern.test(server),
+    (p) =>
+      p.header === "server" &&
+      p.category === "server" &&
+      p.pattern.test(server),
   );
 
   if (match) {
@@ -56,7 +63,11 @@ export function serverHeaderRule(
 
 export function xPoweredByRule(
   evidence: PassiveScanEvidence,
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     TechnologyFingerprint,
@@ -73,7 +84,9 @@ export function xPoweredByRule(
 
   const match = HEADER_PATTERNS.find(
     (p) =>
-      p.header === "x-powered-by" && p.category === "framework" && p.pattern.test(poweredBy),
+      p.header === "x-powered-by" &&
+      p.category === "framework" &&
+      p.pattern.test(poweredBy),
   );
 
   if (match) {
@@ -99,7 +112,11 @@ export function xPoweredByRule(
 
 export function cmsDetectionRule(
   evidence: PassiveScanEvidence,
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     TechnologyFingerprint,
@@ -126,7 +143,11 @@ export function cmsDetectionRule(
 
 export function cmsVersionRule(
   evidence: PassiveScanEvidence,
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     TechnologyFingerprint,
@@ -155,7 +176,11 @@ export function cmsVersionRule(
 
 export function generatorLibraryRule(
   evidence: PassiveScanEvidence,
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     TechnologyFingerprint,
@@ -170,7 +195,9 @@ export function generatorLibraryRule(
   const cms = evidence.cms;
   if (!cms) return [];
 
-  const generatorEvidence = cms.evidence.find((e) => e.startsWith("generator:"));
+  const generatorEvidence = cms.evidence.find((e) =>
+    e.startsWith("generator:"),
+  );
   if (!generatorEvidence) return [];
 
   const generatorValue = generatorEvidence.slice("generator:".length);
@@ -187,7 +214,11 @@ export function generatorLibraryRule(
 
 export function cdnHeaderRule(
   evidence: PassiveScanEvidence,
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     TechnologyFingerprint,
@@ -203,7 +234,8 @@ export function cdnHeaderRule(
   if (!server) return [];
 
   const match = HEADER_PATTERNS.find(
-    (p) => p.header === "server" && p.category === "cdn" && p.pattern.test(server),
+    (p) =>
+      p.header === "server" && p.category === "cdn" && p.pattern.test(server),
   );
 
   if (!match) return [];
@@ -220,7 +252,11 @@ export function cdnHeaderRule(
 
 export function missingSecurityHeadersRule(
   evidence: PassiveScanEvidence,
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     TechnologyFingerprint,
@@ -259,7 +295,11 @@ export function missingSecurityHeadersRule(
 export function cmsVulnerabilityRule(
   evidence: PassiveScanEvidence,
   _fingerprints: TechnologyFingerprint[],
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     VulnerabilityHypothesis,
@@ -285,7 +325,11 @@ export function cmsVulnerabilityRule(
 export function tlsExpiryRule(
   evidence: PassiveScanEvidence,
   _fingerprints: TechnologyFingerprint[],
-  options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     VulnerabilityHypothesis,
@@ -320,7 +364,11 @@ export function tlsExpiryRule(
 export function missingHstsRule(
   evidence: PassiveScanEvidence,
   _fingerprints: TechnologyFingerprint[],
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     VulnerabilityHypothesis,
@@ -349,7 +397,11 @@ export function missingHstsRule(
 export function missingCspRule(
   evidence: PassiveScanEvidence,
   _fingerprints: TechnologyFingerprint[],
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     VulnerabilityHypothesis,
@@ -377,7 +429,11 @@ export function missingCspRule(
 export function missingXFrameOptionsRule(
   evidence: PassiveScanEvidence,
   _fingerprints: TechnologyFingerprint[],
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     VulnerabilityHypothesis,
@@ -404,7 +460,11 @@ export function missingXFrameOptionsRule(
 export function adminPanelExposureRule(
   evidence: PassiveScanEvidence,
   _fingerprints: TechnologyFingerprint[],
-  _options: { now: () => string; idGenerator: () => string; confidenceThreshold: number },
+  _options: {
+    now: () => string;
+    idGenerator: () => string;
+    confidenceThreshold: number;
+  },
 ): Array<
   Pick<
     VulnerabilityHypothesis,

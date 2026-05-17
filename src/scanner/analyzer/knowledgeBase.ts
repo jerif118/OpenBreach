@@ -87,13 +87,7 @@ export type HeaderPattern = {
   header: string;
   pattern: RegExp;
   technology: string;
-  category:
-    | "server"
-    | "framework"
-    | "cms"
-    | "library"
-    | "cdn"
-    | "other";
+  category: "server" | "framework" | "cms" | "library" | "cdn" | "other";
   confidence: number;
 };
 
