@@ -171,12 +171,14 @@ export function deriveValidationStatus(
       pickString(candidate, ["status", "result", "outcome"]) ??
       "status not provided";
     const detail = pickString(candidate, ["summary", "details", "reason"]);
+    const detailSuffix = detail ? `. ${detail}` : "";
 
-    return toSentence(`${label}: ${outcome}${detail ? `. ${detail}` : ""}`);
+    return toSentence(`${label}: ${outcome}${detailSuffix}`);
   });
+  const validationSummaries = uniqueStrings(validations);
 
   return uniqueStrings([
-    ...validations,
+    ...validationSummaries,
     scan?.reachable === true
       ? "The passive target appeared reachable during the supplied observation window."
       : null,
@@ -184,7 +186,7 @@ export function deriveValidationStatus(
       ? "The passive target did not appear reachable during the supplied observation window."
       : null,
     scan?.httpStatus ? `Observed HTTP status: ${scan.httpStatus}.` : null,
-    validations.length === 0
+    validationSummaries.length === 0
       ? "No explicit controlled validation result was supplied in the structured input."
       : null,
   ]);
