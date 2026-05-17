@@ -28,22 +28,26 @@ import type {
 
 /**
  * Check whether a Convex deployment URL is configured.
- * Tries `process.env.CONVEX_URL` (Node.js) and falls back to
- * `import.meta.env.VITE_CONVEX_URL` (Vite/browser) if available.
+ * 
+ * On the server (Convex runtime): always returns true — if code is running
+ * inside a Convex function, Convex is obviously configured.
+ * 
+ * In the browser: checks VITE_CONVEX_URL to determine if the frontend
+ * is pointed at a Convex deployment.
  */
 export function isConvexConfigured(): boolean {
+  // If we're in a Node.js environment (Convex server runtime), assume configured
   try {
-    if (
-      typeof process !== "undefined" &&
-      process.env &&
-      process.env.CONVEX_URL
-    ) {
+    if (typeof process !== "undefined" && process.env) {
+      // We're on the server — if CONVEX_URL is explicitly set, use it as signal
+      // but if not, still return true because we're inside Convex runtime
       return true;
     }
   } catch {
-    // process is not defined in browser
+    // process is not defined in browser — fall through to browser check
   }
 
+  // Browser check: is there a Vite env var pointing to Convex?
   try {
     const metaEnv = (import.meta as unknown as Record<string, unknown>).env as
       | Record<string, string>
