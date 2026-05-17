@@ -8,7 +8,21 @@ import type {
   StyleSpecification,
 } from "maplibre-gl";
 import { peruOutlineGeoJson } from "./peruOutlineGeoJson";
-import type { ThreatEntry } from "./threatMapTypes";
+import type { ThreatEntry, ThreatSeverity } from "./threatMapTypes";
+
+const FLAG_ICON_IDS: Record<ThreatSeverity, string> = {
+  low: "threat-flag-low",
+  medium: "threat-flag-medium",
+  high: "threat-flag-high",
+  critical: "threat-flag-critical",
+};
+
+const FLAG_FILL_COLORS: Record<ThreatSeverity, string> = {
+  low: "#7df4ff",
+  medium: "#72ff70",
+  high: "#ffd166",
+  critical: "#ff89ab",
+};
 
 const MAP_STYLE: StyleSpecification = {
   version: 8,
@@ -75,20 +89,6 @@ const heatmapColor: ExpressionSpecification = [
   "rgba(255, 68, 125, 0.46)",
 ];
 
-const severityColor: ExpressionSpecification = [
-  "match",
-  ["get", "severity"],
-  "low",
-  "#00dbe9",
-  "medium",
-  "#00e639",
-  "high",
-  "#ffd166",
-  "critical",
-  "#ff6b98",
-  "#dbfcff",
-];
-
 type ThreatGeoJsonData = Exclude<GeoJSONSourceSpecification["data"], string>;
 type ThreatMapBounds = {
   maxLat: number;
@@ -152,6 +152,9 @@ export function ThreatGeoMap({
         }
 
         mapReadyRef.current = true;
+
+        registerFlagIcons(map);
+
         map.addSource(MAP_REGION_SOURCE_ID, {
           type: "geojson",
           data: peruOutlineGeoJson as unknown as ThreatGeoJsonData,
@@ -261,38 +264,6 @@ export function ThreatGeoMap({
         });
 
         map.addLayer({
-          id: MAP_POINTS_LAYER_ID,
-          type: "circle",
-          source: MAP_SOURCE_ID,
-          paint: {
-            "circle-color": severityColor,
-            "circle-opacity": [
-              "case",
-              ["==", ["get", "severity"], "critical"],
-              0.94,
-              0.84,
-            ],
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              4,
-              ["+", 2.4, ["*", ["get", "score"], 3.2]],
-              8,
-              ["+", 4.2, ["*", ["get", "score"], 5.5]],
-            ],
-            "circle-stroke-color": "rgba(219, 252, 255, 0.85)",
-            "circle-stroke-opacity": 0.68,
-            "circle-stroke-width": [
-              "case",
-              ["==", ["get", "severity"], "critical"],
-              1.2,
-              0.8,
-            ],
-          },
-        });
-
-        map.addLayer({
           id: MAP_SELECTION_LAYER_ID,
           type: "circle",
           source: MAP_SOURCE_ID,
@@ -311,6 +282,41 @@ export function ThreatGeoMap({
             ],
             "circle-stroke-color": "#dbfcff",
             "circle-stroke-width": 1.1,
+          },
+        });
+
+        map.addLayer({
+          id: MAP_POINTS_LAYER_ID,
+          type: "symbol",
+          source: MAP_SOURCE_ID,
+          layout: {
+            "icon-image": [
+              "match",
+              ["get", "severity"],
+              "low",
+              FLAG_ICON_IDS.low,
+              "medium",
+              FLAG_ICON_IDS.medium,
+              "high",
+              FLAG_ICON_IDS.high,
+              "critical",
+              FLAG_ICON_IDS.critical,
+              FLAG_ICON_IDS.low,
+            ],
+            "icon-anchor": "bottom-left",
+            "icon-allow-overlap": true,
+            "icon-ignore-placement": true,
+            "icon-size": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              4,
+              0.85,
+              7,
+              1.05,
+              9,
+              1.25,
+            ],
           },
         });
 
@@ -532,5 +538,94 @@ function getBoundsCenter(bounds: ThreatMapBounds): [number, number] {
     (bounds.minLng + bounds.maxLng) / 2,
     (bounds.minLat + bounds.maxLat) / 2,
   ];
+}
+
+function registerFlagIcons(map: MapLibreMap) {
+  (Object.keys(FLAG_ICON_IDS) as ThreatSeverity[]).forEach((severity) => {
+    const id = FLAG_ICON_IDS[severity];
+    if (map.hasImage(id)) {
+      return;
+    }
+    const image = buildFlagImage(FLAG_FILL_COLORS[severity]);
+    if (image) {
+      map.addImage(id, image, { pixelRatio: 2 });
+    }
+  });
+}
+
+function buildFlagImage(fillColor: string): ImageData | null {
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  // 8 cols x 12 rows pixel grid. P = pole, O = outline, F = flag fill,
+  // H = highlight stripe. The icon anchor (bottom-left) lands at the pole base.
+  const grid = [
+    "POOOOOOO",
+    "PFFFFFFO",
+    "PFFFFFFO",
+    "PFHHHHFO",
+    "PFFFFFFO",
+    "POOOOOOO",
+    "P.......",
+    "P.......",
+    "P.......",
+    "P.......",
+    "P.......",
+    "P.......",
+  ];
+
+  const pixelScale = 3;
+  const gridWidth = grid[0].length;
+  const gridHeight = grid.length;
+  const width = gridWidth * pixelScale;
+  const height = gridHeight * pixelScale;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return null;
+  }
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, width, height);
+
+  const colors: Record<string, string> = {
+    P: "#dbfcff",
+    O: "#05090b",
+    F: fillColor,
+    H: lightenColor(fillColor, 0.35),
+  };
+
+  for (let row = 0; row < gridHeight; row += 1) {
+    const line = grid[row];
+    for (let col = 0; col < gridWidth; col += 1) {
+      const symbol = line[col];
+      const color = colors[symbol];
+      if (!color) {
+        continue;
+      }
+      ctx.fillStyle = color;
+      ctx.fillRect(col * pixelScale, row * pixelScale, pixelScale, pixelScale);
+    }
+  }
+
+  return ctx.getImageData(0, 0, width, height);
+}
+
+function lightenColor(hex: string, amount: number) {
+  const parsed = hex.replace("#", "");
+  if (parsed.length !== 6) {
+    return hex;
+  }
+  const r = parseInt(parsed.slice(0, 2), 16);
+  const g = parseInt(parsed.slice(2, 4), 16);
+  const b = parseInt(parsed.slice(4, 6), 16);
+  const mix = (channel: number) =>
+    Math.round(channel + (255 - channel) * amount)
+      .toString(16)
+      .padStart(2, "0");
+  return `#${mix(r)}${mix(g)}${mix(b)}`;
 }
 
