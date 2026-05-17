@@ -30,5 +30,20 @@
         "rejectionReason": "Target classification 'private' is out of scope"
       }
     ]
-  }
+  },
+  "auditEvents": [
+    {
+      "eventId": "audit-private-001-rejected",
+      "targetId": "target-private-001",
+      "eventType": "target-rejected",
+      "actor": "system",
+      "timestamp": "2024-01-15T09:05:00Z",
+      "runId": "run-private-001",
+      "details": {
+        "auditDecision": "rejected",
+        "reason": "Target classification 'private' is out of scope",
+        "primaryUrl": "https://private-bank.example.com"
+      }
+    }
+  ]
 }
