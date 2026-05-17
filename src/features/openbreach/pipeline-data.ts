@@ -8,6 +8,7 @@ import type {
   TestPlanDto,
   ValidationResultDto,
   VulnerabilityHypothesisDto,
+  WorkflowPhaseName,
   WorkflowRunDto,
 } from "../../../convex/types.js";
 
@@ -73,7 +74,7 @@ export type StoredDemoTarget = {
   createdAt: string;
   runId: string;
   status: WorkflowRunDto["status"];
-  currentPhase: string;
+  currentPhase: WorkflowPhaseName;
   approverName?: string;
   validationLevel?: ValidationLevel;
   rateLimit?: number;
@@ -323,7 +324,7 @@ function buildApprovedFixtureRecord(): PipelineTargetRecord {
     findings,
     reportArtifact,
     reportDownloads: buildReportDownloads(base.targetId, reportArtifact),
-    auditEvents: auditEventFixture as AuditEventDto[],
+    auditEvents: auditEventFixture as unknown as AuditEventDto[],
     coverage: 100,
     alerts: 1,
     nextActionLabel: "Open reports",
