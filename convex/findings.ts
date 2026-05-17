@@ -1,9 +1,14 @@
-import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
 import type { FindingDto } from "./types/findings";
 import { appendAuditEvent } from "./lib/audit";
+import {
+  createArgs,
+  listByTargetArgs,
+  listByValidationResultArgs,
+  updateArgs,
+} from "./findings.validators";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -38,19 +43,7 @@ function toFindingDto(doc: Doc<"findings">): FindingDto {
 // ============================================================================
 
 export const listByTarget = internalQuery({
-  args: {
-    targetId: v.string(),
-    severity: v.optional(
-      v.union(
-        v.literal("info"),
-        v.literal("low"),
-        v.literal("medium"),
-        v.literal("high"),
-        v.literal("critical"),
-      ),
-    ),
-    limit: v.optional(v.number()),
-  },
+  args: listByTargetArgs,
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
@@ -76,10 +69,7 @@ export const listByTarget = internalQuery({
 });
 
 export const listByValidationResult = internalQuery({
-  args: {
-    validationResultId: v.string(),
-    limit: v.optional(v.number()),
-  },
+  args: listByValidationResultArgs,
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
@@ -99,52 +89,7 @@ export const listByValidationResult = internalQuery({
 // ============================================================================
 
 export const create = internalMutation({
-  args: {
-    findingId: v.string(),
-    targetId: v.string(),
-    title: v.string(),
-    description: v.string(),
-    severity: v.union(
-      v.literal("info"),
-      v.literal("low"),
-      v.literal("medium"),
-      v.literal("high"),
-      v.literal("critical"),
-    ),
-    status: v.union(
-      v.literal("observed"),
-      v.literal("confirmed"),
-      v.literal("likely"),
-      v.literal("skipped"),
-      v.literal("unresolved"),
-      v.literal("false-positive"),
-    ),
-    createdAt: v.string(),
-    category: v.optional(
-      v.union(
-        v.literal("tls"),
-        v.literal("headers"),
-        v.literal("cms"),
-        v.literal("exposure"),
-        v.literal("admin-exposure"),
-        v.literal("availability"),
-        v.literal("known-vulnerability"),
-        v.literal("configuration"),
-        v.literal("logic"),
-      ),
-    ),
-    evidence: v.optional(v.string()),
-    remediationHint: v.optional(v.string()),
-    affectedAssets: v.optional(v.array(v.string())),
-    confidence: v.optional(
-      v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
-    ),
-    cweId: v.optional(v.string()),
-    cvssScore: v.optional(v.number()),
-    validationResultId: v.optional(v.string()),
-    reportReady: v.optional(v.boolean()),
-    runId: v.optional(v.string()),
-  },
+  args: createArgs,
   handler: async (ctx, args) => {
     const actor = await requireOperatorOrAdmin(ctx);
 
@@ -201,54 +146,7 @@ export const create = internalMutation({
 });
 
 export const update = internalMutation({
-  args: {
-    findingId: v.string(),
-    title: v.optional(v.string()),
-    description: v.optional(v.string()),
-    severity: v.optional(
-      v.union(
-        v.literal("info"),
-        v.literal("low"),
-        v.literal("medium"),
-        v.literal("high"),
-        v.literal("critical"),
-      ),
-    ),
-    status: v.optional(
-      v.union(
-        v.literal("observed"),
-        v.literal("confirmed"),
-        v.literal("likely"),
-        v.literal("skipped"),
-        v.literal("unresolved"),
-        v.literal("false-positive"),
-      ),
-    ),
-    category: v.optional(
-      v.union(
-        v.literal("tls"),
-        v.literal("headers"),
-        v.literal("cms"),
-        v.literal("exposure"),
-        v.literal("admin-exposure"),
-        v.literal("availability"),
-        v.literal("known-vulnerability"),
-        v.literal("configuration"),
-        v.literal("logic"),
-      ),
-    ),
-    evidence: v.optional(v.string()),
-    remediationHint: v.optional(v.string()),
-    affectedAssets: v.optional(v.array(v.string())),
-    confidence: v.optional(
-      v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
-    ),
-    cweId: v.optional(v.string()),
-    cvssScore: v.optional(v.number()),
-    validationResultId: v.optional(v.string()),
-    reportReady: v.optional(v.boolean()),
-    runId: v.optional(v.string()),
-  },
+  args: updateArgs,
   handler: async (ctx, args) => {
     const actor = await requireOperatorOrAdmin(ctx);
 
