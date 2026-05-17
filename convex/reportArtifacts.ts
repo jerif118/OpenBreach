@@ -7,9 +7,34 @@ import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
-// ============================================================================
-// DTO Mapper
-// ============================================================================
+const reportArtifactStatusValidator = v.union(
+  v.literal("pending"),
+  v.literal("generating"),
+  v.literal("completed"),
+  v.literal("failed"),
+);
+
+const reportArtifactVariantValidator = v.union(
+  v.literal("technical"),
+  v.literal("friendly"),
+  v.literal("executive"),
+);
+
+const reportArtifactSectionValidator = v.object({
+  title: v.string(),
+  narrative: v.string(),
+  bullets: v.array(v.string()),
+});
+
+const reportArtifactSectionsValidator = v.array(reportArtifactSectionValidator);
+
+const reportArtifactPdfValidator = v.object({
+  storagePath: v.string(),
+  fileName: v.string(),
+  contentType: v.literal("application/pdf"),
+  generatedAt: v.optional(v.string()),
+  sizeBytes: v.optional(v.number()),
+});
 
 function toReportArtifactDto(doc: Doc<"reportArtifacts">): ReportArtifactDto {
   return {
@@ -42,21 +67,10 @@ function toReportArtifactDto(doc: Doc<"reportArtifacts">): ReportArtifactDto {
   };
 }
 
-// ============================================================================
-// Queries
-// ============================================================================
-
 export const listByTarget = internalQuery({
   args: {
     targetId: v.string(),
-    status: v.optional(
-      v.union(
-        v.literal("pending"),
-        v.literal("generating"),
-        v.literal("completed"),
-        v.literal("failed"),
-      ),
-    ),
+    status: v.optional(reportArtifactStatusValidator),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -95,46 +109,17 @@ export const get = internalQuery({
   },
 });
 
-// ============================================================================
-// Mutations
-// ============================================================================
-
 export const create = internalMutation({
   args: {
     artifactId: v.string(),
     targetId: v.string(),
-    variant: v.union(
-      v.literal("technical"),
-      v.literal("friendly"),
-      v.literal("executive"),
-    ),
+    variant: reportArtifactVariantValidator,
     title: v.string(),
     generatedAt: v.string(),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("generating"),
-      v.literal("completed"),
-      v.literal("failed"),
-    ),
+    status: reportArtifactStatusValidator,
     findings: v.array(v.string()),
-    sections: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          narrative: v.string(),
-          bullets: v.array(v.string()),
-        }),
-      ),
-    ),
-    pdf: v.optional(
-      v.object({
-        storagePath: v.string(),
-        fileName: v.string(),
-        contentType: v.literal("application/pdf"),
-        generatedAt: v.optional(v.string()),
-        sizeBytes: v.optional(v.number()),
-      }),
-    ),
+    sections: v.optional(reportArtifactSectionsValidator),
+    pdf: v.optional(reportArtifactPdfValidator),
     generatedBy: v.optional(
       v.union(
         v.literal("deterministic-fallback"),
@@ -197,22 +182,8 @@ export const create = internalMutation({
 export const complete = internalMutation({
   args: {
     artifactId: v.string(),
-    pdf: v.object({
-      storagePath: v.string(),
-      fileName: v.string(),
-      contentType: v.literal("application/pdf"),
-      generatedAt: v.optional(v.string()),
-      sizeBytes: v.optional(v.number()),
-    }),
-    sections: v.optional(
-      v.array(
-        v.object({
-          title: v.string(),
-          narrative: v.string(),
-          bullets: v.array(v.string()),
-        }),
-      ),
-    ),
+    pdf: reportArtifactPdfValidator,
+    sections: v.optional(reportArtifactSectionsValidator),
   },
   handler: async (ctx, args) => {
     const actor = await requireOperatorOrAdmin(ctx);
@@ -243,10 +214,6 @@ export const complete = internalMutation({
     return { id: doc._id, artifactId: args.artifactId };
   },
 });
-
-// ============================================================================
-// Helpers
-// ============================================================================
 
 function normalizeListLimit(limit: number | undefined) {
   if (limit === undefined) {
