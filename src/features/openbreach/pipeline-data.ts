@@ -10,7 +10,9 @@ import type {
   VulnerabilityHypothesisDto,
   WorkflowPhaseName,
   WorkflowRunDto,
+  AuthorizationScopeDto,
 } from "../../../convex/types.js";
+import type { ValidationLevel } from "../../shared/target-scope-decision.ts";
 
 import approvalGateFixture from "../../../data/targets/approval-gate.json";
 import auditEventFixture from "../../../data/targets/audit-event.json";
@@ -24,11 +26,6 @@ import validationResultFixture from "../../../data/targets/validation-result.jso
 import vulnerabilityHypothesisFixture from "../../../data/targets/vulnerability-hypothesis.json";
 
 export const DEMO_TARGET_STORAGE_KEY = "openbreach:demo-targets";
-
-export type ValidationLevel =
-  | "passive"
-  | "semiactive"
-  | "controlled_validation";
 
 export type PipelineTone = "green" | "red" | "cyan" | "amber";
 
@@ -80,6 +77,10 @@ export type StoredDemoTarget = {
   rateLimit?: number;
   allowedAssets?: string[];
   deniedAssets?: string[];
+  scopeDecision?: Record<string, unknown>;
+  authorizationScope?: AuthorizationScopeDto | null;
+  workflowRun?: WorkflowRunDto;
+  auditEvents?: AuditEventDto[];
 };
 
 const DEMO_REPORT_DOWNLOADS: ReportDownloadEntry[] = [
@@ -337,6 +338,7 @@ function buildRejectedFixtureRecord(): PipelineTargetRecord {
     targetProfile: TargetListItemDto;
     approvalGate: ApprovalGateDto;
     workflowRun: WorkflowRunDto;
+    auditEvents?: AuditEventDto[];
   };
 
   return {
@@ -358,7 +360,7 @@ function buildRejectedFixtureRecord(): PipelineTargetRecord {
     findings: [],
     reportArtifact: null,
     reportDownloads: [],
-    auditEvents: [],
+    auditEvents: fixture.auditEvents ?? [],
     coverage: 5,
     alerts: 1,
     nextActionLabel: "Review scope",
@@ -367,7 +369,7 @@ function buildRejectedFixtureRecord(): PipelineTargetRecord {
 }
 
 function buildSessionRecord(target: StoredDemoTarget): PipelineTargetRecord {
-  const latestRun: WorkflowRunDto = {
+  const latestRun: WorkflowRunDto = target.workflowRun ?? {
     runId: target.runId,
     targetId: target.targetId,
     status: target.status,
@@ -414,7 +416,7 @@ function buildSessionRecord(target: StoredDemoTarget): PipelineTargetRecord {
     findings: [],
     reportArtifact: null,
     reportDownloads: [],
-    auditEvents: [
+    auditEvents: target.auditEvents ?? [
       {
         eventId: `${target.runId}-created`,
         targetId: target.targetId,
