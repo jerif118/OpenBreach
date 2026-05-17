@@ -6,6 +6,11 @@ import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
+const auditDetailsValidator = v.record(
+  v.string(),
+  v.union(v.string(), v.number(), v.boolean(), v.null()),
+);
+
 function toAuditEventDto(doc: Doc<"auditEvents">): AuditEventDto {
   return {
     eventId: doc.eventId,
@@ -49,14 +54,20 @@ export const append = internalMutation({
       v.literal("target-updated"),
       v.literal("target-rejected"),
       v.literal("workflow-started"),
+      v.literal("workflow-pending"),
+      v.literal("workflow-running"),
+      v.literal("workflow-paused"),
       v.literal("workflow-completed"),
       v.literal("workflow-halted"),
+      v.literal("workflow-rejected"),
+      v.literal("workflow-failed"),
       v.literal("phase-changed"),
       v.literal("evidence-recorded"),
       v.literal("hypothesis-proposed"),
       v.literal("approval-requested"),
       v.literal("approval-granted"),
       v.literal("approval-rejected"),
+      v.literal("approval-reset"),
       v.literal("gate-approved"),
       v.literal("gate-rejected"),
       v.literal("finding-created"),
@@ -71,7 +82,7 @@ export const append = internalMutation({
     actor: v.string(),
     timestamp: v.string(),
     runId: v.optional(v.string()),
-    details: v.optional(v.record(v.string(), v.any())),
+    details: v.optional(auditDetailsValidator),
     ipAddress: v.optional(v.string()),
     userAgent: v.optional(v.string()),
   },
