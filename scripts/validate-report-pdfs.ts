@@ -148,15 +148,21 @@ for (const record of output.results) {
     throw new Error(`Missing selected context for ${record.municipalityId}.`);
   }
 
+  const firstFinding = requiredElement(
+    context.scan.findings,
+    0,
+    `Selected context ${context.municipality.id} must include a finding for PDF validation.`,
+  );
+
   const requiredSnippets = [
     context.municipality.name,
     "Technical Remediation Report",
     "Audience: Technical",
     "Executive summary",
     "Priority actions",
-    context.scan.findings[0]?.title,
-    `Severity: ${context.scan.findings[0]?.severity}`,
-  ].filter((snippet): snippet is string => Boolean(snippet));
+    firstFinding.title,
+    `Severity: ${firstFinding.severity}`,
+  ];
 
   for (const snippet of requiredSnippets) {
     if (!technicalPdfContent.includes(snippet)) {
