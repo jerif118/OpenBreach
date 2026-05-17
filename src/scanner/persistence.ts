@@ -9,8 +9,8 @@ export function toRawScanPersistenceArgs(
 ): RawScanPersistenceArgs {
   return rawScanPersistenceArgsSchema.parse({
     results: results.map((result) => {
-      const validated = rawScanEvidenceSchema.parse(result);
-      const { municipalityId, ...evidence } = validated;
+      const validatedEvidence = rawScanEvidenceSchema.parse(result);
+      const { municipalityId, ...evidence } = validatedEvidence;
 
       return {
         municipalityExternalId: municipalityId,
