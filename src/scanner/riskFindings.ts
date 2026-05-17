@@ -118,6 +118,9 @@ export function generateFindings(evidence: RawScanEvidence): ScanFinding[] {
   }
 
   if (evidence.cms && evidence.cms.name !== "unknown") {
+    const cmsLabel = evidence.cms.version
+      ? `${evidence.cms.name} ${evidence.cms.version}`
+      : evidence.cms.name;
     findings.push({
       id: "finding-cms-detected",
       category: "cms",
@@ -125,7 +128,7 @@ export function generateFindings(evidence: RawScanEvidence): ScanFinding[] {
       title: "CMS fingerprint was detected",
       description:
         "Public page evidence revealed a likely CMS fingerprint. This is informational unless combined with other risk evidence.",
-      evidence: `${evidence.cms.name}${evidence.cms.version ? ` ${evidence.cms.version}` : ""}; confidence ${evidence.cms.confidence}; evidence ${evidence.cms.evidence.join(", ")}`,
+      evidence: `${cmsLabel}; confidence ${evidence.cms.confidence}; evidence ${evidence.cms.evidence.join(", ")}`,
       remediationHint:
         "Keep CMS core, extensions, and themes patched, and remove unnecessary public version disclosures where practical.",
     });
