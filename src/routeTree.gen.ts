@@ -9,64 +9,182 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as GuardianRouteImport } from './routes/guardian'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuardianIndexRouteImport } from './routes/guardian/index'
 import { Route as ReportsFileNameRouteImport } from './routes/reports/$fileName'
-import { Route as MunicipalitiesIdRouteImport } from './routes/municipalities.$id'
+import { Route as GuardianValidationsRouteImport } from './routes/guardian/validations'
+import { Route as GuardianThreatsRouteImport } from './routes/guardian/threats'
+import { Route as GuardianReportsRouteImport } from './routes/guardian/reports'
+import { Route as GuardianNetworkRouteImport } from './routes/guardian/network'
+import { Route as GuardianLogsRouteImport } from './routes/guardian/logs'
+import { Route as GuardianEvidenceRouteImport } from './routes/guardian/evidence'
+import { Route as GuardianConfigRouteImport } from './routes/guardian/config'
 
+const GuardianRoute = GuardianRouteImport.update({
+  id: '/guardian',
+  path: '/guardian',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GuardianIndexRoute = GuardianIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GuardianRoute,
 } as any)
 const ReportsFileNameRoute = ReportsFileNameRouteImport.update({
   id: '/reports/$fileName',
   path: '/reports/$fileName',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MunicipalitiesIdRoute = MunicipalitiesIdRouteImport.update({
-  id: '/municipalities/$id',
-  path: '/municipalities/$id',
-  getParentRoute: () => rootRouteImport,
+const GuardianValidationsRoute = GuardianValidationsRouteImport.update({
+  id: '/validations',
+  path: '/validations',
+  getParentRoute: () => GuardianRoute,
+} as any)
+const GuardianThreatsRoute = GuardianThreatsRouteImport.update({
+  id: '/threats',
+  path: '/threats',
+  getParentRoute: () => GuardianRoute,
+} as any)
+const GuardianReportsRoute = GuardianReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => GuardianRoute,
+} as any)
+const GuardianNetworkRoute = GuardianNetworkRouteImport.update({
+  id: '/network',
+  path: '/network',
+  getParentRoute: () => GuardianRoute,
+} as any)
+const GuardianLogsRoute = GuardianLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => GuardianRoute,
+} as any)
+const GuardianEvidenceRoute = GuardianEvidenceRouteImport.update({
+  id: '/evidence',
+  path: '/evidence',
+  getParentRoute: () => GuardianRoute,
+} as any)
+const GuardianConfigRoute = GuardianConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => GuardianRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/municipalities/$id': typeof MunicipalitiesIdRoute
+  '/guardian': typeof GuardianRouteWithChildren
+  '/guardian/config': typeof GuardianConfigRoute
+  '/guardian/evidence': typeof GuardianEvidenceRoute
+  '/guardian/logs': typeof GuardianLogsRoute
+  '/guardian/network': typeof GuardianNetworkRoute
+  '/guardian/reports': typeof GuardianReportsRoute
+  '/guardian/threats': typeof GuardianThreatsRoute
+  '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/guardian/': typeof GuardianIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/municipalities/$id': typeof MunicipalitiesIdRoute
+  '/guardian/config': typeof GuardianConfigRoute
+  '/guardian/evidence': typeof GuardianEvidenceRoute
+  '/guardian/logs': typeof GuardianLogsRoute
+  '/guardian/network': typeof GuardianNetworkRoute
+  '/guardian/reports': typeof GuardianReportsRoute
+  '/guardian/threats': typeof GuardianThreatsRoute
+  '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/guardian': typeof GuardianIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/municipalities/$id': typeof MunicipalitiesIdRoute
+  '/guardian': typeof GuardianRouteWithChildren
+  '/guardian/config': typeof GuardianConfigRoute
+  '/guardian/evidence': typeof GuardianEvidenceRoute
+  '/guardian/logs': typeof GuardianLogsRoute
+  '/guardian/network': typeof GuardianNetworkRoute
+  '/guardian/reports': typeof GuardianReportsRoute
+  '/guardian/threats': typeof GuardianThreatsRoute
+  '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/guardian/': typeof GuardianIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/municipalities/$id' | '/reports/$fileName'
+  fullPaths:
+    | '/'
+    | '/guardian'
+    | '/guardian/config'
+    | '/guardian/evidence'
+    | '/guardian/logs'
+    | '/guardian/network'
+    | '/guardian/reports'
+    | '/guardian/threats'
+    | '/guardian/validations'
+    | '/reports/$fileName'
+    | '/guardian/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/municipalities/$id' | '/reports/$fileName'
-  id: '__root__' | '/' | '/municipalities/$id' | '/reports/$fileName'
+  to:
+    | '/'
+    | '/guardian/config'
+    | '/guardian/evidence'
+    | '/guardian/logs'
+    | '/guardian/network'
+    | '/guardian/reports'
+    | '/guardian/threats'
+    | '/guardian/validations'
+    | '/reports/$fileName'
+    | '/guardian'
+  id:
+    | '__root__'
+    | '/'
+    | '/guardian'
+    | '/guardian/config'
+    | '/guardian/evidence'
+    | '/guardian/logs'
+    | '/guardian/network'
+    | '/guardian/reports'
+    | '/guardian/threats'
+    | '/guardian/validations'
+    | '/reports/$fileName'
+    | '/guardian/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  MunicipalitiesIdRoute: typeof MunicipalitiesIdRoute
+  GuardianRoute: typeof GuardianRouteWithChildren
   ReportsFileNameRoute: typeof ReportsFileNameRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/guardian': {
+      id: '/guardian'
+      path: '/guardian'
+      fullPath: '/guardian'
+      preLoaderRoute: typeof GuardianRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/guardian/': {
+      id: '/guardian/'
+      path: '/'
+      fullPath: '/guardian/'
+      preLoaderRoute: typeof GuardianIndexRouteImport
+      parentRoute: typeof GuardianRoute
     }
     '/reports/$fileName': {
       id: '/reports/$fileName'
@@ -75,19 +193,87 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsFileNameRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/municipalities/$id': {
-      id: '/municipalities/$id'
-      path: '/municipalities/$id'
-      fullPath: '/municipalities/$id'
-      preLoaderRoute: typeof MunicipalitiesIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/guardian/validations': {
+      id: '/guardian/validations'
+      path: '/validations'
+      fullPath: '/guardian/validations'
+      preLoaderRoute: typeof GuardianValidationsRouteImport
+      parentRoute: typeof GuardianRoute
+    }
+    '/guardian/threats': {
+      id: '/guardian/threats'
+      path: '/threats'
+      fullPath: '/guardian/threats'
+      preLoaderRoute: typeof GuardianThreatsRouteImport
+      parentRoute: typeof GuardianRoute
+    }
+    '/guardian/reports': {
+      id: '/guardian/reports'
+      path: '/reports'
+      fullPath: '/guardian/reports'
+      preLoaderRoute: typeof GuardianReportsRouteImport
+      parentRoute: typeof GuardianRoute
+    }
+    '/guardian/network': {
+      id: '/guardian/network'
+      path: '/network'
+      fullPath: '/guardian/network'
+      preLoaderRoute: typeof GuardianNetworkRouteImport
+      parentRoute: typeof GuardianRoute
+    }
+    '/guardian/logs': {
+      id: '/guardian/logs'
+      path: '/logs'
+      fullPath: '/guardian/logs'
+      preLoaderRoute: typeof GuardianLogsRouteImport
+      parentRoute: typeof GuardianRoute
+    }
+    '/guardian/evidence': {
+      id: '/guardian/evidence'
+      path: '/evidence'
+      fullPath: '/guardian/evidence'
+      preLoaderRoute: typeof GuardianEvidenceRouteImport
+      parentRoute: typeof GuardianRoute
+    }
+    '/guardian/config': {
+      id: '/guardian/config'
+      path: '/config'
+      fullPath: '/guardian/config'
+      preLoaderRoute: typeof GuardianConfigRouteImport
+      parentRoute: typeof GuardianRoute
     }
   }
 }
 
+interface GuardianRouteChildren {
+  GuardianConfigRoute: typeof GuardianConfigRoute
+  GuardianEvidenceRoute: typeof GuardianEvidenceRoute
+  GuardianLogsRoute: typeof GuardianLogsRoute
+  GuardianNetworkRoute: typeof GuardianNetworkRoute
+  GuardianReportsRoute: typeof GuardianReportsRoute
+  GuardianThreatsRoute: typeof GuardianThreatsRoute
+  GuardianValidationsRoute: typeof GuardianValidationsRoute
+  GuardianIndexRoute: typeof GuardianIndexRoute
+}
+
+const GuardianRouteChildren: GuardianRouteChildren = {
+  GuardianConfigRoute: GuardianConfigRoute,
+  GuardianEvidenceRoute: GuardianEvidenceRoute,
+  GuardianLogsRoute: GuardianLogsRoute,
+  GuardianNetworkRoute: GuardianNetworkRoute,
+  GuardianReportsRoute: GuardianReportsRoute,
+  GuardianThreatsRoute: GuardianThreatsRoute,
+  GuardianValidationsRoute: GuardianValidationsRoute,
+  GuardianIndexRoute: GuardianIndexRoute,
+}
+
+const GuardianRouteWithChildren = GuardianRoute._addFileChildren(
+  GuardianRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  MunicipalitiesIdRoute: MunicipalitiesIdRoute,
+  GuardianRoute: GuardianRouteWithChildren,
   ReportsFileNameRoute: ReportsFileNameRoute,
 }
 export const routeTree = rootRouteImport
