@@ -16,6 +16,8 @@ type MunicipalitySelection =
   | { ok: true; records: readonly Municipality[] }
   | { ok: false; idFilter: readonly string[] };
 
+type ConcurrencySlot<R> = { value: R } | undefined;
+
 // stdout is reserved for the JSON payload that `convex run` consumes via
 // command substitution. All progress/diagnostic output must go to stderr.
 const log = (message: string): void => {
@@ -159,7 +161,7 @@ async function runWithConcurrency<T, R>(
   concurrency: ScanConvexEnvironment["concurrency"],
   task: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
-  const out: R[] = new Array(items.length);
+  const out: Array<ConcurrencySlot<R>> = new Array(items.length);
   let cursor = 0;
 
   const workerCount = Math.min(concurrency, items.length);
@@ -170,10 +172,15 @@ async function runWithConcurrency<T, R>(
       if (index >= items.length) {
         return;
       }
-      out[index] = await task(items[index], index);
+      out[index] = { value: await task(items[index], index) };
     }
   });
 
   await Promise.all(workers);
-  return out;
+  return out.map((slot, index) => {
+    if (slot === undefined) {
+      throw new Error(`Concurrency worker did not produce result ${index}.`);
+    }
+    return slot.value;
+  });
 }
