@@ -286,7 +286,6 @@ Do not commit `.env.local` or paste secrets into documentation, issues, logs, or
 | `AI_PROVIDER_MODEL` | No | Optional report model override. `.env.example` uses `anthropic/claude-sonnet-4.6`; code falls back to `anthropic/claude-sonnet-4` when unset. |
 | `AI_PROVIDER_KEY` | No | Generic server-side provider key for report wording. |
 | `OPENROUTER_API_KEY` | No | OpenRouter-specific provider key recognized by current report code. |
-| `VITE_AI_PROVIDER_KEY` | No | Client-prefixed fallback key recognized by report code; prefer server-side keys for secrets unless a future implementation explicitly needs browser exposure. |
 | `ANTHROPIC_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY` | No | Documented optional provider keys; not required by the current deterministic report path. |
 
 Scanner and persistence scripts also understand these optional runtime variables when using live or fixture-backed persistence paths:
