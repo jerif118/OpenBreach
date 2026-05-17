@@ -186,6 +186,14 @@ function buildArtifact({
   });
 }
 
+async function writeArtifact(
+  outputPath: string,
+  artifact: ReportGenerationArtifact,
+): Promise<void> {
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, `${JSON.stringify(artifact, null, 2)}\n`);
+}
+
 const options = readCliOptions(process.argv.slice(2));
 const municipalities = municipalitySchema.array().parse(municipalitiesFixture);
 const scans = scanResultSchema.array().parse(enrichedScanFixture);
@@ -216,8 +224,7 @@ const convexPersistenceArgs = buildPersistenceArgs({ batch, selected });
 
 const artifact = buildArtifact({ batch, selected, convexPersistenceArgs });
 
-await mkdir(dirname(options.outputPath), { recursive: true });
-await writeFile(options.outputPath, `${JSON.stringify(artifact, null, 2)}\n`);
+await writeArtifact(options.outputPath, artifact);
 
 console.log(
   `Report generation complete: ${batch.summary.completed}/${batch.summary.requested} reports, ${convexPersistenceArgs.length} persistence payloads, artifact ${options.outputPath}`,
