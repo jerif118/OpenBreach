@@ -25,9 +25,9 @@ export const WORKFLOW_RUN_INITIAL_STATUS: WorkflowRunStatus = "pending";
 
 export const APPROVAL_GATE_TRANSITIONS: ValidTransitionMap = {
   pending: ["approved", "rejected", "bypassed"],
-  approved: [],
-  rejected: [],
-  bypassed: [],
+  approved: ["pending"],
+  rejected: ["pending"],
+  bypassed: ["pending"],
 } as const;
 
 export const APPROVAL_GATE_INITIAL_STATUS: ApprovalGateStatus = "pending";
