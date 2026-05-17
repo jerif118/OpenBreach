@@ -157,7 +157,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           errorMessage.includes("WebSocket")
         ) {
           setGlobalError(
-            "[ERROR] Cannot connect to Convex backend. Please ensure 'pnpm convex:dev' is running.",
+            "Cannot connect to Convex backend. Please ensure 'pnpm convex:dev' is running.",
           );
         } else {
           setGlobalError(
