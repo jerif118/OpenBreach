@@ -1008,8 +1008,19 @@ export const auditEventSchema = z.object({
     "target-updated",
     "target-rejected",
     "workflow-started",
+    "workflow-pending",
+    "workflow-running",
+    "workflow-paused",
     "workflow-completed",
     "workflow-halted",
+    "workflow-rejected",
+    "workflow-failed",
+    "phase-changed",
+    "hypothesis-proposed",
+    "approval-requested",
+    "approval-granted",
+    "approval-rejected",
+    "approval-reset",
     "gate-approved",
     "gate-rejected",
     "evidence-recorded",
@@ -1025,7 +1036,12 @@ export const auditEventSchema = z.object({
   actor: nonEmptyStringSchema,
   timestamp: isoDateTimeSchema,
   runId: nonEmptyStringSchema.optional(),
-  details: z.record(z.string(), z.unknown()).optional(),
+  details: z
+    .record(
+      z.string(),
+      z.union([z.string(), z.number(), z.boolean(), z.null()]),
+    )
+    .optional(),
   ipAddress: z
     .string()
     .optional()
@@ -1259,7 +1275,7 @@ export const targetIntakeInputSchema = z.object({
   allowedAssets: z.string().optional(),
   deniedAssets: z.string().optional(),
   validationLevel: z.enum(["passive", "semiactive", "controlled_validation"]),
-  rateLimit: z.coerce.number().int().positive().default(10),
+  rateLimit: z.coerce.number().int().nonnegative().default(10),
   approverName: z.string().optional(),
 });
 
