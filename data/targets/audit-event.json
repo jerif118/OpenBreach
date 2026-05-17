@@ -1,0 +1,51 @@
+[
+  {
+    "eventId": "audit-merida-001",
+    "targetId": "target-merida-001",
+    "eventType": "target-created",
+    "actor": "operator-alice",
+    "timestamp": "2024-01-15T09:00:00Z",
+    "runId": "run-merida-001",
+    "details": {
+      "source": "intake-form",
+      "classification": "public-sector"
+    },
+    "ipAddress": "192.168.1.100"
+  },
+  {
+    "eventId": "audit-merida-002",
+    "targetId": "target-merida-001",
+    "eventType": "workflow-started",
+    "actor": "system-orchestrator",
+    "timestamp": "2024-01-15T09:05:00Z",
+    "runId": "run-merida-001",
+    "details": {
+      "phase": "intake",
+      "status": "running"
+    }
+  },
+  {
+    "eventId": "audit-merida-003",
+    "targetId": "target-merida-001",
+    "eventType": "gate-approved",
+    "actor": "operator-alice",
+    "timestamp": "2024-01-15T10:15:00Z",
+    "runId": "run-merida-001",
+    "details": {
+      "gateType": "test-plan",
+      "gateId": "gate-merida-testplan-001"
+    }
+  },
+  {
+    "eventId": "audit-merida-004",
+    "targetId": "target-merida-001",
+    "eventType": "finding-created",
+    "actor": "agent-test-runner",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "runId": "run-merida-001",
+    "details": {
+      "findingId": "finding-merida-tls-001",
+      "severity": "high"
+    }
+  }
+]
