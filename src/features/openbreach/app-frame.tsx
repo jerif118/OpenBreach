@@ -32,15 +32,17 @@ function SideNavBar() {
   ] as const;
 
   return (
-    <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-primary/10 bg-surface-container-lowest pt-16 md:flex">
-      <div className="mb-6 border-b border-primary/10 px-6 pb-6">
-        <div className="terminal-wordmark text-[2rem] leading-none text-primary">
-          OPEN CREACH
+    <nav className="fixed left-0 top-0 z-40 hidden h-full w-64 flex-col border-r border-primary/10 bg-surface-container-lowest md:flex">
+      <div className="mb-6 flex flex-col items-center border-b border-primary/10 px-6 pb-6 pt-10 overflow-hidden">
+        <div 
+          className="font-mono font-bold tracking-tight text-center text-[2.5rem] leading-[1] text-primary"
+          style={{ transform: "scaleX(1.35)", transformOrigin: "center" }}
+        >
+          OPEN
+          <br />
+          CREACH
         </div>
-        <p className="mt-2 font-mono text-[10px] tracking-[0.28em] text-on-surface-variant uppercase">
-          Authorized Validation Grid
-        </p>
-        <div className="mt-5 flex items-center gap-3 border border-primary/10 bg-surface-container-low px-3 py-3 pixel-corner">
+        <div className="mt-5 w-full flex items-center gap-3 border border-primary/10 bg-surface-container-low px-3 py-3 pixel-corner">
           <div className="flex h-10 w-10 items-center justify-center border border-primary/20 bg-surface pixel-corner">
             <span className="material-symbols-outlined text-primary">
               verified_user

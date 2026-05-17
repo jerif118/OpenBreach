@@ -74,51 +74,5 @@ function RootDocument({ children }: { children: ReactNode }) {
 }
 
 function TopNav() {
-  return (
-    <nav className="sticky top-0 z-50 border-b border-primary/10 bg-surface/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
-        <Link to="/" className="min-w-0">
-          <div className="terminal-wordmark text-2xl leading-none text-primary">
-            OPEN CREACH
-          </div>
-          <p className="mt-1 font-mono text-[10px] tracking-[0.28em] text-primary/45 uppercase">
-            guardian console
-          </p>
-        </Link>
-
-        <div className="flex items-center gap-4 sm:gap-6">
-          <Link
-            to="/guardian"
-            className="font-mono text-[10px] tracking-[0.22em] text-on-surface-variant uppercase transition hover:text-primary sm:text-xs"
-            activeProps={{
-              className:
-                "font-mono text-[10px] tracking-[0.22em] text-primary uppercase transition sm:text-xs",
-            }}
-          >
-            Guardian
-          </Link>
-          <Link
-            to="/targets"
-            className="font-mono text-[10px] tracking-[0.22em] text-on-surface-variant uppercase transition hover:text-primary sm:text-xs"
-            activeProps={{
-              className:
-                "font-mono text-[10px] tracking-[0.22em] text-primary uppercase transition sm:text-xs",
-            }}
-          >
-            Targets
-          </Link>
-          <Link
-            to="/guardian/reports"
-            className="font-mono text-[10px] tracking-[0.22em] text-on-surface-variant uppercase transition hover:text-primary sm:text-xs"
-            activeProps={{
-              className:
-                "font-mono text-[10px] tracking-[0.22em] text-primary uppercase transition sm:text-xs",
-            }}
-          >
-            Reports
-          </Link>
-        </div>
-      </div>
-    </nav>
-  );
+  return null; // Ocultar TopNav de root ya que OpenBreachAppFrame tiene su propio SideNavBar y TopNavBarMobile
 }
