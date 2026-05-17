@@ -7,7 +7,7 @@ import type {
 export function buildProviderPrompt(
   input: GenerateRemediationReportInput,
   variant: ReportAudience,
-) {
+): string {
   const normalized = normalizeReportInput(input);
 
   return JSON.stringify(
