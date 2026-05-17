@@ -34,7 +34,9 @@ type FixtureTargetRecord = {
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : {};
 }
 
 function mapTargetProfile(fixture: unknown): TargetProfileDto {
@@ -60,7 +62,8 @@ function mapTargetProfile(fixture: unknown): TargetProfileDto {
       : undefined,
     population:
       profile.population !== undefined ? Number(profile.population) : undefined,
-    latitude: profile.latitude !== undefined ? Number(profile.latitude) : undefined,
+    latitude:
+      profile.latitude !== undefined ? Number(profile.latitude) : undefined,
     longitude:
       profile.longitude !== undefined ? Number(profile.longitude) : undefined,
   };
@@ -91,7 +94,9 @@ type FixturePassiveEvidence = Pick<
   | "errors"
 >;
 
-function mapEvidenceSummary(evidence: FixturePassiveEvidence): DemoEvidenceSummaryDto {
+function mapEvidenceSummary(
+  evidence: FixturePassiveEvidence,
+): DemoEvidenceSummaryDto {
   return {
     evidenceId: evidence.evidenceId,
     source: evidence.source,
@@ -149,7 +154,9 @@ export function buildDemoTargetListFromFixtures(): DemoTargetCardDto[] {
 export function buildDemoTargetDetailFromFixtures(
   targetId: string,
 ): DemoTargetDetailDto | null {
-  const record = buildFixtureRecords().find((item) => item.target.targetId === targetId);
+  const record = buildFixtureRecords().find(
+    (item) => item.target.targetId === targetId,
+  );
   if (!record) return null;
   return {
     target: record.target,
