@@ -8,6 +8,7 @@ import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-
 import {
   generateRemediationReportResultSchema,
   municipalitySchema,
+  type ReportGenerationArtifact,
   reportGenerationArtifactSchema,
   reportGenerationCliOptionsSchema,
   reportPersistenceArgsSchema,
@@ -161,6 +162,30 @@ function buildPersistenceArgs({
   );
 }
 
+function buildArtifact({
+  batch,
+  selected,
+  convexPersistenceArgs,
+}: {
+  batch: Awaited<ReturnType<typeof renderReportBatchPdfs>>;
+  selected: SelectedMunicipalityReportContext[];
+  convexPersistenceArgs: ReportPersistenceArgs[];
+}): ReportGenerationArtifact {
+  return reportGenerationArtifactSchema.parse({
+    id: batch.id,
+    generatedAt: batch.generatedAt,
+    provider: batch.provider,
+    selected: selectedMunicipalityReportContextSchema.array().parse(selected),
+    batch,
+    convexPersistenceArgs,
+    persistence: {
+      argsCommand: "pnpm report:persist:args",
+      liveConvexCommand: "convex run reports:persistGenerated '<args>'",
+      note: "Replace fixture external IDs with live Convex document IDs and run with an authenticated Convex deployment.",
+    },
+  });
+}
+
 const options = readCliOptions(process.argv.slice(2));
 const municipalities = municipalitySchema.array().parse(municipalitiesFixture);
 const scans = scanResultSchema.array().parse(enrichedScanFixture);
@@ -189,19 +214,7 @@ assertCompleteBatch(batch, selected.length);
 
 const convexPersistenceArgs = buildPersistenceArgs({ batch, selected });
 
-const artifact = reportGenerationArtifactSchema.parse({
-  id: batch.id,
-  generatedAt: batch.generatedAt,
-  provider: batch.provider,
-  selected: selectedMunicipalityReportContextSchema.array().parse(selected),
-  batch,
-  convexPersistenceArgs,
-  persistence: {
-    argsCommand: "pnpm report:persist:args",
-    liveConvexCommand: "convex run reports:persistGenerated '<args>'",
-    note: "Replace fixture external IDs with live Convex document IDs and run with an authenticated Convex deployment.",
-  },
-});
+const artifact = buildArtifact({ batch, selected, convexPersistenceArgs });
 
 await mkdir(dirname(options.outputPath), { recursive: true });
 await writeFile(options.outputPath, `${JSON.stringify(artifact, null, 2)}\n`);
