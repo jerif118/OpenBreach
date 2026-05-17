@@ -195,9 +195,7 @@ export function deriveLimitations(
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
   const errors = pickArray(source, ["errors", "limitations"]).map((entry) =>
-    typeof entry === "string"
-      ? entry
-      : pickString(asObject(entry), ["message", "summary", "reason"]),
+    pickEntryString(entry, ["message", "summary", "reason"]),
   );
   const missingSections = [
     pickObject(source, ["authorizationScope", "scope"])
