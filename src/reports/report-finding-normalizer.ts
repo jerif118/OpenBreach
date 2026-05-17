@@ -20,7 +20,10 @@ import {
   normalizeSeverity,
 } from "./report-finding-classifiers.ts";
 
-function buildVerificationSteps(title: string, affectedAssets: string[]) {
+function buildVerificationSteps(
+  title: string,
+  affectedAssets: string[],
+): string[] {
   const steps = [
     "Re-run the same bounded check after the mitigation is applied.",
     affectedAssets[0]
@@ -35,7 +38,7 @@ function buildVerificationSteps(title: string, affectedAssets: string[]) {
 function buildRemediationSteps(
   remediationHint: string,
   affectedAssets: string[],
-) {
+): string[] {
   const normalizedHint = toSentence(remediationHint);
 
   return uniqueStrings([
@@ -125,7 +128,7 @@ function normalizeFinding(
 
 export function collectFindingCandidates(
   input: GenerateRemediationReportInput,
-) {
+): ReportFinding[] {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
 
