@@ -80,24 +80,24 @@ const themeByVariant: Record<RemediationReport["variant"], PdfTheme> = {
     background: [0.996, 0.996, 0.995],
     surface: [0.985, 0.986, 0.989],
     surfaceAlt: [0.974, 0.977, 0.982],
-    text: [0.18, 0.20, 0.24],
+    text: [0.18, 0.2, 0.24],
     muted: [0.44, 0.47, 0.52],
     accent: [0.19, 0.26, 0.38],
     accentSoft: [0.94, 0.95, 0.97],
     terminalAccent: [0.24, 0.32, 0.43],
     border: [0.86, 0.88, 0.91],
-    quoteBackground: [0.977, 0.980, 0.986],
+    quoteBackground: [0.977, 0.98, 0.986],
     quoteBorder: [0.29, 0.38, 0.52],
   },
   friendly: {
     background: [0.997, 0.996, 0.993],
     surface: [0.987, 0.988, 0.981],
     surfaceAlt: [0.975, 0.979, 0.972],
-    text: [0.19, 0.20, 0.18],
+    text: [0.19, 0.2, 0.18],
     muted: [0.45, 0.47, 0.44],
     accent: [0.28, 0.33, 0.27],
     accentSoft: [0.94, 0.96, 0.93],
-    terminalAccent: [0.35, 0.40, 0.34],
+    terminalAccent: [0.35, 0.4, 0.34],
     border: [0.87, 0.89, 0.85],
     quoteBackground: [0.979, 0.984, 0.977],
     quoteBorder: [0.38, 0.45, 0.36],
@@ -148,7 +148,14 @@ export async function buildStyledPdfDocument(
   }
 
   for (const pageState of pages) {
-    drawFooter(pageState.page, pageState.number, pages.length, theme, fonts, presentation);
+    drawFooter(
+      pageState.page,
+      pageState.number,
+      pages.length,
+      theme,
+      fonts,
+      presentation,
+    );
   }
 
   const pdfBytes = await pdfDoc.save({ useObjectStreams: false });
@@ -183,7 +190,9 @@ function buildReportPresentation(
   const metadata =
     blocks
       .filter(
-        (block): block is Extract<MarkdownBlock, { type: "bullet" | "ordered" }> =>
+        (
+          block,
+        ): block is Extract<MarkdownBlock, { type: "bullet" | "ordered" }> =>
           block.type === "bullet" || block.type === "ordered",
       )
       .map((block) => toKeyValuePairs(block.items))
@@ -194,7 +203,8 @@ function buildReportPresentation(
     subtitle,
     metadata,
     blocks,
-    variantLabel: variant === "technical" ? "TECHNICAL DOSSIER" : "FRIENDLY BRIEF",
+    variantLabel:
+      variant === "technical" ? "TECHNICAL DOSSIER" : "FRIENDLY BRIEF",
   };
 }
 
@@ -359,7 +369,14 @@ function drawContinuationHeader(
     10.6,
     fonts.serifBold,
   );
-  drawCenteredText(page, title, headerY + 14, 10.6, fonts.serifBold, theme.accent);
+  drawCenteredText(
+    page,
+    title,
+    headerY + 14,
+    10.6,
+    fonts.serifBold,
+    theme.accent,
+  );
 }
 
 function drawFooter(
@@ -462,7 +479,12 @@ function renderHero({
     fonts.serifBold,
   );
   const subtitleLines = presentation.subtitle
-    ? wrapTextWithFont(presentation.subtitle, CONTENT_WIDTH, 10.8, fonts.serifItalic)
+    ? wrapTextWithFont(
+        presentation.subtitle,
+        CONTENT_WIDTH,
+        10.8,
+        fonts.serifItalic,
+      )
     : [];
   const summaryLine = buildHeroSummaryLine(presentation.metadata);
   const summaryLines = summaryLine
@@ -489,14 +511,28 @@ function renderHero({
 
   let y = currentPage.y - 6;
   for (const line of titleLines) {
-    drawCenteredText(currentPage.page, line, y, 25, fonts.serifBold, theme.accent);
+    drawCenteredText(
+      currentPage.page,
+      line,
+      y,
+      25,
+      fonts.serifBold,
+      theme.accent,
+    );
     y -= 30;
   }
 
   if (subtitleLines.length > 0) {
     y -= 2;
     for (const line of subtitleLines) {
-      drawCenteredText(currentPage.page, line, y, 10.8, fonts.serifItalic, theme.muted);
+      drawCenteredText(
+        currentPage.page,
+        line,
+        y,
+        10.8,
+        fonts.serifItalic,
+        theme.muted,
+      );
       y -= 15;
     }
   }
@@ -845,7 +881,12 @@ function renderQuote({
   logo: { image: PDFImage | null; dims: { width: number; height: number } };
   presentation: ReportPresentation;
 }) {
-  const lines = wrapTextWithFont(text, CONTENT_WIDTH - 34, 10.2, fonts.serifItalic);
+  const lines = wrapTextWithFont(
+    text,
+    CONTENT_WIDTH - 34,
+    10.2,
+    fonts.serifItalic,
+  );
   const boxHeight = lines.length * 14.6 + 20;
 
   currentPage = ensureSpace({
@@ -923,11 +964,19 @@ function renderKeyValueBlock({
   const paddingY = compact ? 7 : 9;
   const valueWidth = blockWidth - labelWidth - paddingX * 2 - 14;
   const rowHeights = pairs.map((pair) => {
-    const wrappedValue = wrapTextWithFont(pair.value, valueWidth, compact ? 9.3 : 10, fonts.serif);
+    const wrappedValue = wrapTextWithFont(
+      pair.value,
+      valueWidth,
+      compact ? 9.3 : 10,
+      fonts.serif,
+    );
     return {
       pair,
       wrappedValue,
-      height: Math.max(compact ? 20 : 24, wrappedValue.length * (compact ? 12 : 13.5) + paddingY * 2),
+      height: Math.max(
+        compact ? 20 : 24,
+        wrappedValue.length * (compact ? 12 : 13.5) + paddingY * 2,
+      ),
     };
   });
 
@@ -1020,7 +1069,12 @@ function renderList({
 }) {
   for (const [index, item] of items.entries()) {
     const bullet = ordered ? `${index + 1}.` : "\u2022";
-    const itemLines = wrapTextWithFont(item, CONTENT_WIDTH - 24, 10.1, fonts.serif);
+    const itemLines = wrapTextWithFont(
+      item,
+      CONTENT_WIDTH - 24,
+      10.1,
+      fonts.serif,
+    );
     const itemHeight = itemLines.length * 14.4 + 5;
 
     currentPage = ensureSpace({
@@ -1073,8 +1127,16 @@ function estimateKeyValueBlockHeight({
   compact: boolean;
 }) {
   return pairs.reduce((total, pair, index) => {
-    const wrappedValue = wrapTextWithFont(pair.value, valueWidth, compact ? 9.3 : 10, fonts.serif);
-    const rowHeight = Math.max(compact ? 20 : 24, wrappedValue.length * (compact ? 12 : 13.5) + (compact ? 14 : 18));
+    const wrappedValue = wrapTextWithFont(
+      pair.value,
+      valueWidth,
+      compact ? 9.3 : 10,
+      fonts.serif,
+    );
+    const rowHeight = Math.max(
+      compact ? 20 : 24,
+      wrappedValue.length * (compact ? 12 : 13.5) + (compact ? 14 : 18),
+    );
     return total + rowHeight + (index > 0 ? 1 : 0);
   }, 0);
 }
@@ -1187,7 +1249,9 @@ function splitLongToken(
       lines.push(current);
     }
 
-    if (lines.every((line) => font.widthOfTextAtSize(line, fontSize) <= maxWidth)) {
+    if (
+      lines.every((line) => font.widthOfTextAtSize(line, fontSize) <= maxWidth)
+    ) {
       return lines;
     }
   }
@@ -1226,7 +1290,10 @@ function truncateTextToWidth(
   }
 
   let output = normalized;
-  while (output.length > 1 && font.widthOfTextAtSize(`${output}...`, fontSize) > maxWidth) {
+  while (
+    output.length > 1 &&
+    font.widthOfTextAtSize(`${output}...`, fontSize) > maxWidth
+  ) {
     output = output.slice(0, -1);
   }
 
