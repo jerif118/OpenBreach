@@ -139,9 +139,7 @@ export function deriveSkippedTests(
       "deniedTests",
       "notTested",
     ]).map((entry) =>
-      typeof entry === "string"
-        ? entry
-        : pickString(asObject(entry), ["summary", "reason", "name"]),
+      pickEntryString(entry, ["summary", "reason", "name"]),
     ),
   ];
 
