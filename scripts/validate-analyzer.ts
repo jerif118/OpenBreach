@@ -48,7 +48,11 @@ function deterministicOptions() {
 let passed = 0;
 let failed = 0;
 
-function assertEqual(actual: unknown, expected: unknown, message: string): void {
+function assertEqual(
+  actual: unknown,
+  expected: unknown,
+  message: string,
+): void {
   const actualJson = JSON.stringify(actual, null, 2);
   const expectedJson = JSON.stringify(expected, null, 2);
   if (actualJson !== expectedJson) {
@@ -115,7 +119,11 @@ const baseOptions = deterministicOptions();
   assertEqual(result[0].technology, "nginx", "serverHeaderRule technology");
   assertEqual(result[0].category, "server", "serverHeaderRule category");
   assertEqual(result[0].confidence, 0.7, "serverHeaderRule confidence");
-  assertEqual(result[0].evidence, ["header:server=nginx/1.18.0"], "serverHeaderRule evidence");
+  assertEqual(
+    result[0].evidence,
+    ["header:server=nginx/1.18.0"],
+    "serverHeaderRule evidence",
+  );
 })();
 
 (() => {
@@ -133,7 +141,11 @@ const baseOptions = deterministicOptions();
   };
   const result = serverHeaderRule(evidence, baseOptions);
   assertEqual(result.length, 1, "serverHeaderRule partial returns 1 result");
-  assertEqual(result[0].technology, "unknown-server", "serverHeaderRule partial technology");
+  assertEqual(
+    result[0].technology,
+    "unknown-server",
+    "serverHeaderRule partial technology",
+  );
   assertEqual(result[0].confidence, 0.5, "serverHeaderRule partial confidence");
 })();
 
@@ -169,7 +181,12 @@ const baseOptions = deterministicOptions();
     reachable: true,
     httpStatus: 200,
     headers: {},
-    cms: { name: "wordpress", version: "6.4", confidence: 0.8, evidence: ["generator"] },
+    cms: {
+      name: "wordpress",
+      version: "6.4",
+      confidence: 0.8,
+      evidence: ["generator"],
+    },
     adminExposure: [],
     errors: [],
   };
@@ -191,14 +208,23 @@ const baseOptions = deterministicOptions();
     reachable: true,
     httpStatus: 200,
     headers: {},
-    cms: { name: "wordpress", version: "6.4", confidence: 0.8, evidence: ["generator"] },
+    cms: {
+      name: "wordpress",
+      version: "6.4",
+      confidence: 0.8,
+      evidence: ["generator"],
+    },
     adminExposure: [],
     errors: [],
   };
   const result = cmsVersionRule(evidence, baseOptions);
   assertEqual(result.length, 1, "cmsVersionRule returns 1 result");
   assertEqual(result[0].version, "6.4", "cmsVersionRule version");
-  assertEqual(result[0].versionConfidence, 0.8, "cmsVersionRule versionConfidence");
+  assertEqual(
+    result[0].versionConfidence,
+    0.8,
+    "cmsVersionRule versionConfidence",
+  );
 })();
 
 // Generator library rule
@@ -212,13 +238,22 @@ const baseOptions = deterministicOptions();
     reachable: true,
     httpStatus: 200,
     headers: {},
-    cms: { name: "wordpress", version: "6.4", confidence: 0.8, evidence: ["generator:wordpress"] },
+    cms: {
+      name: "wordpress",
+      version: "6.4",
+      confidence: 0.8,
+      evidence: ["generator:wordpress"],
+    },
     adminExposure: [],
     errors: [],
   };
   const result = generatorLibraryRule(evidence, baseOptions);
   assertEqual(result.length, 1, "generatorLibraryRule returns 1 result");
-  assertEqual(result[0].technology, "wordpress", "generatorLibraryRule technology");
+  assertEqual(
+    result[0].technology,
+    "wordpress",
+    "generatorLibraryRule technology",
+  );
   assertEqual(result[0].category, "library", "generatorLibraryRule category");
   assertEqual(result[0].confidence, 0.5, "generatorLibraryRule confidence");
 })();
@@ -281,14 +316,27 @@ console.log("\n=== Unit Tests: Hypothesis Rules ===\n");
     reachable: true,
     httpStatus: 200,
     headers: {},
-    cms: { name: "wordpress", version: "6.4.2", confidence: 0.85, evidence: ["generator"] },
+    cms: {
+      name: "wordpress",
+      version: "6.4.2",
+      confidence: 0.85,
+      evidence: ["generator"],
+    },
     adminExposure: [],
     errors: [],
   };
   const result = cmsVulnerabilityRule(evidence, [], baseOptions);
   assertEqual(result.length, 1, "cmsVulnerabilityRule returns 1 result");
-  assertEqual(result[0].title, "WordPress 6.4 requires patch review", "cmsVulnerabilityRule title");
-  assertEqual(result[0].affectedComponents, ["wordpress"], "cmsVulnerabilityRule affectedComponents");
+  assertEqual(
+    result[0].title,
+    "WordPress 6.4 requires patch review",
+    "cmsVulnerabilityRule title",
+  );
+  assertEqual(
+    result[0].affectedComponents,
+    ["wordpress"],
+    "cmsVulnerabilityRule affectedComponents",
+  );
 })();
 
 // CMS vulnerability rule below threshold
@@ -302,12 +350,21 @@ console.log("\n=== Unit Tests: Hypothesis Rules ===\n");
     reachable: true,
     httpStatus: 200,
     headers: {},
-    cms: { name: "wordpress", version: "6.4", confidence: 0.7, evidence: ["generator"] },
+    cms: {
+      name: "wordpress",
+      version: "6.4",
+      confidence: 0.7,
+      evidence: ["generator"],
+    },
     adminExposure: [],
     errors: [],
   };
   const result = cmsVulnerabilityRule(evidence, [], baseOptions);
-  assertEqual(result.length, 0, "cmsVulnerabilityRule returns 0 when confidence below threshold");
+  assertEqual(
+    result.length,
+    0,
+    "cmsVulnerabilityRule returns 0 when confidence below threshold",
+  );
 })();
 
 // TLS expiry rule
@@ -325,10 +382,26 @@ console.log("\n=== Unit Tests: Hypothesis Rules ===\n");
     adminExposure: [],
     errors: [],
   };
-  const result = tlsExpiryRule(evidence, [], { now: () => "2026-05-17T00:00:00Z", idGenerator: () => "", confidenceThreshold: 0.6 });
-  assertEqual(result.length, 1, "tlsExpiryRule returns 1 result for near expiry");
-  assertEqual(result[0].title, "TLS certificate nearing expiry", "tlsExpiryRule title");
-  assertEqual(result[0].affectedComponents, ["tls"], "tlsExpiryRule affectedComponents");
+  const result = tlsExpiryRule(evidence, [], {
+    now: () => "2026-05-17T00:00:00Z",
+    idGenerator: () => "",
+    confidenceThreshold: 0.6,
+  });
+  assertEqual(
+    result.length,
+    1,
+    "tlsExpiryRule returns 1 result for near expiry",
+  );
+  assertEqual(
+    result[0].title,
+    "TLS certificate nearing expiry",
+    "tlsExpiryRule title",
+  );
+  assertEqual(
+    result[0].affectedComponents,
+    ["tls"],
+    "tlsExpiryRule affectedComponents",
+  );
 })();
 
 // Missing HSTS rule
@@ -387,7 +460,11 @@ console.log("\n=== Unit Tests: Hypothesis Rules ===\n");
   };
   const result = missingXFrameOptionsRule(evidence, [], baseOptions);
   assertEqual(result.length, 1, "missingXFrameOptionsRule returns 1 result");
-  assertEqual(result[0].title, "Clickjacking risk: missing X-Frame-Options", "missingXFrameOptionsRule title");
+  assertEqual(
+    result[0].title,
+    "Clickjacking risk: missing X-Frame-Options",
+    "missingXFrameOptionsRule title",
+  );
 })();
 
 // Admin panel exposure rule
@@ -408,9 +485,21 @@ console.log("\n=== Unit Tests: Hypothesis Rules ===\n");
     errors: [],
   };
   const result = adminPanelExposureRule(evidence, [], baseOptions);
-  assertEqual(result.length, 1, "adminPanelExposureRule returns 1 result for reachable only");
-  assertEqual(result[0].title, "Admin panel reachable at /admin/", "adminPanelExposureRule title");
-  assertEqual(result[0].affectedComponents, ["/admin/"], "adminPanelExposureRule affectedComponents");
+  assertEqual(
+    result.length,
+    1,
+    "adminPanelExposureRule returns 1 result for reachable only",
+  );
+  assertEqual(
+    result[0].title,
+    "Admin panel reachable at /admin/",
+    "adminPanelExposureRule title",
+  );
+  assertEqual(
+    result[0].affectedComponents,
+    ["/admin/"],
+    "adminPanelExposureRule affectedComponents",
+  );
 })();
 
 // ── Regression Tests ──
@@ -421,7 +510,9 @@ console.log("\n=== Regression Tests ===\n");
   const evidence = loadFixture("evidence-dedup.json");
   const result = analyzeEvidence(evidence, deterministicOptions());
   assertEqual(
-    result.fingerprints.filter((f) => f.technology === "wordpress" && f.category === "cms").length,
+    result.fingerprints.filter(
+      (f) => f.technology === "wordpress" && f.category === "cms",
+    ).length,
     1,
     "dedup keeps only one wordpress:cms fingerprint",
   );
@@ -441,7 +532,11 @@ console.log("\n=== Safety Audit ===\n");
   const kbContent = readFileSync(kbPath, "utf-8").toLowerCase();
   const forbiddenWords = ["exploit", "payload", "shell", "reverse", "rce"];
   const found = forbiddenWords.filter((word) => kbContent.includes(word));
-  assertEqual(found.length, 0, `knowledgeBase.ts contains no forbidden words: ${found.join(", ")}`);
+  assertEqual(
+    found.length,
+    0,
+    `knowledgeBase.ts contains no forbidden words: ${found.join(", ")}`,
+  );
 })();
 
 // ── Error Tests ──
