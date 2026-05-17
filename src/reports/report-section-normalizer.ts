@@ -138,16 +138,12 @@ export function deriveSkippedTests(
   input: GenerateRemediationReportInput,
 ): string[] {
   const source = asObject(input.sourceData);
-  const explicitSkipped = [
-    ...pickArray(source, [
-      "skippedTests",
-      "skipped",
-      "deniedTests",
-      "notTested",
-    ]).map((entry) =>
-      pickEntryString(entry, ["summary", "reason", "name"]),
-    ),
-  ];
+  const explicitSkipped = pickArray(source, [
+    "skippedTests",
+    "skipped",
+    "deniedTests",
+    "notTested",
+  ]).map((entry) => pickEntryString(entry, ["summary", "reason", "name"]));
 
   return uniqueStrings([
     ...explicitSkipped,
