@@ -24,7 +24,7 @@ export function TerminalHeader({ title, subtitle }: TerminalHeaderProps) {
         <span className="text-secondary-fixed-dim">{title}</span>
       </div>
       {subtitle && (
-        <p className="mt-1 font-mono text-sm text-on-surface-variant">
+        <p className="text-on-surface-variant mt-1 font-mono text-sm">
           {subtitle}
         </p>
       )}
