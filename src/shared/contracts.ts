@@ -1015,7 +1015,9 @@ export const auditEventSchema = z.object({
     "evidence-recorded",
     "finding-created",
     "finding-updated",
+    "validation-recorded",
     "report-generated",
+    "report-completed",
     "auth-granted",
     "auth-revoked",
     "manual-override",
@@ -1195,6 +1197,54 @@ export const targetListItemSchema = z.object({
 });
 
 export type TargetListItem = z.infer<typeof targetListItemSchema>;
+
+export const demoWorkflowRunSummarySchema = z.object({
+  runId: nonEmptyStringSchema,
+  status: z.enum([
+    "pending",
+    "running",
+    "paused",
+    "completed",
+    "halted",
+    "rejected",
+    "failed",
+  ]),
+  currentPhase: workflowPhaseSchema.shape.phase.optional(),
+});
+
+export const demoTargetCardSchema = targetListItemSchema.extend({
+  latestRun: demoWorkflowRunSummarySchema.nullable(),
+});
+
+export type DemoTargetCard = z.infer<typeof demoTargetCardSchema>;
+
+export const demoEvidenceSummarySchema = z.object({
+  evidenceId: nonEmptyStringSchema,
+  source: passiveScanEvidenceSchema.shape.source,
+  collectedAt: isoDateTimeSchema,
+  requestedUrl: z.string().url(),
+  reachable: z.boolean(),
+  httpStatus: z.number().int().min(100).max(599).optional(),
+  cms: passiveScanEvidenceSchema.shape.cms,
+  adminExposure: passiveScanEvidenceSchema.shape.adminExposure,
+  runId: nonEmptyStringSchema.optional(),
+  errorCount: z.number().int().nonnegative(),
+});
+
+export type DemoEvidenceSummary = z.infer<typeof demoEvidenceSummarySchema>;
+
+export const demoTargetDetailSchema = z.object({
+  target: targetProfileSchema,
+  latestRun: demoWorkflowRunSummarySchema.nullable(),
+  evidence: z.array(demoEvidenceSummarySchema),
+  hypotheses: z.array(vulnerabilityHypothesisSchema),
+  approvals: z.array(approvalGateSchema),
+  validationResults: z.array(validationResultSchema),
+  findings: z.array(findingSchema),
+  reports: z.array(reportArtifactSchema),
+});
+
+export type DemoTargetDetail = z.infer<typeof demoTargetDetailSchema>;
 
 export const targetIntakeInputSchema = z.object({
   targetId: nonEmptyStringSchema.regex(/^[^\s]+$/, "no whitespace"),
