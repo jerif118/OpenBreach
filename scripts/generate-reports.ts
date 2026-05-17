@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 
 import municipalitiesFixture from "../data/municipalities/municipalities.seed.json" with { type: "json" };
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
+import { assertCompleteReportBatch } from "../src/mastra/workflows/report-batch-completeness.ts";
 import { renderReportBatchPdfs } from "../src/mastra/workflows/report-workflow.ts";
 import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-tool.ts";
 import {
@@ -35,21 +36,6 @@ function sanitizePersistenceFindings(
   return findings.map(({ raw: _raw, ...finding }) =>
     reportPersistenceFindingSchema.parse(finding),
   );
-}
-
-function assertCompleteBatch(
-  batch: ReportBatchOutput,
-  selectedCount: number,
-): void {
-  if (
-    batch.summary.completed !== selectedCount ||
-    batch.summary.failed !== 0 ||
-    batch.results.length !== selectedCount
-  ) {
-    throw new Error(
-      "Fixture report generation must complete all selected records.",
-    );
-  }
 }
 
 function requireSelectedContext(
@@ -183,7 +169,7 @@ const batch = await renderReportBatchPdfs({
   providerKey: "",
 });
 
-assertCompleteBatch(batch, selected.length);
+assertCompleteReportBatch(batch, selected);
 
 const convexPersistenceArgs = buildPersistenceArgs({ batch, selected });
 
