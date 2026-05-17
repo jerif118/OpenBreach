@@ -134,23 +134,25 @@ export function generateFindings(evidence: RawScanEvidence): ScanFinding[] {
     });
   }
 
-  const cmsVulnerability = findCmsVulnerability(evidence.cms);
-  if (cmsVulnerability) {
+  const cmsObservation = evidence.cms;
+  const cmsVulnerability = findCmsVulnerability(cmsObservation);
+  if (cmsVulnerability && cmsObservation) {
+    const evidenceParts: string[] = [
+      `${cmsVulnerability.cms} ${cmsVulnerability.version}`,
+      `confidence ${cmsObservation.confidence}`,
+    ];
+    if (cmsVulnerability.referenceIds.length > 0) {
+      evidenceParts.push(
+        `references ${cmsVulnerability.referenceIds.join(", ")}`,
+      );
+    }
     findings.push({
       id: `finding-known-vulnerable-${cmsVulnerability.cms}-${cmsVulnerability.version.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`,
       category: "known-vulnerability",
       severity: cmsVulnerability.severity,
       title: cmsVulnerability.title,
       description: cmsVulnerability.description,
-      evidence: [
-        `${cmsVulnerability.cms} ${evidence.cms?.version}`,
-        `confidence ${evidence.cms?.confidence}`,
-        cmsVulnerability.referenceIds.length > 0
-          ? `references ${cmsVulnerability.referenceIds.join(", ")}`
-          : undefined,
-      ]
-        .filter(Boolean)
-        .join("; "),
+      evidence: evidenceParts.join("; "),
       remediationHint: cmsVulnerability.remediationHint,
     });
   }
