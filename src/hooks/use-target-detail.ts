@@ -1,57 +1,55 @@
-import type { TargetProfileDto, WorkflowRunDto } from "../../convex/types.js";
-import { useOpenBreachPipeline } from "./use-openbreach-pipeline";
+import { useQuery } from "convex/react";
 
-export interface TargetDetailLatestRun {
-  runId: string;
-  status: string;
-  currentPhase?: string;
-}
+import { api } from "../../convex/_generated/api.js";
+import type {
+  DemoTargetDetailDto,
+  DemoWorkflowRunSummaryDto,
+} from "../../convex/types.js";
+import { buildDemoTargetDetailFromFixtures } from "../lib/target-demo-fallback.ts";
 
-export interface TargetDetailDto extends TargetProfileDto {
-  latestRun: TargetDetailLatestRun | null;
-}
+// ============================================================================
+// Types
+// ============================================================================
 
 export interface UseTargetDetailReturn {
-  target: TargetDetailDto | null;
-  latestRun: TargetDetailLatestRun | null;
+  target: DemoTargetDetailDto | null;
+  latestRun: DemoWorkflowRunSummaryDto | null;
   isLoading: boolean;
 }
 
-function toLatestRun(run: WorkflowRunDto | null): TargetDetailLatestRun | null {
-  if (!run) {
-    return null;
-  }
-
-  return {
-    runId: run.runId,
-    status: run.status,
-    currentPhase: run.currentPhase,
-  };
-}
+// ============================================================================
+// Hook
+// ============================================================================
 
 export function useTargetDetail(targetId: string): UseTargetDetailReturn {
-  const { isLoading, targets } = useOpenBreachPipeline();
-  const target = targets.find((entry) => entry.targetId === targetId) ?? null;
-  const latestRun = toLatestRun(target?.latestRun ?? null);
+  const isConfigured = !!import.meta.env.VITE_CONVEX_URL;
 
-  if (!target) {
+  const result = useQuery(
+    api.targets.getDemo,
+    isConfigured ? { targetId } : "skip",
+  );
+
+  // Fixture fallback when Convex is not configured
+  if (!isConfigured) {
+    const fixture = buildDemoTargetDetailFromFixtures(targetId);
     return {
-      target: null,
-      latestRun: null,
-      isLoading,
+      target: fixture,
+      latestRun: fixture?.latestRun ?? null,
+      isLoading: false,
     };
   }
 
+  if (result === undefined) {
+    return { target: null, latestRun: null, isLoading: true };
+  }
+
+  if (result === null) {
+    return { target: null, latestRun: null, isLoading: false };
+  }
+
   return {
-    target: {
-      targetId: target.targetId,
-      name: target.name,
-      primaryUrl: target.primaryUrl,
-      riskTier: target.riskTier,
-      classification: target.classification,
-      latestRun,
-    },
-    latestRun,
-    isLoading,
+    target: result,
+    latestRun: result.latestRun ?? null,
+    isLoading: false,
   };
 }
