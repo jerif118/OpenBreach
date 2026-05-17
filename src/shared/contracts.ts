@@ -1432,7 +1432,10 @@ export function municipalityToTargetProfile(
   };
 }
 
-// --- Issue 66: Target Intake ---
+// ============================================================
+// Target Intake Schemas
+// ============================================================
+
 export const targetListItemSchema = z.object({
   targetId: nonEmptyStringSchema,
   name: nonEmptyStringSchema,

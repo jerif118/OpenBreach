@@ -22,6 +22,7 @@ import type * as reportArtifacts from "../reportArtifacts.js";
 import type * as reports from "../reports.js";
 import type * as scanResults from "../scanResults.js";
 import type * as targets from "../targets.js";
+import type * as targetsPublic from "../targetsPublic.js";
 import type * as technologyFingerprints from "../technologyFingerprints.js";
 import type * as testPlans from "../testPlans.js";
 import type * as types from "../types.js";
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   reports: typeof reports;
   scanResults: typeof scanResults;
   targets: typeof targets;
+  targetsPublic: typeof targetsPublic;
   technologyFingerprints: typeof technologyFingerprints;
   testPlans: typeof testPlans;
   types: typeof types;
