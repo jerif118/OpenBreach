@@ -217,4 +217,206 @@ export default defineSchema({
       v.union(v.literal("viewer"), v.literal("operator"), v.literal("admin")),
     ),
   }).index("by_tokenIdentifier", ["tokenIdentifier"]),
+
+  // ─────────────────────────────────────────────────────────────────
+  // OpenBreach — Workflow Run Persistence (Issue 65)
+  // ─────────────────────────────────────────────────────────────────
+
+  targets: defineTable({
+    targetId: v.string(),
+    assetId: v.string(),
+    organizationName: v.string(),
+    canonicalUrl: v.string(),
+    outOfScope: v.optional(v.boolean()),
+  })
+    .index("by_targetId", ["targetId"])
+    .index("by_organizationName", ["organizationName"])
+    .index("by_outOfScope", ["outOfScope"]),
+
+  authorizationScopes: defineTable({
+    scopeId: v.string(),
+    targetId: v.string(),
+    authorizedUrls: v.array(v.string()),
+    authorizedMethods: v.array(v.union(v.literal("GET"), v.literal("HEAD"), v.literal("OPTIONS"))),
+    authorizedCategories: v.array(v.string()),
+    maxDepth: v.optional(v.number()),
+    validFrom: v.string(),
+    validUntil: v.string(),
+    agentId: v.string(),
+    legalBasis: v.optional(v.string()),
+  })
+    .index("by_scopeId", ["scopeId"])
+    .index("by_targetId", ["targetId"]),
+
+  workflowRuns: defineTable({
+    runId: v.string(),
+    scopeId: v.string(),
+    targetId: v.string(),
+    status: v.union(
+      v.literal("hypothesis"),
+      v.literal("approved"),
+      v.literal("confirmed"),
+      v.literal("skipped"),
+      v.literal("halted"),
+      v.literal("rejected"),
+    ),
+    hypothesisId: v.optional(v.string()),
+    testPlanId: v.optional(v.string()),
+    startedAt: v.string(),
+    completedAt: v.optional(v.string()),
+    agentId: v.string(),
+    evidenceEnvelopeId: v.optional(v.string()),
+  })
+    .index("by_runId", ["runId"])
+    .index("by_targetId", ["targetId"])
+    .index("by_targetId_and_status", ["targetId", "status"]),
+
+  passiveScanEvidence: defineTable({
+    evidenceId: v.string(),
+    runId: v.string(),
+    targetId: v.string(),
+    collectedAt: v.string(),
+    sourceAgent: v.string(),
+    observationType: v.union(
+      v.literal("response-header"),
+      v.literal("resource-load"),
+      v.literal("tls-version"),
+      v.literal("content-match"),
+    ),
+    rawData: v.record(v.string(), v.string()),
+    canonicalUrl: v.string(),
+    evidenceRefs: v.optional(v.array(v.string())),
+  })
+    .index("by_evidenceId", ["evidenceId"])
+    .index("by_targetId_and_runId", ["targetId", "runId"]),
+
+  vulnerabilityHypotheses: defineTable({
+    hypothesisId: v.string(),
+    targetId: v.string(),
+    runId: v.string(),
+    category: v.union(
+      v.literal("tls"),
+      v.literal("headers"),
+      v.literal("cms"),
+      v.literal("exposure"),
+      v.literal("availability"),
+      v.literal("known-vulnerability"),
+    ),
+    severity: v.union(
+      v.literal("info"),
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+      v.literal("critical"),
+    ),
+    title: v.string(),
+    description: v.string(),
+    evidenceIds: v.array(v.string()),
+    confidence: v.union(v.literal("low"), v.literal("medium"), v.literal("high")),
+    createdAt: v.string(),
+    sourceAgent: v.string(),
+    status: v.optional(v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected"))),
+  })
+    .index("by_hypothesisId", ["hypothesisId"])
+    .index("by_targetId_and_runId", ["targetId", "runId"]),
+
+  approvalGates: defineTable({
+    gateId: v.string(),
+    hypothesisId: v.string(),
+    scopeId: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected"),
+      v.literal("expired"),
+      v.literal("revoked"),
+    ),
+    requestedAt: v.string(),
+    reviewedAt: v.optional(v.string()),
+    reviewerId: v.optional(v.string()),
+    reviewNotes: v.optional(v.string()),
+    validUntil: v.optional(v.string()),
+    sourceAgent: v.string(),
+  })
+    .index("by_gateId", ["gateId"])
+    .index("by_hypothesisId", ["hypothesisId"]),
+
+  validationResults: defineTable({
+    resultId: v.string(),
+    hypothesisId: v.string(),
+    gateId: v.string(),
+    runId: v.string(),
+    targetId: v.string(),
+    status: v.union(
+      v.literal("confirmed"),
+      v.literal("skipped"),
+      v.literal("halted"),
+      v.literal("rejected"),
+    ),
+    executedAt: v.string(),
+    completedAt: v.optional(v.string()),
+    evidenceIds: v.array(v.string()),
+    findings: v.optional(v.array(v.string())),
+    agentId: v.string(),
+    notes: v.optional(v.string()),
+  })
+    .index("by_resultId", ["resultId"])
+    .index("by_targetId_and_runId", ["targetId", "runId"]),
+
+  findings: defineTable({
+    findingId: v.string(),
+    resultId: v.string(),
+    hypothesisId: v.string(),
+    targetId: v.string(),
+    severity: v.union(
+      v.literal("info"),
+      v.literal("low"),
+      v.literal("medium"),
+      v.literal("high"),
+      v.literal("critical"),
+    ),
+    category: v.union(
+      v.literal("tls"),
+      v.literal("headers"),
+      v.literal("cms"),
+      v.literal("exposure"),
+      v.literal("availability"),
+      v.literal("known-vulnerability"),
+    ),
+    title: v.string(),
+    description: v.string(),
+    evidenceIds: v.array(v.string()),
+    cveId: v.optional(v.string()),
+    cweId: v.optional(v.string()),
+    createdAt: v.string(),
+    sourceAgent: v.string(),
+    confirmedBy: v.string(),
+  })
+    .index("by_findingId", ["findingId"])
+    .index("by_targetId", ["targetId"]),
+
+  auditEvents: defineTable({
+    eventId: v.string(),
+    timestamp: v.string(),
+    eventType: v.union(
+      v.literal("scope_created"),
+      v.literal("workflow_started"),
+      v.literal("workflow_completed"),
+      v.literal("hypothesis_created"),
+      v.literal("gate_requested"),
+      v.literal("gate_approved"),
+      v.literal("gate_rejected"),
+      v.literal("validation_executed"),
+      v.literal("finding_confirmed"),
+      v.literal("report_generated"),
+    ),
+    agentId: v.string(),
+    targetId: v.optional(v.string()),
+    runId: v.optional(v.string()),
+    entityId: v.optional(v.string()),
+    entityType: v.optional(v.string()),
+    metadata: v.optional(v.record(v.string(), v.string())),
+  })
+    .index("by_eventId", ["eventId"])
+    .index("by_targetId_and_timestamp", ["targetId", "timestamp"]),
 });
