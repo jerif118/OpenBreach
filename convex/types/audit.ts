@@ -1,3 +1,5 @@
+export type AuditDetails = Record<string, string | number | boolean | null>;
+
 export type AuditEventDto = {
   eventId: string;
   targetId: string;
@@ -5,7 +7,7 @@ export type AuditEventDto = {
   actor: string;
   timestamp: string;
   runId?: string;
-  details?: Record<string, unknown>;
+  details?: AuditDetails;
   ipAddress?: string;
   userAgent?: string;
 };
