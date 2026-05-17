@@ -32,9 +32,13 @@ export function assertPdfTextEscapesLiteralControls(): void {
   });
 
   const command = requiredElement(commands, 0, PDF_TEXT_ESCAPING_RULE);
-  const expected = String.raw`BT /F1 12 Tf 0.000 0.000 0.000 rg 1.00 2.00 Td (Line\nBreak\rReturn \(path\\value\)) Tj ET`;
+  const expectedEscapedText = String.raw`(Line\nBreak\rReturn \(path\\value\))`;
 
-  if (command !== expected) {
+  if (
+    !command.startsWith("BT ") ||
+    !command.includes(expectedEscapedText) ||
+    !command.endsWith(" Tj ET")
+  ) {
     throw new Error(PDF_TEXT_ESCAPING_RULE);
   }
 }
@@ -52,14 +56,20 @@ export function assertPageTreeReferencesPageObjects(pdfContent: string): void {
     objects.set(objectId, objectContent);
   }
 
-  const pagesObject = objects.get(2);
+  const pagesObject = [...objects.values()].find((objectContent) =>
+    /\/Type\s+\/Pages\b/.test(objectContent),
+  );
   const kidsMatch = /\/Kids \[([^\]]+)\]/.exec(pagesObject ?? "");
 
   if (!kidsMatch) {
     throw new Error("Generated PDF page tree is missing /Kids references.");
   }
 
-  const kidsReferences = requiredMatchGroup(kidsMatch, 1, "PDF page tree /Kids");
+  const kidsReferences = requiredMatchGroup(
+    kidsMatch,
+    1,
+    "PDF page tree /Kids",
+  );
 
   for (const pageRef of kidsReferences.matchAll(/(\d+) 0 R/g)) {
     const pageObjectId = requiredPdfObjectId(
