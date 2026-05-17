@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { readCliOptions } from "./report-generation-cli.ts";
+import { municipalitySeedSchema } from "../src/shared/municipalitySeed.ts";
 import {
   enrichedScanPersistenceArgsSchema,
   rawScanPersistenceArgsSchema,
+  REPORT_GENERATION_MAX_LIMIT,
   reportGenerationArtifactSchema,
   reportGenerationCliOptionsSchema,
   reportPersistencePayloadSchema,
@@ -87,19 +90,30 @@ const reportPersistenceArgs = {
   artifacts,
 };
 
+const parsedRawPersistenceArgs = rawScanPersistenceArgsSchema.parse({
+  results: [
+    { ...rawEvidence, municipalityExternalId: rawEvidence.municipalityId },
+  ],
+});
 assert.equal(
-  rawScanPersistenceArgsSchema.safeParse({
-    results: [
-      { ...rawEvidence, municipalityExternalId: rawEvidence.municipalityId },
-    ],
-  }).success,
-  true,
+  parsedRawPersistenceArgs.results[0]?.municipalityExternalId,
+  rawEvidence.municipalityId,
 );
 
-assert.equal(
-  rawScanPersistenceArgsSchema.safeParse({ results: [{ source: "fixture" }] })
-    .success,
-  false,
+const invalidRawPersistenceArgs = rawScanPersistenceArgsSchema.safeParse({
+  results: [{ source: "fixture" }],
+});
+assert.equal(invalidRawPersistenceArgs.success, false);
+assert.deepEqual(
+  invalidRawPersistenceArgs.error.issues
+    .map((issue) => issue.path.join("."))
+    .filter((path) =>
+      ["results.0.municipalityExternalId", "results.0.requestedUrl"].includes(
+        path,
+      ),
+    )
+    .sort(),
+  ["results.0.municipalityExternalId", "results.0.requestedUrl"],
 );
 
 assert.equal(
@@ -140,22 +154,34 @@ assert.equal(
   true,
 );
 
-assert.equal(
-  reportGenerationCliOptionsSchema.safeParse({
-    generatedAt: scannedAt,
-    limit: 10,
-    outputPath: "data/reports/latest.report-generation.json",
-  }).success,
-  true,
+const parsedCliOptions = reportGenerationCliOptionsSchema.parse({
+  generatedAt: scannedAt,
+  limit: 10,
+  outputPath: "data/reports/latest.report-generation.json",
+});
+assert.deepEqual(parsedCliOptions, {
+  generatedAt: scannedAt,
+  limit: 10,
+  outputPath: "data/reports/latest.report-generation.json",
+});
+
+assert.equal(readCliOptions(["--limit", "10.0"]).limit, 10);
+assert.equal(readCliOptions(["--limit", "1e1"]).limit, 10);
+assert.equal(readCliOptions(["--all"]).limit, REPORT_GENERATION_MAX_LIMIT);
+assert.throws(
+  () => readCliOptions(["--", "--limit", "5"]),
+  /Unexpected positional argument/,
 );
 
-assert.equal(
-  reportGenerationCliOptionsSchema.safeParse({
-    generatedAt: "not-a-date",
-    limit: 0,
-    outputPath: "",
-  }).success,
-  false,
+const invalidCliOptions = reportGenerationCliOptionsSchema.safeParse({
+  generatedAt: "not-a-date",
+  limit: 0,
+  outputPath: "",
+});
+assert.equal(invalidCliOptions.success, false);
+assert.deepEqual(
+  invalidCliOptions.error.issues.map((issue) => issue.path.join(".")).sort(),
+  ["generatedAt", "limit", "outputPath"],
 );
 
 assert.equal(
@@ -169,6 +195,25 @@ assert.equal(
   true,
 );
 
+const invalidNonFiniteEnvironment = scanConvexEnvironmentSchema.safeParse({
+  fromFixture: false,
+  fixturePath: "data/scans/latest.scan-results.json",
+  municipalityIds: [],
+  concurrency: Number.POSITIVE_INFINITY,
+  controls: {
+    timeoutMs: Number.POSITIVE_INFINITY,
+    retries: 1,
+    delayMs: Number.NEGATIVE_INFINITY,
+  },
+});
+assert.equal(invalidNonFiniteEnvironment.success, false);
+assert.deepEqual(
+  invalidNonFiniteEnvironment.error.issues
+    .map((issue) => issue.path.join("."))
+    .sort(),
+  ["concurrency", "controls.delayMs", "controls.timeoutMs"],
+);
+
 assert.equal(
   scanConvexEnvironmentSchema.safeParse({
     fromFixture: false,
@@ -178,6 +223,14 @@ assert.equal(
     controls: { timeoutMs: -1, retries: -1, delayMs: -1 },
   }).success,
   false,
+);
+
+const tooSmallMunicipalitySeed = municipalitySeedSchema.safeParse([]);
+assert.equal(tooSmallMunicipalitySeed.success, false);
+assert.equal(tooSmallMunicipalitySeed.error.issues[0]?.path.length, 0);
+assert.match(
+  tooSmallMunicipalitySeed.error.issues[0]?.message ?? "",
+  /at least 50 records/,
 );
 
 console.log("Boundary schema tests passed.");
