@@ -44,7 +44,7 @@ export async function collectHttpEvidence(
     const body = await response.text();
 
     return {
-      reachable: response.ok,
+      reachable: true,
       finalUrl: response.url || url.toString(),
       httpStatus: response.status,
       headers: selectHeaders(response.headers),
