@@ -205,11 +205,16 @@ export function collectFindingCandidates(
 ): ReportFinding[] {
   const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
+  const sourceScanFindings = pickArray(asObject(source?.scan), ["findings"]);
+  const scanFindings = scan?.findings ?? [];
+  const shouldUseSourceScanFindings =
+    !input.scan && sourceScanFindings.length > 0;
+  const shouldUseScanFindings = input.scan || sourceScanFindings.length === 0;
 
   const candidates = [
     ...pickArray(source, ["findings", "items", "issues"]),
-    ...pickArray(asObject(source?.scan), ["findings"]),
-    ...(scan?.findings ?? []),
+    ...(shouldUseSourceScanFindings ? sourceScanFindings : []),
+    ...(shouldUseScanFindings ? scanFindings : []),
   ];
 
   return candidates
