@@ -1,6 +1,5 @@
 import {
   generateRemediationReportInputSchema,
-  type GenerateRemediationReportInput,
   type ReportFinding,
   type RiskLevel,
 } from "../shared/contracts.ts";
@@ -74,7 +73,7 @@ function deriveVerificationGuidance(findings: ReportFinding[]): string[] {
 }
 
 export function normalizeReportInput(
-  rawInput: GenerateRemediationReportInput,
+  rawInput: unknown,
 ): NormalizedReportInput {
   const input = generateRemediationReportInputSchema.parse(rawInput);
   const findings = collectFindingCandidates(input);
