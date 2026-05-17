@@ -32,7 +32,7 @@
     "municipalities:seed:args": "node scripts/municipality-seed-args.ts",
     "municipalities:validate": "node scripts/validate-municipality-seed.ts",
     "pivot:smoke": "node scripts/smoke-test-convex.ts",
-    "pivot:validate": "run-s typecheck contracts:test fixtures:validate auth:writes:validate pivot:smoke",
+    "pivot:validate": "run-s typecheck contracts:test fixtures:validate auth:writes:validate pivot:smoke target:intake:validate",
     "preview": "vite preview",
     "report:ai-provider": "node scripts/validate-report-ai-provider.ts",
     "report:batch": "node scripts/validate-report-batch.ts",
@@ -56,6 +56,7 @@
     "scanner:persistence:validate": "node scripts/validate-scan-persistence.ts",
     "scanner:validate": "node scripts/validate-scanner.ts",
     "start": "node .output/server/index.mjs",
+    "target:intake:validate": "node scripts/validate-target-intake-form.ts",
     "typecheck": "tsc --build --pretty"
   },
   "dependencies": {

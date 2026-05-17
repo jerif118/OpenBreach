@@ -14,6 +14,10 @@ const passiveScanEvidenceSource = readFileSync(
   "utf8",
 );
 const approvalGatesSource = readFileSync("convex/approvalGates.ts", "utf8");
+const approvalGateStatusUpdatesSource = readFileSync(
+  "convex/lib/approvalGateStatusUpdates.ts",
+  "utf8",
+);
 const validationResultsSource = readFileSync(
   "convex/validationResults.ts",
   "utf8",
@@ -21,6 +25,24 @@ const validationResultsSource = readFileSync(
 const findingsSource = readFileSync("convex/findings.ts", "utf8");
 const reportArtifactsSource = readFileSync("convex/reportArtifacts.ts", "utf8");
 const auditEventsSource = readFileSync("convex/auditEvents.ts", "utf8");
+
+function extractExportBlock(source: string, exportName: string) {
+  const match = source.match(
+    new RegExp(
+      `export const ${exportName} = (?:internalMutation|mutation|query)\\([\\s\\S]*?\\n}\\);`,
+    ),
+  );
+  if (!match) {
+    throw new Error(`Expected export block not found: ${exportName}`);
+  }
+  return match[0];
+}
+
+function assertSourceIncludes(label: string, source: string, snippet: string) {
+  if (!source.includes(snippet)) {
+    throw new Error(`${label} is missing required source: ${snippet}`);
+  }
+}
 
 const requiredAuthSnippets = [
   "ctx.auth.getUserIdentity()",
@@ -113,21 +135,30 @@ for (const forbiddenSnippet of [
   }
 }
 
-const protectedIntakeMatch = targetsPublicSource.match(
-  /export const createFull = mutation\([\s\S]*?\n}\);/,
+const protectedIntakeSource = extractExportBlock(
+  targetsPublicSource,
+  "createFull",
 );
-if (!protectedIntakeMatch) {
-  throw new Error(
-    "targetsPublic.createFull protected intake mutation must exist.",
-  );
+const buildEnrichedMetadataStart = targetsPublicSource.indexOf(
+  "function buildEnrichedMetadata",
+);
+if (buildEnrichedMetadataStart < 0) {
+  throw new Error("targetsPublic.buildEnrichedMetadata helper must exist.");
 }
+const buildEnrichedMetadataSource = targetsPublicSource.slice(
+  buildEnrichedMetadataStart,
+  targetsPublicSource.indexOf(
+    "// ============================================================================",
+    buildEnrichedMetadataStart,
+  ),
+);
 
 for (const snippet of [
   "ctx.auth.getUserIdentity()",
   "identity.tokenIdentifier",
   "await requireOperatorOrAdmin(ctx)",
 ]) {
-  if (!protectedIntakeMatch[0].includes(snippet)) {
+  if (!protectedIntakeSource.includes(snippet)) {
     throw new Error(
       `targetsPublic.createFull must derive and authorize server identity: ${snippet}`,
     );
@@ -135,13 +166,19 @@ for (const snippet of [
 }
 
 if (
-  protectedIntakeMatch[0].includes("args.approverName") ||
-  protectedIntakeMatch[0].includes('"anonymous"')
+  protectedIntakeSource.includes("args.approverName") ||
+  protectedIntakeSource.includes('"anonymous"')
 ) {
   throw new Error(
     "targetsPublic.createFull must not trust client approverName or anonymous actors for audit attribution.",
   );
 }
+
+assertSourceIncludes(
+  "targetsPublic.createFull rateLimit metadata merge",
+  buildEnrichedMetadataSource,
+  "args.rateLimit !== undefined",
+);
 
 const sensitiveInternalExports: Array<[string, string, string]> = [
   ["workflowRuns", workflowRunsSource, "create"],
@@ -209,52 +246,128 @@ for (const forbiddenSnippet of [
   }
 }
 
-for (const snippet of [
+const workflowRunsCreateSource = extractExportBlock(
+  workflowRunsSource,
+  "create",
+);
+const workflowRunsUpdatePhaseSource = extractExportBlock(
+  workflowRunsSource,
+  "updatePhase",
+);
+const workflowRunsUpdateStatusSource = extractExportBlock(
+  workflowRunsSource,
+  "updateStatus",
+);
+const workflowStatusAuditEventSource = workflowRunsSource.slice(
+  workflowRunsSource.indexOf("function workflowStatusAuditEvent"),
+);
+const passiveScanEvidenceUpsertSource = extractExportBlock(
+  passiveScanEvidenceSource,
+  "upsert",
+);
+const approvalGatesCreateSource = extractExportBlock(
+  approvalGatesSource,
+  "create",
+);
+const approvalGatesUpdateStatusSource = extractExportBlock(
+  approvalGatesSource,
+  "updateStatus",
+);
+const validationResultsCreateSource = extractExportBlock(
+  validationResultsSource,
+  "create",
+);
+const findingsCreateSource = extractExportBlock(findingsSource, "create");
+const findingsUpdateSource = extractExportBlock(findingsSource, "update");
+const reportArtifactsCreateSource = extractExportBlock(
+  reportArtifactsSource,
+  "create",
+);
+const reportArtifactsCompleteSource = extractExportBlock(
+  reportArtifactsSource,
+  "complete",
+);
+
+assertSourceIncludes(
+  "workflowRuns.updateStatus",
+  workflowRunsUpdateStatusSource,
   "validateWorkflowRunTransition(doc.status, args.status)",
+);
+assertSourceIncludes(
+  "approvalGates.updateStatus",
+  approvalGatesUpdateStatusSource,
   "validateApprovalGateTransition(doc.status, args.status)",
-]) {
-  if (
-    ![workflowRunsSource, approvalGatesSource].some((source) =>
-      source.includes(snippet),
-    )
-  ) {
-    throw new Error(`State transition validation is missing: ${snippet}`);
-  }
-}
+);
+assertSourceIncludes(
+  "approval gate pending reset authorization",
+  approvalGateStatusUpdatesSource,
+  'args.status === "pending"',
+);
+assertSourceIncludes(
+  "approval gate pending reset authorization",
+  approvalGateStatusUpdatesSource,
+  "requireApprover(ctx)",
+);
+assertSourceIncludes(
+  "approval gate pending reset audit",
+  approvalGateStatusUpdatesSource,
+  'eventType: "approval-reset"',
+);
 
 const auditCoverage: Array<[string, string, string[]]> = [
   [
     "targetsPublic.createFull",
-    targetsPublicSource,
+    protectedIntakeSource,
     ["target-created", "approval-granted", "workflow-started"],
   ],
-  ["workflowRuns.create", workflowRunsSource, ["workflow-started"]],
-  ["workflowRuns.updatePhase", workflowRunsSource, ["phase-changed"]],
+  ["workflowRuns.create", workflowRunsCreateSource, ["workflow-started"]],
+  [
+    "workflowRuns.updatePhase",
+    workflowRunsUpdatePhaseSource,
+    ["phase-changed"],
+  ],
   [
     "workflowRuns.updateStatus",
-    workflowRunsSource,
-    ["workflow-completed", "workflow-halted"],
+    `${workflowRunsUpdateStatusSource}\n${workflowStatusAuditEventSource}`,
+    [
+      "workflow-pending",
+      "workflow-running",
+      "workflow-paused",
+      "workflow-completed",
+      "workflow-halted",
+      "workflow-rejected",
+      "workflow-failed",
+    ],
   ],
   [
     "passiveScanEvidence.upsert",
-    passiveScanEvidenceSource,
+    passiveScanEvidenceUpsertSource,
     ["evidence-recorded"],
   ],
-  ["approvalGates.create", approvalGatesSource, ["approval-requested"]],
+  ["approvalGates.create", approvalGatesCreateSource, ["approval-requested"]],
   [
     "approvalGates.updateStatus",
-    approvalGatesSource,
-    ["approval-granted", "approval-rejected", "manual-override"],
+    `${approvalGatesUpdateStatusSource}\n${approvalGateStatusUpdatesSource}`,
+    [
+      "approval-granted",
+      "approval-rejected",
+      "approval-reset",
+      "manual-override",
+    ],
   ],
   [
     "validationResults.create",
-    validationResultsSource,
+    validationResultsCreateSource,
     ["validation-recorded"],
   ],
-  ["findings.create", findingsSource, ["finding-created"]],
-  ["findings.update", findingsSource, ["finding-updated"]],
-  ["reportArtifacts.create", reportArtifactsSource, ["report-generated"]],
-  ["reportArtifacts.complete", reportArtifactsSource, ["report-completed"]],
+  ["findings.create", findingsCreateSource, ["finding-created"]],
+  ["findings.update", findingsUpdateSource, ["finding-updated"]],
+  ["reportArtifacts.create", reportArtifactsCreateSource, ["report-generated"]],
+  [
+    "reportArtifacts.complete",
+    reportArtifactsCompleteSource,
+    ["report-completed"],
+  ],
 ];
 
 for (const [label, source, eventTypes] of auditCoverage) {
