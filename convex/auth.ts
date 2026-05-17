@@ -63,3 +63,12 @@ export async function requireAdmin(ctx: AuthCtx) {
 export async function requireOperatorOrAdmin(ctx: AuthCtx) {
   return await requireAnyRole(ctx, [ROLES.operator, ROLES.admin]);
 }
+
+/**
+ * Require the current user to have an approver role.
+ * For the MVP, approver maps to operator or admin.
+ * Future: may enforce separation-of-duties (cannot approve your own request).
+ */
+export async function requireApprover(ctx: AuthCtx) {
+  return await requireAnyRole(ctx, [ROLES.operator, ROLES.admin]);
+}
