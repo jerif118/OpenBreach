@@ -5,6 +5,7 @@ import {
 } from "../shared/contracts.ts";
 import {
   asObject,
+  looseSourcePayload,
   pickArray,
   pickString,
   severityScore,
@@ -193,7 +194,7 @@ function normalizeFinding(
 export function collectFindingCandidates(
   input: GenerateRemediationReportInput,
 ): ReportFinding[] {
-  const source = asObject(input.sourceData);
+  const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
 
   const candidates = [
