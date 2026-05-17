@@ -31,6 +31,8 @@
     "municipalities:seed": "convex run municipalities:seed \"$(node scripts/municipality-seed-args.ts)\"",
     "municipalities:seed:args": "node scripts/municipality-seed-args.ts",
     "municipalities:validate": "node scripts/validate-municipality-seed.ts",
+    "pivot:smoke": "node scripts/smoke-test-convex.ts",
+    "pivot:validate": "run-s typecheck contracts:test fixtures:validate auth:writes:validate pivot:smoke",
     "preview": "vite preview",
     "report:ai-provider": "node scripts/validate-report-ai-provider.ts",
     "report:batch": "node scripts/validate-report-batch.ts",
