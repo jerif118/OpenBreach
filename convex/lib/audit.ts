@@ -1,18 +1,25 @@
 import type { MutationCtx } from "../_generated/server";
+import type { AuditDetails } from "../types/audit";
 
 type AuditEventType =
   | "target-created"
   | "target-updated"
   | "target-rejected"
   | "workflow-started"
+  | "workflow-pending"
+  | "workflow-running"
+  | "workflow-paused"
   | "workflow-completed"
   | "workflow-halted"
+  | "workflow-rejected"
+  | "workflow-failed"
   | "phase-changed"
   | "evidence-recorded"
   | "hypothesis-proposed"
   | "approval-requested"
   | "approval-granted"
   | "approval-rejected"
+  | "approval-reset"
   | "gate-approved"
   | "gate-rejected"
   | "finding-created"
@@ -23,8 +30,6 @@ type AuditEventType =
   | "auth-granted"
   | "auth-revoked"
   | "manual-override";
-
-type AuditDetails = Record<string, string | number | boolean | null>;
 
 export async function appendAuditEvent(
   ctx: MutationCtx,
