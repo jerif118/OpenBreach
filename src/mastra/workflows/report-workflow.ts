@@ -60,6 +60,18 @@ export async function generateRemediationReportVariants(
   return await adapter.generateRemediationReportVariants(input);
 }
 
+function buildReportInput(
+  context: SelectedMunicipalityReportContext,
+  generatedAt: string,
+): GenerateRemediationReportInput {
+  return generateRemediationReportInputSchema.parse({
+    municipality: context.municipality,
+    scan: context.scan,
+    generatedAt,
+    sourceData: context,
+  });
+}
+
 function buildFailedResult({
   error,
   generatedAt,
@@ -99,12 +111,7 @@ export async function generateRemediationReportBatch({
 
     try {
       const context = selectedMunicipalityReportContextSchema.parse(rawContext);
-      const input = generateRemediationReportInputSchema.parse({
-        municipality: context.municipality,
-        scan: context.scan,
-        generatedAt,
-        sourceData: context,
-      });
+      const input = buildReportInput(context, generatedAt);
       const reports = await adapter.generateRemediationReportVariants(input);
       const report = reports.technical;
 
