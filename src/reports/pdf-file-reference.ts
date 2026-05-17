@@ -2,6 +2,7 @@ import { join } from "node:path";
 
 import {
   reportPdfReferenceSchema,
+  type ReportAudience,
   type RemediationReport,
 } from "../shared/contracts.ts";
 
@@ -19,7 +20,23 @@ export function createReportPdfFileTarget({
   report: RemediationReport;
   outputDirectory: string;
 }) {
-  const fileName = `${sanitizePdfFileStem(report.municipalityId)}-${report.variant}.pdf`;
+  return createReportPdfFileTargetForVariant({
+    municipalityId: report.municipalityId,
+    outputDirectory,
+    variant: report.variant,
+  });
+}
+
+export function createReportPdfFileTargetForVariant({
+  municipalityId,
+  outputDirectory,
+  variant,
+}: {
+  municipalityId: string;
+  outputDirectory: string;
+  variant: ReportAudience;
+}) {
+  const fileName = `${sanitizePdfFileStem(municipalityId)}-${variant}.pdf`;
   const storagePath = join(outputDirectory, fileName).replace(/\\/g, "/");
 
   return { fileName, storagePath };
