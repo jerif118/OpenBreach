@@ -1,11 +1,12 @@
 import { chat } from "@tanstack/ai";
 import { createOpenRouterText } from "@tanstack/ai-openrouter";
-import { plainLanguageReportAgent } from "../mastra/agents/plain-language-report-agent.ts";
-import { reportAgent } from "../mastra/agents/report-agent.ts";
 import { buildDeterministicReportVariants } from "../reports/report-composer.ts";
 import { normalizeReportInput } from "../reports/report-normalizer.ts";
 import { parseProviderReport } from "./report-provider-parser.ts";
-import { buildProviderPrompt } from "./report-provider-prompt.ts";
+import {
+  buildProviderPrompt,
+  getReportProviderAudienceInstructions,
+} from "./report-provider-prompt.ts";
 import {
   remediationReportVariantsSchema,
   type GenerateRemediationReport,
@@ -119,10 +120,13 @@ function createDeterministicReportAdapter(): ReportAiAdapter {
   };
 }
 
-function getAudienceInstructions(variant: ReportAudience): string {
-  return variant === "technical"
-    ? reportAgent.instructions
-    : plainLanguageReportAgent.instructions;
+function remediationProviderContractSystemPrompts(
+  variant: ReportAudience,
+): string[] {
+  return [
+    getReportProviderAudienceInstructions(variant),
+    JSON_CONTRACT_SYSTEM_PROMPT,
+  ];
 }
 
 async function runTanStackChat({
@@ -156,10 +160,7 @@ async function generateProviderReport({
     model,
     provider,
     providerKey,
-    systemPrompts: [
-      getAudienceInstructions(variant),
-      JSON_CONTRACT_SYSTEM_PROMPT,
-    ],
+    systemPrompts: remediationProviderContractSystemPrompts(variant),
     messages: [
       {
         role: "user",
