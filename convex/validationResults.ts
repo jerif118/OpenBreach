@@ -3,6 +3,7 @@ import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
 import type { ValidationResultDto } from "./types";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -119,7 +120,7 @@ export const create = internalMutation({
     metadata: v.optional(v.record(v.string(), v.any())),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("validationResults")
@@ -151,6 +152,14 @@ export const create = internalMutation({
       evidenceRefs: args.evidenceRefs,
       runId: args.runId,
       metadata: args.metadata,
+    });
+
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "validation-recorded",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: { resultId: args.resultId, status: args.status },
     });
 
     return { id, resultId: args.resultId };
