@@ -49,6 +49,31 @@ function assertCompleteBatch(
   }
 }
 
+function requireSelectedContext(
+  selectedByMunicipalityId: Map<string, SelectedMunicipalityReportContext>,
+  municipalityId: string,
+): SelectedMunicipalityReportContext {
+  const context = selectedByMunicipalityId.get(municipalityId);
+
+  if (!context) {
+    throw new Error(`Missing selected context for ${municipalityId}.`);
+  }
+
+  return context;
+}
+
+function requireCompletedResult(
+  record: Awaited<ReturnType<typeof renderReportBatchPdfs>>["results"][number],
+): CompletedReportResult {
+  const result = generateRemediationReportResultSchema.parse(record.result);
+
+  if (result.status !== "completed") {
+    throw new Error(`Expected completed report for ${record.municipalityId}.`);
+  }
+
+  return result;
+}
+
 function readCliOptions(argv: string[]): ReportGenerationCliOptions {
   const options = {
     generatedAt: DEFAULT_GENERATED_AT,
@@ -114,6 +139,28 @@ function toPersistenceArgs({
   });
 }
 
+function buildPersistenceArgs({
+  batch,
+  selected,
+}: {
+  batch: Awaited<ReturnType<typeof renderReportBatchPdfs>>;
+  selected: SelectedMunicipalityReportContext[];
+}): ReportPersistenceArgs[] {
+  const selectedByMunicipalityId = new Map(
+    selected.map((context) => [context.municipality.id, context]),
+  );
+
+  return batch.results.map((record) =>
+    toPersistenceArgs({
+      context: requireSelectedContext(
+        selectedByMunicipalityId,
+        record.municipalityId,
+      ),
+      result: requireCompletedResult(record),
+    }),
+  );
+}
+
 const options = readCliOptions(process.argv.slice(2));
 const municipalities = municipalitySchema.array().parse(municipalitiesFixture);
 const scans = scanResultSchema.array().parse(enrichedScanFixture);
@@ -140,27 +187,7 @@ const batch = await renderReportBatchPdfs({
 
 assertCompleteBatch(batch, selected.length);
 
-const selectedByMunicipalityId = new Map(
-  selected.map((context) => [context.municipality.id, context]),
-);
-const convexPersistenceArgs: ReportPersistenceArgs[] = batch.results.map(
-  (record) => {
-    const result = generateRemediationReportResultSchema.parse(record.result);
-    const context = selectedByMunicipalityId.get(record.municipalityId);
-
-    if (!context) {
-      throw new Error(`Missing selected context for ${record.municipalityId}.`);
-    }
-
-    if (result.status !== "completed") {
-      throw new Error(
-        `Expected completed report for ${record.municipalityId}.`,
-      );
-    }
-
-    return toPersistenceArgs({ result, context });
-  },
-);
+const convexPersistenceArgs = buildPersistenceArgs({ batch, selected });
 
 const artifact = reportGenerationArtifactSchema.parse({
   id: batch.id,
