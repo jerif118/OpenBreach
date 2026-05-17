@@ -2,6 +2,11 @@ import type { ReportFinding, RiskLevel } from "../shared/contracts.ts";
 
 export type LooseRecord = Record<string, unknown>;
 
+/** Inputs that may carry a loose `sourceData` object (e.g. remediation report generation). */
+export type ReportInputPayload = {
+  sourceData?: unknown;
+};
+
 export const severityScore: Record<ReportFinding["severity"], number> = {
   info: 5,
   low: 20,
@@ -24,6 +29,12 @@ function isLooseObjectRecord(value: unknown): value is LooseRecord {
 
 export function asObject(value: unknown): LooseRecord | null {
   return isLooseObjectRecord(value) ? value : null;
+}
+
+export function looseSourcePayload(
+  input: ReportInputPayload,
+): LooseRecord | null {
+  return asObject(input.sourceData);
 }
 
 export function asArray(value: unknown): unknown[] {
