@@ -31,7 +31,7 @@ export function OpenBreachDashboard() {
             <span className="material-symbols-outlined text-2xl lg:text-3xl">
               travel_explore
             </span>
-            Open Creach Control Plane
+            Open Breach Control Plane
           </h1>
           <p className="mt-2 font-mono text-[10px] text-[#b9cacb] lg:text-xs">
             Authorized intake, passive evidence, approval gates, validation, and

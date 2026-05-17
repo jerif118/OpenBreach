@@ -40,7 +40,7 @@ function SideNavBar() {
         >
           OPEN
           <br />
-          CREACH
+          BREACH
         </div>
         <div className="border-primary/10 bg-surface-container-low pixel-corner mt-5 flex w-full items-center gap-3 border px-3 py-3">
           <div className="border-primary/20 bg-surface pixel-corner flex h-10 w-10 items-center justify-center border">
@@ -125,7 +125,7 @@ function TopNavBarMobile() {
     <nav className="border-primary/10 bg-surface/90 sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b px-4 backdrop-blur-md md:hidden">
       <div>
         <h1 className="terminal-wordmark text-primary text-xl leading-none">
-          OPEN CREACH
+          OPEN BREACH
         </h1>
         <p className="text-on-surface-variant mt-1 font-mono text-[9px] tracking-[0.24em] uppercase">
           Control Plane
