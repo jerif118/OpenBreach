@@ -36,9 +36,7 @@ import {
 // Legacy fixture pipeline (hard-coded imports)
 // ============================================================
 
-import {
-  type GenerateRemediationReportResult,
-} from "../src/shared/contracts.ts";
+import { type GenerateRemediationReportResult } from "../src/shared/contracts.ts";
 
 type GenerateRemediationReportBatchRecord = {
   result: { status: string };

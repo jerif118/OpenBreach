@@ -60,21 +60,34 @@ import reportArtifact from "../data/targets/report-artifact.json" with { type: "
 // Structural type assertions (compile-time)
 // ============================================================================
 
-const _targetProfile: TargetProfileDto = targetApprovedPublic as TargetProfileDto;
-const _passiveEvidence: PassiveScanEvidenceDto = passiveEvidence as unknown as PassiveScanEvidenceDto;
-const _technologyFingerprint: TechnologyFingerprintDto = technologyFingerprint as unknown as TechnologyFingerprintDto;
-const _vulnerabilityHypothesis: VulnerabilityHypothesisDto = vulnerabilityHypothesis as unknown as VulnerabilityHypothesisDto;
+const _targetProfile: TargetProfileDto =
+  targetApprovedPublic as TargetProfileDto;
+const _passiveEvidence: PassiveScanEvidenceDto =
+  passiveEvidence as unknown as PassiveScanEvidenceDto;
+const _technologyFingerprint: TechnologyFingerprintDto =
+  technologyFingerprint as unknown as TechnologyFingerprintDto;
+const _vulnerabilityHypothesis: VulnerabilityHypothesisDto =
+  vulnerabilityHypothesis as unknown as VulnerabilityHypothesisDto;
 const _testPlan: TestPlanDto = testPlan as unknown as TestPlanDto;
-const _approvalGate: ApprovalGateDto = approvalGate as unknown as ApprovalGateDto;
-const _validationResult: ValidationResultDto = validationResult as unknown as ValidationResultDto;
+const _approvalGate: ApprovalGateDto =
+  approvalGate as unknown as ApprovalGateDto;
+const _validationResult: ValidationResultDto =
+  validationResult as unknown as ValidationResultDto;
 const _finding: FindingDto = reportReadyFinding as unknown as FindingDto;
 const _auditEvents: AuditEventDto[] = auditEvents as unknown as AuditEventDto[];
-const _reportArtifact: ReportArtifactDto = reportArtifact as unknown as ReportArtifactDto;
+const _reportArtifact: ReportArtifactDto =
+  reportArtifact as unknown as ReportArtifactDto;
 
 // Rejected target has nested objects
-const _rejectedTargetProfile: TargetProfileDto = (targetRejected as unknown as Record<string, unknown>).targetProfile as unknown as TargetProfileDto;
-const _rejectedApprovalGate: ApprovalGateDto = (targetRejected as unknown as Record<string, unknown>).approvalGate as unknown as ApprovalGateDto;
-const _rejectedWorkflowRun: WorkflowRunDto = (targetRejected as unknown as Record<string, unknown>).workflowRun as unknown as WorkflowRunDto;
+const _rejectedTargetProfile: TargetProfileDto = (
+  targetRejected as unknown as Record<string, unknown>
+).targetProfile as unknown as TargetProfileDto;
+const _rejectedApprovalGate: ApprovalGateDto = (
+  targetRejected as unknown as Record<string, unknown>
+).approvalGate as unknown as ApprovalGateDto;
+const _rejectedWorkflowRun: WorkflowRunDto = (
+  targetRejected as unknown as Record<string, unknown>
+).workflowRun as unknown as WorkflowRunDto;
 
 // ============================================================================
 // Runtime Zod validation (structural)
@@ -90,16 +103,40 @@ function tryValidate(label: string, schema: unknown, data: unknown) {
   }
 }
 
-tryValidate("target-approved-public", targetProfileSchema, targetApprovedPublic);
-tryValidate("rejected-target.profile", targetProfileSchema, (targetRejected as Record<string, unknown>).targetProfile);
-tryValidate("rejected-target.approvalGate", approvalGateSchema, (targetRejected as Record<string, unknown>).approvalGate);
-tryValidate("rejected-target.workflowRun", workflowRunSchema, (targetRejected as Record<string, unknown>).workflowRun);
+tryValidate(
+  "target-approved-public",
+  targetProfileSchema,
+  targetApprovedPublic,
+);
+tryValidate(
+  "rejected-target.profile",
+  targetProfileSchema,
+  (targetRejected as Record<string, unknown>).targetProfile,
+);
+tryValidate(
+  "rejected-target.approvalGate",
+  approvalGateSchema,
+  (targetRejected as Record<string, unknown>).approvalGate,
+);
+tryValidate(
+  "rejected-target.workflowRun",
+  workflowRunSchema,
+  (targetRejected as Record<string, unknown>).workflowRun,
+);
 tryValidate("passive-evidence", passiveScanEvidenceSchema, passiveEvidence);
-tryValidate("vulnerability-hypothesis", vulnerabilityHypothesisSchema, vulnerabilityHypothesis);
+tryValidate(
+  "vulnerability-hypothesis",
+  vulnerabilityHypothesisSchema,
+  vulnerabilityHypothesis,
+);
 tryValidate("approval-gate", approvalGateSchema, approvalGate);
 tryValidate("validation-result", validationResultSchema, validationResult);
 tryValidate("report-ready-finding", findingSchema, reportReadyFinding);
-tryValidate("technology-fingerprint", technologyFingerprintSchema, technologyFingerprint);
+tryValidate(
+  "technology-fingerprint",
+  technologyFingerprintSchema,
+  technologyFingerprint,
+);
 tryValidate("test-plan", testPlanSchema, testPlan);
 
 if (!Array.isArray(auditEvents)) {
@@ -117,18 +154,54 @@ tryValidate("report-artifact", reportArtifactSchema, reportArtifact);
 // ============================================================================
 
 const knownTargetIds = new Set<string>();
-knownTargetIds.add((targetApprovedPublic as Record<string, unknown>).targetId as string);
-knownTargetIds.add(((targetRejected as Record<string, unknown>).targetProfile as Record<string, unknown>).targetId as string);
+knownTargetIds.add(
+  (targetApprovedPublic as Record<string, unknown>).targetId as string,
+);
+knownTargetIds.add(
+  (
+    (targetRejected as Record<string, unknown>).targetProfile as Record<
+      string,
+      unknown
+    >
+  ).targetId as string,
+);
 
 const fixturesToCheck = [
-  { name: "passive-evidence", targetId: (passiveEvidence as Record<string, unknown>).targetId as string },
-  { name: "vulnerability-hypothesis", targetId: (vulnerabilityHypothesis as Record<string, unknown>).targetId as string },
-  { name: "approval-gate", targetId: (approvalGate as Record<string, unknown>).targetId as string },
-  { name: "validation-result", targetId: (validationResult as Record<string, unknown>).targetId as string },
-  { name: "report-ready-finding", targetId: (reportReadyFinding as Record<string, unknown>).targetId as string },
-  { name: "technology-fingerprint", targetId: (technologyFingerprint as Record<string, unknown>).targetId as string },
-  { name: "test-plan", targetId: (testPlan as Record<string, unknown>).targetId as string },
-  { name: "report-artifact", targetId: (reportArtifact as Record<string, unknown>).targetId as string },
+  {
+    name: "passive-evidence",
+    targetId: (passiveEvidence as Record<string, unknown>).targetId as string,
+  },
+  {
+    name: "vulnerability-hypothesis",
+    targetId: (vulnerabilityHypothesis as Record<string, unknown>)
+      .targetId as string,
+  },
+  {
+    name: "approval-gate",
+    targetId: (approvalGate as Record<string, unknown>).targetId as string,
+  },
+  {
+    name: "validation-result",
+    targetId: (validationResult as Record<string, unknown>).targetId as string,
+  },
+  {
+    name: "report-ready-finding",
+    targetId: (reportReadyFinding as Record<string, unknown>)
+      .targetId as string,
+  },
+  {
+    name: "technology-fingerprint",
+    targetId: (technologyFingerprint as Record<string, unknown>)
+      .targetId as string,
+  },
+  {
+    name: "test-plan",
+    targetId: (testPlan as Record<string, unknown>).targetId as string,
+  },
+  {
+    name: "report-artifact",
+    targetId: (reportArtifact as Record<string, unknown>).targetId as string,
+  },
 ];
 
 for (const fixture of fixturesToCheck) {
@@ -141,7 +214,8 @@ for (const fixture of fixturesToCheck) {
 
 if (Array.isArray(auditEvents)) {
   for (let i = 0; i < auditEvents.length; i++) {
-    const targetId = (auditEvents[i] as Record<string, unknown>).targetId as string;
+    const targetId = (auditEvents[i] as Record<string, unknown>)
+      .targetId as string;
     if (!knownTargetIds.has(targetId)) {
       errors.push(
         `[FAIL] CrossRef → audit-event[${i}].targetId '${targetId}' not found in target set`,
@@ -161,4 +235,6 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log("Smoke test passed. All DTOs compile and fixtures validate against contracts.");
+console.log(
+  "Smoke test passed. All DTOs compile and fixtures validate against contracts.",
+);
