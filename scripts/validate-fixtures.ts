@@ -1,12 +1,20 @@
 import municipalityFixture from "../data/municipalities/sample-municipality.json" with { type: "json" };
+import pivotWorkflowFixture from "../data/pivot/sample-pivot-workflow.json" with { type: "json" };
 import reportGenerationFixture from "../data/reports/latest.report-generation.json" with { type: "json" };
 import scanFixture from "../data/scans/sample-scan.json" with { type: "json" };
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
 import rawScanEvidenceFixture from "../data/scans/sample-raw-scan-evidence.json" with { type: "json" };
 import {
+  approvalGateSchema,
+  auditEventSchema,
+  authorizationScopeSchema,
+  evidenceEnvelopeSchema,
+  findingSchema,
   generateRemediationReportResultSchema,
   municipalitySchema,
+  passiveScanEvidenceSchema,
   rawScanEvidenceSchema,
+  reportArtifactSchema,
   reportGenerationArtifactSchema,
   reportGenerationStatusSchema,
   reportArtifactsSchema,
@@ -16,6 +24,12 @@ import {
   remediationReportVariantsSchema,
   scanResultSchema,
   selectedMunicipalityReportContextSchema,
+  targetProfileSchema,
+  technologyFingerprintSchema,
+  testPlanSchema,
+  validationResultSchema,
+  vulnerabilityHypothesisSchema,
+  workflowRunSchema,
   type GenerateRemediationReportBatchRecord,
   type GenerateRemediationReportResult,
 } from "../src/shared/contracts.ts";
@@ -34,6 +48,22 @@ municipalitySchema.parse(municipalityFixture);
 scanResultSchema.parse(scanFixture);
 scanResultSchema.array().parse(enrichedScanFixture);
 rawScanEvidenceSchema.parse(rawScanEvidenceFixture);
+targetProfileSchema.parse(pivotWorkflowFixture.approvedTarget);
+targetProfileSchema.parse(pivotWorkflowFixture.rejectedTarget);
+authorizationScopeSchema.parse(pivotWorkflowFixture.authorizationScope);
+workflowRunSchema.parse(pivotWorkflowFixture.workflowRun);
+passiveScanEvidenceSchema.parse(pivotWorkflowFixture.passiveEvidence);
+technologyFingerprintSchema.parse(pivotWorkflowFixture.technologyFingerprint);
+vulnerabilityHypothesisSchema.parse(
+  pivotWorkflowFixture.vulnerabilityHypothesis,
+);
+testPlanSchema.parse(pivotWorkflowFixture.testPlan);
+approvalGateSchema.parse(pivotWorkflowFixture.approvalGate);
+validationResultSchema.parse(pivotWorkflowFixture.validationResult);
+evidenceEnvelopeSchema.parse(pivotWorkflowFixture.evidenceEnvelope);
+findingSchema.parse(pivotWorkflowFixture.finding);
+reportArtifactSchema.parse(pivotWorkflowFixture.reportArtifact);
+auditEventSchema.parse(pivotWorkflowFixture.auditEvent);
 const reportArtifact = reportGenerationArtifactSchema.parse(
   reportGenerationFixture,
 );
