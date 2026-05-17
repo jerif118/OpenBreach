@@ -6,12 +6,15 @@ import {
   municipalitySchema,
   rawScanEvidenceSchema,
   scanConvexEnvironmentSchema,
+  type Municipality,
   type RawScanEvidence,
+  type RawScanPersistenceArgs,
+  type ScanConvexEnvironment,
 } from "../src/shared/contracts.ts";
 
 // stdout is reserved for the JSON payload that `convex run` consumes via
 // command substitution. All progress/diagnostic output must go to stderr.
-const log = (message: string) => {
+const log = (message: string): void => {
   process.stderr.write(`${message}\n`);
 };
 
@@ -24,9 +27,11 @@ const results = environment.fromFixture
   ? await loadFixtureResults(environment.fixturePath, idFilter, records)
   : await runLiveScan(records, environment);
 
-process.stdout.write(JSON.stringify(toRawScanPersistenceArgs(results)));
+const persistenceArgs: RawScanPersistenceArgs =
+  toRawScanPersistenceArgs(results);
+process.stdout.write(JSON.stringify(persistenceArgs));
 
-function readEnvironment() {
+function readEnvironment(): ScanConvexEnvironment {
   return scanConvexEnvironmentSchema.parse({
     fromFixture: process.env.SCAN_FROM_FIXTURE === "1",
     fixturePath:
@@ -45,9 +50,9 @@ function readEnvironment() {
 }
 
 function selectMunicipalities(
-  records: typeof allRecords,
+  records: readonly Municipality[],
   idFilter: readonly string[],
-) {
+): readonly Municipality[] {
   const selected =
     idFilter.length === 0
       ? records
@@ -64,7 +69,7 @@ function selectMunicipalities(
 function filterFixtureResults(
   results: RawScanEvidence[],
   idFilter: readonly string[],
-  records: typeof allRecords,
+  records: readonly Municipality[],
 ): RawScanEvidence[] {
   if (idFilter.length === 0) {
     return results;
@@ -77,7 +82,7 @@ function filterFixtureResults(
 async function loadFixtureResults(
   fixturePath: string,
   idFilter: readonly string[],
-  records: typeof allRecords,
+  records: readonly Municipality[],
 ): Promise<RawScanEvidence[]> {
   log(`Loading scan results from fixture file: ${fixturePath}`);
   const parsed = rawScanEvidenceSchema
@@ -94,8 +99,8 @@ async function loadFixtureResults(
 }
 
 async function runLiveScan(
-  records: typeof allRecords,
-  environment: ReturnType<typeof readEnvironment>,
+  records: readonly Municipality[],
+  environment: ScanConvexEnvironment,
 ): Promise<RawScanEvidence[]> {
   log(
     `Running live passive scan against ${records.length} municipalit${
@@ -139,7 +144,7 @@ function describeOutcome(result: RawScanEvidence): string {
 
 async function runWithConcurrency<T, R>(
   items: readonly T[],
-  concurrency: number,
+  concurrency: ScanConvexEnvironment["concurrency"],
   task: (item: T, index: number) => Promise<R>,
 ): Promise<R[]> {
   const out: R[] = new Array(items.length);
