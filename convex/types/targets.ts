@@ -20,4 +20,18 @@ export type TargetListItemDto = {
   primaryUrl: string;
   riskTier: "low" | "medium" | "high" | "critical";
   classification: "public-sector" | "private" | "infrastructure" | "other";
+  metadata?: Record<string, unknown>;
+  latestRun?: {
+    runId: string;
+    status:
+      | "pending"
+      | "running"
+      | "paused"
+      | "completed"
+      | "halted"
+      | "rejected"
+      | "failed";
+    currentPhase?: string;
+    durationMs?: number;
+  } | null;
 };
