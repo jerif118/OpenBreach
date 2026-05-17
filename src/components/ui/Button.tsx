@@ -1,5 +1,9 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from "~/lib/terminal-styles";
+import {
+  BUTTON_PRIMARY,
+  BUTTON_SECONDARY,
+  BUTTON_DANGER,
+} from "~/lib/terminal-styles";
 
 // ============================================================================
 // Types
@@ -7,8 +11,10 @@ import { BUTTON_PRIMARY, BUTTON_SECONDARY, BUTTON_DANGER } from "~/lib/terminal-
 
 export type ButtonVariant = "primary" | "secondary" | "danger";
 
-export interface ButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "type"> {
+export interface ButtonProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  "type"
+> {
   variant: ButtonVariant;
   children: ReactNode;
   type?: "button" | "submit" | "reset";

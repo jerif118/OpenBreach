@@ -66,7 +66,11 @@ export function FormSelect({
           className={`${inputClass} appearance-none pr-10`}
         >
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value} className="bg-slate-900 text-slate-200">
+            <option
+              key={opt.value}
+              value={opt.value}
+              className="bg-slate-900 text-slate-200"
+            >
               {opt.label}
             </option>
           ))}
@@ -90,7 +94,10 @@ export function FormSelect({
         </div>
       </div>
       {error && (
-        <p id={`${name}-error`} className={`mt-1.5 text-sm font-mono ${ERROR_TEXT}`}>
+        <p
+          id={`${name}-error`}
+          className={`mt-1.5 font-mono text-sm ${ERROR_TEXT}`}
+        >
           {error}
         </p>
       )}

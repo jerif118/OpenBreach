@@ -7,11 +7,13 @@
 @keyframes terminal-glow {
   0%,
   100% {
-    box-shadow: 0 0 8px rgba(34, 211, 238, 0.08),
+    box-shadow:
+      0 0 8px rgba(34, 211, 238, 0.08),
       0 0 24px rgba(34, 211, 238, 0.04);
   }
   50% {
-    box-shadow: 0 0 12px rgba(34, 211, 238, 0.14),
+    box-shadow:
+      0 0 12px rgba(34, 211, 238, 0.14),
       0 0 32px rgba(34, 211, 238, 0.08);
   }
 }

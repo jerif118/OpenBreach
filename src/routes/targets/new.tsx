@@ -15,7 +15,9 @@ export const Route = createFileRoute("/targets/new")({
 // ============================================================================
 
 function TargetsNewPage() {
-  const [createdTarget, setCreatedTarget] = useState<TargetCreateResult | null>(null);
+  const [createdTarget, setCreatedTarget] = useState<TargetCreateResult | null>(
+    null,
+  );
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.18),_transparent_34rem),linear-gradient(135deg,_#020617_0%,_#0f172a_52%,_#111827_100%)] text-slate-100">

@@ -13,9 +13,7 @@ export interface TargetListCardProps {
 // Risk tier styling
 // ============================================================================
 
-function riskTierBadgeClasses(
-  riskTier: TargetListItemDto["riskTier"],
-): string {
+function riskTierBadgeClasses(riskTier: TargetListItemDto["riskTier"]): string {
   switch (riskTier) {
     case "low":
       return "border-green-400/30 bg-green-400/10 text-green-300";
@@ -52,10 +50,10 @@ export function TargetListCard({ target, onClick }: TargetListCardProps) {
     <button
       type="button"
       onClick={handleClick}
-      className="group relative w-full rounded-[2rem] border border-white/10 bg-slate-900/80 p-5 text-left shadow-lg shadow-black/20 backdrop-blur transition hover:border-green-400/50 hover:shadow-green-900/20 focus:outline-none focus:ring-2 focus:ring-green-400/40"
+      className="group relative w-full rounded-[2rem] border border-white/10 bg-slate-900/80 p-5 text-left shadow-lg shadow-black/20 backdrop-blur transition hover:border-green-400/50 hover:shadow-green-900/20 focus:ring-2 focus:ring-green-400/40 focus:outline-none"
     >
       {/* Top accent line */}
-      <div className="absolute left-0 top-0 h-1 w-full rounded-t-[2rem] bg-cyan-300/20 transition group-hover:bg-green-400/40" />
+      <div className="absolute top-0 left-0 h-1 w-full rounded-t-[2rem] bg-cyan-300/20 transition group-hover:bg-green-400/40" />
 
       <div className="relative">
         {/* Header: targetId + badge */}
@@ -71,9 +69,7 @@ export function TargetListCard({ target, onClick }: TargetListCardProps) {
         </div>
 
         {/* Name */}
-        <h3 className="mt-3 text-lg font-semibold text-white">
-          {target.name}
-        </h3>
+        <h3 className="mt-3 text-lg font-semibold text-white">{target.name}</h3>
 
         {/* URL */}
         <p className="mt-1 truncate font-mono text-sm text-cyan-400">

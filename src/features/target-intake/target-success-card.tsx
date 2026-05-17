@@ -50,7 +50,9 @@ export function TargetSuccessCard({ target }: TargetSuccessCardProps) {
           </div>
           <div className="flex justify-between gap-4">
             <dt className="font-mono text-emerald-200/70">Risk Tier</dt>
-            <dd className="font-mono text-white capitalize">{target.riskTier}</dd>
+            <dd className="font-mono text-white capitalize">
+              {target.riskTier}
+            </dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="font-mono text-emerald-200/70">Classification</dt>

@@ -27,7 +27,7 @@ function TargetListSkeleton() {
           key={i}
           className="relative h-40 animate-pulse rounded-[2rem] border border-white/5 bg-slate-900/60 p-5 backdrop-blur"
         >
-          <div className="absolute left-0 top-0 h-1 w-full rounded-t-[2rem] bg-slate-700/50" />
+          <div className="absolute top-0 left-0 h-1 w-full rounded-t-[2rem] bg-slate-700/50" />
           <div className="h-4 w-1/3 rounded bg-slate-700/50" />
           <div className="mt-4 h-5 w-2/3 rounded bg-slate-700/50" />
           <div className="mt-2 h-4 w-1/2 rounded bg-slate-700/50" />
@@ -44,14 +44,15 @@ function TargetListSkeleton() {
 
 function CreationSuccessBanner() {
   return (
-    <div className="mb-6 rounded-[2rem] border border-emerald-300/20 bg-emerald-300/10 p-5 animate-terminal-glow">
+    <div className="animate-terminal-glow mb-6 rounded-[2rem] border border-emerald-300/20 bg-emerald-300/10 p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="font-mono text-sm font-semibold text-emerald-100">
             ✓ Target created successfully
           </p>
           <p className="mt-1 font-mono text-xs text-emerald-100/70">
-            The new target has been registered and is pending workflow activation.
+            The new target has been registered and is pending workflow
+            activation.
           </p>
         </div>
         <Link

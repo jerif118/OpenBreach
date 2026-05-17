@@ -91,4 +91,5 @@ export const PAGE_BACKGROUND =
 // Focus ring (global)
 // ============================================================================
 
-export const FOCUS_RING = "focus:ring-2 focus:ring-cyan-200/40 focus:outline-none";
+export const FOCUS_RING =
+  "focus:ring-2 focus:ring-cyan-200/40 focus:outline-none";

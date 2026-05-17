@@ -11,8 +11,10 @@ import {
 // Types
 // ============================================================================
 
-export interface FormFieldProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "onChange"> {
+export interface FormFieldProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "type" | "value" | "onChange"
+> {
   label: string;
   name: string;
   value: string | number;
@@ -68,7 +70,10 @@ export function FormField({
         {...rest}
       />
       {error && (
-        <p id={`${name}-error`} className={`mt-1.5 text-sm font-mono ${ERROR_TEXT}`}>
+        <p
+          id={`${name}-error`}
+          className={`mt-1.5 font-mono text-sm ${ERROR_TEXT}`}
+        >
           {error}
         </p>
       )}

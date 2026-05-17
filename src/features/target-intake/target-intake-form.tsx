@@ -15,7 +15,10 @@ import {
   targetIntakeInputSchema,
   type TargetIntakeInput,
 } from "~/shared/contracts.ts";
-import { useTargetCreate, type TargetCreateResult } from "~/hooks/use-target-create.ts";
+import {
+  useTargetCreate,
+  type TargetCreateResult,
+} from "~/hooks/use-target-create.ts";
 
 // ============================================================================
 // Types
@@ -53,10 +56,14 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
   const [targetId, setTargetId] = useState("");
   const [name, setName] = useState("");
   const [primaryUrl, setPrimaryUrl] = useState("");
-  const [classification, setClassification] = useState<"public-sector" | "private" | "infrastructure" | "other">("public-sector");
+  const [classification, setClassification] = useState<
+    "public-sector" | "private" | "infrastructure" | "other"
+  >("public-sector");
   const [allowedAssets, setAllowedAssets] = useState("");
   const [deniedAssets, setDeniedAssets] = useState("");
-  const [validationLevel, setValidationLevel] = useState<"passive" | "semiactive" | "controlled_validation">("passive");
+  const [validationLevel, setValidationLevel] = useState<
+    "passive" | "semiactive" | "controlled_validation"
+  >("passive");
   const [rateLimit, setRateLimit] = useState("10");
   const [approverName, setApproverName] = useState("");
 
@@ -145,10 +152,17 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
       } catch (err) {
         console.error("❌ createTarget failed:", err);
         const errorMessage = err instanceof Error ? err.message : String(err);
-        if (errorMessage.includes("Connection refused") || errorMessage.includes("WebSocket")) {
-          setGlobalError("[ERROR] Cannot connect to Convex backend. Please ensure 'pnpm convex:dev' is running.");
+        if (
+          errorMessage.includes("Connection refused") ||
+          errorMessage.includes("WebSocket")
+        ) {
+          setGlobalError(
+            "[ERROR] Cannot connect to Convex backend. Please ensure 'pnpm convex:dev' is running.",
+          );
         } else {
-          setGlobalError(apiError?.message ?? "Target creation failed. Please try again.");
+          setGlobalError(
+            apiError?.message ?? "Target creation failed. Please try again.",
+          );
         }
       }
     },
@@ -264,7 +278,9 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           <div className="w-full">
             <label htmlFor="allowedAssets" className={LABEL_BASE}>
               Allowed Assets
-              <span className="ml-1 text-slate-500">(comma-separated URLs)</span>
+              <span className="ml-1 text-slate-500">
+                (comma-separated URLs)
+              </span>
             </label>
             <textarea
               id="allowedAssets"
@@ -277,7 +293,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
               className={`${INPUT_BASE} ${fieldErrors.allowedAssets ? INPUT_ERROR : INPUT_FOCUS} resize-y`}
             />
             {fieldErrors.allowedAssets && (
-              <p className={`mt-1.5 text-sm font-mono ${ERROR_TEXT}`}>
+              <p className={`mt-1.5 font-mono text-sm ${ERROR_TEXT}`}>
                 {fieldErrors.allowedAssets}
               </p>
             )}
@@ -285,7 +301,9 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           <div className="w-full">
             <label htmlFor="deniedAssets" className={LABEL_BASE}>
               Denied Assets
-              <span className="ml-1 text-slate-500">(comma-separated URLs)</span>
+              <span className="ml-1 text-slate-500">
+                (comma-separated URLs)
+              </span>
             </label>
             <textarea
               id="deniedAssets"
@@ -298,7 +316,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
               className={`${INPUT_BASE} ${fieldErrors.deniedAssets ? INPUT_ERROR : INPUT_FOCUS} resize-y`}
             />
             {fieldErrors.deniedAssets && (
-              <p className={`mt-1.5 text-sm font-mono ${ERROR_TEXT}`}>
+              <p className={`mt-1.5 font-mono text-sm ${ERROR_TEXT}`}>
                 {fieldErrors.deniedAssets}
               </p>
             )}
@@ -336,7 +354,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
 
         {/* Global error */}
         {globalError && (
-          <div className="rounded-2xl border border-red-400/20 bg-red-400/10 p-4 animate-shake">
+          <div className="animate-shake rounded-2xl border border-red-400/20 bg-red-400/10 p-4">
             <p className="font-mono text-sm text-red-300">
               [ERROR] {globalError}
             </p>

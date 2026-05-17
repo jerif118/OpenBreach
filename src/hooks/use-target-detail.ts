@@ -46,8 +46,7 @@ function mapFixtureToTargetDetailDto(fixture: unknown): TargetDetailDto | null {
     primaryUrl: String(profile.primaryUrl ?? ""),
     riskTier: (profile.riskTier as TargetProfileDto["riskTier"]) ?? "medium",
     classification:
-      (profile.classification as TargetProfileDto["classification"]) ??
-      "other",
+      (profile.classification as TargetProfileDto["classification"]) ?? "other",
     parentOrganization: profile.parentOrganization
       ? String(profile.parentOrganization)
       : undefined,
