@@ -1,6 +1,7 @@
 import type {
   GenerateRemediationReportInput,
   ReportFinding,
+  ScanResult,
 } from "../shared/contracts.ts";
 import {
   asObject,
@@ -13,7 +14,11 @@ import {
   type LooseRecord,
   uniqueStrings,
 } from "./report-normalizer-utils.ts";
-import { getScanLikeObject, type NormalizedSubject } from "./report-subject-risk.ts";
+import {
+  getScanLikeObject,
+  type LooseScanLike,
+  type NormalizedSubject,
+} from "./report-subject-risk.ts";
 
 type ReportSectionContent = {
   narrative: string;
@@ -69,7 +74,7 @@ function formatValidationResult(
 
 function missingLimitationMessages(
   source: LooseRecord | null,
-  scan: unknown,
+  scan: ScanResult | LooseScanLike | null,
   findings: ReportFinding[],
 ): Array<string | null> {
   return [
@@ -98,11 +103,11 @@ export function deriveScopeSection(
     subject.websiteUrl ? `Primary public URL: ${subject.websiteUrl}` : null,
     subject.state ? `Region or state reference: ${subject.state}` : null,
     pickString(scope, ["targetType", "assetType", "scopeType"]),
-    ...pickEntryStrings(scope, ["allowedAssets", "targets", "inScope"], [
-      "name",
-      "url",
-      "path",
-    ]),
+    ...pickEntryStrings(
+      scope,
+      ["allowedAssets", "targets", "inScope"],
+      ["name", "url", "path"],
+    ),
   ]);
 
   return {
@@ -130,10 +135,11 @@ export function deriveAuthorizationSection(
     "isApproved",
   ]);
   const bullets = uniqueStrings([
-    ...pickEntryStrings(scope, ["allowedActions", "validationClasses"], [
-      "name",
-      "label",
-    ]),
+    ...pickEntryStrings(
+      scope,
+      ["allowedActions", "validationClasses"],
+      ["name", "label"],
+    ),
     ...pickEntryStrings(
       scope,
       ["forbiddenActions", "deniedActions", "outOfScope"],
@@ -236,11 +242,11 @@ export function deriveLimitations(
 ): string[] {
   const source = looseSourcePayload(input);
   const scan = getScanLikeObject(input);
-  const errors = pickEntryStrings(source, ["errors", "limitations"], [
-    "message",
-    "summary",
-    "reason",
-  ]);
+  const errors = pickEntryStrings(
+    source,
+    ["errors", "limitations"],
+    ["message", "summary", "reason"],
+  );
   return uniqueStrings([
     ...errors,
     ...missingLimitationMessages(source, scan, findings),
