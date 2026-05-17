@@ -1,20 +1,18 @@
+import fs from "fs";
+import path from "path";
+import { z } from "zod";
 import municipalityFixture from "../data/municipalities/sample-municipality.json" with { type: "json" };
-import pivotWorkflowFixture from "../data/pivot/sample-pivot-workflow.json" with { type: "json" };
 import reportGenerationFixture from "../data/reports/latest.report-generation.json" with { type: "json" };
 import scanFixture from "../data/scans/sample-scan.json" with { type: "json" };
 import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json" with { type: "json" };
 import rawScanEvidenceFixture from "../data/scans/sample-raw-scan-evidence.json" with { type: "json" };
 import {
   approvalGateSchema,
-  auditEventSchema,
-  authorizationScopeSchema,
-  evidenceEnvelopeSchema,
   findingSchema,
   generateRemediationReportResultSchema,
   municipalitySchema,
   passiveScanEvidenceSchema,
   rawScanEvidenceSchema,
-  reportArtifactSchema,
   reportGenerationArtifactSchema,
   reportGenerationStatusSchema,
   reportArtifactsSchema,
@@ -24,14 +22,12 @@ import {
   remediationReportVariantsSchema,
   scanResultSchema,
   selectedMunicipalityReportContextSchema,
+  type GenerateRemediationReportBatchRecord,
+  type GenerateRemediationReportResult,
   targetProfileSchema,
-  technologyFingerprintSchema,
-  testPlanSchema,
   validationResultSchema,
   vulnerabilityHypothesisSchema,
   workflowRunSchema,
-  type GenerateRemediationReportBatchRecord,
-  type GenerateRemediationReportResult,
 } from "../src/shared/contracts.ts";
 
 type CompletedReportRecord = GenerateRemediationReportBatchRecord & {
@@ -44,26 +40,15 @@ function isCompletedReportRecord(
   return record.result.status === "completed";
 }
 
+
+// ============================================================
+// Legacy fixture pipeline (hard-coded imports)
+// ============================================================
+
 municipalitySchema.parse(municipalityFixture);
 scanResultSchema.parse(scanFixture);
 scanResultSchema.array().parse(enrichedScanFixture);
 rawScanEvidenceSchema.parse(rawScanEvidenceFixture);
-targetProfileSchema.parse(pivotWorkflowFixture.approvedTarget);
-targetProfileSchema.parse(pivotWorkflowFixture.rejectedTarget);
-authorizationScopeSchema.parse(pivotWorkflowFixture.authorizationScope);
-workflowRunSchema.parse(pivotWorkflowFixture.workflowRun);
-passiveScanEvidenceSchema.parse(pivotWorkflowFixture.passiveEvidence);
-technologyFingerprintSchema.parse(pivotWorkflowFixture.technologyFingerprint);
-vulnerabilityHypothesisSchema.parse(
-  pivotWorkflowFixture.vulnerabilityHypothesis,
-);
-testPlanSchema.parse(pivotWorkflowFixture.testPlan);
-approvalGateSchema.parse(pivotWorkflowFixture.approvalGate);
-validationResultSchema.parse(pivotWorkflowFixture.validationResult);
-evidenceEnvelopeSchema.parse(pivotWorkflowFixture.evidenceEnvelope);
-findingSchema.parse(pivotWorkflowFixture.finding);
-reportArtifactSchema.parse(pivotWorkflowFixture.reportArtifact);
-auditEventSchema.parse(pivotWorkflowFixture.auditEvent);
 const reportArtifact = reportGenerationArtifactSchema.parse(
   reportGenerationFixture,
 );
@@ -158,6 +143,131 @@ if (failedWithoutError.success) {
   throw new Error(
     "Failed report generation results must include an error message.",
   );
+}
+
+// ============================================================
+// Generic target fixture pipeline (dynamic discovery)
+// ============================================================
+
+const targetsDir = "data/targets";
+const targetFiles = fs
+  .readdirSync(targetsDir)
+  .filter((f) => f.endsWith(".json"));
+
+const knownTargetIds = new Set<string>();
+const errors: string[] = [];
+
+function formatZodIssues(
+  filePath: string,
+  contractName: string,
+  err: unknown,
+): string[] {
+  if (err instanceof z.ZodError) {
+    return err.issues.map(
+      (issue) =>
+        `[FAIL] ${filePath} → ${contractName} → ${issue.path.join(".") || "root"}: ${issue.message}`,
+    );
+  }
+  return [`[FAIL] ${filePath} → ${contractName} → ${String(err)}`];
+}
+
+// --- First pass: schema validation + collect targetIds ---
+for (const file of targetFiles) {
+  const filePath = path.join(targetsDir, file);
+  const content = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+
+  if (file.startsWith("target-")) {
+    try {
+      targetProfileSchema.parse(content);
+      knownTargetIds.add(content.targetId);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "TargetProfile", e));
+    }
+  } else if (file === "rejected-target.json") {
+    try {
+      targetProfileSchema.parse(content.targetProfile);
+      knownTargetIds.add(content.targetProfile.targetId);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "TargetProfile", e));
+    }
+    try {
+      approvalGateSchema.parse(content.approvalGate);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "ApprovalGate", e));
+    }
+    try {
+      workflowRunSchema.parse(content.workflowRun);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "WorkflowRun", e));
+    }
+  } else if (file.startsWith("passive-evidence-")) {
+    try {
+      passiveScanEvidenceSchema.parse(content);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "PassiveScanEvidence", e));
+    }
+  } else if (file.startsWith("vulnerability-")) {
+    try {
+      vulnerabilityHypothesisSchema.parse(content);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "VulnerabilityHypothesis", e));
+    }
+  } else if (file.startsWith("approval-")) {
+    try {
+      approvalGateSchema.parse(content);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "ApprovalGate", e));
+    }
+  } else if (file.startsWith("validation-")) {
+    try {
+      validationResultSchema.parse(content);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "ValidationResult", e));
+    }
+  } else if (file.startsWith("report-ready-")) {
+    try {
+      findingSchema.parse(content);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "Finding", e));
+    }
+  } else {
+    errors.push(
+      `[FAIL] ${filePath} → Router → unknown fixture filename prefix`,
+    );
+  }
+}
+
+// --- Second pass: cross-reference integrity ---
+for (const file of targetFiles) {
+  const filePath = path.join(targetsDir, file);
+  const content = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+
+  if (file === "rejected-target.json") {
+    if (content.approvalGate?.targetId !== content.targetProfile?.targetId) {
+      errors.push(
+        `[FAIL] ${filePath} → CrossRef → approvalGate.targetId does not match targetProfile.targetId`,
+      );
+    }
+    if (content.workflowRun?.targetId !== content.targetProfile?.targetId) {
+      errors.push(
+        `[FAIL] ${filePath} → CrossRef → workflowRun.targetId does not match targetProfile.targetId`,
+      );
+    }
+  } else if (!file.startsWith("target-")) {
+    const targetId = content.targetId;
+    if (targetId && !knownTargetIds.has(targetId)) {
+      errors.push(
+        `[FAIL] ${filePath} → CrossRef → targetId '${targetId}' not found in target set`,
+      );
+    }
+  }
+}
+
+if (errors.length > 0) {
+  for (const error of errors) {
+    console.error(error);
+  }
+  process.exit(1);
 }
 
 console.log("Fixture validation passed.");

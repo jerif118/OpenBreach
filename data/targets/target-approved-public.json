@@ -1,0 +1,13 @@
+{
+  "targetId": "target-merida-001",
+  "name": "Merida",
+  "primaryUrl": "https://www.merida.gob.mx",
+  "riskTier": "medium",
+  "classification": "public-sector",
+  "population": 995129,
+  "geography": {
+    "country": "Mexico",
+    "region": "Yucatan",
+    "city": "Merida"
+  }
+}

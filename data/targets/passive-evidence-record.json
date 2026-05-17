@@ -1,0 +1,19 @@
+{
+  "evidenceId": "evidence-merida-ssl-001",
+  "targetId": "target-merida-001",
+  "source": "ssl-labs",
+  "collectedAt": "2024-01-15T10:00:00Z",
+  "requestedUrl": "https://www.merida.gob.mx",
+  "reachable": true,
+  "httpStatus": 200,
+  "finalUrl": "https://www.merida.gob.mx",
+  "headers": {
+    "Server": "nginx/1.18.0",
+    "Content-Type": "text/html; charset=UTF-8"
+  },
+  "tls": {
+    "valid": true,
+    "expiresAt": "2035-06-01T00:00:00Z",
+    "issuer": "Let's Encrypt"
+  }
+}
