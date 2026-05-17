@@ -35,6 +35,12 @@ type CompletedReportResult = Extract<
   { status: "completed" }
 >;
 
+type CliOptionDraft = {
+  generatedAt: string;
+  limit: number;
+  outputPath: string;
+};
+
 function sanitizePersistenceFindings(
   findings: CompletedReportResult["report"]["findings"],
 ): ReportPersistenceArgs["findings"] {
@@ -56,6 +62,31 @@ function assertCompleteBatch(
       "Fixture report generation must complete all selected records.",
     );
   }
+}
+
+function parseLimit(value: string): number {
+  const limit = Number(value);
+
+  if (!Number.isFinite(limit) || !Number.isInteger(limit)) {
+    throw new Error(`Invalid --limit value: ${value}.`);
+  }
+
+  return limit;
+}
+
+function readRequiredValue(
+  argv: string[],
+  index: number,
+  flag: string,
+  { allowFlagLikeValue = false }: { allowFlagLikeValue?: boolean } = {},
+): string {
+  const value = argv[index + 1];
+
+  if (value === undefined || (!allowFlagLikeValue && value.startsWith("--"))) {
+    throw new Error(`Missing value for ${flag}.`);
+  }
+
+  return value;
 }
 
 function requireSelectedContext(
@@ -84,7 +115,7 @@ function requireCompletedResult(
 }
 
 function readCliOptions(argv: string[]): ReportGenerationCliOptions {
-  const options = {
+  const options: CliOptionDraft = {
     generatedAt: DEFAULT_GENERATED_AT,
     limit: 10,
     outputPath: DEFAULT_OUTPUT_PATH,
@@ -92,28 +123,29 @@ function readCliOptions(argv: string[]): ReportGenerationCliOptions {
 
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
-    const value = argv[index + 1];
 
-    if (flag === "--generated-at" && value) {
-      options.generatedAt = value;
-      index += 1;
-      continue;
-    }
-
-    if (flag === "--limit" && value) {
-      options.limit = Number(value);
-      index += 1;
-      continue;
-    }
-
-    if (flag === "--all") {
-      options.limit = MAX_LIMIT;
-    }
-
-    if (flag === "--output" && value) {
-      options.outputPath = value;
-      index += 1;
-      continue;
+    switch (flag) {
+      case "--":
+        continue;
+      case "--generated-at":
+        options.generatedAt = readRequiredValue(argv, index, flag);
+        index += 1;
+        continue;
+      case "--limit":
+        options.limit = parseLimit(readRequiredValue(argv, index, flag));
+        index += 1;
+        continue;
+      case "--all":
+        options.limit = MAX_LIMIT;
+        continue;
+      case "--output":
+        options.outputPath = readRequiredValue(argv, index, flag, {
+          allowFlagLikeValue: true,
+        });
+        index += 1;
+        continue;
+      default:
+        throw new Error(`Unknown report generation option: ${flag}.`);
     }
   }
 
