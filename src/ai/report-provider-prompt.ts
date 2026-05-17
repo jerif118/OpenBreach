@@ -1,3 +1,5 @@
+import { plainLanguageReportAgent } from "../mastra/agents/plain-language-report-agent.ts";
+import { reportAgent } from "../mastra/agents/report-agent.ts";
 import {
   normalizeReportInput,
   type NormalizedReportInput,
@@ -52,10 +54,32 @@ function buildPromptInstructions(variant: ReportAudience): string[] {
   ];
 }
 
-function getAudienceDescription(variant: ReportAudience): string {
-  return variant === "technical"
-    ? "Formal, engineer-ready, detailed, ordered, and evidence-grounded."
-    : "Plain-language, accessible to nontechnical owners, and free of unnecessary jargon.";
+type AudienceProfile = {
+  description: string;
+  instructions: string;
+};
+
+function audienceProfile(variant: ReportAudience): AudienceProfile {
+  if (variant === "technical") {
+    return {
+      description:
+        "Formal, engineer-ready, detailed, ordered, and evidence-grounded.",
+      instructions: reportAgent.instructions,
+    };
+  }
+
+  return {
+    description:
+      "Plain-language, accessible to nontechnical owners, and free of unnecessary jargon.",
+    instructions: plainLanguageReportAgent.instructions,
+  };
+}
+
+/** Mastra system instructions aligned with {@link buildProviderPrompt}'s variant. */
+export function getReportProviderAudienceInstructions(
+  variant: ReportAudience,
+): string {
+  return audienceProfile(variant).instructions;
 }
 
 function buildReportSectionShape(): PromptReportSectionShape {
@@ -101,7 +125,7 @@ export function buildProviderPrompt(
   return JSON.stringify(
     {
       instructions: buildPromptInstructions(variant),
-      audience: getAudienceDescription(variant),
+      audience: audienceProfile(variant).description,
       outputShape: buildOutputShape(normalized, variant),
       normalizedInput: normalized,
     },
