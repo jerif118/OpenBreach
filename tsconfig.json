@@ -1,5 +1,9 @@
 {
   "include": ["**/*.ts", "**/*.tsx", "**/*.d.ts"],
+  "exclude": [
+    "scripts/validate-dashboard-data-adapter.ts",
+    "scripts/validate-municipality-detail.ts"
+  ],
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,
