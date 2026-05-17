@@ -1,13 +1,12 @@
-import {
-  createReportAiAdapter,
-  type ReportAiProvider,
-} from "../../ai/report-adapter.ts";
+import { createReportAiAdapter } from "../../ai/report-adapter.ts";
 import { renderReportArtifacts } from "../../reports/pdf-renderer.ts";
 import {
   generateRemediationReportInputSchema,
   generateRemediationReportBatchOutputSchema,
   generateRemediationReportResultSchema,
   selectedMunicipalityReportContextSchema,
+  type GenerateRemediationReportBatchOutput as ContractGenerateRemediationReportBatchOutput,
+  type GenerateRemediationReportBatchRecord as ContractGenerateRemediationReportBatchRecord,
   type GenerateRemediationReportInput,
   type GenerateRemediationReportResult,
   type RemediationReportVariants,
@@ -15,29 +14,17 @@ import {
 } from "../../shared/contracts.ts";
 
 export type GenerateRemediationReportBatchInput = {
-  id?: string;
+  id?: ContractGenerateRemediationReportBatchOutput["id"];
   contexts: SelectedMunicipalityReportContext[];
-  generatedAt?: string;
+  generatedAt?: ContractGenerateRemediationReportBatchOutput["generatedAt"];
   providerKey?: string;
 };
 
-export type GenerateRemediationReportBatchRecord = {
-  municipalityId: string;
-  rank?: number;
-  result: GenerateRemediationReportResult;
-};
+export type GenerateRemediationReportBatchRecord =
+  ContractGenerateRemediationReportBatchRecord;
 
-export type GenerateRemediationReportBatchOutput = {
-  id: string;
-  generatedAt: string;
-  provider: ReportAiProvider;
-  summary: {
-    requested: number;
-    completed: number;
-    failed: number;
-  };
-  results: GenerateRemediationReportBatchRecord[];
-};
+export type GenerateRemediationReportBatchOutput =
+  ContractGenerateRemediationReportBatchOutput;
 
 export type RenderReportBatchPdfsInput = Omit<
   GenerateRemediationReportBatchInput,
