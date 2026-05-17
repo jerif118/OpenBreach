@@ -5,7 +5,7 @@ import {
 } from "../shared/contracts.ts";
 import { collectFindingCandidates } from "./report-finding-normalizer.ts";
 import {
-  asObject,
+  looseSourcePayload,
   pickString,
   severityLabels,
   uniqueStrings,
@@ -87,7 +87,7 @@ export function normalizeReportInput(
   return {
     generatedAt:
       input.generatedAt ??
-      pickString(asObject(input.sourceData), ["generatedAt"]) ??
+      pickString(looseSourcePayload(input), ["generatedAt"]) ??
       new Date("2026-01-01T00:00:00.000Z").toISOString(),
     subject,
     riskScore,
