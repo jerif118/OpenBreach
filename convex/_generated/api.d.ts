@@ -13,6 +13,7 @@ import type * as auditEvents from "../auditEvents.js";
 import type * as auth from "../auth.js";
 import type * as authorizationScopes from "../authorizationScopes.js";
 import type * as findings from "../findings.js";
+import type * as lib_audit from "../lib/audit.js";
 import type * as lib_fixtureFallback from "../lib/fixtureFallback.js";
 import type * as lib_stateMachine from "../lib/stateMachine.js";
 import type * as municipalities from "../municipalities.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authorizationScopes: typeof authorizationScopes;
   findings: typeof findings;
+  "lib/audit": typeof lib_audit;
   "lib/fixtureFallback": typeof lib_fixtureFallback;
   "lib/stateMachine": typeof lib_stateMachine;
   municipalities: typeof municipalities;
