@@ -12,6 +12,10 @@ import {
   type ScanConvexEnvironment,
 } from "../src/shared/contracts.ts";
 
+type MunicipalitySelection =
+  | { ok: true; records: readonly Municipality[] }
+  | { ok: false; idFilter: readonly string[] };
+
 // stdout is reserved for the JSON payload that `convex run` consumes via
 // command substitution. All progress/diagnostic output must go to stderr.
 const log = (message: string): void => {
@@ -22,7 +26,16 @@ const environment = readEnvironment();
 
 const allRecords = municipalitySchema.array().parse(municipalities);
 const idFilter = environment.municipalityIds;
-const records = selectMunicipalities(allRecords, idFilter);
+const municipalitySelection = selectMunicipalities(allRecords, idFilter);
+
+if (!municipalitySelection.ok) {
+  log(
+    `No municipalities matched MUNICIPALITY_IDS=${municipalitySelection.idFilter.join(",")}.`,
+  );
+  process.exit(1);
+}
+
+const records = municipalitySelection.records;
 const results = environment.fromFixture
   ? await loadFixtureResults(environment.fixturePath, idFilter, records)
   : await runLiveScan(records, environment);
@@ -52,18 +65,17 @@ function readEnvironment(): ScanConvexEnvironment {
 function selectMunicipalities(
   records: readonly Municipality[],
   idFilter: readonly string[],
-): readonly Municipality[] {
+): MunicipalitySelection {
   const selected =
     idFilter.length === 0
       ? records
       : records.filter((m) => idFilter.includes(m.id));
 
   if (idFilter.length > 0 && selected.length === 0) {
-    log(`No municipalities matched MUNICIPALITY_IDS=${idFilter.join(",")}.`);
-    process.exit(1);
+    return { ok: false, idFilter };
   }
 
-  return selected;
+  return { ok: true, records: selected };
 }
 
 function filterFixtureResults(
