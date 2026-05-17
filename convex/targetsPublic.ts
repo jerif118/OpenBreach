@@ -7,9 +7,10 @@ import {
   loadFixture,
   mapFixtureToTargetProfileDto,
 } from "./lib/fixtureFallback";
-import { TargetListItemDto, TargetProfileDto } from "./types/targets";
-import { Doc } from "./_generated/dataModel";
-import { WorkflowRunDto } from "./types/workflow";
+import type { TargetListItemDto, TargetProfileDto } from "./types/targets";
+import type { Doc } from "./_generated/dataModel";
+import type { WorkflowRunDto } from "./types/workflow";
+import { validateTargetDomainBounds } from "./targets.validators";
 
 const DEFAULT_LIST_LIMIT = 50;
 const MAX_LIST_LIMIT = 100;
@@ -44,7 +45,7 @@ function buildEnrichedMetadata(args: {
     ...(args.metadata ?? {}),
     ...(args.allowedAssets ? { allowedAssets: args.allowedAssets } : {}),
     ...(args.deniedAssets ? { deniedAssets: args.deniedAssets } : {}),
-    ...(args.rateLimit ? { rateLimit: args.rateLimit } : {}),
+    ...(args.rateLimit !== undefined ? { rateLimit: args.rateLimit } : {}),
     ...(args.validationLevel ? { validationLevel: args.validationLevel } : {}),
   };
 }
@@ -277,6 +278,7 @@ export const createFull = mutation({
     const profile = await requireOperatorOrAdmin(ctx);
     const actor = profile.name ?? identity.tokenIdentifier;
     const nowISO = new Date().toISOString();
+    validateTargetDomainBounds(args);
 
     // -----------------------------------------------------------------------
     // 1. Duplicate check
