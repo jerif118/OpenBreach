@@ -1,4 +1,8 @@
-import type { ReportFinding, RiskLevel } from "../shared/contracts.ts";
+import {
+  riskLevelSchema,
+  type ReportFinding,
+  type RiskLevel,
+} from "../shared/contracts.ts";
 
 export type LooseRecord = Record<string, unknown>;
 
@@ -189,14 +193,10 @@ export function uniqueStrings(
 export function normalizeRiskLevel(value: unknown, score: number): RiskLevel {
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
+    const parsed = riskLevelSchema.safeParse(normalized);
 
-    if (
-      normalized === "critical" ||
-      normalized === "high" ||
-      normalized === "medium" ||
-      normalized === "low"
-    ) {
-      return normalized;
+    if (parsed.success) {
+      return parsed.data;
     }
   }
 
