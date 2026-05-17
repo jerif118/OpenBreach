@@ -11,8 +11,11 @@ export type Role = (typeof ROLES)[keyof typeof ROLES];
 
 type AuthCtx = Pick<QueryCtx, "auth" | "db"> | Pick<MutationCtx, "auth" | "db">;
 
+const DEMO_MODE = !process.env.CLERK_SECRET_KEY;
+
 export async function getCurrentUserProfile(ctx: AuthCtx) {
   const identity = await ctx.auth.getUserIdentity();
+
   if (!identity) {
     return null;
   }
@@ -29,7 +32,14 @@ export async function getCurrentUserProfile(ctx: AuthCtx) {
 
 export async function requireAuthenticatedProfile(
   ctx: AuthCtx,
-): Promise<Doc<"userProfiles">> {
+): Promise<Doc<"userProfiles"> | { _id: string; roles: Role[] }> {
+  if (DEMO_MODE) {
+    return {
+      _id: "demo-user",
+      roles: ["viewer"] as Role[],
+    };
+  }
+
   const current = await getCurrentUserProfile(ctx);
 
   if (!current) {
@@ -48,6 +58,13 @@ export async function requireAnyRole(
   allowedRoles: readonly Role[],
 ) {
   const profile = await requireAuthenticatedProfile(ctx);
+
+  if (DEMO_MODE) {
+    if (!allowedRoles.includes("viewer")) {
+      throw new Error("Demo mode: viewer role only.");
+    }
+    return profile;
+  }
 
   if (!profile.roles.some((role) => allowedRoles.includes(role))) {
     throw new Error("Insufficient permissions.");

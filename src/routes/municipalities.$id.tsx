@@ -1,5 +1,5 @@
-import { SignInButton, UserButton, useAuth } from "@clerk/tanstack-react-start";
-import { createFileRoute } from "@tanstack/react-router";
+import { UserButton, useAuth } from "@clerk/tanstack-react-start";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import {
@@ -387,9 +387,8 @@ function ProtectedOperationsPanel() {
       >
         <p className="text-sm leading-6 text-slate-300">
           Public detail viewing and PDF downloads remain available without
-          sign-in. Protected report regeneration remains deferred to issue #10
-          until Clerk and Convex authorization are configured for that exact
-          operation.
+          sign-in. Configure Clerk and Convex auth to unlock protected operator
+          workflows without affecting the public read-only experience.
         </p>
       </ProtectedOperationsFrame>
     );
@@ -423,17 +422,15 @@ function ConfiguredProtectedOperationsPanel() {
       >
         <p className="text-sm leading-6 text-slate-300">
           Public detail viewing and PDF downloads remain available without
-          sign-in. Protected report regeneration remains deferred to issue #10
-          and cannot be invoked from this page.
+          sign-in. Use the dedicated login screen to authenticate before
+          protected operator actions are exposed elsewhere in the app.
         </p>
-        <SignInButton mode="modal">
-          <button
-            className="mt-4 inline-flex w-fit items-center justify-center rounded-full border border-cyan-200/40 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-100 hover:text-white"
-            type="button"
-          >
-            Sign in with Clerk
-          </button>
-        </SignInButton>
+        <Link
+          to="/login"
+          className="mt-4 inline-flex w-fit items-center justify-center rounded-full border border-cyan-200/40 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:border-cyan-100 hover:text-white"
+        >
+          Open login screen
+        </Link>
       </ProtectedOperationsFrame>
     );
   }
@@ -446,8 +443,8 @@ function ConfiguredProtectedOperationsPanel() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-slate-300">
           Public detail viewing and PDF downloads remain available without
-          sign-in. Protected report regeneration remains deferred to issue #10
-          until Convex authorization is available for the operation.
+          sign-in. This session is authenticated; protected operator writes
+          still depend on server-side Convex role checks.
         </p>
         <UserButton />
       </div>

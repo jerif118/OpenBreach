@@ -2,6 +2,8 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { getCurrentUserProfile, requireAdmin, ROLES } from "./auth";
 
+const DEMO_MODE = !process.env.CLERK_SECRET_KEY;
+
 const profileRole = v.union(
   v.literal("viewer"),
   v.literal("operator"),
@@ -11,6 +13,16 @@ const profileRole = v.union(
 export const current = query({
   args: {},
   handler: async (ctx) => {
+    if (DEMO_MODE) {
+      return {
+        _id: "demo-user" as const,
+        tokenIdentifier: "demo",
+        email: null,
+        name: "Demo User",
+        roles: ["viewer"] as const,
+      };
+    }
+
     const currentUser = await getCurrentUserProfile(ctx);
     return currentUser?.profile ?? null;
   },
@@ -19,6 +31,10 @@ export const current = query({
 export const updateCurrentMetadata = mutation({
   args: {},
   handler: async (ctx) => {
+    if (DEMO_MODE) {
+      return "demo-user";
+    }
+
     const currentUser = await getCurrentUserProfile(ctx);
     if (!currentUser) {
       throw new Error("Authentication required.");
@@ -48,6 +64,9 @@ export const setRoles = mutation({
     roles: v.array(profileRole),
   },
   handler: async (ctx, args) => {
+    if (DEMO_MODE) {
+      throw new Error("Role management is disabled in demo mode.");
+    }
     await requireAdmin(ctx);
     await ctx.db.patch(args.profileId, { roles: args.roles });
     return args.profileId;
