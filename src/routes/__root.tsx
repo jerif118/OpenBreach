@@ -21,7 +21,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "DEFF-ACC",
+        title: "OPEN CREACH",
       },
       {
         name: "description",
@@ -32,6 +32,23 @@ export const Route = createRootRoute({
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Geist:wght@400;600;700&display=swap",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap",
       },
     ],
   }),
@@ -57,24 +74,5 @@ function RootDocument({ children }: { children: ReactNode }) {
 }
 
 function TopNav() {
-  return (
-    <nav className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
-        <Link
-          to="/"
-          className="font-mono text-sm font-semibold text-cyan-300 transition hover:text-cyan-100"
-        >
-          DEFF-ACC
-        </Link>
-        <div className="h-4 w-px bg-white/10" />
-        <Link
-          to="/targets"
-          className="font-mono text-sm text-slate-300 transition hover:text-white"
-          activeProps={{ className: "font-mono text-sm text-cyan-300" }}
-        >
-          Targets
-        </Link>
-      </div>
-    </nav>
-  );
+  return null; // Ocultar TopNav de root ya que OpenBreachAppFrame tiene su propio SideNavBar y TopNavBarMobile
 }

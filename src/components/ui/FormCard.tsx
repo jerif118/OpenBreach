@@ -18,11 +18,10 @@ export interface FormCardProps {
 export function FormCard({ children, title, className = "" }: FormCardProps) {
   return (
     <div className={`${CARD_BASE} ${className}`.trim()}>
-      {/* Optional corner accent */}
-      <div className="absolute top-0 left-0 h-1 w-full rounded-t-[2rem] bg-cyan-300/30" />
+      <div className="absolute inset-x-0 top-0 h-px bg-primary/35" />
       <div className="relative p-6">
         {title && (
-          <h2 className="mb-4 border-b border-slate-700 pb-2 font-mono text-lg font-semibold text-white">
+          <h2 className="mb-4 border-b border-primary/10 pb-3 font-display text-xl text-primary uppercase">
             {title}
           </h2>
         )}

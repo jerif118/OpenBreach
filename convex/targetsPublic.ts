@@ -67,6 +67,7 @@ function toTargetListItemDto(doc: Doc<"targets">): TargetListItemDto {
     primaryUrl: doc.primaryUrl,
     riskTier: doc.riskTier,
     classification: doc.classification,
+    metadata: doc.metadata ?? undefined,
   };
 }
 
@@ -148,7 +149,22 @@ export const list = query({
     }
 
     const docs = await ctx.db.query("targets").take(limit);
-    return docs.map(toTargetListItemDto);
+    const items: TargetListItemDto[] = [];
+
+    for (const doc of docs) {
+      const latestRun = await ctx.db
+        .query("workflowRuns")
+        .withIndex("by_targetId", (q) => q.eq("targetId", doc.targetId))
+        .order("desc")
+        .take(1);
+
+      items.push({
+        ...toTargetListItemDto(doc),
+        latestRun: latestRun[0] ? toWorkflowRunDto(latestRun[0]) : null,
+      });
+    }
+
+    return items;
   },
 });
 

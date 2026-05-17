@@ -1,8 +1,35 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Geist:wght@400;600;700&display=swap");
 @import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
 
-/* ============================================================================
-   Terminal animations
-   ============================================================================ */
+@theme {
+  --color-background: #131313;
+  --color-surface: #131313;
+  --color-surface-dim: #131313;
+  --color-surface-bright: #3a3939;
+  --color-surface-container-lowest: #0e0e0e;
+  --color-surface-container-low: #1c1b1b;
+  --color-surface-container: #201f1f;
+  --color-surface-container-high: #2a2a2a;
+  --color-surface-container-highest: #353534;
+  --color-surface-variant: #353534;
+  --color-primary: #dbfcff;
+  --color-primary-fixed-dim: #00dbe9;
+  --color-primary-container: #00f0ff;
+  --color-secondary-fixed-dim: #00e639;
+  --color-secondary-container: #13ff43;
+  --color-on-background: #e5e2e1;
+  --color-on-surface: #e5e2e1;
+  --color-on-surface-variant: #b9cacb;
+  --color-outline: #849495;
+  --color-outline-variant: #3b494b;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+  --font-display: "Geist", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
 
 @keyframes terminal-glow {
   0%,
@@ -38,10 +65,82 @@
   }
 }
 
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  min-height: 100%;
+  background-color: #131313;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  color: #e5e2e1;
+  font-family: "JetBrains Mono", monospace;
+  background:
+    radial-gradient(circle at top, rgba(0, 219, 233, 0.06), transparent 30%),
+    #131313;
+}
+
+a {
+  color: inherit;
+}
+
 .animate-terminal-glow {
   animation: terminal-glow 3s ease-in-out infinite;
 }
 
 .animate-shake {
   animation: shake 0.4s ease-in-out;
+}
+
+.scanlines {
+  position: relative;
+}
+
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      transparent 50%,
+      rgba(219, 252, 255, 0.035) 50%
+    );
+  background-size: 100% 4px;
+  pointer-events: none;
+}
+
+.pixel-corner {
+  clip-path: polygon(
+    0 4px,
+    4px 4px,
+    4px 0,
+    calc(100% - 4px) 0,
+    calc(100% - 4px) 4px,
+    100% 4px,
+    100% calc(100% - 4px),
+    calc(100% - 4px) calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    4px 100%,
+    4px calc(100% - 4px),
+    0 calc(100% - 4px)
+  );
+}
+
+.crt-glow {
+  text-shadow:
+    0 0 8px rgba(0, 230, 57, 0.26),
+    0 0 18px rgba(0, 219, 233, 0.14);
+}
+
+.terminal-wordmark {
+  font-family: "Geist", sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
 }
