@@ -5,6 +5,7 @@ import { municipalitySchema, scanResultSchema } from "../src/shared/contracts.ts
 import { runReportPdfValidation } from "./report-pdf-validation-pipeline.ts";
 import { assertPdfTextEscapesLiteralControls } from "./report-pdf-validation-assertions.ts";
 
+const PDF_VALIDATION_CONTEXT_LIMIT = 2;
 const selectedAt = "2026-01-01T00:00:00.000Z";
 assertPdfTextEscapesLiteralControls();
 
@@ -13,12 +14,12 @@ const contexts = selectTopRiskReportContexts({
   scans: scanResultSchema.array().parse(enrichedScanFixture),
   source: "fixture",
   selectedAt,
-  limit: 2,
+  limit: PDF_VALIDATION_CONTEXT_LIMIT,
 });
 
-if (contexts.length !== 2) {
+if (contexts.length !== PDF_VALIDATION_CONTEXT_LIMIT) {
   throw new Error(
-    `Expected 2 selected contexts for PDF validation, received ${contexts.length}.`,
+    `Expected ${PDF_VALIDATION_CONTEXT_LIMIT} selected contexts for PDF validation, received ${contexts.length}.`,
   );
 }
 
