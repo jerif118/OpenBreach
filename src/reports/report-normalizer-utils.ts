@@ -60,7 +60,7 @@ export function toSentence(value: string): string {
 
 export function pickString(
   source: LooseRecord | null,
-  keys: string[],
+  keys: readonly string[],
 ): string | undefined {
   if (!source) {
     return undefined;
@@ -83,7 +83,7 @@ export function pickString(
 
 export function pickNumber(
   source: LooseRecord | null,
-  keys: string[],
+  keys: readonly string[],
 ): number | undefined {
   if (!source) {
     return undefined;
@@ -110,7 +110,7 @@ export function pickNumber(
 
 export function pickBoolean(
   source: LooseRecord | null,
-  keys: string[],
+  keys: readonly string[],
 ): boolean | undefined {
   if (!source) {
     return undefined;
@@ -129,7 +129,7 @@ export function pickBoolean(
 
 export function pickObject(
   source: LooseRecord | null,
-  keys: string[],
+  keys: readonly string[],
 ): LooseRecord | null {
   if (!source) {
     return null;
@@ -148,7 +148,7 @@ export function pickObject(
 
 export function pickArray(
   source: LooseRecord | null,
-  keys: string[],
+  keys: readonly string[],
 ): unknown[] {
   if (!source) {
     return [];
