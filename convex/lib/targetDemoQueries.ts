@@ -20,6 +20,7 @@ import type { TargetProfileDto } from "../types/targets";
 const DEFAULT_LIST_LIMIT = 50;
 const MAX_LIST_LIMIT = 100;
 const DETAIL_SECTION_LIMIT = 25;
+const VALIDATION_FINDING_COUNT_LIMIT = 1000;
 
 export function normalizeListLimit(limit: number | undefined) {
   if (limit === undefined) {
@@ -57,11 +58,47 @@ export async function listDemoTargets(
         .take(limit)
     : await ctx.db.query("targets").take(limit);
 
-  const cards: DemoTargetCardDto[] = [];
-  for (const doc of docs) {
-    cards.push(toDemoTargetCardDto(doc, await getLatestRun(ctx, doc.targetId)));
+  return await Promise.all(
+    docs.map(async (doc) =>
+      toDemoTargetCardDto(doc, await getLatestRun(ctx, doc.targetId)),
+    ),
+  );
+}
+
+async function countFindingsByValidationId(
+  ctx: QueryCtx,
+  validationResultId: string,
+) {
+  const findings = await ctx.db
+    .query("findings")
+    .withIndex("by_validationResultId", (q) =>
+      q.eq("validationResultId", validationResultId),
+    )
+    .take(VALIDATION_FINDING_COUNT_LIMIT + 1);
+
+  if (findings.length > VALIDATION_FINDING_COUNT_LIMIT) {
+    throw new Error(
+      `Validation result "${validationResultId}" has more than ${VALIDATION_FINDING_COUNT_LIMIT} findings; add a denormalized count before raising this demo limit.`,
+    );
   }
-  return cards;
+
+  return findings.length;
+}
+
+async function getFindingCountsByValidationId(
+  ctx: QueryCtx,
+  validationDocs: Array<{ resultId: string }>,
+) {
+  const entries = await Promise.all(
+    validationDocs.map(
+      async (result) =>
+        [
+          result.resultId,
+          await countFindingsByValidationId(ctx, result.resultId),
+        ] as const,
+    ),
+  );
+  return new Map(entries);
 }
 
 export async function getDemoTargetDetail(
@@ -117,14 +154,10 @@ export async function getDemoTargetDetail(
       .take(DETAIL_SECTION_LIMIT),
   ]);
 
-  const findingsByValidationId = new Map<string, number>();
-  for (const finding of findings) {
-    if (!finding.validationResultId) continue;
-    findingsByValidationId.set(
-      finding.validationResultId,
-      (findingsByValidationId.get(finding.validationResultId) ?? 0) + 1,
-    );
-  }
+  const findingsByValidationId = await getFindingCountsByValidationId(
+    ctx,
+    validationDocs,
+  );
 
   return {
     target: toTargetProfileDto(doc),
