@@ -1,5 +1,7 @@
 import type { ReportFinding, RiskLevel } from "../shared/contracts.ts";
 
+export type LooseRecord = Record<string, unknown>;
+
 export const severityScore: Record<ReportFinding["severity"], number> = {
   info: 5,
   low: 20,
@@ -16,12 +18,12 @@ export const severityLabels: ReportFinding["severity"][] = [
   "info",
 ];
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+function isLooseObjectRecord(value: unknown): value is LooseRecord {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-export function asObject(value: unknown): Record<string, unknown> | null {
-  return isRecord(value) ? value : null;
+export function asObject(value: unknown): LooseRecord | null {
+  return isLooseObjectRecord(value) ? value : null;
 }
 
 export function asArray(value: unknown): unknown[] {
@@ -46,7 +48,7 @@ export function toSentence(value: string): string {
 }
 
 export function pickString(
-  source: Record<string, unknown> | null,
+  source: LooseRecord | null,
   keys: string[],
 ): string | undefined {
   if (!source) {
@@ -69,7 +71,7 @@ export function pickString(
 }
 
 export function pickNumber(
-  source: Record<string, unknown> | null,
+  source: LooseRecord | null,
   keys: string[],
 ): number | undefined {
   if (!source) {
@@ -96,7 +98,7 @@ export function pickNumber(
 }
 
 export function pickBoolean(
-  source: Record<string, unknown> | null,
+  source: LooseRecord | null,
   keys: string[],
 ): boolean | undefined {
   if (!source) {
@@ -115,9 +117,9 @@ export function pickBoolean(
 }
 
 export function pickObject(
-  source: Record<string, unknown> | null,
+  source: LooseRecord | null,
   keys: string[],
-): Record<string, unknown> | null {
+): LooseRecord | null {
   if (!source) {
     return null;
   }
@@ -134,7 +136,7 @@ export function pickObject(
 }
 
 export function pickArray(
-  source: Record<string, unknown> | null,
+  source: LooseRecord | null,
   keys: string[],
 ): unknown[] {
   if (!source) {
@@ -175,7 +177,7 @@ export function uniqueStrings(
 
 export function normalizeRiskLevel(value: unknown, score: number): RiskLevel {
   if (typeof value === "string") {
-    const normalized = value.toLowerCase();
+    const normalized = value.trim().toLowerCase();
 
     if (
       normalized === "critical" ||
