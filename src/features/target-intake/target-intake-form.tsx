@@ -4,6 +4,7 @@ import { Button } from "~/components/ui/Button.tsx";
 import { FormCard } from "~/components/ui/FormCard.tsx";
 import { FormField } from "~/components/ui/FormField.tsx";
 import { FormSelect } from "~/components/ui/FormSelect.tsx";
+import approvedDemoFixture from "../../../data/targets/target-approved-public.json";
 import {
   INPUT_BASE,
   INPUT_ERROR,
@@ -45,6 +46,15 @@ const VALIDATION_LEVEL_OPTIONS = [
   { value: "controlled_validation", label: "Controlled Validation" },
 ];
 
+const DEMO_APPROVER_NAME = "fixture-demo-operator";
+
+const VALIDATION_BOUNDARIES = [
+  "Passive-only: metadata and contract review only; no active checks start here.",
+  "Semiactive requires approval: limited validation classes are recorded, but approval is required before stronger behavior.",
+  "Controlled validation requires approval: constrained validation remains gated until an approved plan exists.",
+  "No scanner, fingerprinting, active validation, orchestrator, or report work starts from this screen.",
+];
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -70,6 +80,22 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
   // Validation errors
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState<string | null>(null);
+
+  const handleApprovedFixturePrefill = useCallback(() => {
+    setTargetId(approvedDemoFixture.targetId);
+    setName(approvedDemoFixture.name);
+    setPrimaryUrl(approvedDemoFixture.primaryUrl);
+    setClassification(
+      approvedDemoFixture.classification as TargetIntakeInput["classification"],
+    );
+    setAllowedAssets(approvedDemoFixture.primaryUrl);
+    setDeniedAssets("");
+    setValidationLevel("passive");
+    setRateLimit("10");
+    setApproverName(DEMO_APPROVER_NAME);
+    setFieldErrors({});
+    setGlobalError(null);
+  }, []);
 
   const clearFieldError = useCallback((field: string) => {
     setFieldErrors((prev) => {
@@ -128,11 +154,6 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
         : undefined;
 
       try {
-        console.log("🚀 Calling createTarget with:", {
-          name: validated.name,
-          primaryUrl: validated.primaryUrl,
-          classification: validated.classification,
-        });
         const result = await createTarget({
           targetId: validated.targetId,
           name: validated.name,
@@ -144,13 +165,11 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           rateLimit: validated.rateLimit,
           approverName: validated.approverName,
         });
-        console.log("✅ createTarget succeeded:", result);
 
         if (onSuccess) {
           onSuccess(result);
         }
       } catch (err) {
-        console.error("❌ createTarget failed:", err);
         const errorMessage = err instanceof Error ? err.message : String(err);
         if (
           errorMessage.includes("Connection refused") ||
@@ -161,7 +180,7 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
           );
         } else {
           setGlobalError(
-            apiError?.message ?? "Target creation failed. Please try again.",
+            apiError?.message ?? "Intake gate failed. Please try again.",
           );
         }
       }
@@ -195,6 +214,29 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
   return (
     <FormCard title="NEW TARGET PROFILE">
       <form onSubmit={handleSubmit} className="grid gap-6">
+        <div className="border-primary/20 bg-primary/5 pixel-corner border p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-primary font-mono text-xs tracking-[0.18em] uppercase">
+                One-minute demo path
+              </p>
+              <p className="text-on-surface-variant mt-2 font-mono text-sm">
+                Load approved demo fixture values, then submit the intake gate.
+                The fields remain editable for an out-of-scope URL test.
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              type="button"
+              disabled={isPending}
+              onClick={handleApprovedFixturePrefill}
+              className="shrink-0"
+            >
+              Load approved demo fixture
+            </Button>
+          </div>
+        </div>
+
         {/* Row 1: targetId + name */}
         <div className="grid gap-6 sm:grid-cols-2">
           <FormField
@@ -271,6 +313,22 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
             required
             disabled={isPending}
           />
+        </div>
+
+        <div className="border-outline/30 bg-surface pixel-corner border p-4">
+          <p className="text-on-surface mb-3 font-mono text-xs tracking-[0.18em] uppercase">
+            Validation boundaries
+          </p>
+          <ul className="grid gap-2">
+            {VALIDATION_BOUNDARIES.map((boundary) => (
+              <li
+                key={boundary}
+                className="text-on-surface-variant font-mono text-sm"
+              >
+                [SAFE] {boundary}
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Row 4: allowedAssets + deniedAssets (textareas) */}
@@ -372,15 +430,15 @@ export function TargetIntakeForm({ onSuccess }: TargetIntakeFormProps) {
             {isPending ? (
               <span className="flex items-center gap-2">
                 <span className="border-secondary-fixed-dim/30 border-t-secondary-fixed-dim inline-block h-4 w-4 animate-spin rounded-full border-2" />
-                Processing…
+                Resolving authorization gate…
               </span>
             ) : (
-              "EXECUTE TARGET_CREATION"
+              "RUN INTAKE_GATE"
             )}
           </Button>
           {isPending && (
             <span className="text-on-surface-variant font-mono text-sm">
-              Submitting to Convex…
+              Resolving authorization gate with Convex or fixture fallback…
             </span>
           )}
         </div>

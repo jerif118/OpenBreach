@@ -26,7 +26,7 @@ function TargetsNewPage() {
         <header className="border-primary/20 flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-end sm:justify-between">
           <TerminalHeader
             title="target new"
-            subtitle="Register a new assessment target and initialize intake workflow."
+            subtitle="Run the authorization intake gate before any scope, workflow, or downstream validation can proceed."
           />
           <div className="flex items-center gap-3">
             <Link
