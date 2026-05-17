@@ -23,7 +23,9 @@ import type {
   ReportArtifactDto,
   WorkflowRunDto,
   AuthorizationScopeDto,
+  DemoTargetDetailDto,
 } from "../convex/types";
+import fs from "node:fs";
 
 import {
   targetProfileSchema,
@@ -38,7 +40,13 @@ import {
   reportArtifactSchema,
   workflowRunSchema,
   authorizationScopeSchema,
+  demoTargetCardSchema,
+  demoTargetDetailSchema,
 } from "../src/shared/contracts.ts";
+import {
+  buildDemoTargetDetailFromFixtures,
+  buildDemoTargetListFromFixtures,
+} from "../src/lib/target-demo-fallback.ts";
 
 // ============================================================================
 // Fixture imports (dynamic to avoid hard-coding every file)
@@ -103,6 +111,41 @@ function tryValidate(label: string, schema: unknown, data: unknown) {
   }
 }
 
+function expect(condition: boolean, message: string) {
+  if (!condition) {
+    errors.push(`[FAIL] ${message}`);
+  }
+}
+
+function expectExactKeys(
+  label: string,
+  value: unknown,
+  expectedKeys: readonly string[],
+) {
+  if (!value || typeof value !== "object") {
+    errors.push(`[FAIL] ${label} must be an object`);
+    return;
+  }
+
+  const actualKeys = Object.keys(value as Record<string, unknown>).sort();
+  const expected = [...expectedKeys].sort();
+  expect(
+    JSON.stringify(actualKeys) === JSON.stringify(expected),
+    `${label} keys must match DTO contract; expected ${expected.join(", ")} got ${actualKeys.join(", ")}`,
+  );
+}
+
+function expectArraySection(
+  label: string,
+  value: unknown,
+  section: keyof DemoTargetDetailDto,
+) {
+  expect(
+    Array.isArray((value as DemoTargetDetailDto | null)?.[section]),
+    `${label}.${String(section)} must be an array for fixture/live DTO parity`,
+  );
+}
+
 tryValidate(
   "target-approved-public",
   targetProfileSchema,
@@ -148,6 +191,142 @@ if (!Array.isArray(auditEvents)) {
 }
 
 tryValidate("report-artifact", reportArtifactSchema, reportArtifact);
+
+const demoCards = buildDemoTargetListFromFixtures();
+const approvedDemoDetail = buildDemoTargetDetailFromFixtures(
+  (targetApprovedPublic as Record<string, unknown>).targetId as string,
+);
+const rejectedDemoDetail = buildDemoTargetDetailFromFixtures(
+  (
+    (targetRejected as Record<string, unknown>).targetProfile as Record<
+      string,
+      unknown
+    >
+  ).targetId as string,
+);
+const unknownDemoDetail = buildDemoTargetDetailFromFixtures("missing-target");
+const approvedTargetId = (targetApprovedPublic as Record<string, unknown>)
+  .targetId as string;
+const rejectedTargetId = (
+  (targetRejected as Record<string, unknown>).targetProfile as Record<
+    string,
+    unknown
+  >
+).targetId as string;
+
+tryValidate("demo-target-cards", demoTargetCardSchema.array(), demoCards);
+tryValidate(
+  "demo-target-detail.approved",
+  demoTargetDetailSchema,
+  approvedDemoDetail,
+);
+tryValidate(
+  "demo-target-detail.rejected",
+  demoTargetDetailSchema,
+  rejectedDemoDetail,
+);
+
+if (unknownDemoDetail !== null) {
+  errors.push("[FAIL] demo-target-detail.unknown must return null");
+}
+
+expect(
+  demoCards.some((card) => card.targetId === approvedTargetId),
+  "demo-target-cards must include the approved fixture target",
+);
+expect(
+  demoCards.some((card) => card.targetId === rejectedTargetId),
+  "demo-target-cards must include the rejected fixture target",
+);
+
+for (const [label, detail] of [
+  ["demo-target-detail.approved", approvedDemoDetail],
+  ["demo-target-detail.rejected", rejectedDemoDetail],
+] as const) {
+  expectExactKeys(label, detail, [
+    "target",
+    "latestRun",
+    "evidence",
+    "hypotheses",
+    "approvals",
+    "validationResults",
+    "findings",
+    "reports",
+  ]);
+  for (const section of [
+    "evidence",
+    "hypotheses",
+    "approvals",
+    "validationResults",
+    "findings",
+    "reports",
+  ] as const) {
+    expectArraySection(label, detail, section);
+  }
+}
+
+for (const card of demoCards) {
+  expectExactKeys(`demo-target-card.${card.targetId}`, card, [
+    "targetId",
+    "name",
+    "primaryUrl",
+    "riskTier",
+    "classification",
+    "latestRun",
+  ]);
+}
+
+const targetsSource = fs.readFileSync("convex/targets.ts", "utf-8");
+if (/\.filter\s*\(/.test(targetsSource)) {
+  errors.push("[FAIL] targets demo reads must not use Convex filter scans");
+}
+if (/\.collect\s*\(/.test(targetsSource)) {
+  errors.push("[FAIL] targets demo reads must not use unbounded collect reads");
+}
+if (
+  !/export const listDemo = query\(\{[\s\S]*returns: v\.array/.test(
+    targetsSource,
+  )
+) {
+  errors.push("[FAIL] targets.listDemo must declare a return validator");
+}
+if (
+  !/export const getDemo = query\(\{[\s\S]*returns: v\.union/.test(
+    targetsSource,
+  )
+) {
+  errors.push("[FAIL] targets.getDemo must declare a return validator");
+}
+if (
+  !/export const listDemo = query\(\{[\s\S]*args: targetListArgsValidator/.test(
+    targetsSource,
+  )
+) {
+  errors.push("[FAIL] targets.listDemo must declare argument validators");
+}
+if (
+  !/export const getDemo = query\(\{[\s\S]*args: \{ targetId: v\.string\(\) \}/.test(
+    targetsSource,
+  )
+) {
+  errors.push("[FAIL] targets.getDemo must validate targetId arguments");
+}
+
+for (const snippet of [
+  '.query("targets").take(limit)',
+  '.query("passiveScanEvidence")\n        .withIndex("by_targetId"',
+  '.query("vulnerabilityHypotheses")\n        .withIndex("by_targetId"',
+  '.query("approvalGates")\n        .withIndex("by_targetId"',
+  '.query("validationResults")\n        .withIndex("by_targetId"',
+  '.query("findings")\n        .withIndex("by_targetId"',
+  '.query("reportArtifacts")\n        .withIndex("by_targetId"',
+]) {
+  if (!targetsSource.includes(snippet)) {
+    errors.push(
+      `[FAIL] targets demo read safety check missing source pattern: ${snippet}`,
+    );
+  }
+}
 
 // ============================================================================
 // Cross-reference integrity
