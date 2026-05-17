@@ -31,6 +31,18 @@ type PromptOutputShape = {
   generatedBy: "ai-provider";
 };
 
+type ProviderBoundFinding = Omit<
+  NormalizedReportInput["findings"][number],
+  "raw"
+>;
+
+type ProviderBoundNormalizedInput = Omit<
+  NormalizedReportInput,
+  "findings" | "sourceData"
+> & {
+  findings: ProviderBoundFinding[];
+};
+
 const PROMPT_REPORT_SECTION_ORDER = [
   "scope",
   "authorization",
@@ -116,6 +128,17 @@ function buildOutputShape(
   };
 }
 
+function buildProviderBoundInput(
+  normalized: NormalizedReportInput,
+): ProviderBoundNormalizedInput {
+  const { findings, sourceData: _sourceData, ...safeInput } = normalized;
+
+  return {
+    ...safeInput,
+    findings: findings.map(({ raw: _raw, ...finding }) => finding),
+  };
+}
+
 export function buildProviderPrompt(
   input: GenerateRemediationReportInput,
   variant: ReportAudience,
@@ -127,7 +150,7 @@ export function buildProviderPrompt(
       instructions: buildPromptInstructions(variant),
       audience: audienceProfile(variant).description,
       outputShape: buildOutputShape(normalized, variant),
-      normalizedInput: normalized,
+      normalizedInput: buildProviderBoundInput(normalized),
     },
     null,
     2,

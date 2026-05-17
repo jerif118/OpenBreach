@@ -7,7 +7,7 @@ import {
 function parseProviderJson(content: string): unknown {
   const trimmed = content.trim();
   const json =
-    trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/)?.[1] ?? trimmed;
+    trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i)?.[1] ?? trimmed;
   const parsed: unknown = JSON.parse(json);
 
   return parsed;
