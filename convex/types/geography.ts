@@ -3,14 +3,3 @@ export type GeographyDto = {
   region: string;
   city: string;
 };
-
-export type WorkflowPhaseName =
-  | "intake"
-  | "passive-scan"
-  | "hypothesis"
-  | "test-planning"
-  | "approval"
-  | "execution"
-  | "validation"
-  | "reporting"
-  | "archived";

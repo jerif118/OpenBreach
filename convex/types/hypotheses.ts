@@ -1,16 +1,18 @@
 import type { TestPlanDto } from "./testPlans";
 
+export type VulnerabilityHypothesisStatus =
+  | "hypothesis"
+  | "approved"
+  | "confirmed"
+  | "disproven"
+  | "skipped"
+  | "rejected";
+
 export type VulnerabilityHypothesisDto = {
   hypothesisId: string;
   targetId: string;
   title: string;
-  status:
-    | "hypothesis"
-    | "approved"
-    | "confirmed"
-    | "disproven"
-    | "skipped"
-    | "rejected";
+  status: VulnerabilityHypothesisStatus;
   createdAt: string;
   proposedBy: string;
   description?: string;
@@ -23,11 +25,3 @@ export type VulnerabilityHypothesisDto = {
   metadata?: Record<string, unknown>;
   linkedTestPlan?: TestPlanDto; // deferred: populated by domain function
 };
-
-export type VulnerabilityHypothesisStatus =
-  | "hypothesis"
-  | "approved"
-  | "confirmed"
-  | "disproven"
-  | "skipped"
-  | "rejected";

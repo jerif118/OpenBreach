@@ -1,4 +1,13 @@
-import type { WorkflowPhaseName } from "./geography";
+export type WorkflowPhaseName =
+  | "intake"
+  | "passive-scan"
+  | "hypothesis"
+  | "test-planning"
+  | "approval"
+  | "execution"
+  | "validation"
+  | "reporting"
+  | "archived";
 
 export type WorkflowPhaseDto = {
   phase: WorkflowPhaseName;
