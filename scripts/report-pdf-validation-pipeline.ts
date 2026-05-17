@@ -10,8 +10,12 @@ import {
   assertRenderedResults,
   assertUnsafeFilenameValidation,
 } from "./report-pdf-validation-checks.ts";
+import { requiredElement } from "./report-pdf-validation-helpers.ts";
 
-type ReportPdfValidationInput = { contexts: SelectedMunicipalityReportContext[]; selectedAt: string };
+type ReportPdfValidationInput = {
+  contexts: SelectedMunicipalityReportContext[];
+  selectedAt: string;
+};
 
 async function assertTemplateDocumentation(): Promise<void> {
   for (const templatePath of [
@@ -103,11 +107,11 @@ export async function runReportPdfValidation({
   contexts,
   selectedAt,
 }: ReportPdfValidationInput): Promise<void> {
-  const firstContext = contexts[0];
-
-  if (firstContext === undefined) {
-    throw new Error("Expected at least one selected context for PDF validation.");
-  }
+  const firstContext = requiredElement(
+    contexts,
+    0,
+    "Expected at least one selected context for PDF validation.",
+  );
 
   await assertTemplateDocumentation();
   await removeExistingReportPdfs(contexts);
