@@ -81,7 +81,8 @@ function missingLimitationMessages(
     pickObject(source, ["authorizationScope", "scope"])
       ? null
       : "Authorization scope details were not fully supplied.",
-    pickArray(source, ["validationResults", "validations"]).length > 0
+    pickArray(source, ["validationResults", "validations", "results"]).length >
+    0
       ? null
       : "No explicit validation result set was supplied, so unresolved uncertainty remains.",
     findings.length > 0
