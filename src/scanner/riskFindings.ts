@@ -185,5 +185,10 @@ function isExpired(expiresAt: string | undefined, scannedAt: string): boolean {
   if (!expiresAt) {
     return false;
   }
-  return new Date(expiresAt).getTime() < new Date(scannedAt).getTime();
+  const expiryMs = new Date(expiresAt).getTime();
+  const scannedMs = new Date(scannedAt).getTime();
+  if (!Number.isFinite(expiryMs) || !Number.isFinite(scannedMs)) {
+    return false;
+  }
+  return expiryMs < scannedMs;
 }
