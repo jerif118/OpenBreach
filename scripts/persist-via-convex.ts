@@ -18,6 +18,8 @@ type PayloadFor<TMutationName extends MutationName> = ReturnType<
 >;
 type PersistencePayload = PayloadFor<MutationName>;
 
+const DEFAULT_BATCH_SIZE = 10;
+
 // Stream `{ "results": [...] }` JSON on stdin and forward it to a Convex
 // mutation in chunks via the Convex CLI. Required because Linux enforces a
 // per-argv-element cap (MAX_ARG_STRLEN ~= 128 KB) that is much smaller than
@@ -34,9 +36,8 @@ if (!rawFunctionName) {
 const functionName = resolveMutationName(rawFunctionName);
 const payloadSchema = resolvePayloadSchema(functionName);
 
-const batchSize = Math.max(
-  1,
-  Number(process.argv[3] ?? process.env.PERSIST_BATCH_SIZE ?? "10"),
+const batchSize = parseBatchSize(
+  process.argv[3] ?? process.env.PERSIST_BATCH_SIZE,
 );
 
 const parsedPayload = await parseStdinJson();
@@ -81,6 +82,14 @@ function resolvePayloadSchema<TMutationName extends MutationName>(
   functionName: TMutationName,
 ): (typeof payloadSchemas)[TMutationName] {
   return payloadSchemas[functionName];
+}
+
+function parseBatchSize(rawBatchSize: string | undefined): number {
+  const batchSize = Number(rawBatchSize ?? String(DEFAULT_BATCH_SIZE));
+  if (!Number.isSafeInteger(batchSize) || batchSize < 1) {
+    exitWithInputError("Batch size must be a positive safe integer.");
+  }
+  return batchSize;
 }
 
 async function parseStdinJson(): Promise<unknown> {
