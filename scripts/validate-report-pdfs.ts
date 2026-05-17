@@ -213,9 +213,13 @@ const unsafeOutput = await renderReportBatchPdfs({
   providerKey: "",
 });
 
-const [unsafeRecord] = unsafeOutput.results;
+const unsafeRecord = requiredElement(
+  unsafeOutput.results,
+  0,
+  "Unsafe filename validation record must complete.",
+);
 
-if (!unsafeRecord || unsafeRecord.result.status !== "completed") {
+if (unsafeRecord.result.status !== "completed") {
   throw new Error("Unsafe filename validation record must complete.");
 }
 
