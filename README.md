@@ -305,12 +305,24 @@ sequenceDiagram
 
 ## Convex Persistence Layer
 
-When `CONVEX_URL` is not configured, the application falls back to deterministic JSON fixtures under `data/targets/` for demo and development. This ensures the hackathon vertical slice works even without a live Convex deployment.
+Issue #65 defines the downstream persistence contract for the pivot. Consumers should integrate through validated DTOs and mutation boundaries, not by reading or writing Convex tables directly.
+
+### Downstream Contract
+
+- Demo read APIs are `targets.listDemo()` and `targets.getDemo({ targetId })`. They return display-ready target card/detail DTOs for dashboards and target detail surfaces.
+- Browser consumers should use `useTargetList`, `useTargetDetail`, or the DTO builders in `src/lib/target-demo-fallback.ts` rather than table documents.
+- Scanner, orchestrator, approval, validation, finding, report, workflow, and audit persistence should use protected or internal Convex mutations. Sensitive writes must derive actor identity server-side and must not trust client-supplied user identifiers.
+- Accepted/rejected intake and sensitive workflow changes append audit events. Downstream code should treat audit events as part of the persistence boundary.
+- Unknown target detail lookups return `null` through the demo detail contract.
+
+When `VITE_CONVEX_URL` is not configured for the browser app, the current hooks skip live Convex reads and fall back to deterministic JSON fixtures under `data/targets/` for demo and development. This ensures the hackathon vertical slice works even without a live Convex deployment.
 
 ### Fixture Fallback Behavior
 
-- Reads are served from committed JSON fixtures when Convex is unavailable.
-- Writes are silently no-oped or queued in memory (demo-only; not production).
+- Reads are served from committed JSON fixtures when `VITE_CONVEX_URL` is absent.
+- Fixture DTO assembly lives in `src/lib/target-demo-fallback.ts` and returns the same display-ready shapes as `targets.listDemo()` and `targets.getDemo({ targetId })`.
+- Fixture inputs live under `data/targets/*.json` and cover approved/rejected targets, evidence, hypotheses, approval gates, validation results, findings, reports, technology fingerprints, test plans, and audit events.
+- Fixture fallback is read-only deterministic demo support. It does not provide fixture write-back persistence, production authorization storage, billing, scheduled scanning, hosted deployment readiness, live scanning, or multi-tenant isolation.
 - All fixtures validate against the Zod contracts in `src/shared/contracts.ts` via `pnpm fixtures:validate`.
 
 ### Tables
@@ -353,10 +365,12 @@ The Convex schema contains two groups of tables:
 ### Validation Commands
 
 ```bash
+pnpm pivot:validate             # Typecheck, contracts, fixtures, auth-write boundary, and pivot smoke checks
+pnpm pivot:smoke                # Validate demo DTO shape, fixture parity, bounded reads, and indexed detail reads
+pnpm typecheck                  # TypeScript typecheck across src/ and convex/
 pnpm fixtures:validate          # Validate all JSON fixtures against Zod contracts
-pnpm lint:types                 # TypeScript typecheck across src/ and convex/
-pnpm convex:codegen             # Regenerate Convex API types and validate schema
-node scripts/smoke-test-convex.ts  # Compile-time structural smoke test
+pnpm auth:writes:validate       # Confirm sensitive write surfaces stay protected/internal
+pnpm convex:codegen             # Regenerate Convex API types only when Convex references change
 ```
 
 ## Runtime
