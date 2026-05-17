@@ -76,11 +76,26 @@ function DashboardFrame({ children }: { children: ReactNode }) {
               queue.
             </p>
           </div>
-          <div className="rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-100 shadow-xl shadow-cyan-950/30">
+          <div className="rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-4 py-4 text-sm text-cyan-100 shadow-xl shadow-cyan-950/30 sm:max-w-sm">
             <span className="block font-semibold">Public dashboard</span>
-            <span className="text-cyan-100/80">
+            <span className="mt-1 block text-cyan-100/80">
               Map, ranked list, and legend stay visible across data states.
             </span>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center rounded-full border border-cyan-200/40 px-4 py-2 text-sm font-semibold text-cyan-50 transition hover:border-cyan-100 hover:text-white"
+              >
+                Operator login
+              </Link>
+              <Link
+                to="/municipalities/$id"
+                params={{ id: "mx-yuc-merida" }}
+                className="inline-flex items-center justify-center rounded-full border border-white/15 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-white/30 hover:text-white"
+              >
+                Open sample detail
+              </Link>
+            </div>
           </div>
         </header>
         {children}
