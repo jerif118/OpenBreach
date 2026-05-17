@@ -3,6 +3,7 @@ import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
 import type { FindingDto } from "./types";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -53,15 +54,24 @@ export const listByTarget = internalQuery({
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
-    let query = ctx.db
+    if (args.severity) {
+      const severity = args.severity;
+      const docs = await ctx.db
+        .query("findings")
+        .withIndex("by_targetId_and_severity", (q) =>
+          q.eq("targetId", args.targetId).eq("severity", severity),
+        )
+        .take(limit);
+
+      return docs.map(toFindingDto);
+    }
+
+    const query = ctx.db
       .query("findings")
       .withIndex("by_targetId", (q) => q.eq("targetId", args.targetId));
 
     const docs = await query.take(limit);
-    const filtered = args.severity
-      ? docs.filter((d) => d.severity === args.severity)
-      : docs;
-    return filtered.map(toFindingDto);
+    return docs.map(toFindingDto);
   },
 });
 
@@ -136,7 +146,7 @@ export const create = internalMutation({
     runId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("findings")
@@ -172,6 +182,18 @@ export const create = internalMutation({
       validationResultId: args.validationResultId,
       reportReady: args.reportReady,
       runId: args.runId,
+    });
+
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "finding-created",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: {
+        findingId: args.findingId,
+        severity: args.severity,
+        status: args.status,
+      },
     });
 
     return { id, findingId: args.findingId };
@@ -228,7 +250,7 @@ export const update = internalMutation({
     runId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const doc = await ctx.db
       .query("findings")
@@ -272,6 +294,14 @@ export const update = internalMutation({
     }
 
     await ctx.db.patch(doc._id, patch);
+    await appendAuditEvent(ctx, {
+      targetId: doc.targetId,
+      eventType: "finding-updated",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId ?? doc.runId,
+      details: { findingId: args.findingId, status: args.status ?? doc.status },
+    });
+
     return { id: doc._id, findingId: args.findingId };
   },
 });
