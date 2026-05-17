@@ -1,11 +1,66 @@
 import type { ReportFinding } from "../shared/contracts.ts";
 
+const SEVERITY_THRESHOLDS = {
+  critical: 90,
+  high: 70,
+  medium: 40,
+  low: 15,
+} as const;
+
+const CONFIDENCE_THRESHOLDS = {
+  high: 0.75,
+  medium: 0.4,
+} as const;
+
+const CRITICAL_SEVERITY_ALIASES = new Set<string>([
+  "critical",
+  "crit",
+  "urgent",
+  "severe",
+]);
+const HIGH_SEVERITY_ALIASES = new Set<string>(["high", "major"]);
+const MEDIUM_SEVERITY_ALIASES = new Set<string>(["medium", "moderate"]);
+const LOW_SEVERITY_ALIASES = new Set<string>(["low", "minor"]);
+
+const REPORT_FINDING_CATEGORIES = [
+  "tls",
+  "headers",
+  "cms",
+  "exposure",
+  "admin-exposure",
+  "availability",
+  "known-vulnerability",
+] as const satisfies readonly ReportFinding["category"][];
+
+const REPORT_FINDING_CONFIDENCE_VALUES = [
+  "high",
+  "medium",
+  "low",
+] as const satisfies readonly ReportFinding["confidence"][];
+
+const REPORT_FINDING_CATEGORY_SET = new Set<string>(REPORT_FINDING_CATEGORIES);
+const REPORT_FINDING_CONFIDENCE_SET = new Set<string>(
+  REPORT_FINDING_CONFIDENCE_VALUES,
+);
+
+function isReportFindingCategory(
+  value: string,
+): value is ReportFinding["category"] {
+  return REPORT_FINDING_CATEGORY_SET.has(value);
+}
+
+function isReportFindingConfidence(
+  value: string,
+): value is ReportFinding["confidence"] {
+  return REPORT_FINDING_CONFIDENCE_SET.has(value);
+}
+
 export function normalizeSeverity(value: unknown): ReportFinding["severity"] {
   if (typeof value === "number" && Number.isFinite(value)) {
-    if (value >= 90) return "critical";
-    if (value >= 70) return "high";
-    if (value >= 40) return "medium";
-    if (value >= 15) return "low";
+    if (value >= SEVERITY_THRESHOLDS.critical) return "critical";
+    if (value >= SEVERITY_THRESHOLDS.high) return "high";
+    if (value >= SEVERITY_THRESHOLDS.medium) return "medium";
+    if (value >= SEVERITY_THRESHOLDS.low) return "low";
     return "info";
   }
 
@@ -13,13 +68,13 @@ export function normalizeSeverity(value: unknown): ReportFinding["severity"] {
 
   const normalized = value.toLowerCase();
 
-  if (["critical", "crit", "urgent", "severe"].includes(normalized)) {
+  if (CRITICAL_SEVERITY_ALIASES.has(normalized)) {
     return "critical";
   }
 
-  if (["high", "major"].includes(normalized)) return "high";
-  if (["medium", "moderate"].includes(normalized)) return "medium";
-  if (["low", "minor"].includes(normalized)) return "low";
+  if (HIGH_SEVERITY_ALIASES.has(normalized)) return "high";
+  if (MEDIUM_SEVERITY_ALIASES.has(normalized)) return "medium";
+  if (LOW_SEVERITY_ALIASES.has(normalized)) return "low";
   return "info";
 }
 
@@ -30,15 +85,7 @@ export function normalizeCategory(
   if (typeof value === "string") {
     const normalized = value.toLowerCase();
 
-    if (
-      normalized === "tls" ||
-      normalized === "headers" ||
-      normalized === "cms" ||
-      normalized === "exposure" ||
-      normalized === "admin-exposure" ||
-      normalized === "availability" ||
-      normalized === "known-vulnerability"
-    ) {
+    if (isReportFindingCategory(normalized)) {
       return normalized;
     }
   }
@@ -96,19 +143,15 @@ export function normalizeConfidence(
   severity: ReportFinding["severity"],
 ): ReportFinding["confidence"] {
   if (typeof value === "number" && Number.isFinite(value)) {
-    if (value >= 0.75) return "high";
-    if (value >= 0.4) return "medium";
+    if (value >= CONFIDENCE_THRESHOLDS.high) return "high";
+    if (value >= CONFIDENCE_THRESHOLDS.medium) return "medium";
     return "low";
   }
 
   if (typeof value === "string") {
     const normalized = value.toLowerCase();
 
-    if (
-      normalized === "high" ||
-      normalized === "medium" ||
-      normalized === "low"
-    ) {
+    if (isReportFindingConfidence(normalized)) {
       return normalized;
     }
   }
