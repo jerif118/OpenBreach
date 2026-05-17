@@ -155,7 +155,9 @@ export const rawScanPersistenceArgsSchema = z.object({
   results: z.array(rawScanPersistenceResultSchema),
 });
 
-export type RawScanPersistenceArgs = z.infer<typeof rawScanPersistenceArgsSchema>;
+export type RawScanPersistenceArgs = z.infer<
+  typeof rawScanPersistenceArgsSchema
+>;
 
 export const enrichedScanPersistenceResultSchema = scanResultSchema
   .omit({ municipalityId: true })
@@ -173,15 +175,17 @@ export type EnrichedScanPersistenceArgs = z.infer<
   typeof enrichedScanPersistenceArgsSchema
 >;
 
+const finiteNumberSchema = z.number().finite();
+
 export const scanConvexEnvironmentSchema = z.object({
   fromFixture: z.boolean(),
   fixturePath: z.string().min(1),
   municipalityIds: z.array(z.string().min(1)),
-  concurrency: z.number().int().min(1),
+  concurrency: finiteNumberSchema.int().min(1),
   controls: z.object({
-    timeoutMs: z.number().nonnegative(),
-    retries: z.number().int().nonnegative(),
-    delayMs: z.number().nonnegative(),
+    timeoutMs: finiteNumberSchema.nonnegative(),
+    retries: finiteNumberSchema.int().nonnegative(),
+    delayMs: finiteNumberSchema.nonnegative(),
   }),
 });
 
@@ -315,7 +319,9 @@ export const reportPersistencePayloadSchema = z.object({
   results: z.array(reportPersistenceArgsSchema),
 });
 
-export type ReportPersistencePayload = z.infer<typeof reportPersistencePayloadSchema>;
+export type ReportPersistencePayload = z.infer<
+  typeof reportPersistencePayloadSchema
+>;
 
 const reportMetadataBaseSchema = z.object({
   reportId: z.string().min(1),
@@ -418,9 +424,11 @@ export type GenerateRemediationReportBatchOutput = z.infer<
   typeof generateRemediationReportBatchOutputSchema
 >;
 
+export const REPORT_GENERATION_MAX_LIMIT = 1_000;
+
 export const reportGenerationCliOptionsSchema = z.object({
   generatedAt: z.string().datetime(),
-  limit: z.number().int().min(1).max(1_000),
+  limit: z.number().int().min(1).max(REPORT_GENERATION_MAX_LIMIT),
   outputPath: z.string().min(1),
 });
 
