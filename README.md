@@ -303,6 +303,62 @@ sequenceDiagram
   App-->>Judge: Download PDFs
 ```
 
+## Convex Persistence Layer
+
+When `CONVEX_URL` is not configured, the application falls back to deterministic JSON fixtures under `data/targets/` for demo and development. This ensures the hackathon vertical slice works even without a live Convex deployment.
+
+### Fixture Fallback Behavior
+
+- Reads are served from committed JSON fixtures when Convex is unavailable.
+- Writes are silently no-oped or queued in memory (demo-only; not production).
+- All fixtures validate against the Zod contracts in `src/shared/contracts.ts` via `pnpm fixtures:validate`.
+
+### Tables
+
+The Convex schema contains two groups of tables:
+
+**Existing municipality tables (preserved, not modified):**
+
+| Table | Purpose |
+|-------|---------|
+| `municipalities` | Legacy geographic target index |
+| `scanResults` | Enriched scan output with findings |
+| `rawScanResults` | Raw passive scan evidence |
+| `remediationReports` | Generated report metadata |
+| `userProfiles` | Clerk-authenticated user roles |
+
+**New security-validation pivot tables (Issue #65):**
+
+| Table | Purpose |
+|-------|---------|
+| `targets` | Generic target profiles (URL, classification, risk tier) |
+| `authorizationScopes` | Approved scope and time-bound constraints |
+| `workflowRuns` | Orchestrator state machine runs |
+| `passiveScanEvidence` | Public recon evidence with envelope metadata |
+| `technologyFingerprints` | Detected technology with confidence scores |
+| `vulnerabilityHypotheses` | Evidence-backed security questions |
+| `testPlans` | Approval-gated validation steps |
+| `approvalGates` | Human approval checkpoints |
+| `validationResults` | Controlled validation outcomes |
+| `findings` | Reportable risk items |
+| `auditEvents` | Decision and action audit trail |
+| `reportArtifacts` | Technical / friendly report metadata |
+
+### Auth Model
+
+- **Public reads**: Demo UI can load fixtures and read target state without authentication.
+- **Protected writes**: Operator or admin role is required for `create`, `update`, `approve`, and `append` mutations.
+- **Approver separation**: `requireApprover` guard enforces that approval actions are performed by operators or admins. Future iterations can add stricter separation-of-duties.
+
+### Validation Commands
+
+```bash
+pnpm fixtures:validate          # Validate all JSON fixtures against Zod contracts
+pnpm lint:types                 # TypeScript typecheck across src/ and convex/
+pnpm convex:codegen             # Regenerate Convex API types and validate schema
+node scripts/smoke-test-convex.ts  # Compile-time structural smoke test
+```
+
 ## Runtime
 
 - Node.js: `24.15.0`

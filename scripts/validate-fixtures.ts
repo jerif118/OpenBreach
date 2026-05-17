@@ -8,11 +8,13 @@ import enrichedScanFixture from "../data/scans/latest.enriched-scan-results.json
 import rawScanEvidenceFixture from "../data/scans/sample-raw-scan-evidence.json" with { type: "json" };
 import {
   approvalGateSchema,
+  auditEventSchema,
   findingSchema,
   generateRemediationReportResultSchema,
   municipalitySchema,
   passiveScanEvidenceSchema,
   rawScanEvidenceSchema,
+  reportArtifactSchema,
   reportGenerationStatusSchema,
   reportArtifactsSchema,
   reportMetadataSchema,
@@ -22,6 +24,8 @@ import {
   scanResultSchema,
   selectedMunicipalityReportContextSchema,
   targetProfileSchema,
+  technologyFingerprintSchema,
+  testPlanSchema,
   validationResultSchema,
   vulnerabilityHypothesisSchema,
   workflowRunSchema,
@@ -203,6 +207,38 @@ for (const file of targetFiles) {
     } catch (e) {
       errors.push(...formatZodIssues(filePath, "Finding", e));
     }
+  } else if (file === "technology-fingerprint.json") {
+    try {
+      technologyFingerprintSchema.parse(content);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "TechnologyFingerprint", e));
+    }
+  } else if (file === "test-plan.json") {
+    try {
+      testPlanSchema.parse(content);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "TestPlan", e));
+    }
+  } else if (file === "audit-event.json") {
+    if (!Array.isArray(content)) {
+      errors.push(
+        `[FAIL] ${filePath} → Router → audit-event.json must be an array of events`,
+      );
+    } else {
+      for (const event of content) {
+        try {
+          auditEventSchema.parse(event);
+        } catch (e) {
+          errors.push(...formatZodIssues(filePath, "AuditEvent", e));
+        }
+      }
+    }
+  } else if (file === "report-artifact.json") {
+    try {
+      reportArtifactSchema.parse(content);
+    } catch (e) {
+      errors.push(...formatZodIssues(filePath, "ReportArtifact", e));
+    }
   } else {
     errors.push(
       `[FAIL] ${filePath} → Router → unknown fixture filename prefix`,
@@ -225,6 +261,17 @@ for (const file of targetFiles) {
       errors.push(
         `[FAIL] ${filePath} → CrossRef → workflowRun.targetId does not match targetProfile.targetId`,
       );
+    }
+  } else if (file === "audit-event.json") {
+    if (Array.isArray(content)) {
+      for (const event of content) {
+        const targetId = event.targetId;
+        if (targetId && !knownTargetIds.has(targetId)) {
+          errors.push(
+            `[FAIL] ${filePath} → CrossRef → targetId '${targetId}' not found in target set`,
+          );
+        }
+      }
     }
   } else if (!file.startsWith("target-")) {
     const targetId = content.targetId;
