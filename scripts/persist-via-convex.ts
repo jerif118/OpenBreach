@@ -49,34 +49,7 @@ process.stderr.write(
   } of up to ${batchSize}.\n`,
 );
 
-for (let batchIndex = 0; batchIndex < batchCount; batchIndex += 1) {
-  const start = batchIndex * batchSize;
-  const slice = payload.results.slice(start, start + batchSize);
-  const batchArg = JSON.stringify({ results: slice });
-
-  process.stderr.write(
-    `[${batchIndex + 1}/${batchCount}] convex run ${functionName} (${slice.length} item${
-      slice.length === 1 ? "" : "s"
-    }, ${batchArg.length} bytes)\n`,
-  );
-
-  const result = spawnSync("npx", ["convex", "run", functionName, batchArg], {
-    stdio: "inherit",
-  });
-
-  if (result.error) {
-    process.stderr.write(
-      `Failed to spawn npx convex run: ${result.error.message}\n`,
-    );
-    process.exit(1);
-  }
-  if (typeof result.status === "number" && result.status !== 0) {
-    process.stderr.write(
-      `Batch ${batchIndex + 1} failed with exit code ${result.status}; aborting.\n`,
-    );
-    process.exit(result.status);
-  }
-}
+runBatches(functionName, payload.results, batchSize, batchCount);
 
 process.stderr.write(
   `Forwarded ${total} result${total === 1 ? "" : "s"} successfully.\n`,
@@ -122,6 +95,51 @@ function validatePayload(
     exitWithInputError(
       `Payload failed validation for ${functionName}: ${error instanceof Error ? error.message : String(error)}`,
     );
+  }
+}
+
+function runBatches(
+  functionName: string,
+  results: unknown[],
+  batchSize: number,
+  batchCount: number,
+): void {
+  for (let batchIndex = 0; batchIndex < batchCount; batchIndex += 1) {
+    const start = batchIndex * batchSize;
+    const slice = results.slice(start, start + batchSize);
+    runBatch(functionName, batchIndex, batchCount, slice);
+  }
+}
+
+function runBatch(
+  functionName: string,
+  batchIndex: number,
+  batchCount: number,
+  slice: unknown[],
+): void {
+  const batchArg = JSON.stringify({ results: slice });
+
+  process.stderr.write(
+    `[${batchIndex + 1}/${batchCount}] convex run ${functionName} (${slice.length} item${
+      slice.length === 1 ? "" : "s"
+    }, ${batchArg.length} bytes)\n`,
+  );
+
+  const result = spawnSync("npx", ["convex", "run", functionName, batchArg], {
+    stdio: "inherit",
+  });
+
+  if (result.error) {
+    process.stderr.write(
+      `Failed to spawn npx convex run: ${result.error.message}\n`,
+    );
+    process.exit(1);
+  }
+  if (typeof result.status === "number" && result.status !== 0) {
+    process.stderr.write(
+      `Batch ${batchIndex + 1} failed with exit code ${result.status}; aborting.\n`,
+    );
+    process.exit(result.status);
   }
 }
 
