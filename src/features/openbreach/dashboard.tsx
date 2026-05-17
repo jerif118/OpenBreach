@@ -82,10 +82,10 @@ export function OpenBreachDashboard() {
         />
       </section>
 
+      <ThreatMapPanel />
+
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.7fr_1fr]">
         <div className="flex flex-col gap-4">
-          <ThreatMapPanel />
-
           <section className="relative overflow-hidden border border-primary/15 bg-[#2a2a2a] p-4">
             <div className="absolute inset-0 scanlines opacity-20" />
             <div className="relative z-10">

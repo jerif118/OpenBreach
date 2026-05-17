@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { ThreatEntry } from "./threatMapTypes";
-import { peruOutlineGeoJson } from "./peruOutlineGeoJson";
 
-const SOUTH_PERU_BOUNDS = {
-  maxLat: -11.2,
-  maxLng: -68.6,
-  minLat: -19.1,
-  minLng: -76.9,
+const SEVERITY_INTENSITY: Record<ThreatEntry["severity"], number> = {
+  critical: 1.0,
+  high: 0.75,
+  medium: 0.5,
+  low: 0.25,
 };
 
 export function ThreatGeoMap({
@@ -25,80 +24,63 @@ export function ThreatGeoMap({
   entriesRef.current = entries;
 
   useEffect(() => {
-    console.log("[ThreatGeoMap] Effect running, container:", containerRef.current);
-    if (!containerRef.current || mapRef.current) {
-      console.log("[ThreatGeoMap] Skipping - no container or map already exists");
-      return;
-    }
+    if (!containerRef.current || mapRef.current) return;
 
     let map: maplibregl.Map;
     let isCancelled = false;
 
     async function initMap() {
       try {
-        console.log("[ThreatGeoMap] Starting map initialization...");
         const maplibregl = await import("maplibre-gl");
-        console.log("[ThreatGeoMap] maplibre-gl imported:", !!maplibregl.Map);
 
-        if (isCancelled || !containerRef.current) {
-          console.log("[ThreatGeoMap] Component unmounted during import, aborting map init");
-          return;
-        }
+        if (isCancelled || !containerRef.current) return;
 
         map = new maplibregl.Map({
-          container: containerRef.current!,
-          center: [-71.6, -15.35],
-          zoom: 5.3,
-          minZoom: 4,
-          maxZoom: 10,
+          container: containerRef.current,
+          center: [10, 15],
+          zoom: 1.6,
+          minZoom: 1,
+          maxZoom: 12,
           dragRotate: false,
           pitchWithRotate: false,
+          renderWorldCopies: true,
           style: {
             version: 8,
             sources: {
-              "peru-outline": {
-                type: "geojson",
-                data: peruOutlineGeoJson as unknown as GeoJSON.FeatureCollection,
+              "carto-dark": {
+                type: "raster",
+                tiles: [
+                  "https://a.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png",
+                  "https://b.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png",
+                  "https://c.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png",
+                  "https://d.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png",
+                ],
+                tileSize: 256,
+                attribution:
+                  '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
+              },
+              "carto-labels": {
+                type: "raster",
+                tiles: [
+                  "https://a.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png",
+                  "https://b.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png",
+                  "https://c.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png",
+                  "https://d.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}.png",
+                ],
+                tileSize: 256,
+                attribution: "",
               },
             },
             layers: [
-              {
-                id: "peru-fill",
-                type: "fill",
-                source: "peru-outline",
-                paint: {
-                  "fill-color": "#204655", // Brighter so we can see it
-                  "fill-opacity": 0.55,
-                },
-              },
-              {
-                id: "peru-line",
-                type: "line",
-                source: "peru-outline",
-                paint: {
-                  "line-color": "#58edf8",
-                  "line-opacity": 0.8,
-                  "line-width": 2,
-                },
-              },
+              { id: "carto-dark", type: "raster", source: "carto-dark" },
+              { id: "carto-labels", type: "raster", source: "carto-labels" },
             ],
           },
         });
 
         mapRef.current = map;
-        console.log("[ThreatGeoMap] Map created, mapRef set");
 
-        if (map.loaded()) {
-          console.log("[ThreatGeoMap] Map already loaded, calling load handler directly");
-          handleMapLoad();
-        } else {
-          map.once("load", () => {
-            console.log("[ThreatGeoMap] Map load event fired");
-            handleMapLoad();
-          });
-        }
-
-        function handleMapLoad() {
+        const onLoad = () => {
           setIsMapLoaded(true);
 
           map.addSource("threats", {
@@ -111,19 +93,63 @@ export function ThreatGeoMap({
             type: "heatmap",
             source: "threats",
             paint: {
+              "heatmap-weight": [
+                "interpolate",
+                ["linear"],
+                ["get", "intensity"],
+                0,
+                0,
+                1,
+                1,
+              ],
               "heatmap-color": [
                 "interpolate",
                 ["linear"],
                 ["heatmap-density"],
-                0, "rgba(0, 0, 0, 0)",
-                0.15, "rgba(0, 219, 233, 0.18)",
-                0.3, "rgba(19, 255, 67, 0.34)",
-                0.5, "rgba(255, 209, 102, 0.64)",
-                0.72, "rgba(255, 94, 120, 0.82)",
-                1, "rgba(255, 68, 125, 0.98)",
+                0,
+                "rgba(0,0,0,0)",
+                0.2,
+                "rgba(0, 230, 57, 0.45)",
+                0.4,
+                "rgba(255, 209, 102, 0.65)",
+                0.6,
+                "rgba(255, 138, 91, 0.78)",
+                0.8,
+                "rgba(255, 180, 171, 0.9)",
+                1,
+                "rgba(255, 84, 112, 1)",
               ],
-              "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 4, 0.85, 9, 2.1],
-              "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 22, 10, 70],
+              "heatmap-intensity": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                1,
+                1,
+                6,
+                2.2,
+                10,
+                3.4,
+              ],
+              "heatmap-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                1,
+                24,
+                4,
+                40,
+                8,
+                64,
+              ],
+              "heatmap-opacity": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                1,
+                0.85,
+                10,
+                0.5,
+              ],
             },
           });
 
@@ -135,41 +161,57 @@ export function ThreatGeoMap({
               "circle-color": [
                 "match",
                 ["get", "severity"],
-                "low", "#00dbe9",
-                "medium", "#00e639",
-                "high", "#ffd166",
-                "critical", "#ff6b98",
+                "low",
+                "#00e639",
+                "medium",
+                "#ffd166",
+                "high",
+                "#ff8a5b",
+                "critical",
+                "#ffb4ab",
                 "#dbfcff",
               ],
-              "circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 6, 8, 12],
+              "circle-radius": [
+                "interpolate",
+                ["linear"],
+                ["zoom"],
+                1,
+                4,
+                4,
+                6,
+                8,
+                10,
+              ],
               "circle-stroke-color": "#dbfcff",
-              "circle-stroke-width": 1,
-              "circle-opacity": 0.85,
+              "circle-stroke-width": 1.2,
+              "circle-opacity": 0.95,
             },
           });
 
           map.on("click", "threats-circles", (e) => {
-            if (e.features && e.features[0]) {
-              const entryId = e.features[0].properties?.id;
-              const entry = entriesRef.current.find((en) => en.id === entryId);
-              if (entry) {
-                onSelectEntry(entry);
-              }
-            }
+            const feature = e.features?.[0];
+            if (!feature) return;
+            const entryId = feature.properties?.id as string | undefined;
+            if (!entryId) return;
+            const entry = entriesRef.current.find((en) => en.id === entryId);
+            if (entry) onSelectEntry(entry);
           });
 
           map.on("mouseenter", "threats-circles", () => {
             map.getCanvas().style.cursor = "pointer";
           });
-
           map.on("mouseleave", "threats-circles", () => {
             map.getCanvas().style.cursor = "";
           });
+        };
 
-          fitMapToEntries(map, entriesRef.current);
+        if (map.loaded()) {
+          onLoad();
+        } else {
+          map.once("load", onLoad);
         }
       } catch (err) {
-        console.error("Error initializing map:", err);
+        console.error("[ThreatGeoMap] init failed:", err);
       }
     }
 
@@ -182,12 +224,13 @@ export function ThreatGeoMap({
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [onSelectEntry]);
 
   useEffect(() => {
     if (!mapRef.current || !isMapLoaded) return;
-
-    const source = mapRef.current.getSource("threats") as maplibregl.GeoJSONSource;
+    const source = mapRef.current.getSource("threats") as
+      | maplibregl.GeoJSONSource
+      | undefined;
     if (source) {
       source.setData(buildThreatGeoJson(entries));
     }
@@ -195,27 +238,37 @@ export function ThreatGeoMap({
 
   useEffect(() => {
     if (!mapRef.current || !isMapLoaded) return;
-
     mapRef.current.setPaintProperty(
       "threats-circles",
       "circle-stroke-width",
-      selectedEntryId ? 2.5 : 1
-    );
-    mapRef.current.setPaintProperty(
-      "threats-circles",
-      "circle-stroke-color",
-      selectedEntryId ? "#dbfcff" : "#dbfcff"
+      selectedEntryId ? 2.4 : 1.2,
     );
   }, [selectedEntryId, isMapLoaded]);
 
+  const hasUserSelectedRef = useRef(false);
+  useEffect(() => {
+    if (!mapRef.current || !isMapLoaded || !selectedEntryId) return;
+    if (!hasUserSelectedRef.current) {
+      hasUserSelectedRef.current = true;
+      return;
+    }
+    const entry = entriesRef.current.find((en) => en.id === selectedEntryId);
+    if (!entry) return;
+    mapRef.current.flyTo({
+      center: [entry.lng, entry.lat],
+      zoom: Math.max(mapRef.current.getZoom(), 3.4),
+      duration: 900,
+    });
+  }, [selectedEntryId, isMapLoaded]);
+
   return (
-    <div className="relative h-[420px] overflow-hidden border border-primary/20 bg-[#05090b] pixel-corner lg:h-[540px]">
-      <div ref={containerRef} className="absolute inset-0" />
+    <div className="relative h-[calc(100vh-260px)] min-h-[520px] w-full overflow-hidden border border-primary/20 bg-[#05090b] pixel-corner">
+      <div ref={containerRef} className="h-full w-full" />
       {!isMapLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#05090b]">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#05090b]/85">
           <div className="border border-primary/20 bg-[#131313]/90 px-4 py-3">
             <p className="font-mono text-[10px] tracking-[0.22em] text-primary uppercase animate-pulse">
-              Loading map...
+              Loading map…
             </p>
           </div>
         </div>
@@ -237,35 +290,8 @@ function buildThreatGeoJson(entries: ThreatEntry[]): GeoJSON.FeatureCollection {
         id: entry.id,
         severity: entry.severity,
         title: entry.title,
+        intensity: SEVERITY_INTENSITY[entry.severity],
       },
     })),
   };
-}
-
-function fitMapToEntries(map: maplibregl.Map, entries: ThreatEntry[]) {
-  if (!entries.length) return;
-
-  if (entries.length === 1) {
-    map.flyTo({
-      center: [entries[0].lng, entries[0].lat],
-      zoom: 7,
-      duration: 1000,
-    });
-    return;
-  }
-
-  const lngs = entries.map((e) => e.lng);
-  const lats = entries.map((e) => e.lat);
-
-  map.fitBounds(
-    [
-      [Math.min(...lngs), Math.min(...lats)],
-      [Math.max(...lngs), Math.max(...lats)],
-    ],
-    {
-      padding: 50,
-      maxZoom: 7,
-      duration: 1000,
-    }
-  );
 }
