@@ -14,6 +14,9 @@ export const municipalitySeedRecordSchema = z.object({
 
 export const municipalitySeedSchema = z
   .array(municipalitySeedRecordSchema)
+  .min(50, {
+    message: "Municipality seed must contain at least 50 records.",
+  })
   .superRefine((records, ctx) => {
     const ids = new Set<string>();
     for (const [index, record] of records.entries()) {

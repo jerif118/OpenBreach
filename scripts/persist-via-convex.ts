@@ -1,4 +1,21 @@
 import { spawnSync } from "node:child_process";
+import {
+  enrichedScanPersistenceArgsSchema,
+  rawScanPersistenceArgsSchema,
+  reportPersistencePayloadSchema,
+} from "../src/shared/contracts.ts";
+
+const payloadSchemas = {
+  "rawScanResults:upsertMany": rawScanPersistenceArgsSchema,
+  "scanResults:upsertEnrichedMany": enrichedScanPersistenceArgsSchema,
+  "reports:seedFromFixture": reportPersistencePayloadSchema,
+} as const;
+
+type PayloadSchema = (typeof payloadSchemas)[keyof typeof payloadSchemas];
+type MutationName = keyof typeof payloadSchemas;
+type PersistencePayload = ReturnType<PayloadSchema["parse"]>;
+
+const DEFAULT_BATCH_SIZE = 10;
 
 // Stream `{ "results": [...] }` JSON on stdin and forward it to a Convex
 // mutation in chunks via the Convex CLI. Required because Linux enforces a
@@ -6,39 +23,22 @@ import { spawnSync } from "node:child_process";
 // the total ARG_MAX, so passing a full enriched-scan payload to
 // `convex run <fn> "$(...)"` fails with E2BIG long before the system limit.
 
-const functionName = process.argv[2];
-if (!functionName) {
-  process.stderr.write(
-    "Usage: node scripts/persist-via-convex.ts <function-name> [batch-size]\n",
+const rawFunctionName = process.argv[2];
+if (!rawFunctionName) {
+  exitWithInputError(
+    "Usage: node scripts/persist-via-convex.ts <function-name> [batch-size]",
   );
-  process.exit(2);
 }
 
-const batchSize = Math.max(
-  1,
-  Number(process.argv[3] ?? process.env.PERSIST_BATCH_SIZE ?? "10"),
+const functionName = resolveMutationName(rawFunctionName);
+const payloadSchema = payloadSchemas[functionName];
+
+const batchSize = parseBatchSize(
+  process.argv[3] ?? process.env.PERSIST_BATCH_SIZE,
 );
 
-const stdin = await readStdin();
-if (stdin.trim().length === 0) {
-  process.stderr.write("No payload received on stdin.\n");
-  process.exit(2);
-}
-
-let payload: unknown;
-try {
-  payload = JSON.parse(stdin);
-} catch (error) {
-  process.stderr.write(
-    `Failed to parse stdin as JSON: ${error instanceof Error ? error.message : String(error)}\n`,
-  );
-  process.exit(2);
-}
-
-if (!isPayloadWithResults(payload)) {
-  process.stderr.write('Expected payload shape `{ "results": [...] }`.\n');
-  process.exit(2);
-}
+const parsedPayload = await parseStdinJson();
+const payload = validatePayload(functionName, payloadSchema, parsedPayload);
 
 const total = payload.results.length;
 if (total === 0) {
@@ -46,16 +46,95 @@ if (total === 0) {
   process.exit(0);
 }
 
-const batchCount = Math.ceil(total / batchSize);
+const batchCount = getBatchCount(total, batchSize);
 process.stderr.write(
   `Forwarding ${total} result${total === 1 ? "" : "s"} to ${functionName} in ${batchCount} batch${
     batchCount === 1 ? "" : "es"
   } of up to ${batchSize}.\n`,
 );
 
-for (let batchIndex = 0; batchIndex < batchCount; batchIndex += 1) {
-  const start = batchIndex * batchSize;
-  const slice = payload.results.slice(start, start + batchSize);
+runBatches(functionName, payload.results, batchSize);
+
+process.stderr.write(
+  `Forwarded ${total} result${total === 1 ? "" : "s"} successfully.\n`,
+);
+
+function exitWithInputError(message: string): never {
+  process.stderr.write(`${message}\n`);
+  process.exit(2);
+}
+
+function isMutationName(functionName: string): functionName is MutationName {
+  return Object.prototype.hasOwnProperty.call(payloadSchemas, functionName);
+}
+
+function resolveMutationName(functionName: string): MutationName {
+  if (!isMutationName(functionName)) {
+    exitWithInputError(`No payload schema configured for ${functionName}.`);
+  }
+  return functionName;
+}
+
+function parseBatchSize(rawBatchSize: string | undefined): number {
+  const batchSize = Number(rawBatchSize ?? String(DEFAULT_BATCH_SIZE));
+  if (!Number.isSafeInteger(batchSize) || batchSize < 1) {
+    exitWithInputError("Batch size must be a positive safe integer.");
+  }
+  return batchSize;
+}
+
+async function parseStdinJson(): Promise<unknown> {
+  const stdin = await readStdin();
+  if (stdin.trim().length === 0) {
+    exitWithInputError("No payload received on stdin.");
+  }
+
+  try {
+    return JSON.parse(stdin);
+  } catch (error) {
+    exitWithInputError(
+      `Failed to parse stdin as JSON: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+function validatePayload(
+  functionName: MutationName,
+  payloadSchema: PayloadSchema,
+  parsedPayload: unknown,
+): PersistencePayload {
+  try {
+    return payloadSchema.parse(parsedPayload);
+  } catch (error) {
+    exitWithInputError(
+      `Payload failed validation for ${functionName}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+function runBatches(
+  functionName: MutationName,
+  results: readonly unknown[],
+  batchSize: number,
+): void {
+  const batchCount = getBatchCount(results.length, batchSize);
+  for (let batchIndex = 0; batchIndex < batchCount; batchIndex += 1) {
+    const start = batchIndex * batchSize;
+    const slice = results.slice(start, start + batchSize);
+    runBatch(functionName, batchIndex, batchCount, slice);
+  }
+}
+
+function getBatchCount(total: number, batchSize: number): number {
+  return Math.ceil(total / batchSize);
+}
+
+function runBatch(
+  functionName: MutationName,
+  batchIndex: number,
+  batchCount: number,
+  slice: readonly unknown[],
+): void {
   const batchArg = JSON.stringify({ results: slice });
 
   process.stderr.write(
@@ -80,11 +159,19 @@ for (let batchIndex = 0; batchIndex < batchCount; batchIndex += 1) {
     );
     process.exit(result.status);
   }
+  if (result.signal) {
+    process.stderr.write(
+      `Batch ${batchIndex + 1} terminated by signal ${result.signal}; aborting.\n`,
+    );
+    process.exit(1);
+  }
+  if (result.status === null) {
+    process.stderr.write(
+      `Batch ${batchIndex + 1} ended without an exit status; aborting.\n`,
+    );
+    process.exit(1);
+  }
 }
-
-process.stderr.write(
-  `Forwarded ${total} result${total === 1 ? "" : "s"} successfully.\n`,
-);
 
 async function readStdin(): Promise<string> {
   let buffer = "";
@@ -93,12 +180,4 @@ async function readStdin(): Promise<string> {
     buffer += chunk;
   }
   return buffer;
-}
-
-function isPayloadWithResults(value: unknown): value is { results: unknown[] } {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    Array.isArray((value as { results?: unknown }).results)
-  );
 }

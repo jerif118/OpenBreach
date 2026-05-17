@@ -20,6 +20,7 @@ assert.equal(riskLevelForScore(74), "high");
 assert.equal(riskLevelForScore(75), "critical");
 assert.equal(riskLevelForScore(100), "critical");
 assert.equal(riskLevelForScore(999), "critical");
+assert.equal(riskLevelForScore(Number.POSITIVE_INFINITY), "low");
 
 const criticalEvidence = rawScanEvidenceSchema.parse({
   municipalityId: "mx-test-critical",
@@ -98,6 +99,30 @@ assert.equal(
     (finding) => finding.category === "known-vulnerability",
   ),
   false,
+);
+
+const unreachableResult = enrichScanEvidence(
+  rawScanEvidenceSchema.parse({
+    municipalityId: "mx-test-unreachable",
+    source: "fixture",
+    requestedUrl: "https://unreachable.example.test",
+    scannedAt: "2026-01-01T00:00:00.000Z",
+    reachable: false,
+    headers: {},
+    adminExposure: [],
+    errors: [{ stage: "http", message: "network unavailable" }],
+  }),
+);
+
+assert.equal(
+  unreachableResult.findings.some((finding) => finding.category === "headers"),
+  false,
+);
+assert.equal(
+  unreachableResult.findings.some(
+    (finding) => finding.category === "availability",
+  ),
+  true,
 );
 
 const fixturePath = "data/scans/latest.enriched-scan-results.json";

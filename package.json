@@ -8,6 +8,7 @@
     "build": "vite build && pnpm typecheck",
     "clean:hard": "node scripts/hard-clean.ts",
     "clean:soft": "node scripts/soft-clean.ts",
+    "contracts:test": "node scripts/test-boundary-schemas.ts",
     "convex:codegen": "convex codegen",
     "convex:dev": "convex dev",
     "dashboard:data:validate": "node scripts/validate-dashboard-data-adapter.ts",
@@ -51,7 +52,8 @@
     "scanner:persist:args": "node scripts/scan-convex-args.ts",
     "scanner:persistence:validate": "node scripts/validate-scan-persistence.ts",
     "scanner:validate": "node scripts/validate-scanner.ts",
-    "start": "node .output/server/index.mjs"
+    "start": "node .output/server/index.mjs",
+    "typecheck": "tsc --build --pretty"
   },
   "dependencies": {
     "@clerk/tanstack-react-start": "1.2.5",

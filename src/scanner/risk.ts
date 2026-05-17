@@ -1,10 +1,13 @@
-import type {
-  RawScanEvidence,
-  RiskLevel,
-  ScanFinding,
-  ScanResult,
+import {
+  scanResultSchema,
+  type RawScanEvidence,
+  type RiskLevel,
+  type ScanFinding,
+  type ScanResult,
 } from "../shared/contracts.ts";
-import { findCmsVulnerability } from "./vulnerableCmsKnowledgeBase.ts";
+import { generateFindings } from "./riskFindings.ts";
+
+export { BASELINE_SECURITY_HEADERS, generateFindings } from "./riskFindings.ts";
 
 export const RISK_LEVEL_THRESHOLDS = {
   low: { min: 0, max: 24 },
@@ -26,12 +29,30 @@ export const RISK_FINDING_WEIGHTS = {
   knownVulnerableCms: 35,
 } as const;
 
-export const BASELINE_SECURITY_HEADERS = [
-  "strict-transport-security",
-  "content-security-policy",
-  "x-content-type-options",
-  "x-frame-options",
-] as const;
+const STATIC_FINDING_WEIGHTS = {
+  "finding-availability-unreachable": RISK_FINDING_WEIGHTS.unreachable,
+  "finding-tls-invalid": RISK_FINDING_WEIGHTS.invalidTls,
+  "finding-tls-expired": RISK_FINDING_WEIGHTS.expiredTls,
+  "finding-header-missing-hsts": RISK_FINDING_WEIGHTS.missingHsts,
+  "finding-header-missing-csp":
+    RISK_FINDING_WEIGHTS.missingContentSecurityPolicy,
+  "finding-header-missing-content-type-options":
+    RISK_FINDING_WEIGHTS.missingContentTypeOptions,
+  "finding-header-missing-frame-protection":
+    RISK_FINDING_WEIGHTS.missingFrameProtection,
+  "finding-admin-path-exposed": RISK_FINDING_WEIGHTS.exposedAdminPath,
+  "finding-cms-detected": RISK_FINDING_WEIGHTS.cmsDetected,
+} as const;
+
+type StaticWeightedFindingId = keyof typeof STATIC_FINDING_WEIGHTS;
+
+function isStaticWeightedFindingId(
+  id: ScanFinding["id"],
+): id is StaticWeightedFindingId {
+  return Object.hasOwn(STATIC_FINDING_WEIGHTS, id);
+}
+
+const KNOWN_VULNERABLE_FINDING_PREFIX = "finding-known-vulnerable-" as const;
 
 export function enrichScanEvidence(evidence: RawScanEvidence): ScanResult {
   const findings = generateFindings(evidence);
@@ -39,7 +60,7 @@ export function enrichScanEvidence(evidence: RawScanEvidence): ScanResult {
     findings.reduce((total, finding) => total + findingWeight(finding.id), 0),
   );
 
-  return {
+  return scanResultSchema.parse({
     id: `scan-${evidence.municipalityId}-${evidence.scannedAt.slice(0, 10)}`,
     municipalityId: evidence.municipalityId,
     scannedAt: evidence.scannedAt,
@@ -56,7 +77,7 @@ export function enrichScanEvidence(evidence: RawScanEvidence): ScanResult {
     riskLevel: riskLevelForScore(riskScore),
     findings,
     score: riskScore,
-  };
+  });
 }
 
 export function enrichScanEvidenceBatch(
@@ -83,202 +104,17 @@ export function riskLevelForScore(score: number): RiskLevel {
   return "low";
 }
 
-export function generateFindings(evidence: RawScanEvidence): ScanFinding[] {
-  const findings: ScanFinding[] = [];
-
-  if (!evidence.reachable) {
-    findings.push({
-      id: "finding-availability-unreachable",
-      category: "availability",
-      severity: "high",
-      title: "Public website was unreachable",
-      description:
-        "The passive scanner could not reach the public municipal website during the scan window.",
-      evidence:
-        evidence.errors.length > 0
-          ? evidence.errors
-              .map((error) => `${error.stage}: ${error.message}`)
-              .join("; ")
-          : "HTTP request did not return a reachable response.",
-      remediationHint:
-        "Verify DNS, hosting, firewall, and uptime monitoring for the public website.",
-    });
+function findingWeight(findingId: ScanFinding["id"]): number {
+  if (isStaticWeightedFindingId(findingId)) {
+    return STATIC_FINDING_WEIGHTS[findingId];
   }
-
-  if (evidence.tls?.valid === false) {
-    findings.push({
-      id: "finding-tls-invalid",
-      category: "tls",
-      severity: "high",
-      title: "TLS certificate is invalid",
-      description:
-        "The HTTPS certificate was observable but did not validate successfully.",
-      evidence: `Issuer: ${evidence.tls.issuer ?? "unknown"}; expires: ${evidence.tls.expiresAt ?? "unknown"}`,
-      remediationHint:
-        "Install a valid certificate from a trusted authority and automate renewal before expiry.",
-    });
-  } else if (isExpired(evidence.tls?.expiresAt, evidence.scannedAt)) {
-    findings.push({
-      id: "finding-tls-expired",
-      category: "tls",
-      severity: "high",
-      title: "TLS certificate is expired",
-      description:
-        "The observed HTTPS certificate expiry date is before the scan timestamp.",
-      evidence: `Certificate expired at ${evidence.tls?.expiresAt}`,
-      remediationHint:
-        "Renew the HTTPS certificate and confirm the full certificate chain is served correctly.",
-    });
-  }
-
-  for (const header of missingSecurityHeaders(evidence.headers)) {
-    findings.push(headerFinding(header));
-  }
-
-  const exposedAdminPaths = evidence.adminExposure.filter(
-    (entry) => entry.reachable,
-  );
-  if (exposedAdminPaths.length > 0) {
-    findings.push({
-      id: "finding-admin-path-exposed",
-      category: "admin-exposure",
-      severity: "medium",
-      title: "Public admin path is reachable",
-      description:
-        "One or more common CMS or generic admin paths responded successfully to safe passive checks.",
-      evidence: exposedAdminPaths
-        .map(
-          (entry) =>
-            `${entry.path} returned ${entry.httpStatus ?? "reachable"}`,
-        )
-        .join("; "),
-      remediationHint:
-        "Restrict administrative entry points with access controls, MFA, and monitoring where operationally possible.",
-    });
-  }
-
-  if (evidence.cms && evidence.cms.name !== "unknown") {
-    findings.push({
-      id: "finding-cms-detected",
-      category: "cms",
-      severity: "low",
-      title: "CMS fingerprint was detected",
-      description:
-        "Public page evidence revealed a likely CMS fingerprint. This is informational unless combined with other risk evidence.",
-      evidence: `${evidence.cms.name}${evidence.cms.version ? ` ${evidence.cms.version}` : ""}; confidence ${evidence.cms.confidence}; evidence ${evidence.cms.evidence.join(", ")}`,
-      remediationHint:
-        "Keep CMS core, extensions, and themes patched, and remove unnecessary public version disclosures where practical.",
-    });
-  }
-
-  const cmsVulnerability = findCmsVulnerability(evidence.cms);
-  if (cmsVulnerability) {
-    findings.push({
-      id: `finding-known-vulnerable-${cmsVulnerability.cms}-${cmsVulnerability.version.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`,
-      category: "known-vulnerability",
-      severity: cmsVulnerability.severity,
-      title: cmsVulnerability.title,
-      description: cmsVulnerability.description,
-      evidence: [
-        `${cmsVulnerability.cms} ${evidence.cms?.version}`,
-        `confidence ${evidence.cms?.confidence}`,
-        cmsVulnerability.referenceIds.length > 0
-          ? `references ${cmsVulnerability.referenceIds.join(", ")}`
-          : undefined,
-      ]
-        .filter(Boolean)
-        .join("; "),
-      remediationHint: cmsVulnerability.remediationHint,
-    });
-  }
-
-  return findings;
-}
-
-function missingSecurityHeaders(
-  headers: RawScanEvidence["headers"],
-): Array<(typeof BASELINE_SECURITY_HEADERS)[number]> {
-  const normalizedNames = new Set(
-    Object.keys(headers).map((header) => header.toLowerCase()),
-  );
-  return BASELINE_SECURITY_HEADERS.filter(
-    (header) => !normalizedNames.has(header),
-  );
-}
-
-function headerFinding(
-  header: (typeof BASELINE_SECURITY_HEADERS)[number],
-): ScanFinding {
-  const details = {
-    "strict-transport-security": {
-      id: "finding-header-missing-hsts",
-      title: "Missing HTTP Strict Transport Security",
-      remediationHint:
-        "Enable HSTS after confirming HTTPS is stable for the site and subdomains.",
-    },
-    "content-security-policy": {
-      id: "finding-header-missing-csp",
-      title: "Missing Content Security Policy",
-      remediationHint:
-        "Add a tested Content-Security-Policy that limits script, frame, and object sources.",
-    },
-    "x-content-type-options": {
-      id: "finding-header-missing-content-type-options",
-      title: "Missing X-Content-Type-Options",
-      remediationHint:
-        "Send X-Content-Type-Options: nosniff on HTML and static asset responses.",
-    },
-    "x-frame-options": {
-      id: "finding-header-missing-frame-protection",
-      title: "Missing frame protection header",
-      remediationHint:
-        "Use Content-Security-Policy frame-ancestors or X-Frame-Options to limit clickjacking risk.",
-    },
-  }[header];
-
-  return {
-    id: details.id,
-    category: "headers",
-    severity: "medium",
-    title: details.title,
-    description:
-      "A baseline browser security response header was not observed in the passive HTTP response.",
-    evidence: `${header} was not present in the selected response headers.`,
-    remediationHint: details.remediationHint,
-  };
-}
-
-function findingWeight(findingId: string): number {
-  if (findingId === "finding-availability-unreachable")
-    return RISK_FINDING_WEIGHTS.unreachable;
-  if (findingId === "finding-tls-invalid")
-    return RISK_FINDING_WEIGHTS.invalidTls;
-  if (findingId === "finding-tls-expired")
-    return RISK_FINDING_WEIGHTS.expiredTls;
-  if (findingId === "finding-header-missing-hsts")
-    return RISK_FINDING_WEIGHTS.missingHsts;
-  if (findingId === "finding-header-missing-csp")
-    return RISK_FINDING_WEIGHTS.missingContentSecurityPolicy;
-  if (findingId === "finding-header-missing-content-type-options")
-    return RISK_FINDING_WEIGHTS.missingContentTypeOptions;
-  if (findingId === "finding-header-missing-frame-protection")
-    return RISK_FINDING_WEIGHTS.missingFrameProtection;
-  if (findingId === "finding-admin-path-exposed")
-    return RISK_FINDING_WEIGHTS.exposedAdminPath;
-  if (findingId === "finding-cms-detected")
-    return RISK_FINDING_WEIGHTS.cmsDetected;
-  if (findingId.startsWith("finding-known-vulnerable-"))
+  if (findingId.startsWith(KNOWN_VULNERABLE_FINDING_PREFIX)) {
     return RISK_FINDING_WEIGHTS.knownVulnerableCms;
+  }
   return 0;
 }
 
 function clampScore(score: number): number {
-  return Math.min(100, Math.max(0, Math.round(score)));
-}
-
-function isExpired(expiresAt: string | undefined, scannedAt: string): boolean {
-  if (!expiresAt) {
-    return false;
-  }
-  return new Date(expiresAt).getTime() < new Date(scannedAt).getTime();
+  const rounded = Number.isFinite(score) ? Math.round(score) : 0;
+  return Math.min(100, Math.max(0, rounded));
 }
