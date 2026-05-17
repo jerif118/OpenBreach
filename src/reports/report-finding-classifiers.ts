@@ -1,4 +1,16 @@
-import type { ReportFinding } from "../shared/contracts.ts";
+import {
+  reportFindingSchema,
+  scanFindingSchema,
+  type ReportFinding,
+} from "../shared/contracts.ts";
+
+const REPORT_FINDING_CATEGORY_SET = new Set<string>(
+  scanFindingSchema.shape.category.options,
+);
+
+const REPORT_FINDING_CONFIDENCE_SET = new Set<string>(
+  reportFindingSchema.shape.confidence.unwrap().options,
+);
 
 type AliasRule<T extends string> = {
   output: T;
@@ -28,27 +40,6 @@ const CONFIDENCE_THRESHOLD_RULES = [
   { output: "high", minimum: 0.75 },
   { output: "medium", minimum: 0.4 },
 ] as const satisfies readonly ThresholdRule<ReportFinding["confidence"]>[];
-
-const REPORT_FINDING_CATEGORIES = [
-  "tls",
-  "headers",
-  "cms",
-  "exposure",
-  "admin-exposure",
-  "availability",
-  "known-vulnerability",
-] as const satisfies readonly ReportFinding["category"][];
-
-const REPORT_FINDING_CONFIDENCE_VALUES = [
-  "high",
-  "medium",
-  "low",
-] as const satisfies readonly ReportFinding["confidence"][];
-
-const REPORT_FINDING_CATEGORY_SET = new Set<string>(REPORT_FINDING_CATEGORIES);
-const REPORT_FINDING_CONFIDENCE_SET = new Set<string>(
-  REPORT_FINDING_CONFIDENCE_VALUES,
-);
 
 const CATEGORY_KEYWORD_RULES = [
   { output: "tls", keywords: ["tls", "certificate", "ssl"] },
