@@ -134,6 +134,26 @@ function addRenderedMetadata(
   };
 }
 
+function buildContextByMunicipalityId(
+  contexts: SelectedMunicipalityReportContext[],
+): Map<string, SelectedMunicipalityReportContext> {
+  const contextByMunicipalityId = new Map<
+    string,
+    SelectedMunicipalityReportContext
+  >();
+
+  for (const rawContext of contexts) {
+    const parsed =
+      selectedMunicipalityReportContextSchema.safeParse(rawContext);
+
+    if (parsed.success) {
+      contextByMunicipalityId.set(parsed.data.municipality.id, parsed.data);
+    }
+  }
+
+  return contextByMunicipalityId;
+}
+
 export async function generateRemediationReportBatch({
   id = `report-batch-${new Date().toISOString()}`,
   contexts,
@@ -191,9 +211,7 @@ export async function renderReportBatchPdfs({
     generatedAt,
     providerKey,
   });
-  const contextByMunicipalityId = new Map(
-    contexts.map((context) => [context.municipality.id, context] as const),
-  );
+  const contextByMunicipalityId = buildContextByMunicipalityId(contexts);
   const results: GenerateRemediationReportBatchRecord[] = [];
 
   for (const record of batch.results) {
