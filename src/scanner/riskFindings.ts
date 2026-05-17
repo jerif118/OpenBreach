@@ -15,33 +15,35 @@ type HeaderFindingDetail = Pick<
   "id" | "title" | "remediationHint"
 >;
 
-const HEADER_FINDING_DETAILS: Record<BaselineSecurityHeader, HeaderFindingDetail> =
-  {
-    "strict-transport-security": {
-      id: "finding-header-missing-hsts",
-      title: "Missing HTTP Strict Transport Security",
-      remediationHint:
-        "Enable HSTS after confirming HTTPS is stable for the site and subdomains.",
-    },
-    "content-security-policy": {
-      id: "finding-header-missing-csp",
-      title: "Missing Content Security Policy",
-      remediationHint:
-        "Add a tested Content-Security-Policy that limits script, frame, and object sources.",
-    },
-    "x-content-type-options": {
-      id: "finding-header-missing-content-type-options",
-      title: "Missing X-Content-Type-Options",
-      remediationHint:
-        "Send X-Content-Type-Options: nosniff on HTML and static asset responses.",
-    },
-    "x-frame-options": {
-      id: "finding-header-missing-frame-protection",
-      title: "Missing frame protection header",
-      remediationHint:
-        "Use Content-Security-Policy frame-ancestors or X-Frame-Options to limit clickjacking risk.",
-    },
-  };
+const HEADER_FINDING_DETAILS: Record<
+  BaselineSecurityHeader,
+  HeaderFindingDetail
+> = {
+  "strict-transport-security": {
+    id: "finding-header-missing-hsts",
+    title: "Missing HTTP Strict Transport Security",
+    remediationHint:
+      "Enable HSTS after confirming HTTPS is stable for the site and subdomains.",
+  },
+  "content-security-policy": {
+    id: "finding-header-missing-csp",
+    title: "Missing Content Security Policy",
+    remediationHint:
+      "Add a tested Content-Security-Policy that limits script, frame, and object sources.",
+  },
+  "x-content-type-options": {
+    id: "finding-header-missing-content-type-options",
+    title: "Missing X-Content-Type-Options",
+    remediationHint:
+      "Send X-Content-Type-Options: nosniff on HTML and static asset responses.",
+  },
+  "x-frame-options": {
+    id: "finding-header-missing-frame-protection",
+    title: "Missing frame protection header",
+    remediationHint:
+      "Use Content-Security-Policy frame-ancestors or X-Frame-Options to limit clickjacking risk.",
+  },
+};
 
 export function generateFindings(evidence: RawScanEvidence): ScanFinding[] {
   const findings: ScanFinding[] = [];
@@ -91,8 +93,10 @@ export function generateFindings(evidence: RawScanEvidence): ScanFinding[] {
     });
   }
 
-  for (const header of missingSecurityHeaders(evidence.headers)) {
-    findings.push(headerFinding(header));
+  if (evidence.reachable) {
+    for (const header of missingSecurityHeaders(evidence.headers)) {
+      findings.push(headerFinding(header));
+    }
   }
 
   const exposedAdminPaths = evidence.adminExposure.filter(
