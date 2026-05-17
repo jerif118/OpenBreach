@@ -9,6 +9,7 @@ import {
   type GenerateRemediationReportBatchRecord as ContractGenerateRemediationReportBatchRecord,
   type GenerateRemediationReportInput,
   type GenerateRemediationReportResult,
+  type RemediationReport,
   type RemediationReportVariants,
   type SelectedMunicipalityReportContext,
 } from "../../shared/contracts.ts";
@@ -36,14 +37,14 @@ export type RenderReportBatchPdfsInput = Omit<
 
 export async function generateRemediationReport(
   input: GenerateRemediationReportInput,
-) {
+): Promise<RemediationReport> {
   const adapter = createReportAiAdapter();
   return await adapter.generateRemediationReport(input);
 }
 
 export async function generateRemediationReportVariants(
   input: GenerateRemediationReportInput,
-) {
+): Promise<RemediationReportVariants> {
   const adapter = createReportAiAdapter();
   return await adapter.generateRemediationReportVariants(input);
 }
