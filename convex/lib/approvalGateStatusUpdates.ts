@@ -81,11 +81,22 @@ export async function buildApprovalGateStatusPatch(
   }
 
   if (args.status === "pending") {
-    // Reset approval fields when reverting to pending
+    const actor = await requireApprover(ctx);
     patch.approvedBy = undefined;
     patch.approvedAt = undefined;
     patch.rejectionReason = undefined;
     patch.bypassJustification = undefined;
+    await appendAuditEvent(ctx, {
+      targetId: doc.targetId,
+      eventType: "approval-reset",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: doc.runId,
+      details: {
+        gateId: args.gateId,
+        gateType: doc.gateType,
+        previousStatus: doc.status,
+      },
+    });
   }
 
   return patch;
