@@ -17,7 +17,7 @@ import type { TestPlanDto } from "../types/testPlans";
 import type { ApprovalGateDto } from "../types/approvals";
 import type { ValidationResultDto } from "../types/validation";
 import type { FindingDto } from "../types/findings";
-import type { AuditEventDto } from "../types/audit";
+import type { AuditDetails, AuditEventDto } from "../types/audit";
 import type { ReportArtifactDto } from "../types/reports";
 
 // ============================================================================
@@ -330,10 +330,31 @@ export function mapFixtureToAuditEventDto(fixture: unknown): AuditEventDto {
     actor: String(f.actor ?? ""),
     timestamp: String(f.timestamp ?? ""),
     runId: f.runId ? String(f.runId) : undefined,
-    details: f.details as Record<string, unknown> | undefined,
+    details: mapFixtureAuditDetails(f.details),
     ipAddress: f.ipAddress ? String(f.ipAddress) : undefined,
     userAgent: f.userAgent ? String(f.userAgent) : undefined,
   };
+}
+
+function mapFixtureAuditDetails(value: unknown): AuditDetails | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const details: AuditDetails = {};
+  for (const [key, detail] of Object.entries(value)) {
+    if (
+      typeof detail === "string" ||
+      typeof detail === "number" ||
+      typeof detail === "boolean" ||
+      detail === null
+    ) {
+      details[key] = detail;
+      continue;
+    }
+    details[key] = String(detail);
+  }
+  return details;
 }
 
 /**
