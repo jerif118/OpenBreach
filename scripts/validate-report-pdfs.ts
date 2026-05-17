@@ -131,9 +131,19 @@ for (const record of output.results) {
     );
   }
 
-  const technicalPdfContent = await readFile(pdf.storagePath, "latin1");
+  const technicalArtifactPdf = reportPdfReferenceSchema.parse(
+    artifacts.technical.pdf,
+  );
+  const friendlyArtifactPdf = reportPdfReferenceSchema.parse(
+    artifacts.friendly.pdf,
+  );
+
+  const technicalPdfContent = await readFile(
+    technicalArtifactPdf.storagePath,
+    "latin1",
+  );
   const friendlyPdfContent = await readFile(
-    artifacts.friendly.pdf.storagePath,
+    friendlyArtifactPdf.storagePath,
     "latin1",
   );
 
