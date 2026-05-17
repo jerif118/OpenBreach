@@ -6,16 +6,14 @@ export function detectCms(
   body: string,
   headers: Headers,
 ): NonNullable<RawScanEvidence["cms"]> {
-  const evidence: string[] = [];
+  const evidence = new Set<string>();
   const lowerBody = body.toLowerCase();
   const poweredBy = headers.get("x-powered-by")?.toLowerCase() ?? "";
-  const generator = body.match(
-    /<meta\s+[^>]*name=["']generator["'][^>]*content=["']([^"']+)["']/i,
-  )?.[1];
+  const generator = findGeneratorContent(body);
   const generatorLower = generator?.toLowerCase() ?? "";
 
   if (generator) {
-    evidence.push(`generator:${generator}`);
+    evidence.add(`generator:${generator}`);
   }
 
   const candidates: Array<{
@@ -35,17 +33,41 @@ export function detectCms(
         poweredBy.includes(marker),
     );
     if (matchedMarkers.length > 0) {
-      evidence.push(...matchedMarkers.map((marker) => `marker:${marker}`));
+      for (const marker of matchedMarkers) {
+        evidence.add(`marker:${marker}`);
+      }
       return {
         name: candidate.name,
         version: extractVersion(generator, candidate.name),
         confidence: generatorLower.includes(candidate.name) ? 0.8 : 0.6,
-        evidence: Array.from(new Set(evidence)),
+        evidence: Array.from(evidence),
       };
     }
   }
 
-  return { name: "unknown", confidence: 0, evidence };
+  return { name: "unknown", confidence: 0, evidence: Array.from(evidence) };
+}
+
+function findGeneratorContent(body: string): string | undefined {
+  for (const match of body.matchAll(/<meta\b[^>]*>/gi)) {
+    const tag = match[0];
+    if (getHtmlAttribute(tag, "name")?.toLowerCase() === "generator") {
+      const content = getHtmlAttribute(tag, "content");
+      if (content) {
+        return content;
+      }
+    }
+  }
+  return undefined;
+}
+
+function getHtmlAttribute(
+  tag: string,
+  attributeName: string,
+): string | undefined {
+  return tag.match(
+    new RegExp(`\\b${attributeName}\\s*=\\s*["']([^"']+)["']`, "i"),
+  )?.[1];
 }
 
 function extractVersion(
