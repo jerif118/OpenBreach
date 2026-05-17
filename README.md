@@ -319,30 +319,30 @@ The Convex schema contains two groups of tables:
 
 **Existing municipality tables (preserved, not modified):**
 
-| Table | Purpose |
-|-------|---------|
-| `municipalities` | Legacy geographic target index |
-| `scanResults` | Enriched scan output with findings |
-| `rawScanResults` | Raw passive scan evidence |
-| `remediationReports` | Generated report metadata |
-| `userProfiles` | Clerk-authenticated user roles |
+| Table                | Purpose                            |
+| -------------------- | ---------------------------------- |
+| `municipalities`     | Legacy geographic target index     |
+| `scanResults`        | Enriched scan output with findings |
+| `rawScanResults`     | Raw passive scan evidence          |
+| `remediationReports` | Generated report metadata          |
+| `userProfiles`       | Clerk-authenticated user roles     |
 
 **New security-validation pivot tables (Issue #65):**
 
-| Table | Purpose |
-|-------|---------|
-| `targets` | Generic target profiles (URL, classification, risk tier) |
-| `authorizationScopes` | Approved scope and time-bound constraints |
-| `workflowRuns` | Orchestrator state machine runs |
-| `passiveScanEvidence` | Public recon evidence with envelope metadata |
-| `technologyFingerprints` | Detected technology with confidence scores |
-| `vulnerabilityHypotheses` | Evidence-backed security questions |
-| `testPlans` | Approval-gated validation steps |
-| `approvalGates` | Human approval checkpoints |
-| `validationResults` | Controlled validation outcomes |
-| `findings` | Reportable risk items |
-| `auditEvents` | Decision and action audit trail |
-| `reportArtifacts` | Technical / friendly report metadata |
+| Table                     | Purpose                                                  |
+| ------------------------- | -------------------------------------------------------- |
+| `targets`                 | Generic target profiles (URL, classification, risk tier) |
+| `authorizationScopes`     | Approved scope and time-bound constraints                |
+| `workflowRuns`            | Orchestrator state machine runs                          |
+| `passiveScanEvidence`     | Public recon evidence with envelope metadata             |
+| `technologyFingerprints`  | Detected technology with confidence scores               |
+| `vulnerabilityHypotheses` | Evidence-backed security questions                       |
+| `testPlans`               | Approval-gated validation steps                          |
+| `approvalGates`           | Human approval checkpoints                               |
+| `validationResults`       | Controlled validation outcomes                           |
+| `findings`                | Reportable risk items                                    |
+| `auditEvents`             | Decision and action audit trail                          |
+| `reportArtifacts`         | Technical / friendly report metadata                     |
 
 ### Auth Model
 
