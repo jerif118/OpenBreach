@@ -56,15 +56,24 @@ export const listByTarget = internalQuery({
   handler: async (ctx, args) => {
     const limit = normalizeListLimit(args.limit);
 
-    let query = ctx.db
+    if (args.status) {
+      const status = args.status;
+      const docs = await ctx.db
+        .query("testPlans")
+        .withIndex("by_targetId_and_status", (q) =>
+          q.eq("targetId", args.targetId).eq("status", status),
+        )
+        .take(limit);
+
+      return docs.map(toTestPlanDto);
+    }
+
+    const query = ctx.db
       .query("testPlans")
       .withIndex("by_targetId", (q) => q.eq("targetId", args.targetId));
 
     const docs = await query.take(limit);
-    const filtered = args.status
-      ? docs.filter((d) => d.status === args.status)
-      : docs;
-    return filtered.map(toTestPlanDto);
+    return docs.map(toTestPlanDto);
   },
 });
 
