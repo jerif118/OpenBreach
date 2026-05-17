@@ -29,6 +29,18 @@ type PromptOutputShape = {
   generatedBy: "ai-provider";
 };
 
+const PROMPT_REPORT_SECTION_ORDER = [
+  "scope",
+  "authorization",
+  "methodology",
+  "findingsOverview",
+  "skippedTests",
+  "validationStatus",
+  "limitations",
+  "remediationChecklist",
+  "verificationGuidance",
+] as const satisfies readonly PromptReportSectionKey[];
+
 function buildPromptInstructions(variant: ReportAudience): string[] {
   return [
     "Return only JSON matching the RemediationReport contract.",
@@ -50,6 +62,18 @@ function buildReportSectionShape(): PromptReportSectionShape {
   return { title: "string", narrative: "string", bullets: ["string"] };
 }
 
+function buildReportSections(): Record<
+  PromptReportSectionKey,
+  PromptReportSectionShape
+> {
+  return Object.fromEntries(
+    PROMPT_REPORT_SECTION_ORDER.map((sectionKey) => [
+      sectionKey,
+      buildReportSectionShape(),
+    ]),
+  ) as Record<PromptReportSectionKey, PromptReportSectionShape>;
+}
+
 function buildOutputShape(
   normalized: NormalizedReportInput,
   variant: ReportAudience,
@@ -63,17 +87,7 @@ function buildOutputShape(
     summary: "string",
     priorityActions: ["string"],
     findings: "array matching the supplied normalized finding shape",
-    sections: {
-      scope: buildReportSectionShape(),
-      authorization: buildReportSectionShape(),
-      methodology: buildReportSectionShape(),
-      findingsOverview: buildReportSectionShape(),
-      skippedTests: buildReportSectionShape(),
-      validationStatus: buildReportSectionShape(),
-      limitations: buildReportSectionShape(),
-      remediationChecklist: buildReportSectionShape(),
-      verificationGuidance: buildReportSectionShape(),
-    },
+    sections: buildReportSections(),
     generatedBy: "ai-provider",
   };
 }
