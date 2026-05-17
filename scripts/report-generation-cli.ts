@@ -1,11 +1,11 @@
 import {
+  REPORT_GENERATION_MAX_LIMIT,
   reportGenerationCliOptionsSchema,
   type ReportGenerationCliOptions,
 } from "../src/shared/contracts.ts";
 
 const DEFAULT_OUTPUT_PATH = "data/reports/latest.report-generation.json";
 const DEFAULT_GENERATED_AT = new Date().toISOString();
-const MAX_LIMIT = 1_000;
 
 type CliOptionDraft = {
   generatedAt: string;
@@ -50,7 +50,12 @@ export function readCliOptions(argv: string[]): ReportGenerationCliOptions {
 
     switch (flag) {
       case "--":
-        continue;
+        if (index < argv.length - 1) {
+          throw new Error(
+            `Unexpected positional argument: ${argv[index + 1]}.`,
+          );
+        }
+        return reportGenerationCliOptionsSchema.parse(options);
       case "--generated-at":
         options.generatedAt = readRequiredValue(argv, index, flag);
         index += 1;
@@ -60,7 +65,7 @@ export function readCliOptions(argv: string[]): ReportGenerationCliOptions {
         index += 1;
         continue;
       case "--all":
-        options.limit = MAX_LIMIT;
+        options.limit = REPORT_GENERATION_MAX_LIMIT;
         continue;
       case "--output":
         options.outputPath = readRequiredValue(argv, index, flag, {
