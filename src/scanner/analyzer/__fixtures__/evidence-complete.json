@@ -1,0 +1,32 @@
+{
+  "evidenceId": "evidence-complete",
+  "targetId": "target-complete",
+  "source": "fixture",
+  "collectedAt": "2026-05-17T00:00:00Z",
+  "requestedUrl": "https://example.com",
+  "reachable": true,
+  "httpStatus": 200,
+  "headers": {
+    "server": "nginx/1.18.0",
+    "x-powered-by": "PHP/7.4"
+  },
+  "tls": {
+    "valid": true,
+    "expiresAt": "2026-06-15T00:00:00Z",
+    "issuer": "Let's Encrypt"
+  },
+  "cms": {
+    "name": "wordpress",
+    "version": "6.4.2",
+    "confidence": 0.85,
+    "evidence": ["generator:wordpress"]
+  },
+  "adminExposure": [
+    {
+      "path": "/wp-admin/",
+      "reachable": true,
+      "httpStatus": 200
+    }
+  ],
+  "errors": []
+}

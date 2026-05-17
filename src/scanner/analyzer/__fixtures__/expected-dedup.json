@@ -1,0 +1,103 @@
+{
+  "fingerprints": [
+    {
+      "fingerprintId": "id-001",
+      "targetId": "target-dedup",
+      "technology": "wordpress",
+      "category": "cms",
+      "confidence": 0.9,
+      "detectedAt": "2026-05-17T00:00:00.000Z",
+      "version": "6.4",
+      "versionConfidence": 0.9,
+      "evidence": [
+        "cms:version=6.4"
+      ]
+    },
+    {
+      "fingerprintId": "id-002",
+      "targetId": "target-dedup",
+      "technology": "missing-strict-transport-security",
+      "category": "other",
+      "confidence": 0.6,
+      "detectedAt": "2026-05-17T00:00:00.000Z",
+      "evidence": [
+        "header:strict-transport-security=absent"
+      ]
+    },
+    {
+      "fingerprintId": "id-003",
+      "targetId": "target-dedup",
+      "technology": "missing-content-security-policy",
+      "category": "other",
+      "confidence": 0.6,
+      "detectedAt": "2026-05-17T00:00:00.000Z",
+      "evidence": [
+        "header:content-security-policy=absent"
+      ]
+    },
+    {
+      "fingerprintId": "id-004",
+      "targetId": "target-dedup",
+      "technology": "missing-x-frame-options",
+      "category": "other",
+      "confidence": 0.6,
+      "detectedAt": "2026-05-17T00:00:00.000Z",
+      "evidence": [
+        "header:x-frame-options=absent"
+      ]
+    }
+  ],
+  "hypotheses": [
+    {
+      "hypothesisId": "id-005",
+      "targetId": "target-dedup",
+      "title": "WordPress 6.4 requires patch review",
+      "status": "hypothesis",
+      "createdAt": "2026-05-17T00:00:00.000Z",
+      "proposedBy": "analyzer",
+      "description": "The scanner observed a WordPress 6.4 generator string. This MVP treats the version as a known-risk demo match when confidence is high, without confirming active compromise.",
+      "cvssScore": 7.5,
+      "affectedComponents": [
+        "wordpress"
+      ]
+    },
+    {
+      "hypothesisId": "id-006",
+      "targetId": "target-dedup",
+      "title": "Missing HSTS header",
+      "status": "hypothesis",
+      "createdAt": "2026-05-17T00:00:00.000Z",
+      "proposedBy": "analyzer",
+      "description": "The response did not include Strict-Transport-Security, reducing protection against downgrade and man-in-the-middle attacks.",
+      "cweId": "CWE-319",
+      "affectedComponents": [
+        "strict-transport-security"
+      ]
+    },
+    {
+      "hypothesisId": "id-007",
+      "targetId": "target-dedup",
+      "title": "Missing CSP header",
+      "status": "hypothesis",
+      "createdAt": "2026-05-17T00:00:00.000Z",
+      "proposedBy": "analyzer",
+      "description": "The response did not include Content-Security-Policy, increasing risk of injection-driven content execution.",
+      "cweId": "CWE-693",
+      "affectedComponents": [
+        "content-security-policy"
+      ]
+    },
+    {
+      "hypothesisId": "id-008",
+      "targetId": "target-dedup",
+      "title": "Clickjacking risk: missing X-Frame-Options",
+      "status": "hypothesis",
+      "createdAt": "2026-05-17T00:00:00.000Z",
+      "proposedBy": "analyzer",
+      "description": "The response did not include X-Frame-Options or CSP frame-ancestors, increasing clickjacking risk.",
+      "affectedComponents": [
+        "x-frame-options"
+      ]
+    }
+  ]
+}

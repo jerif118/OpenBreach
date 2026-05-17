@@ -53,6 +53,7 @@
     "scanner:persist:args": "node scripts/scan-convex-args.ts",
     "scanner:persistence:validate": "node scripts/validate-scan-persistence.ts",
     "scanner:validate": "node scripts/validate-scanner.ts",
+    "test:analyzer": "npx tsx scripts/validate-analyzer.ts",
     "start": "node .output/server/index.mjs",
     "typecheck": "tsc --build --pretty"
   },
