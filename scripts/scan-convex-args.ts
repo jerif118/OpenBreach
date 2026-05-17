@@ -15,21 +15,7 @@ const log = (message: string) => {
   process.stderr.write(`${message}\n`);
 };
 
-const environment = scanConvexEnvironmentSchema.parse({
-  fromFixture: process.env.SCAN_FROM_FIXTURE === "1",
-  fixturePath:
-    process.env.SCAN_FIXTURE_PATH ?? "data/scans/latest.scan-results.json",
-  municipalityIds: (process.env.MUNICIPALITY_IDS ?? "")
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean),
-  concurrency: Number(process.env.SCAN_CONCURRENCY ?? "5"),
-  controls: {
-    timeoutMs: Number(process.env.SCAN_TIMEOUT_MS ?? "5000"),
-    retries: Number(process.env.SCAN_RETRIES ?? "1"),
-    delayMs: Number(process.env.SCAN_DELAY_MS ?? "250"),
-  },
-});
+const environment = readEnvironment();
 
 const allRecords = municipalitySchema.array().parse(municipalities);
 const idFilter = environment.municipalityIds;
@@ -93,6 +79,24 @@ if (environment.fromFixture) {
 }
 
 process.stdout.write(JSON.stringify(toRawScanPersistenceArgs(results)));
+
+function readEnvironment() {
+  return scanConvexEnvironmentSchema.parse({
+    fromFixture: process.env.SCAN_FROM_FIXTURE === "1",
+    fixturePath:
+      process.env.SCAN_FIXTURE_PATH ?? "data/scans/latest.scan-results.json",
+    municipalityIds: (process.env.MUNICIPALITY_IDS ?? "")
+      .split(",")
+      .map((id) => id.trim())
+      .filter(Boolean),
+    concurrency: Number(process.env.SCAN_CONCURRENCY ?? "5"),
+    controls: {
+      timeoutMs: Number(process.env.SCAN_TIMEOUT_MS ?? "5000"),
+      retries: Number(process.env.SCAN_RETRIES ?? "1"),
+      delayMs: Number(process.env.SCAN_DELAY_MS ?? "250"),
+    },
+  });
+}
 
 function describeOutcome(result: RawScanEvidence): string {
   if (result.reachable) {
