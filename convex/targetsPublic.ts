@@ -1,19 +1,7 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
-import type { Doc } from "./_generated/dataModel";
-import type {
-  TargetProfileDto,
-  TargetListItemDto,
-  WorkflowRunDto,
-} from "./types";
-import {
-  isConvexConfigured,
-  loadFixture,
-  mapFixtureToTargetProfileDto,
-} from "./lib/fixtureFallback";
-
-const DEFAULT_LIST_LIMIT = 50;
-const MAX_LIST_LIMIT = 100;
+import { mutation } from "./_generated/server";
+import { requireOperatorOrAdmin } from "./auth";
+import { appendAuditEvent } from "./lib/audit";
 
 // ============================================================================
 // Validation-level → scopeType mapper
@@ -35,194 +23,11 @@ function mapValidationLevel(
 }
 
 // ============================================================================
-// DTO Mappers
-// ============================================================================
-
-function toTargetProfileDto(doc: Doc<"targets">): TargetProfileDto {
-  return {
-    targetId: doc.targetId,
-    name: doc.name,
-    primaryUrl: doc.primaryUrl,
-    riskTier: doc.riskTier,
-    classification: doc.classification,
-    parentOrganization: doc.parentOrganization ?? undefined,
-    geography: doc.geography
-      ? {
-          country: doc.geography.country,
-          region: doc.geography.region,
-          city: doc.geography.city,
-        }
-      : undefined,
-    population: doc.population ?? undefined,
-    latitude: doc.latitude ?? undefined,
-    longitude: doc.longitude ?? undefined,
-    metadata: doc.metadata ?? undefined,
-  };
-}
-
-function toTargetListItemDto(doc: Doc<"targets">): TargetListItemDto {
-  return {
-    targetId: doc.targetId,
-    name: doc.name,
-    primaryUrl: doc.primaryUrl,
-    riskTier: doc.riskTier,
-    classification: doc.classification,
-    metadata: doc.metadata ?? undefined,
-  };
-}
-
-function toWorkflowRunDto(doc: Doc<"workflowRuns">): WorkflowRunDto {
-  const durationMs =
-    doc.completedAt || doc.abortedAt
-      ? new Date(doc.completedAt ?? doc.abortedAt!).getTime() -
-        new Date(doc.startedAt).getTime()
-      : undefined;
-
-  return {
-    runId: doc.runId,
-    targetId: doc.targetId,
-    status: doc.status,
-    startedAt: doc.startedAt,
-    completedAt: doc.completedAt ?? undefined,
-    abortedAt: doc.abortedAt ?? undefined,
-    abortedReason: doc.abortedReason ?? undefined,
-    currentPhase: doc.currentPhase ?? undefined,
-    phases: doc.phases
-      ? doc.phases.map((p) => ({
-          phase: p.phase,
-          enteredAt: p.enteredAt,
-          exitedAt: p.exitedAt ?? undefined,
-          rejectionReason: p.rejectionReason ?? undefined,
-        }))
-      : undefined,
-    durationMs,
-  };
-}
-
-// ============================================================================
-// Helpers
-// ============================================================================
-
-function normalizeListLimit(limit: number | undefined) {
-  if (limit === undefined) {
-    return DEFAULT_LIST_LIMIT;
-  }
-  if (!Number.isInteger(limit) || limit < 1 || limit > MAX_LIST_LIMIT) {
-    throw new Error(
-      `targetsPublic.list limit must be an integer from 1 to ${MAX_LIST_LIMIT}.`,
-    );
-  }
-  return limit;
-}
-
-// ============================================================================
-// Queries
-// ============================================================================
-
-/**
- * Public query: list targets as bounded DTOs.
- * Falls back to fixture data when Convex is not configured.
- */
-export const list = query({
-  args: {
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    const limit = normalizeListLimit(args.limit);
-
-    // Fixture fallback for demo mode (only when Convex is not configured in browser)
-    if (!isConvexConfigured()) {
-      try {
-        const fixture = await loadFixture<unknown>("target-approved-public");
-        const dto = mapFixtureToTargetProfileDto(fixture);
-        const item: TargetListItemDto = {
-          targetId: dto.targetId,
-          name: dto.name,
-          primaryUrl: dto.primaryUrl,
-          riskTier: dto.riskTier,
-          classification: dto.classification,
-        };
-        return [item];
-      } catch {
-        return [] as TargetListItemDto[];
-      }
-    }
-
-    const docs = await ctx.db.query("targets").take(limit);
-    const items: TargetListItemDto[] = [];
-
-    for (const doc of docs) {
-      const latestRun = await ctx.db
-        .query("workflowRuns")
-        .withIndex("by_targetId", (q) => q.eq("targetId", doc.targetId))
-        .order("desc")
-        .take(1);
-
-      items.push({
-        ...toTargetListItemDto(doc),
-        latestRun: latestRun[0] ? toWorkflowRunDto(latestRun[0]) : null,
-      });
-    }
-
-    return items;
-  },
-});
-
-/**
- * Public query: get a single target by targetId, including latest run info.
- * Falls back to fixture data when Convex is not configured.
- */
-export const get = query({
-  args: { targetId: v.string() },
-  handler: async (ctx, args) => {
-    // Fixture fallback for demo mode
-    if (!isConvexConfigured()) {
-      try {
-        const fixture = await loadFixture<unknown>("target-approved-public");
-        const dto = mapFixtureToTargetProfileDto(fixture);
-        if (dto.targetId === args.targetId) {
-          return { ...dto, latestRun: null };
-        }
-        return null;
-      } catch {
-        return null;
-      }
-    }
-
-    const doc = await ctx.db
-      .query("targets")
-      .withIndex("by_targetId", (q) => q.eq("targetId", args.targetId))
-      .unique();
-
-    if (!doc) return null;
-
-    const latestRun = await ctx.db
-      .query("workflowRuns")
-      .withIndex("by_targetId", (q) => q.eq("targetId", doc.targetId))
-      .order("desc")
-      .take(1);
-
-    return {
-      ...toTargetProfileDto(doc),
-      latestRun: latestRun[0]
-        ? {
-            runId: latestRun[0].runId,
-            status: latestRun[0].status,
-            currentPhase: latestRun[0].currentPhase,
-          }
-        : null,
-    };
-  },
-});
-
-// ============================================================================
 // Mutations
 // ============================================================================
 
 /**
- * Public mutation: atomic 5-insert orchestration for target intake.
- *
- * MVP: NO auth check — any user may submit.
+ * Protected public mutation: atomic target intake orchestration.
  * Creates target + authorization scope + workflow run + approval gate + audit event
  * atomically within a single Convex transaction.
  */
@@ -257,7 +62,12 @@ export const createFull = mutation({
     rateLimit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const actor = args.approverName ?? "anonymous";
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Authentication required.");
+    }
+    const profile = await requireOperatorOrAdmin(ctx);
+    const actor = profile.name ?? identity.tokenIdentifier;
     const nowISO = new Date().toISOString();
 
     // -----------------------------------------------------------------------
@@ -347,14 +157,28 @@ export const createFull = mutation({
     // -----------------------------------------------------------------------
     // 7. Insert audit event
     // -----------------------------------------------------------------------
-    await ctx.db.insert("auditEvents", {
-      eventId: crypto.randomUUID(),
+    await appendAuditEvent(ctx, {
       targetId: args.targetId,
       eventType: "target-created",
       actor,
-      timestamp: nowISO,
       runId,
       details: { approver: actor, autoApproved: true },
+    });
+
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "approval-granted",
+      actor,
+      runId,
+      details: { gateType: "intake", autoApproved: true },
+    });
+
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "workflow-started",
+      actor,
+      runId,
+      details: { phase: "intake", status: "pending" },
     });
 
     // -----------------------------------------------------------------------
