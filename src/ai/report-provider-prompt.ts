@@ -1,8 +1,33 @@
-import { normalizeReportInput } from "../reports/report-normalizer.ts";
+import {
+  normalizeReportInput,
+  type NormalizedReportInput,
+} from "../reports/report-normalizer.ts";
 import type {
   GenerateRemediationReportInput,
   ReportAudience,
+  RemediationReport,
 } from "../shared/contracts.ts";
+
+type PromptReportSectionKey = keyof RemediationReport["sections"];
+
+type PromptReportSectionShape = {
+  title: "string";
+  narrative: "string";
+  bullets: ["string"];
+};
+
+type PromptOutputShape = {
+  id: "string";
+  municipalityId: NormalizedReportInput["subject"]["id"];
+  variant: ReportAudience;
+  generatedAt: NormalizedReportInput["generatedAt"];
+  title: "string";
+  summary: "string";
+  priorityActions: ["string"];
+  findings: "array matching the supplied normalized finding shape";
+  sections: Record<PromptReportSectionKey, PromptReportSectionShape>;
+  generatedBy: "ai-provider";
+};
 
 function buildPromptInstructions(variant: ReportAudience): string[] {
   return [
@@ -21,10 +46,14 @@ function getAudienceDescription(variant: ReportAudience): string {
     : "Plain-language, accessible to nontechnical owners, and free of unnecessary jargon.";
 }
 
+function buildReportSectionShape(): PromptReportSectionShape {
+  return { title: "string", narrative: "string", bullets: ["string"] };
+}
+
 function buildOutputShape(
-  normalized: ReturnType<typeof normalizeReportInput>,
+  normalized: NormalizedReportInput,
   variant: ReportAudience,
-) {
+): PromptOutputShape {
   return {
     id: "string",
     municipalityId: normalized.subject.id,
@@ -35,47 +64,15 @@ function buildOutputShape(
     priorityActions: ["string"],
     findings: "array matching the supplied normalized finding shape",
     sections: {
-      scope: { title: "string", narrative: "string", bullets: ["string"] },
-      authorization: {
-        title: "string",
-        narrative: "string",
-        bullets: ["string"],
-      },
-      methodology: {
-        title: "string",
-        narrative: "string",
-        bullets: ["string"],
-      },
-      findingsOverview: {
-        title: "string",
-        narrative: "string",
-        bullets: ["string"],
-      },
-      skippedTests: {
-        title: "string",
-        narrative: "string",
-        bullets: ["string"],
-      },
-      validationStatus: {
-        title: "string",
-        narrative: "string",
-        bullets: ["string"],
-      },
-      limitations: {
-        title: "string",
-        narrative: "string",
-        bullets: ["string"],
-      },
-      remediationChecklist: {
-        title: "string",
-        narrative: "string",
-        bullets: ["string"],
-      },
-      verificationGuidance: {
-        title: "string",
-        narrative: "string",
-        bullets: ["string"],
-      },
+      scope: buildReportSectionShape(),
+      authorization: buildReportSectionShape(),
+      methodology: buildReportSectionShape(),
+      findingsOverview: buildReportSectionShape(),
+      skippedTests: buildReportSectionShape(),
+      validationStatus: buildReportSectionShape(),
+      limitations: buildReportSectionShape(),
+      remediationChecklist: buildReportSectionShape(),
+      verificationGuidance: buildReportSectionShape(),
     },
     generatedBy: "ai-provider",
   };
