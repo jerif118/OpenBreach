@@ -2,11 +2,13 @@ import type {
   GenerateRemediationReportInput,
   ReportFinding,
   RiskLevel,
-  ScanResult,
 } from "../shared/contracts.ts";
+import { scanResultSchema } from "../shared/contracts.ts";
 import {
   asObject,
   normalizeRiskLevel,
+  pickArray,
+  pickBoolean,
   pickNumber,
   pickObject,
   pickString,
@@ -21,7 +23,37 @@ export type NormalizedSubject = {
   state?: string;
 };
 
-export function getScanLikeObject(input: GenerateRemediationReportInput) {
+export type ReportScanLike = {
+  municipalityId?: string;
+  requestedUrl?: string;
+  finalUrl?: string;
+  reachable?: boolean;
+  httpStatus?: number;
+  riskScore?: number;
+  score?: number;
+  riskLevel?: RiskLevel | string;
+  findings?: unknown[];
+};
+
+function toLooseScanLikeObject(
+  source: Record<string, unknown>,
+): ReportScanLike {
+  return {
+    municipalityId: pickString(source, ["municipalityId"]),
+    requestedUrl: pickString(source, ["requestedUrl"]),
+    finalUrl: pickString(source, ["finalUrl"]),
+    reachable: pickBoolean(source, ["reachable"]),
+    httpStatus: pickNumber(source, ["httpStatus"]),
+    riskScore: pickNumber(source, ["riskScore"]),
+    score: pickNumber(source, ["score"]),
+    riskLevel: pickString(source, ["riskLevel"]),
+    findings: pickArray(source, ["findings"]),
+  };
+}
+
+export function getScanLikeObject(
+  input: GenerateRemediationReportInput,
+): ReportScanLike | null {
   if (input.scan) {
     return input.scan;
   }
@@ -33,14 +65,16 @@ export function getScanLikeObject(input: GenerateRemediationReportInput) {
     return null;
   }
 
-  try {
-    return scanCandidate as ScanResult;
-  } catch {
-    return null;
-  }
+  const parsedScan = scanResultSchema.safeParse(scanCandidate);
+
+  return parsedScan.success
+    ? parsedScan.data
+    : toLooseScanLikeObject(scanCandidate);
 }
 
-export function deriveSubject(input: GenerateRemediationReportInput) {
+export function deriveSubject(
+  input: GenerateRemediationReportInput,
+): NormalizedSubject {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
   const target = pickObject(source, ["target", "subject", "targetProfile"]);
@@ -88,7 +122,7 @@ export function deriveSubject(input: GenerateRemediationReportInput) {
 export function deriveRiskScore(
   findings: ReportFinding[],
   input: GenerateRemediationReportInput,
-) {
+): number {
   const source = asObject(input.sourceData);
   const scan = getScanLikeObject(input);
   const directScore =
