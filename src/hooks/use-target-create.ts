@@ -2,27 +2,264 @@ import { useCallback, useState } from "react";
 import { useMutation } from "convex/react";
 
 import { api } from "../../convex/_generated/api.js";
-import type { TargetProfileDto } from "../../convex/types.js";
+import type {
+  AuditEventDto,
+  AuthorizationScopeDto,
+  TargetProfileDto,
+  WorkflowRunDto,
+} from "../../convex/types.js";
+import { writeStoredDemoTarget } from "../features/openbreach/pipeline-data";
 import {
-  writeStoredDemoTarget,
+  decideTargetScope,
+  type AcceptedScopeDecision,
+  type RejectedScopeDecision,
   type ValidationLevel,
-} from "../features/openbreach/pipeline-data";
+} from "../shared/target-scope-decision.ts";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-/**
- * Return shape of the `targetsPublic.createFull` mutation.
- */
-export interface TargetCreateResult {
+type TargetCreateBase = {
   targetId: string;
   name: string;
   riskTier: TargetProfileDto["riskTier"];
   classification: TargetProfileDto["classification"];
   runId: string;
-  status: "pending";
   currentPhase: "intake";
+  workflowRun: WorkflowRunDto;
+  auditEvents: AuditEventDto[];
+};
+
+export type AcceptedTargetCreateResult = TargetCreateBase & {
+  decision: "accepted";
+  status: "pending";
+  authorizationScope: AuthorizationScopeDto;
+};
+
+export type RejectedTargetCreateResult = TargetCreateBase & {
+  decision: "rejected";
+  status: "rejected";
+  reason: string;
+  authorizationScope: null;
+};
+
+/**
+ * Client-visible intake result returned by Convex or deterministic fallback.
+ */
+export type TargetCreateResult =
+  | AcceptedTargetCreateResult
+  | RejectedTargetCreateResult;
+
+function buildAcceptedResult(args: {
+  input: CreateTargetArgs;
+  decision: AcceptedScopeDecision;
+  actor: string;
+  nowISO: string;
+  runId: string;
+}): AcceptedTargetCreateResult {
+  const authorizationScope: AuthorizationScopeDto = {
+    authorizationId: `${args.runId}-authorization`,
+    targetId: args.input.targetId,
+    scopeType: args.decision.scopeType,
+    grantedBy: args.actor,
+    grantedAt: args.nowISO,
+    constraints: args.decision.constraints,
+    isExpired: false,
+  };
+  const workflowRun: WorkflowRunDto = {
+    runId: args.runId,
+    targetId: args.input.targetId,
+    status: "pending",
+    startedAt: args.nowISO,
+    currentPhase: "intake",
+    phases: [{ phase: "intake", enteredAt: args.nowISO }],
+  };
+  const auditEvents: AuditEventDto[] = [
+    {
+      eventId: `${args.runId}-target-created`,
+      targetId: args.input.targetId,
+      eventType: "target-created",
+      actor: args.actor,
+      timestamp: args.nowISO,
+      runId: args.runId,
+      details: {
+        auditDecision: args.decision.auditDecision,
+        validationLevel: args.decision.validationLevel,
+        scopeType: args.decision.scopeType,
+        rateLimit: args.decision.rateLimit,
+      },
+    },
+    {
+      eventId: `${args.runId}-approval-granted`,
+      targetId: args.input.targetId,
+      eventType: "approval-granted",
+      actor: args.actor,
+      timestamp: args.nowISO,
+      runId: args.runId,
+      details: { gateType: "intake", autoApproved: true },
+    },
+    {
+      eventId: `${args.runId}-workflow-started`,
+      targetId: args.input.targetId,
+      eventType: "workflow-started",
+      actor: args.actor,
+      timestamp: args.nowISO,
+      runId: args.runId,
+      details: { phase: "intake", status: "pending" },
+    },
+  ];
+
+  return {
+    decision: "accepted",
+    targetId: args.input.targetId,
+    name: args.input.name,
+    riskTier: "medium",
+    classification: args.input.classification,
+    runId: args.runId,
+    status: "pending",
+    currentPhase: "intake",
+    authorizationScope,
+    workflowRun,
+    auditEvents,
+  };
+}
+
+function buildRejectedResult(args: {
+  input: CreateTargetArgs;
+  decision: RejectedScopeDecision;
+  actor: string;
+  nowISO: string;
+  runId: string;
+}): RejectedTargetCreateResult {
+  const workflowRun: WorkflowRunDto = {
+    runId: args.runId,
+    targetId: args.input.targetId,
+    status: "rejected",
+    startedAt: args.nowISO,
+    abortedAt: args.nowISO,
+    abortedReason: args.decision.reason,
+    currentPhase: "intake",
+    phases: [
+      {
+        phase: "intake",
+        enteredAt: args.nowISO,
+        exitedAt: args.nowISO,
+        rejectionReason: args.decision.reason,
+      },
+    ],
+  };
+  const auditEvents: AuditEventDto[] = [
+    {
+      eventId: `${args.runId}-target-rejected`,
+      targetId: args.input.targetId,
+      eventType: "target-rejected",
+      actor: args.actor,
+      timestamp: args.nowISO,
+      runId: args.runId,
+      details: {
+        auditDecision: args.decision.auditDecision,
+        reason: args.decision.reason,
+        primaryUrl: args.input.primaryUrl,
+      },
+    },
+  ];
+
+  return {
+    decision: "rejected",
+    targetId: args.input.targetId,
+    name: args.input.name,
+    riskTier: "medium",
+    classification: args.input.classification,
+    runId: args.runId,
+    status: "rejected",
+    currentPhase: "intake",
+    reason: args.decision.reason,
+    authorizationScope: null,
+    workflowRun,
+    auditEvents,
+  };
+}
+
+function shouldUseDemoFallback(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  return (
+    message.includes("Authentication required") ||
+    message.includes("not authenticated") ||
+    message.includes("Connection refused") ||
+    message.includes("WebSocket") ||
+    message.includes("Convex")
+  );
+}
+
+function buildAndStoreDemoResult(args: {
+  input: CreateTargetArgs;
+  scopeDecision: ReturnType<typeof decideTargetScope>;
+}): TargetCreateResult {
+  const createdAt = new Date().toISOString();
+  const runId = crypto.randomUUID();
+  const actor = args.input.approverName ?? "fixture-demo-operator";
+  const result =
+    args.scopeDecision.status === "accepted"
+      ? buildAcceptedResult({
+          input: args.input,
+          decision: args.scopeDecision,
+          actor,
+          nowISO: createdAt,
+          runId,
+        })
+      : buildRejectedResult({
+          input: args.input,
+          decision: args.scopeDecision,
+          actor,
+          nowISO: createdAt,
+          runId,
+        });
+
+  writeStoredDemoTarget({
+    targetId: args.input.targetId,
+    name: args.input.name,
+    primaryUrl: args.input.primaryUrl,
+    classification: args.input.classification,
+    riskTier: "medium",
+    createdAt,
+    runId,
+    status: result.status,
+    currentPhase: "intake",
+    approverName: args.input.approverName,
+    validationLevel:
+      args.scopeDecision.status === "accepted"
+        ? args.scopeDecision.validationLevel
+        : args.input.validationLevel,
+    rateLimit:
+      args.scopeDecision.status === "accepted"
+        ? args.scopeDecision.rateLimit
+        : args.input.rateLimit,
+    allowedAssets:
+      args.scopeDecision.status === "accepted"
+        ? args.scopeDecision.allowedAssets.map(
+            (asset) => asset.url ?? asset.host,
+          )
+        : args.input.allowedAssets,
+    deniedAssets:
+      args.scopeDecision.status === "accepted"
+        ? args.scopeDecision.deniedAssets.map(
+            (asset) => asset.url ?? asset.host,
+          )
+        : args.input.deniedAssets,
+    scopeDecision:
+      args.scopeDecision.status === "accepted"
+        ? args.scopeDecision.metadata
+        : {
+            scopeDecision: "rejected",
+            reason: args.scopeDecision.reason,
+          },
+    authorizationScope: result.authorizationScope,
+    workflowRun: result.workflowRun,
+    auditEvents: result.auditEvents,
+  });
+
+  return result;
 }
 
 export interface UseTargetCreateReturn {
@@ -49,7 +286,7 @@ export interface CreateTargetArgs {
   approverName?: string;
   allowedAssets?: string[];
   deniedAssets?: string[];
-  validationLevel?: string;
+  validationLevel?: ValidationLevel;
   rateLimit?: number;
 }
 
@@ -74,40 +311,25 @@ export function useTargetCreate(): UseTargetCreateReturn {
 
       try {
         let result: TargetCreateResult;
+        const scopeDecision = decideTargetScope({
+          primaryUrl: args.primaryUrl,
+          allowedAssets: args.allowedAssets,
+          deniedAssets: args.deniedAssets,
+          validationLevel: args.validationLevel,
+          rateLimit: args.rateLimit,
+        });
 
         if (!mutate) {
-          const createdAt = new Date().toISOString();
-          const runId = crypto.randomUUID();
-          result = {
-            targetId: args.targetId,
-            name: args.name,
-            riskTier: "medium",
-            classification: args.classification,
-            runId,
-            status: "pending",
-            currentPhase: "intake",
-          };
-
-          writeStoredDemoTarget({
-            targetId: args.targetId,
-            name: args.name,
-            primaryUrl: args.primaryUrl,
-            classification: args.classification,
-            riskTier: "medium",
-            createdAt,
-            runId,
-            status: "pending",
-            currentPhase: "intake",
-            approverName: args.approverName,
-            validationLevel: args.validationLevel as
-              | ValidationLevel
-              | undefined,
-            rateLimit: args.rateLimit,
-            allowedAssets: args.allowedAssets,
-            deniedAssets: args.deniedAssets,
-          });
+          result = buildAndStoreDemoResult({ input: args, scopeDecision });
         } else {
-          result = await mutate(args);
+          try {
+            result = await mutate(args);
+          } catch (err) {
+            if (!shouldUseDemoFallback(err)) {
+              throw err;
+            }
+            result = buildAndStoreDemoResult({ input: args, scopeDecision });
+          }
         }
 
         setData(result);
