@@ -27,6 +27,8 @@ import {
   targetProfileSchema,
   technologyFingerprintSchema,
   testPlanSchema,
+  type GenerateRemediationReportBatchRecord,
+  type GenerateRemediationReportResult,
   validationResultSchema,
   vulnerabilityHypothesisSchema,
   workflowRunSchema,
@@ -35,12 +37,6 @@ import {
 // ============================================================
 // Legacy fixture pipeline (hard-coded imports)
 // ============================================================
-
-import { type GenerateRemediationReportResult } from "../src/shared/contracts.ts";
-
-type GenerateRemediationReportBatchRecord = {
-  result: { status: string };
-};
 
 type CompletedReportRecord = GenerateRemediationReportBatchRecord & {
   result: Extract<GenerateRemediationReportResult, { status: "completed" }>;
