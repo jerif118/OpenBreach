@@ -193,6 +193,8 @@ pnpm auth:writes:validate
 pnpm typecheck
 ```
 
+`pnpm pivot:validate` is the aggregate persistence check. It runs `typecheck`, `contracts:test`, `fixtures:validate`, `auth:writes:validate`, and `pivot:smoke`. `pnpm pivot:smoke` validates the implemented Issue #65 demo contract: `targets.listDemo()`, `targets.getDemo({ targetId })`, fixture DTO parity, bounded reads, indexed detail reads, and unknown-target `null` behavior. Run `pnpm convex:codegen` only when Convex function references or generated API expectations change.
+
 Useful fixture and report generation commands:
 
 ```bash
