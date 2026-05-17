@@ -16,7 +16,19 @@ import {
   remediationReportVariantsSchema,
   scanResultSchema,
   selectedMunicipalityReportContextSchema,
+  type GenerateRemediationReportBatchRecord,
+  type GenerateRemediationReportResult,
 } from "../src/shared/contracts.ts";
+
+type CompletedReportRecord = GenerateRemediationReportBatchRecord & {
+  result: Extract<GenerateRemediationReportResult, { status: "completed" }>;
+};
+
+function isCompletedReportRecord(
+  record: GenerateRemediationReportBatchRecord,
+): record is CompletedReportRecord {
+  return record.result.status === "completed";
+}
 
 municipalitySchema.parse(municipalityFixture);
 scanResultSchema.parse(scanFixture);
@@ -26,13 +38,10 @@ const reportArtifact = reportGenerationArtifactSchema.parse(
   reportGenerationFixture,
 );
 const firstCompletedReport = reportArtifact.batch.results.find(
-  (record) => record.result.status === "completed",
+  isCompletedReportRecord,
 );
 
-if (
-  !firstCompletedReport ||
-  firstCompletedReport.result.status !== "completed"
-) {
+if (!firstCompletedReport) {
   throw new Error("Report generation fixture must include a completed report.");
 }
 
