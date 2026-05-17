@@ -7,6 +7,7 @@ import { renderReportBatchPdfs } from "../src/mastra/workflows/report-workflow.t
 import { selectTopRiskReportContexts } from "../src/mastra/tools/report-context-tool.ts";
 import {
   generateRemediationReportResultSchema,
+  type GenerateRemediationReportBatchOutput,
   municipalitySchema,
   type ReportGenerationArtifact,
   reportGenerationArtifactSchema,
@@ -26,6 +27,9 @@ const DEFAULT_GENERATED_AT = new Date().toISOString();
 
 const MAX_LIMIT = 1_000;
 
+type ReportBatchOutput = GenerateRemediationReportBatchOutput;
+type ReportBatchRecord = ReportBatchOutput["results"][number];
+
 type CompletedReportResult = Extract<
   GenerateRemediationReportResult,
   { status: "completed" }
@@ -40,7 +44,7 @@ function sanitizePersistenceFindings(
 }
 
 function assertCompleteBatch(
-  batch: Awaited<ReturnType<typeof renderReportBatchPdfs>>,
+  batch: ReportBatchOutput,
   selectedCount: number,
 ): void {
   if (batch.summary.completed !== selectedCount || batch.summary.failed !== 0) {
@@ -64,7 +68,7 @@ function requireSelectedContext(
 }
 
 function requireCompletedResult(
-  record: Awaited<ReturnType<typeof renderReportBatchPdfs>>["results"][number],
+  record: ReportBatchRecord,
 ): CompletedReportResult {
   const result = generateRemediationReportResultSchema.parse(record.result);
 
@@ -144,7 +148,7 @@ function buildPersistenceArgs({
   batch,
   selected,
 }: {
-  batch: Awaited<ReturnType<typeof renderReportBatchPdfs>>;
+  batch: ReportBatchOutput;
   selected: SelectedMunicipalityReportContext[];
 }): ReportPersistenceArgs[] {
   const selectedByMunicipalityId = new Map(
@@ -167,7 +171,7 @@ function buildArtifact({
   selected,
   convexPersistenceArgs,
 }: {
-  batch: Awaited<ReturnType<typeof renderReportBatchPdfs>>;
+  batch: ReportBatchOutput;
   selected: SelectedMunicipalityReportContext[];
   convexPersistenceArgs: ReportPersistenceArgs[];
 }): ReportGenerationArtifact {
