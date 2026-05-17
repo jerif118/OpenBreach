@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
-import { requireOperatorOrAdmin } from "./auth";
 import type { AuditEventDto } from "./types";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -73,7 +73,9 @@ export const append = internalMutation({
       v.literal("gate-rejected"),
       v.literal("finding-created"),
       v.literal("finding-updated"),
+      v.literal("validation-recorded"),
       v.literal("report-generated"),
+      v.literal("report-completed"),
       v.literal("auth-granted"),
       v.literal("auth-revoked"),
       v.literal("manual-override"),
@@ -86,9 +88,7 @@ export const append = internalMutation({
     userAgent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
-
-    const id = await ctx.db.insert("auditEvents", {
+    const result = await appendAuditEvent(ctx, {
       eventId: args.eventId,
       targetId: args.targetId,
       eventType: args.eventType,
@@ -100,7 +100,7 @@ export const append = internalMutation({
       userAgent: args.userAgent,
     });
 
-    return { id, eventId: args.eventId };
+    return result;
   },
 });
 
