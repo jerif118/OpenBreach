@@ -99,7 +99,9 @@ export function useTargetCreate(): UseTargetCreateReturn {
             status: "pending",
             currentPhase: "intake",
             approverName: args.approverName,
-            validationLevel: args.validationLevel as ValidationLevel | undefined,
+            validationLevel: args.validationLevel as
+              | ValidationLevel
+              | undefined,
             rateLimit: args.rateLimit,
             allowedAssets: args.allowedAssets,
             deniedAssets: args.deniedAssets,
