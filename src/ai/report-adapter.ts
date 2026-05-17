@@ -44,20 +44,22 @@ export type CreateReportAiAdapterOptions = {
   provider?: ReportAiAdapterProvider;
 };
 
-function getConfiguredProviderKey() {
+function getConfiguredProviderKey(): string | undefined {
+  const viteProviderKey = import.meta.env?.VITE_AI_PROVIDER_KEY;
+
   return (
     process.env.AI_PROVIDER_KEY ??
     process.env.OPENROUTER_API_KEY ??
     process.env.VITE_AI_PROVIDER_KEY ??
-    import.meta.env?.VITE_AI_PROVIDER_KEY
+    (typeof viteProviderKey === "string" ? viteProviderKey : undefined)
   );
 }
 
 function getConfiguredProvider(): ReportAiAdapterProvider {
-  return process.env.AI_PROVIDER === "openrouter" ? "openrouter" : "openrouter";
+  return "openrouter";
 }
 
-function getConfiguredModel() {
+function getConfiguredModel(): string {
   return process.env.AI_PROVIDER_MODEL ?? "anthropic/claude-sonnet-4";
 }
 
@@ -75,16 +77,18 @@ async function runTanStackChat({
   provider,
   providerKey,
   systemPrompts,
-}: ReportAiChatExecutorInput) {
+}: ReportAiChatExecutorInput): Promise<string> {
   const adapters: Record<
     ReportAiAdapterProvider,
     () => ReturnType<typeof createOpenRouterText>
   > = {
-    openrouter: () =>
-      createOpenRouterText(
-        model as Parameters<typeof createOpenRouterText>[0],
-        providerKey,
-      ),
+    openrouter: () => {
+      const openRouterModel = model as Parameters<
+        typeof createOpenRouterText
+      >[0];
+
+      return createOpenRouterText(openRouterModel, providerKey);
+    },
   };
 
   return await chat({
