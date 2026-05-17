@@ -56,8 +56,12 @@ export function pickString(
   for (const key of keys) {
     const value = source[key];
 
-    if (typeof value === "string" && normalizeWhitespace(value)) {
-      return normalizeWhitespace(value);
+    if (typeof value === "string") {
+      const normalized = normalizeWhitespace(value);
+
+      if (normalized) {
+        return normalized;
+      }
     }
   }
 
