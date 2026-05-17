@@ -12,20 +12,7 @@ import {
   type SelectedMunicipalityReportContext,
 } from "../src/shared/contracts.ts";
 import { assertPageTreeReferencesPageObjects } from "./report-pdf-validation-assertions.ts";
-
-function requiredElement<T>(
-  values: readonly T[],
-  index: number,
-  message: string,
-): T {
-  const value = values[index];
-
-  if (value === undefined) {
-    throw new Error(message);
-  }
-
-  return value;
-}
+import { requiredElement } from "./report-pdf-validation-helpers.ts";
 
 function assertPdfIncludes(
   pdfContent: string,
