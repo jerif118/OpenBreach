@@ -20,45 +20,9 @@ const environment = readEnvironment();
 const allRecords = municipalitySchema.array().parse(municipalities);
 const idFilter = environment.municipalityIds;
 const records = selectMunicipalities(allRecords, idFilter);
-
-let results: RawScanEvidence[];
-
-if (environment.fromFixture) {
-  results = await loadFixtureResults(
-    environment.fixturePath,
-    idFilter,
-    records,
-  );
-} else {
-  log(
-    `Running live passive scan against ${records.length} municipalit${
-      records.length === 1 ? "y" : "ies"
-    } (concurrency=${environment.concurrency}, timeoutMs=${environment.controls.timeoutMs}, retries=${environment.controls.retries}).`,
-  );
-  log(
-    "Set SCAN_FROM_FIXTURE=1 to skip the network and reuse data/scans/latest.scan-results.json.",
-  );
-
-  results = await runWithConcurrency(
-    records,
-    environment.concurrency,
-    async (municipality, index) => {
-      const startedAt = Date.now();
-      const result = await scanWebsite(municipality, {
-        source: "convex",
-        controls: environment.controls,
-      });
-      const elapsedMs = Date.now() - startedAt;
-      log(
-        `[${index + 1}/${records.length}] ${municipality.id} ${describeOutcome(result)} in ${elapsedMs}ms`,
-      );
-      return result;
-    },
-  );
-
-  const reachableCount = results.filter((r) => r.reachable).length;
-  log(`Live scan complete: ${reachableCount}/${results.length} reachable.`);
-}
+const results = environment.fromFixture
+  ? await loadFixtureResults(environment.fixturePath, idFilter, records)
+  : await runLiveScan(records, environment);
 
 process.stdout.write(JSON.stringify(toRawScanPersistenceArgs(results)));
 
@@ -125,6 +89,42 @@ async function loadFixtureResults(
   log(
     `Loaded ${results.length} fixture scan result${results.length === 1 ? "" : "s"}.`,
   );
+
+  return results;
+}
+
+async function runLiveScan(
+  records: typeof allRecords,
+  environment: ReturnType<typeof readEnvironment>,
+): Promise<RawScanEvidence[]> {
+  log(
+    `Running live passive scan against ${records.length} municipalit${
+      records.length === 1 ? "y" : "ies"
+    } (concurrency=${environment.concurrency}, timeoutMs=${environment.controls.timeoutMs}, retries=${environment.controls.retries}).`,
+  );
+  log(
+    "Set SCAN_FROM_FIXTURE=1 to skip the network and reuse data/scans/latest.scan-results.json.",
+  );
+
+  const results = await runWithConcurrency(
+    records,
+    environment.concurrency,
+    async (municipality, index) => {
+      const startedAt = Date.now();
+      const result = await scanWebsite(municipality, {
+        source: "convex",
+        controls: environment.controls,
+      });
+      const elapsedMs = Date.now() - startedAt;
+      log(
+        `[${index + 1}/${records.length}] ${municipality.id} ${describeOutcome(result)} in ${elapsedMs}ms`,
+      );
+      return result;
+    },
+  );
+
+  const reachableCount = results.filter((r) => r.reachable).length;
+  log(`Live scan complete: ${reachableCount}/${results.length} reachable.`);
 
   return results;
 }
