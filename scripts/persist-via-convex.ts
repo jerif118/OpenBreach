@@ -13,10 +13,7 @@ const payloadSchemas = {
 
 type PayloadSchema = (typeof payloadSchemas)[keyof typeof payloadSchemas];
 type MutationName = keyof typeof payloadSchemas;
-type PayloadFor<TMutationName extends MutationName> = ReturnType<
-  (typeof payloadSchemas)[TMutationName]["parse"]
->;
-type PersistencePayload = PayloadFor<MutationName>;
+type PersistencePayload = ReturnType<PayloadSchema["parse"]>;
 
 const DEFAULT_BATCH_SIZE = 10;
 
@@ -34,7 +31,7 @@ if (!rawFunctionName) {
 }
 
 const functionName = resolveMutationName(rawFunctionName);
-const payloadSchema = resolvePayloadSchema(functionName);
+const payloadSchema = payloadSchemas[functionName];
 
 const batchSize = parseBatchSize(
   process.argv[3] ?? process.env.PERSIST_BATCH_SIZE,
@@ -76,12 +73,6 @@ function resolveMutationName(functionName: string): MutationName {
     exitWithInputError(`No payload schema configured for ${functionName}.`);
   }
   return functionName;
-}
-
-function resolvePayloadSchema<TMutationName extends MutationName>(
-  functionName: TMutationName,
-): (typeof payloadSchemas)[TMutationName] {
-  return payloadSchemas[functionName];
 }
 
 function parseBatchSize(rawBatchSize: string | undefined): number {
