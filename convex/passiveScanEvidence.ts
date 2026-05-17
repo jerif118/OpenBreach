@@ -3,6 +3,7 @@ import { internalQuery, internalMutation } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
 import type { PassiveScanEvidenceDto } from "./types";
+import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
@@ -152,7 +153,7 @@ export const upsert = internalMutation({
     envelopeCollectedBy: v.string(),
   },
   handler: async (ctx, args) => {
-    await requireOperatorOrAdmin(ctx);
+    const actor = await requireOperatorOrAdmin(ctx);
 
     const existing = await ctx.db
       .query("passiveScanEvidence")
@@ -182,6 +183,17 @@ export const upsert = internalMutation({
 
     if (existing) {
       await ctx.db.replace(existing._id, document);
+      await appendAuditEvent(ctx, {
+        targetId: args.targetId,
+        eventType: "evidence-recorded",
+        actor: actor.name ?? actor.tokenIdentifier,
+        runId: args.runId,
+        details: {
+          evidenceId: args.evidenceId,
+          source: args.source,
+          action: "updated",
+        },
+      });
       return {
         id: existing._id,
         evidenceId: args.evidenceId,
@@ -190,6 +202,17 @@ export const upsert = internalMutation({
     }
 
     const id = await ctx.db.insert("passiveScanEvidence", document);
+    await appendAuditEvent(ctx, {
+      targetId: args.targetId,
+      eventType: "evidence-recorded",
+      actor: actor.name ?? actor.tokenIdentifier,
+      runId: args.runId,
+      details: {
+        evidenceId: args.evidenceId,
+        source: args.source,
+        action: "created",
+      },
+    });
     return { id, evidenceId: args.evidenceId, action: "created" };
   },
 });
