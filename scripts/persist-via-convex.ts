@@ -12,6 +12,11 @@ const payloadSchemas = {
 } as const;
 
 type PayloadSchema = (typeof payloadSchemas)[keyof typeof payloadSchemas];
+type MutationName = keyof typeof payloadSchemas;
+type PayloadFor<TMutationName extends MutationName> = ReturnType<
+  (typeof payloadSchemas)[TMutationName]["parse"]
+>;
+type PersistencePayload = PayloadFor<MutationName>;
 
 // Stream `{ "results": [...] }` JSON on stdin and forward it to a Convex
 // mutation in chunks via the Convex CLI. Required because Linux enforces a
@@ -19,13 +24,14 @@ type PayloadSchema = (typeof payloadSchemas)[keyof typeof payloadSchemas];
 // the total ARG_MAX, so passing a full enriched-scan payload to
 // `convex run <fn> "$(...)"` fails with E2BIG long before the system limit.
 
-const functionName = process.argv[2];
-if (!functionName) {
+const rawFunctionName = process.argv[2];
+if (!rawFunctionName) {
   exitWithInputError(
     "Usage: node scripts/persist-via-convex.ts <function-name> [batch-size]",
   );
 }
 
+const functionName = resolveMutationName(rawFunctionName);
 const payloadSchema = resolvePayloadSchema(functionName);
 
 const batchSize = Math.max(
@@ -60,13 +66,21 @@ function exitWithInputError(message: string): never {
   process.exit(2);
 }
 
-function resolvePayloadSchema(functionName: string): PayloadSchema {
-  const payloadSchema =
-    payloadSchemas[functionName as keyof typeof payloadSchemas];
-  if (!payloadSchema) {
+function isMutationName(functionName: string): functionName is MutationName {
+  return Object.prototype.hasOwnProperty.call(payloadSchemas, functionName);
+}
+
+function resolveMutationName(functionName: string): MutationName {
+  if (!isMutationName(functionName)) {
     exitWithInputError(`No payload schema configured for ${functionName}.`);
   }
-  return payloadSchema;
+  return functionName;
+}
+
+function resolvePayloadSchema<TMutationName extends MutationName>(
+  functionName: TMutationName,
+): (typeof payloadSchemas)[TMutationName] {
+  return payloadSchemas[functionName];
 }
 
 async function parseStdinJson(): Promise<unknown> {
@@ -85,10 +99,10 @@ async function parseStdinJson(): Promise<unknown> {
 }
 
 function validatePayload(
-  functionName: string,
+  functionName: MutationName,
   payloadSchema: PayloadSchema,
   parsedPayload: unknown,
-): { results: unknown[] } {
+): PersistencePayload {
   try {
     return payloadSchema.parse(parsedPayload);
   } catch (error) {
@@ -99,8 +113,8 @@ function validatePayload(
 }
 
 function runBatches(
-  functionName: string,
-  results: unknown[],
+  functionName: MutationName,
+  results: readonly unknown[],
   batchSize: number,
   batchCount: number,
 ): void {
@@ -112,10 +126,10 @@ function runBatches(
 }
 
 function runBatch(
-  functionName: string,
+  functionName: MutationName,
   batchIndex: number,
   batchCount: number,
-  slice: unknown[],
+  slice: readonly unknown[],
 ): void {
   const batchArg = JSON.stringify({ results: slice });
 
