@@ -310,6 +310,8 @@ sequenceDiagram
 
 ## Local Setup
 
+For the detailed fixture-first setup path, optional Convex/Clerk/AI configuration, current Mastra/report behavior, and stale command caveats, see [`docs/demo-runbook.md`](./docs/demo-runbook.md).
+
 Prerequisites:
 
 - Node.js `24.15.0`, matching `package.json`.
