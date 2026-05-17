@@ -6,10 +6,6 @@ import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
 
-// ============================================================================
-// DTO Mapper
-// ============================================================================
-
 function toAuditEventDto(doc: Doc<"auditEvents">): AuditEventDto {
   return {
     eventId: doc.eventId,
@@ -23,10 +19,6 @@ function toAuditEventDto(doc: Doc<"auditEvents">): AuditEventDto {
     userAgent: doc.userAgent ?? undefined,
   };
 }
-
-// ============================================================================
-// Queries
-// ============================================================================
 
 export const listByTarget = internalQuery({
   args: {
@@ -47,10 +39,6 @@ export const listByTarget = internalQuery({
     return docs.map(toAuditEventDto);
   },
 });
-
-// ============================================================================
-// Mutations
-// ============================================================================
 
 export const append = internalMutation({
   args: {
@@ -88,25 +76,9 @@ export const append = internalMutation({
     userAgent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const result = await appendAuditEvent(ctx, {
-      eventId: args.eventId,
-      targetId: args.targetId,
-      eventType: args.eventType,
-      actor: args.actor,
-      timestamp: args.timestamp,
-      runId: args.runId,
-      details: args.details,
-      ipAddress: args.ipAddress,
-      userAgent: args.userAgent,
-    });
-
-    return result;
+    return appendAuditEvent(ctx, args);
   },
 });
-
-// ============================================================================
-// Helpers
-// ============================================================================
 
 function normalizeListLimit(limit: number | undefined) {
   if (limit === undefined) {
