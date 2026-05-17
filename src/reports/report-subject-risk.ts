@@ -13,6 +13,7 @@ import {
   pickObject,
   pickString,
   severityScore,
+  type LooseRecord,
 } from "./report-normalizer-utils.ts";
 
 export type NormalizedSubject = {
@@ -31,12 +32,12 @@ export type ReportScanLike = {
   httpStatus?: number;
   riskScore?: number;
   score?: number;
-  riskLevel?: RiskLevel | string;
+  riskLevel?: string;
   findings?: unknown[];
 };
 
 function toLooseScanLikeObject(
-  source: Record<string, unknown>,
+  source: LooseRecord,
 ): ReportScanLike {
   return {
     municipalityId: pickString(source, ["municipalityId"]),
