@@ -31,7 +31,7 @@ function TargetDetailPage() {
     return (
       <OpenBreachAppFrame>
         <div className={`${PANEL_CLASS_NAME} mx-auto max-w-7xl`}>
-          <p className="font-mono text-sm text-primary">
+          <p className="text-primary font-mono text-sm">
             Loading target pipeline...
           </p>
         </div>
@@ -42,13 +42,13 @@ function TargetDetailPage() {
   if (!target) {
     return (
       <OpenBreachAppFrame>
-        <div className="mx-auto max-w-4xl border border-error/30 bg-error/10 p-8 pixel-corner">
-          <p className="font-mono text-sm text-error">
+        <div className="border-error/30 bg-error/10 pixel-corner mx-auto max-w-4xl border p-8">
+          <p className="text-error font-mono text-sm">
             Target not found in the current pipeline snapshot.
           </p>
           <Link
             to="/targets"
-            className={`${ACTION_CLASS_NAME} mt-4 inline-flex border-outline/40 text-on-surface hover:bg-primary/10 hover:text-primary focus:ring-primary/30`}
+            className={`${ACTION_CLASS_NAME} border-outline/40 text-on-surface hover:bg-primary/10 hover:text-primary focus:ring-primary/30 mt-4 inline-flex`}
           >
             Back to target list
           </Link>
@@ -64,15 +64,15 @@ function TargetDetailPage() {
   return (
     <OpenBreachAppFrame>
       <section className="mx-auto flex w-full max-w-7xl flex-col">
-        <header className="flex flex-col gap-4 border-b border-primary/20 pb-5 lg:flex-row lg:items-end lg:justify-between">
+        <header className="border-primary/20 flex flex-col gap-4 border-b pb-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="font-mono text-[10px] tracking-[0.28em] text-primary uppercase">
+            <p className="text-primary font-mono text-[10px] tracking-[0.28em] uppercase">
               target / detail / pipeline
             </p>
-            <h1 className="mt-3 font-display text-4xl text-on-surface uppercase">
+            <h1 className="font-display text-on-surface mt-3 text-4xl uppercase">
               {target.name}
             </h1>
-            <p className="mt-2 break-all font-mono text-sm text-primary">
+            <p className="text-primary mt-2 font-mono text-sm break-all">
               {target.primaryUrl}
             </p>
           </div>
@@ -116,7 +116,7 @@ function TargetDetailPage() {
         <div className="mt-6 grid gap-4 xl:grid-cols-[1.3fr_1fr]">
           <section className={PANEL_CLASS_NAME}>
             <SectionTitle title="Target Summary" />
-            <p className="font-mono text-sm leading-6 text-on-surface-variant">
+            <p className="text-on-surface-variant font-mono text-sm leading-6">
               {target.summary}
             </p>
             <dl className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -127,9 +127,14 @@ function TargetDetailPage() {
               />
               <DetailItem
                 label="Validation Level"
-                value={target.validationLevel.replaceAll("_", " ").toUpperCase()}
+                value={target.validationLevel
+                  .replaceAll("_", " ")
+                  .toUpperCase()}
               />
-              <DetailItem label="Rate Limit" value={`${target.rateLimit} rpm`} />
+              <DetailItem
+                label="Rate Limit"
+                value={`${target.rateLimit} rpm`}
+              />
               <DetailItem
                 label="Allowed Assets"
                 value={target.allowedAssets.length.toString()}
@@ -210,7 +215,7 @@ function TargetDetailPage() {
                   label={target.validation.status.toUpperCase()}
                   tone={target.validation.status === "passed" ? "green" : "red"}
                 />
-                <p className="font-mono text-sm text-on-surface-variant">
+                <p className="text-on-surface-variant font-mono text-sm">
                   {target.validation.summary ?? "Validation summary pending."}
                 </p>
                 <DetailItem
@@ -235,14 +240,14 @@ function TargetDetailPage() {
                   target.findings.map((finding) => (
                     <div
                       key={finding.findingId}
-                      className="border border-primary/10 bg-surface p-4"
+                      className="border-primary/10 bg-surface border p-4"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="font-mono text-[10px] tracking-[0.2em] text-on-surface-variant uppercase">
+                          <p className="text-on-surface-variant font-mono text-[10px] tracking-[0.2em] uppercase">
                             {finding.category ?? "finding"}
                           </p>
-                          <h3 className="mt-2 font-display text-xl text-on-surface uppercase">
+                          <h3 className="font-display text-on-surface mt-2 text-xl uppercase">
                             {finding.title}
                           </h3>
                         </div>
@@ -251,7 +256,7 @@ function TargetDetailPage() {
                           tone={getFindingTone(finding.severity)}
                         />
                       </div>
-                      <p className="mt-3 font-mono text-sm leading-6 text-on-surface-variant">
+                      <p className="text-on-surface-variant mt-3 font-mono text-sm leading-6">
                         {finding.description}
                       </p>
                     </div>
@@ -261,11 +266,11 @@ function TargetDetailPage() {
                 )}
               </div>
 
-              <div className="border border-primary/15 bg-surface px-4 py-4 pixel-corner">
-                <p className="font-mono text-[10px] tracking-[0.24em] text-primary uppercase">
+              <div className="border-primary/15 bg-surface pixel-corner border px-4 py-4">
+                <p className="text-primary font-mono text-[10px] tracking-[0.24em] uppercase">
                   Report Artifacts
                 </p>
-                <p className="mt-3 font-mono text-sm text-on-surface-variant">
+                <p className="text-on-surface-variant mt-3 font-mono text-sm">
                   {target.reportArtifact
                     ? `Latest artifact status: ${target.reportArtifact.status.toUpperCase()}`
                     : "No report artifact has been generated for this target yet."}
@@ -275,7 +280,7 @@ function TargetDetailPage() {
                     target.reportDownloads.map((download) => (
                       <a
                         key={download.id}
-                        className="border border-primary/20 bg-surface-container-low px-4 py-3 font-mono text-[10px] tracking-[0.18em] text-primary uppercase transition pixel-corner hover:bg-primary/10"
+                        className="border-primary/20 bg-surface-container-low text-primary pixel-corner hover:bg-primary/10 border px-4 py-3 font-mono text-[10px] tracking-[0.18em] uppercase transition"
                         href={download.href}
                       >
                         {download.label}
@@ -296,17 +301,17 @@ function TargetDetailPage() {
                 target.auditEvents.map((event) => (
                   <div
                     key={event.eventId}
-                    className="flex flex-col gap-2 border border-primary/10 bg-surface p-4 md:flex-row md:items-center md:justify-between"
+                    className="border-primary/10 bg-surface flex flex-col gap-2 border p-4 md:flex-row md:items-center md:justify-between"
                   >
                     <div>
-                      <p className="font-mono text-[10px] tracking-[0.2em] text-primary uppercase">
+                      <p className="text-primary font-mono text-[10px] tracking-[0.2em] uppercase">
                         {event.eventType}
                       </p>
-                      <p className="mt-1 font-mono text-sm text-on-surface-variant">
+                      <p className="text-on-surface-variant mt-1 font-mono text-sm">
                         {event.actor}
                       </p>
                     </div>
-                    <p className="font-mono text-sm text-on-surface-variant">
+                    <p className="text-on-surface-variant font-mono text-sm">
                       {formatTimestamp(event.timestamp)}
                     </p>
                   </div>
@@ -324,7 +329,7 @@ function TargetDetailPage() {
 
 function SectionTitle({ title }: { title: string }) {
   return (
-    <h2 className="mb-4 border-b border-primary/10 pb-3 font-display text-xl text-primary uppercase">
+    <h2 className="border-primary/10 font-display text-primary mb-4 border-b pb-3 text-xl uppercase">
       {title}
     </h2>
   );
@@ -347,11 +352,11 @@ function MetricCard({
         : "border-primary/25 bg-primary/10 text-primary";
 
   return (
-    <div className={`border p-5 pixel-corner ${toneClassName}`}>
-      <p className="font-mono text-[10px] tracking-[0.22em] opacity-70 uppercase">
+    <div className={`pixel-corner border p-5 ${toneClassName}`}>
+      <p className="font-mono text-[10px] tracking-[0.22em] uppercase opacity-70">
         {label}
       </p>
-      <p className="mt-3 font-display text-3xl">{value}</p>
+      <p className="font-display mt-3 text-3xl">{value}</p>
     </div>
   );
 }
@@ -374,26 +379,20 @@ function StatusBadge({
 
   return (
     <span
-      className={`inline-flex border px-3 py-1 font-mono text-[10px] tracking-[0.18em] uppercase pixel-corner ${className}`}
+      className={`pixel-corner inline-flex border px-3 py-1 font-mono text-[10px] tracking-[0.18em] uppercase ${className}`}
     >
       {label}
     </span>
   );
 }
 
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function DetailItem({ label, value }: { label: string; value: string }) {
   return (
     <div className={INSET_CLASS_NAME}>
-      <dt className="font-mono text-[10px] tracking-[0.18em] text-on-surface-variant uppercase">
+      <dt className="text-on-surface-variant font-mono text-[10px] tracking-[0.18em] uppercase">
         {label}
       </dt>
-      <dd className="mt-2 break-words font-mono text-sm text-on-surface">
+      <dd className="text-on-surface mt-2 font-mono text-sm break-words">
         {value}
       </dd>
     </div>
@@ -402,7 +401,7 @@ function DetailItem({
 
 function EmptyMessage({ message }: { message: string }) {
   return (
-    <div className="border border-dashed border-primary/10 bg-surface px-4 py-4 font-mono text-sm text-on-surface-variant pixel-corner">
+    <div className="border-primary/10 bg-surface text-on-surface-variant pixel-corner border border-dashed px-4 py-4 font-mono text-sm">
       {message}
     </div>
   );
