@@ -62,6 +62,7 @@
     "target:intake:validate": "node scripts/validate-target-intake-form.ts",
     "test:analyzer": "npx tsx scripts/validate-analyzer.ts",
     "typecheck": "tsc --build --pretty",
+    "users:elevate-admin": "node scripts/elevate-admin.ts",
     "validation:gate:validate": "node scripts/validate-approval-validation.ts"
   },
   "dependencies": {
