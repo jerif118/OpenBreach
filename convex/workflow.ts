@@ -463,10 +463,7 @@ async function upsertWorkflowRun(
   return true;
 }
 
-async function upsertTestPlan(
-  ctx: Ctx,
-  plan: TestPlanArgs,
-): Promise<boolean> {
+async function upsertTestPlan(ctx: Ctx, plan: TestPlanArgs): Promise<boolean> {
   const existing = await ctx.db
     .query("testPlans")
     .withIndex("by_planId", (q) => q.eq("planId", plan.planId))
@@ -533,10 +530,7 @@ async function upsertValidationResult(
   return true;
 }
 
-async function upsertFinding(
-  ctx: Ctx,
-  finding: FindingArgs,
-): Promise<boolean> {
+async function upsertFinding(ctx: Ctx, finding: FindingArgs): Promise<boolean> {
   const existing = await ctx.db
     .query("findings")
     .withIndex("by_findingId", (q) => q.eq("findingId", finding.findingId))
@@ -571,9 +565,7 @@ async function upsertPassiveEvidence(
 ): Promise<boolean> {
   const existing = await ctx.db
     .query("passiveScanEvidence")
-    .withIndex("by_evidenceId", (q) =>
-      q.eq("evidenceId", evidence.evidenceId),
-    )
+    .withIndex("by_evidenceId", (q) => q.eq("evidenceId", evidence.evidenceId))
     .unique();
 
   const doc = {
@@ -608,9 +600,7 @@ export const orchestratorByTargetId = query({
 
     const auditEvents = await ctx.db
       .query("auditEvents")
-      .withIndex("by_targetId_and_timestamp", (q) =>
-        q.eq("targetId", targetId),
-      )
+      .withIndex("by_targetId_and_timestamp", (q) => q.eq("targetId", targetId))
       .order("desc")
       .take(20);
 

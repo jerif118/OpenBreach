@@ -58,8 +58,9 @@ function WorkflowRunsPage() {
   }
 
   const total = runs.length;
-  const completed = runs.filter((entry) => entry.run.status === "completed")
-    .length;
+  const completed = runs.filter(
+    (entry) => entry.run.status === "completed",
+  ).length;
   const running = runs.filter((entry) => entry.run.status === "running").length;
   const passed = runs.filter(
     (entry) => entry.validation?.status === "passed",

@@ -22,12 +22,7 @@ export const Route = createFileRoute("/targets/$targetId")({
 type OrchestratorRunOutcome = {
   runId: string;
   targetId: string;
-  validationStatus:
-    | "passed"
-    | "blocked"
-    | "error"
-    | "failed"
-    | "inconclusive";
+  validationStatus: "passed" | "blocked" | "error" | "failed" | "inconclusive";
   requestCount: number;
   httpStatus: number | null;
 };
@@ -129,7 +124,9 @@ function TargetDetailPage() {
             <button
               type="button"
               onClick={orchestrator.run}
-              disabled={!orchestrator.canRun || orchestrator.state.status === "running"}
+              disabled={
+                !orchestrator.canRun || orchestrator.state.status === "running"
+              }
               className={`${ACTION_CLASS_NAME} border-[#00e639]/40 bg-[#00e639]/10 text-[#00e639] hover:bg-[#00e639]/15 focus:ring-[#00e639]/30 disabled:cursor-not-allowed disabled:opacity-40`}
               title={
                 orchestrator.canRun
@@ -282,22 +279,20 @@ function TargetDetailPage() {
                       tone="amber"
                     />
                   ) : null}
-                  {typeof target.validation.metadata?.httpStatus === "number"
-                    ? (
-                      <StatusBadge
-                        label={`HTTP ${target.validation.metadata.httpStatus}`}
-                        tone="cyan"
-                      />
-                    )
-                    : null}
-                  {typeof target.validation.metadata?.requestCount === "number"
-                    ? (
-                      <StatusBadge
-                        label={`${target.validation.metadata.requestCount}/2 REQUESTS`}
-                        tone="cyan"
-                      />
-                    )
-                    : null}
+                  {typeof target.validation.metadata?.httpStatus ===
+                  "number" ? (
+                    <StatusBadge
+                      label={`HTTP ${target.validation.metadata.httpStatus}`}
+                      tone="cyan"
+                    />
+                  ) : null}
+                  {typeof target.validation.metadata?.requestCount ===
+                  "number" ? (
+                    <StatusBadge
+                      label={`${target.validation.metadata.requestCount}/2 REQUESTS`}
+                      tone="cyan"
+                    />
+                  ) : null}
                 </div>
                 <p className="text-on-surface-variant font-mono text-sm">
                   {target.validation.summary ?? "Validation summary pending."}
@@ -596,15 +591,15 @@ const PHASE_SEQUENCE: PhaseName[] = [
 ];
 
 const PHASE_SHORT_LABEL: Record<PhaseName, string> = {
-  "intake": "INTAKE",
+  intake: "INTAKE",
   "passive-scan": "PASSIVE",
-  "hypothesis": "HYPOTH",
+  hypothesis: "HYPOTH",
   "test-planning": "PLAN",
-  "approval": "APPROVE",
-  "execution": "EXECUTE",
-  "validation": "VALIDATE",
-  "reporting": "REPORT",
-  "archived": "ARCHIVE",
+  approval: "APPROVE",
+  execution: "EXECUTE",
+  validation: "VALIDATE",
+  reporting: "REPORT",
+  archived: "ARCHIVE",
 };
 
 type PhaseEntry = {
@@ -664,14 +659,14 @@ function PhaseTimeline({
               title={
                 entry
                   ? `${phase}\nEntered: ${formatTimestamp(entry.enteredAt)}${
-                    entry.exitedAt
-                      ? `\nExited: ${formatTimestamp(entry.exitedAt)}`
-                      : "\n(active)"
-                  }${
-                    entry.rejectionReason
-                      ? `\nRejected: ${entry.rejectionReason}`
-                      : ""
-                  }`
+                      entry.exitedAt
+                        ? `\nExited: ${formatTimestamp(entry.exitedAt)}`
+                        : "\n(active)"
+                    }${
+                      entry.rejectionReason
+                        ? `\nRejected: ${entry.rejectionReason}`
+                        : ""
+                    }`
                   : `${phase} (not entered)`
               }
             >

@@ -252,7 +252,10 @@ export const listPipeline = query({
         .order("desc")
         .take(1);
 
-      const orchestrator = await loadOrchestratorJoin(ctx, municipality.externalId);
+      const orchestrator = await loadOrchestratorJoin(
+        ctx,
+        municipality.externalId,
+      );
 
       entries.push({
         municipality: toMunicipalityContract(municipality),
@@ -278,40 +281,42 @@ type PipelineEntry = {
 };
 
 type OrchestratorJoin = {
-  latestRun:
-    | (Pick<
-        Doc<"workflowRuns">,
-        | "runId"
-        | "targetId"
-        | "status"
-        | "startedAt"
-        | "completedAt"
-        | "abortedAt"
-        | "abortedReason"
-        | "currentPhase"
-        | "phases"
-      >)
-    | null;
-  latestValidation:
-    | Pick<
-        Doc<"validationResults">,
-        | "resultId"
-        | "targetId"
-        | "status"
-        | "executedAt"
-        | "executedBy"
-        | "testPlanId"
-        | "hypothesisId"
-        | "summary"
-        | "evidenceRefs"
-        | "runId"
-        | "metadata"
-      >
-    | null;
+  latestRun: Pick<
+    Doc<"workflowRuns">,
+    | "runId"
+    | "targetId"
+    | "status"
+    | "startedAt"
+    | "completedAt"
+    | "abortedAt"
+    | "abortedReason"
+    | "currentPhase"
+    | "phases"
+  > | null;
+  latestValidation: Pick<
+    Doc<"validationResults">,
+    | "resultId"
+    | "targetId"
+    | "status"
+    | "executedAt"
+    | "executedBy"
+    | "testPlanId"
+    | "hypothesisId"
+    | "summary"
+    | "evidenceRefs"
+    | "runId"
+    | "metadata"
+  > | null;
   auditEvents: Array<
     Pick<
       Doc<"auditEvents">,
-      "eventId" | "targetId" | "eventType" | "actor" | "timestamp" | "runId" | "details"
+      | "eventId"
+      | "targetId"
+      | "eventType"
+      | "actor"
+      | "timestamp"
+      | "runId"
+      | "details"
     >
   >;
   findings: Array<

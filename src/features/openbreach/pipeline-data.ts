@@ -882,7 +882,10 @@ export function buildMunicipalityRecord(
     ? toRealWorkflowRun(orchestrator.latestRun)
     : null;
   const realValidation = orchestrator?.latestValidation
-    ? toRealValidation(orchestrator.latestValidation, orchestrator.findings.length)
+    ? toRealValidation(
+        orchestrator.latestValidation,
+        orchestrator.findings.length,
+      )
     : null;
   const realAudit = (orchestrator?.auditEvents ?? []).map(toRealAuditEvent);
   const realFindings = (orchestrator?.findings ?? []).map(toRealFinding);

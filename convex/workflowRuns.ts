@@ -85,10 +85,7 @@ export const listRecent = query({
   handler: async (ctx, args) => {
     const limit = normalizeRecentLimit(args.limit);
 
-    const runs = await ctx.db
-      .query("workflowRuns")
-      .order("desc")
-      .take(limit);
+    const runs = await ctx.db.query("workflowRuns").order("desc").take(limit);
 
     const items: Array<{
       run: WorkflowRunDto;
@@ -107,9 +104,7 @@ export const listRecent = query({
     for (const run of runs) {
       const municipality = await ctx.db
         .query("municipalities")
-        .withIndex("by_externalId", (q) =>
-          q.eq("externalId", run.targetId),
-        )
+        .withIndex("by_externalId", (q) => q.eq("externalId", run.targetId))
         .unique();
 
       const [validation] = await ctx.db

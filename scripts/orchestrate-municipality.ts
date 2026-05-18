@@ -161,9 +161,7 @@ function readPipeline(limit: number): PipelineEntry[] {
     { encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
   );
   if (result.error) {
-    throw new Error(
-      `Failed to spawn convex run: ${result.error.message}`,
-    );
+    throw new Error(`Failed to spawn convex run: ${result.error.message}`);
   }
   if (typeof result.status === "number" && result.status !== 0) {
     throw new Error(
