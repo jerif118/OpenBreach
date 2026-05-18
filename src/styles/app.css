@@ -143,3 +143,62 @@ a {
   letter-spacing: -0.06em;
   text-transform: uppercase;
 }
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  .no-print,
+  .scanlines,
+  nav {
+    display: none !important;
+  }
+
+  .report-print {
+    color: #111111 !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+  }
+
+  .report-print * {
+    color: #111111 !important;
+    background: transparent !important;
+    border-color: #cccccc !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .report-print .severity-critical,
+  .report-print .severity-high {
+    color: #8a0a0a !important;
+  }
+
+  .report-print .severity-medium {
+    color: #8a5a00 !important;
+  }
+
+  .report-print .severity-low,
+  .report-print .severity-info {
+    color: #2f4f2f !important;
+  }
+
+  .report-print .pixel-corner {
+    clip-path: none !important;
+  }
+
+  .report-print section,
+  .report-print article {
+    break-inside: avoid;
+  }
+
+  @page {
+    margin: 16mm 14mm;
+  }
+}
