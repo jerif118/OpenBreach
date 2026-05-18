@@ -147,8 +147,10 @@ export async function collectBoundedArtifacts(
   errors: RawScanEvidence["errors"];
 }> {
   const fetchImpl = options.fetch ?? fetch;
+  const delayImpl = options.delay ?? delay;
   const errors: RawScanEvidence["errors"] = [];
   const artifacts: BoundedArtifact[] = [];
+  let fetchesAttempted = 0;
 
   for (const path of paths) {
     if (!path.startsWith("/") || path.startsWith("//")) {
@@ -161,16 +163,19 @@ export async function collectBoundedArtifacts(
 
     const checkUrl = new URL(path, baseUrl.origin);
     try {
+      if (fetchesAttempted > 0 && controls.delayMs > 0) {
+        await delayImpl(controls.delayMs);
+      }
+      fetchesAttempted += 1;
       const response = await withRetries(
         () => fetchWithTimeout(fetchImpl, checkUrl, controls.timeoutMs, "GET"),
         controls,
-        options.delay ?? delay,
+        delayImpl,
       );
-      const text = await response.text();
-      const snippet =
-        text.length > MAX_BOUNDED_BODY_CHARS
-          ? `${text.slice(0, MAX_BOUNDED_BODY_CHARS)}…`
-          : text;
+      const snippet = await readBoundedResponseText(
+        response,
+        MAX_BOUNDED_BODY_CHARS,
+      );
       artifacts.push({
         kind: boundedKindForPath(path),
         path,
@@ -192,6 +197,39 @@ export async function collectBoundedArtifacts(
   }
 
   return { artifacts, errors };
+}
+
+async function readBoundedResponseText(
+  response: Response,
+  maxChars: number,
+): Promise<string> {
+  if (!response.body) {
+    const text = await response.text();
+    return truncateText(text, maxChars);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+
+  try {
+    while (text.length <= maxChars) {
+      const { done, value } = await reader.read();
+      if (done) {
+        text += decoder.decode();
+        return truncateText(text, maxChars);
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+    await reader.cancel();
+    return truncateText(text, maxChars);
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+function truncateText(text: string, maxChars: number): string {
+  return text.length > maxChars ? `${text.slice(0, maxChars)}…` : text;
 }
 
 export async function collectTlsEvidence(
