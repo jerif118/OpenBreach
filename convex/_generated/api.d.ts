@@ -19,6 +19,8 @@ import type * as lib_fixtureFallback from "../lib/fixtureFallback.js";
 import type * as lib_stateMachine from "../lib/stateMachine.js";
 import type * as lib_targetDemoQueries from "../lib/targetDemoQueries.js";
 import type * as municipalities from "../municipalities.js";
+import type * as orchestratorActions from "../orchestratorActions.js";
+import type * as orchestratorInternal from "../orchestratorInternal.js";
 import type * as passiveScanEvidence from "../passiveScanEvidence.js";
 import type * as rawScanResults from "../rawScanResults.js";
 import type * as reportArtifacts from "../reportArtifacts.js";
@@ -68,6 +70,8 @@ declare const fullApi: ApiFromModules<{
   "lib/stateMachine": typeof lib_stateMachine;
   "lib/targetDemoQueries": typeof lib_targetDemoQueries;
   municipalities: typeof municipalities;
+  orchestratorActions: typeof orchestratorActions;
+  orchestratorInternal: typeof orchestratorInternal;
   passiveScanEvidence: typeof passiveScanEvidence;
   rawScanResults: typeof rawScanResults;
   reportArtifacts: typeof reportArtifacts;
