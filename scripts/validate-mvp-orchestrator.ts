@@ -64,6 +64,13 @@ function validateArtifacts(result: ReturnType<typeof runMvpOrchestrator>) {
     r.auditEvents.some((e) => e.eventType === "workflow-rejected"),
     "scope rejection must be audited",
   );
+  assert.equal(r.workflowRun.phases?.length, 1);
+  assert.equal(r.workflowRun.phases?.[0]?.phase, "intake");
+  assert.equal(r.workflowRun.phases?.[0]?.exitedAt, NOW);
+  assert.equal(
+    r.workflowRun.phases?.[0]?.rejectionReason,
+    "ambiguous_authorization",
+  );
   assert.equal(r.testPlan, null);
 }
 
