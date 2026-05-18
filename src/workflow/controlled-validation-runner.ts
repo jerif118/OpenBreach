@@ -1,6 +1,6 @@
 /**
  * Approval-gated, bounded active validation (issue #70).
- * Performs at most one safe HTTP read against an explicitly allowed origin.
+ * Performs at most two safe HTTP reads against an explicitly allowed origin.
  */
 
 import { createHash } from "node:crypto";
@@ -81,6 +81,7 @@ export async function runControlledValidation(
   const fetchFn = req.fetchImpl ?? globalThis.fetch;
   const audits: AuditEvent[] = [];
   const seq = { i: 0 };
+  let requestCount = 0;
   const path =
     req.validationPath === undefined || req.validationPath === ""
       ? "/"
@@ -129,7 +130,7 @@ export async function runControlledValidation(
       validationResult: validationResultSchema.parse(vr),
       evidenceEnvelope: evidenceEnvelopeSchema.parse(envelope),
       auditTrail: audits,
-      requestCount: 0,
+      requestCount,
     };
   };
 
@@ -140,19 +141,45 @@ export async function runControlledValidation(
   }
 
   if (req.approvalGate.status !== "approved") {
-    pushAudit(audits, seq, {
-      targetId: req.targetId,
-      eventType: "gate-rejected",
-      actor: req.actor,
-      timestamp: req.now,
-      runId: req.runId,
-      details: {
-        gateId: req.approvalGate.gateId,
-        gateStatus: String(req.approvalGate.status),
-      },
-    });
+    if (req.approvalGate.status === "rejected") {
+      pushAudit(audits, seq, {
+        targetId: req.targetId,
+        eventType: "gate-rejected",
+        actor: req.actor,
+        timestamp: req.now,
+        runId: req.runId,
+        details: {
+          gateId: req.approvalGate.gateId,
+          gateStatus: String(req.approvalGate.status),
+        },
+      });
+    }
     return blocked("execution_gate_not_approved", {
       gateStatus: req.approvalGate.status,
+    });
+  }
+
+  if (
+    req.testPlan.targetId !== req.targetId ||
+    req.testPlan.runId !== req.runId
+  ) {
+    return blocked("test_plan_mismatch", {
+      planTargetId: req.testPlan.targetId,
+      planRunId: req.testPlan.runId ?? null,
+    });
+  }
+
+  if (
+    req.approvalGate.gateType !== "execution" ||
+    req.approvalGate.targetId !== req.targetId ||
+    req.approvalGate.linkedArtifactId !== req.testPlan.planId ||
+    req.approvalGate.runId !== req.runId
+  ) {
+    return blocked("approval_gate_mismatch", {
+      gateType: req.approvalGate.gateType,
+      gateTargetId: req.approvalGate.targetId,
+      linkedArtifactId: req.approvalGate.linkedArtifactId ?? null,
+      gateRunId: req.approvalGate.runId ?? null,
     });
   }
 
@@ -193,9 +220,36 @@ export async function runControlledValidation(
     return blocked("invalid_validation_url");
   }
 
-  const allowed = new Set(req.allowedOrigins.map((o) => normalizeOrigin(o)));
+  let allowed: Set<string>;
+  try {
+    allowed = new Set(req.allowedOrigins.map((o) => normalizeOrigin(o)));
+  } catch {
+    return blocked("invalid_allowed_origin");
+  }
   if (!allowed.has(requestOrigin)) {
     return blocked("validation_origin_not_allowed");
+  }
+
+  try {
+    const scopeOrigins = new Set<string>();
+    for (const constraint of req.authorizationScope.constraints ?? []) {
+      if (constraint.startsWith("allowed_origin:")) {
+        scopeOrigins.add(
+          normalizeOrigin(constraint.slice("allowed_origin:".length)),
+        );
+      }
+    }
+    if (scopeOrigins.size > 0 && !scopeOrigins.has(requestOrigin)) {
+      return blocked("authorization_scope_origin_not_allowed");
+    }
+    if (
+      req.authorizationScope.evidenceUrl &&
+      normalizeOrigin(req.authorizationScope.evidenceUrl) !== requestOrigin
+    ) {
+      return blocked("authorization_scope_origin_not_allowed");
+    }
+  } catch {
+    return blocked("authorization_scope_origin_not_allowed");
   }
 
   const meta = req.testPlan.metadata as Record<string, unknown> | undefined;
@@ -206,6 +260,10 @@ export async function runControlledValidation(
   const forbidden = (meta?.forbiddenActions as string[] | undefined) ?? [];
   const maxRequests =
     typeof meta?.maxRequestsTotal === "number" ? meta.maxRequestsTotal : 2;
+  const fetchTimeoutMs =
+    typeof meta?.fetchTimeoutMs === "number" && meta.fetchTimeoutMs > 0
+      ? meta.fetchTimeoutMs
+      : 5000;
 
   const tryMethod = async (method: string): Promise<Response> => {
     if (forbidden.includes(method)) {
@@ -214,14 +272,23 @@ export async function runControlledValidation(
     if (!allowedActions.includes(method)) {
       throw new Error(`method_not_allowed:${method}`);
     }
-    requestCount++;
-    if (requestCount > maxRequests) {
+    if (requestCount >= maxRequests) {
       throw new Error("max_requests_exceeded");
     }
-    return fetchFn(validationUrl, { method, redirect: "manual" });
+    requestCount++;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), fetchTimeoutMs);
+    try {
+      return await fetchFn(validationUrl, {
+        method,
+        redirect: "manual",
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
   };
 
-  let requestCount = 0;
   let res: Response;
   try {
     res = await tryMethod("HEAD");
@@ -318,7 +385,7 @@ export async function runControlledValidation(
   const envelope: EvidenceEnvelope = {
     envelopeId: `${req.runId}-env-passed`,
     targetId: req.targetId,
-    source: "fixture",
+    source: "system",
     recordedAt: req.now,
     payloadType: "test-result",
     payload: passed,
