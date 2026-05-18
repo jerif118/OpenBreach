@@ -20,6 +20,7 @@ import { Route as TargetsTargetIdRouteImport } from './routes/targets/$targetId'
 import { Route as ReportsReportIdRouteImport } from './routes/reports/$reportId'
 import { Route as GuardianValidationsRouteImport } from './routes/guardian/validations'
 import { Route as GuardianThreatsRouteImport } from './routes/guardian/threats'
+import { Route as GuardianRunsRouteImport } from './routes/guardian/runs'
 import { Route as GuardianReportsRouteImport } from './routes/guardian/reports'
 import { Route as GuardianNetworkRouteImport } from './routes/guardian/network'
 import { Route as GuardianLogsRouteImport } from './routes/guardian/logs'
@@ -81,6 +82,11 @@ const GuardianThreatsRoute = GuardianThreatsRouteImport.update({
   path: '/threats',
   getParentRoute: () => GuardianRoute,
 } as any)
+const GuardianRunsRoute = GuardianRunsRouteImport.update({
+  id: '/runs',
+  path: '/runs',
+  getParentRoute: () => GuardianRoute,
+} as any)
 const GuardianReportsRoute = GuardianReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/guardian/logs': typeof GuardianLogsRoute
   '/guardian/network': typeof GuardianNetworkRoute
   '/guardian/reports': typeof GuardianReportsRoute
+  '/guardian/runs': typeof GuardianRunsRoute
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/guardian/logs': typeof GuardianLogsRoute
   '/guardian/network': typeof GuardianNetworkRoute
   '/guardian/reports': typeof GuardianReportsRoute
+  '/guardian/runs': typeof GuardianRunsRoute
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/guardian/logs': typeof GuardianLogsRoute
   '/guardian/network': typeof GuardianNetworkRoute
   '/guardian/reports': typeof GuardianReportsRoute
+  '/guardian/runs': typeof GuardianRunsRoute
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/guardian/logs'
     | '/guardian/network'
     | '/guardian/reports'
+    | '/guardian/runs'
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$reportId'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/guardian/logs'
     | '/guardian/network'
     | '/guardian/reports'
+    | '/guardian/runs'
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$reportId'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/guardian/logs'
     | '/guardian/network'
     | '/guardian/reports'
+    | '/guardian/runs'
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$reportId'
@@ -307,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuardianThreatsRouteImport
       parentRoute: typeof GuardianRoute
     }
+    '/guardian/runs': {
+      id: '/guardian/runs'
+      path: '/runs'
+      fullPath: '/guardian/runs'
+      preLoaderRoute: typeof GuardianRunsRouteImport
+      parentRoute: typeof GuardianRoute
+    }
     '/guardian/reports': {
       id: '/guardian/reports'
       path: '/reports'
@@ -351,6 +370,7 @@ interface GuardianRouteChildren {
   GuardianLogsRoute: typeof GuardianLogsRoute
   GuardianNetworkRoute: typeof GuardianNetworkRoute
   GuardianReportsRoute: typeof GuardianReportsRoute
+  GuardianRunsRoute: typeof GuardianRunsRoute
   GuardianThreatsRoute: typeof GuardianThreatsRoute
   GuardianValidationsRoute: typeof GuardianValidationsRoute
   GuardianIndexRoute: typeof GuardianIndexRoute
@@ -362,6 +382,7 @@ const GuardianRouteChildren: GuardianRouteChildren = {
   GuardianLogsRoute: GuardianLogsRoute,
   GuardianNetworkRoute: GuardianNetworkRoute,
   GuardianReportsRoute: GuardianReportsRoute,
+  GuardianRunsRoute: GuardianRunsRoute,
   GuardianThreatsRoute: GuardianThreatsRoute,
   GuardianValidationsRoute: GuardianValidationsRoute,
   GuardianIndexRoute: GuardianIndexRoute,

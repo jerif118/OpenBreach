@@ -27,6 +27,7 @@ function SideNavBar() {
       label: "VALIDATIONS",
       to: "/guardian/validations",
     },
+    { icon: "play_circle", label: "RUNS", to: "/guardian/runs" },
     { icon: "description", label: "REPORTS", to: "/guardian/reports" },
     { icon: "terminal", label: "LOGS", to: "/guardian/logs" },
     { icon: "settings", label: "CONFIG", to: "/guardian/config" },
