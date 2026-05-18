@@ -698,12 +698,14 @@ function buildReportDownloadsFromReport(
   const technical = report.artifacts?.technical;
   const friendly = report.artifacts?.friendly;
   const upperName = municipality.name.toUpperCase().replaceAll(/\s+/g, "_");
+  const technicalHref = `/reports/${report.externalId}?variant=technical`;
+  const friendlyHref = `/reports/${report.externalId}?variant=friendly`;
 
   if (technical?.pdf) {
     downloads.push({
       id: `${report.externalId}-technical`,
       fileName: technical.pdf.fileName,
-      href: `/reports/${technical.pdf.fileName}`,
+      href: technicalHref,
       label: `${upperName}_TECHNICAL`,
       targetName: municipality.name,
       variant: "technical",
@@ -714,18 +716,18 @@ function buildReportDownloadsFromReport(
     downloads.push({
       id: `${report.externalId}-friendly`,
       fileName: friendly.pdf.fileName,
-      href: `/reports/${friendly.pdf.fileName}`,
+      href: friendlyHref,
       label: `${upperName}_FRIENDLY`,
       targetName: municipality.name,
       variant: "friendly",
     });
   }
 
-  if (downloads.length === 0 && report.pdf) {
+  if (downloads.length === 0) {
     downloads.push({
-      id: `${report.externalId}-pdf`,
-      fileName: report.pdf.fileName,
-      href: `/reports/${report.pdf.fileName}`,
+      id: `${report.externalId}-report`,
+      fileName: report.pdf?.fileName ?? `${municipality.id}-report.pdf`,
+      href: technicalHref,
       label: `${upperName}_REPORT`,
       targetName: municipality.name,
       variant: "technical",
