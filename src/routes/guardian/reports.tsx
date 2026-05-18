@@ -118,6 +118,7 @@ function SecurityReports() {
               <a
                 key={download.id}
                 className="border-primary/10 text-primary hover:bg-primary/10 flex items-center justify-between gap-3 border bg-[#131313]/70 px-4 py-4 font-mono text-[10px] transition-colors"
+                download={download.fileName}
                 href={download.href}
               >
                 <div>

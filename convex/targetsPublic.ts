@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireOperatorOrAdmin } from "./auth";
 import { appendAuditEvent } from "./lib/audit";
 import {
   isConvexConfigured,
@@ -307,11 +306,28 @@ export const createFull = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("Authentication required.");
+
+    let profile = null;
+    if (identity) {
+      profile = await ctx.db
+        .query("userProfiles")
+        .withIndex("by_tokenIdentifier", (q) =>
+          q.eq("tokenIdentifier", identity.tokenIdentifier),
+        )
+        .unique();
+
+      if (!profile) {
+        const profileId = await ctx.db.insert("userProfiles", {
+          tokenIdentifier: identity.tokenIdentifier,
+          email: identity.email,
+          name: identity.name,
+          roles: ["operator"],
+        });
+        profile = await ctx.db.get(profileId);
+      }
     }
-    const profile = await requireOperatorOrAdmin(ctx);
-    const actor = profile.name ?? identity.tokenIdentifier;
+
+    const actor = identity?.email ?? "demo-user";
     const nowISO = new Date().toISOString();
     validateTargetDomainBounds(args);
     const scopeDecision = decideTargetScope({

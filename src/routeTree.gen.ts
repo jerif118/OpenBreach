@@ -12,11 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as GuardianRouteImport } from './routes/guardian'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TargetsIndexRouteImport } from './routes/targets/index'
 import { Route as GuardianIndexRouteImport } from './routes/guardian/index'
 import { Route as TargetsNewRouteImport } from './routes/targets/new'
 import { Route as TargetsTargetIdRouteImport } from './routes/targets/$targetId'
+import { Route as SignUpSplatRouteImport } from './routes/sign-up/$'
+import { Route as SignInSplatRouteImport } from './routes/sign-in/$'
 import { Route as ReportsFileNameRouteImport } from './routes/reports/$fileName'
 import { Route as GuardianValidationsRouteImport } from './routes/guardian/validations'
 import { Route as GuardianThreatsRouteImport } from './routes/guardian/threats'
@@ -25,6 +28,7 @@ import { Route as GuardianNetworkRouteImport } from './routes/guardian/network'
 import { Route as GuardianLogsRouteImport } from './routes/guardian/logs'
 import { Route as GuardianEvidenceRouteImport } from './routes/guardian/evidence'
 import { Route as GuardianConfigRouteImport } from './routes/guardian/config'
+import { Route as AuthSplatRouteImport } from './routes/auth/$'
 
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
@@ -39,6 +43,11 @@ const SignInRoute = SignInRouteImport.update({
 const GuardianRoute = GuardianRouteImport.update({
   id: '/guardian',
   path: '/guardian',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -65,6 +74,16 @@ const TargetsTargetIdRoute = TargetsTargetIdRouteImport.update({
   id: '/targets/$targetId',
   path: '/targets/$targetId',
   getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpSplatRoute = SignUpSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => SignUpRoute,
+} as any)
+const SignInSplatRoute = SignInSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => SignInRoute,
 } as any)
 const ReportsFileNameRoute = ReportsFileNameRouteImport.update({
   id: '/reports/$fileName',
@@ -106,12 +125,19 @@ const GuardianConfigRoute = GuardianConfigRouteImport.update({
   path: '/config',
   getParentRoute: () => GuardianRoute,
 } as any)
+const AuthSplatRoute = AuthSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/guardian': typeof GuardianRouteWithChildren
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/sign-in': typeof SignInRouteWithChildren
+  '/sign-up': typeof SignUpRouteWithChildren
+  '/auth/$': typeof AuthSplatRoute
   '/guardian/config': typeof GuardianConfigRoute
   '/guardian/evidence': typeof GuardianEvidenceRoute
   '/guardian/logs': typeof GuardianLogsRoute
@@ -120,6 +146,8 @@ export interface FileRoutesByFullPath {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian/': typeof GuardianIndexRoute
@@ -127,8 +155,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/sign-in': typeof SignInRouteWithChildren
+  '/sign-up': typeof SignUpRouteWithChildren
+  '/auth/$': typeof AuthSplatRoute
   '/guardian/config': typeof GuardianConfigRoute
   '/guardian/evidence': typeof GuardianEvidenceRoute
   '/guardian/logs': typeof GuardianLogsRoute
@@ -137,6 +167,8 @@ export interface FileRoutesByTo {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian': typeof GuardianIndexRoute
@@ -145,9 +177,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/guardian': typeof GuardianRouteWithChildren
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
+  '/sign-in': typeof SignInRouteWithChildren
+  '/sign-up': typeof SignUpRouteWithChildren
+  '/auth/$': typeof AuthSplatRoute
   '/guardian/config': typeof GuardianConfigRoute
   '/guardian/evidence': typeof GuardianEvidenceRoute
   '/guardian/logs': typeof GuardianLogsRoute
@@ -156,6 +190,8 @@ export interface FileRoutesById {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$fileName': typeof ReportsFileNameRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian/': typeof GuardianIndexRoute
@@ -165,9 +201,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/guardian'
     | '/sign-in'
     | '/sign-up'
+    | '/auth/$'
     | '/guardian/config'
     | '/guardian/evidence'
     | '/guardian/logs'
@@ -176,6 +214,8 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$fileName'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian/'
@@ -183,8 +223,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/sign-in'
     | '/sign-up'
+    | '/auth/$'
     | '/guardian/config'
     | '/guardian/evidence'
     | '/guardian/logs'
@@ -193,6 +235,8 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$fileName'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian'
@@ -200,9 +244,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/guardian'
     | '/sign-in'
     | '/sign-up'
+    | '/auth/$'
     | '/guardian/config'
     | '/guardian/evidence'
     | '/guardian/logs'
@@ -211,6 +257,8 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$fileName'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian/'
@@ -219,9 +267,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
   GuardianRoute: typeof GuardianRouteWithChildren
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
+  SignInRoute: typeof SignInRouteWithChildren
+  SignUpRoute: typeof SignUpRouteWithChildren
   ReportsFileNameRoute: typeof ReportsFileNameRoute
   TargetsTargetIdRoute: typeof TargetsTargetIdRoute
   TargetsNewRoute: typeof TargetsNewRoute
@@ -249,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/guardian'
       fullPath: '/guardian'
       preLoaderRoute: typeof GuardianRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -285,6 +341,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/targets/$targetId'
       preLoaderRoute: typeof TargetsTargetIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/sign-up/$': {
+      id: '/sign-up/$'
+      path: '/$'
+      fullPath: '/sign-up/$'
+      preLoaderRoute: typeof SignUpSplatRouteImport
+      parentRoute: typeof SignUpRoute
+    }
+    '/sign-in/$': {
+      id: '/sign-in/$'
+      path: '/$'
+      fullPath: '/sign-in/$'
+      preLoaderRoute: typeof SignInSplatRouteImport
+      parentRoute: typeof SignInRoute
     }
     '/reports/$fileName': {
       id: '/reports/$fileName'
@@ -342,8 +412,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuardianConfigRouteImport
       parentRoute: typeof GuardianRoute
     }
+    '/auth/$': {
+      id: '/auth/$'
+      path: '/$'
+      fullPath: '/auth/$'
+      preLoaderRoute: typeof AuthSplatRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
+
+interface AuthRouteChildren {
+  AuthSplatRoute: typeof AuthSplatRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthSplatRoute: AuthSplatRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface GuardianRouteChildren {
   GuardianConfigRoute: typeof GuardianConfigRoute
@@ -371,11 +458,34 @@ const GuardianRouteWithChildren = GuardianRoute._addFileChildren(
   GuardianRouteChildren,
 )
 
+interface SignInRouteChildren {
+  SignInSplatRoute: typeof SignInSplatRoute
+}
+
+const SignInRouteChildren: SignInRouteChildren = {
+  SignInSplatRoute: SignInSplatRoute,
+}
+
+const SignInRouteWithChildren =
+  SignInRoute._addFileChildren(SignInRouteChildren)
+
+interface SignUpRouteChildren {
+  SignUpSplatRoute: typeof SignUpSplatRoute
+}
+
+const SignUpRouteChildren: SignUpRouteChildren = {
+  SignUpSplatRoute: SignUpSplatRoute,
+}
+
+const SignUpRouteWithChildren =
+  SignUpRoute._addFileChildren(SignUpRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
   GuardianRoute: GuardianRouteWithChildren,
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
+  SignInRoute: SignInRouteWithChildren,
+  SignUpRoute: SignUpRouteWithChildren,
   ReportsFileNameRoute: ReportsFileNameRoute,
   TargetsTargetIdRoute: TargetsTargetIdRoute,
   TargetsNewRoute: TargetsNewRoute,

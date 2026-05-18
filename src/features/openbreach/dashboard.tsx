@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useUser } from "@clerk/tanstack-react-start";
 import { MaterialSymbol } from "../../components/ui/MaterialSymbol";
 
 import { ThreatMapPanel } from "../../components/threat-map/ThreatMapPanel";
@@ -14,6 +15,8 @@ import {
 } from "../../hooks/use-openbreach-pipeline";
 
 export function OpenBreachDashboard() {
+  const { isLoaded, isSignedIn } = useUser();
+  const isPublicMode = !isLoaded || !isSignedIn;
   const {
     alerts,
     metrics,
@@ -48,13 +51,13 @@ export function OpenBreachDashboard() {
           </div>
           <Link
             className="border-primary/40 text-primary pixel-corner hover:bg-primary/10 border px-3 py-2 font-mono text-[10px] uppercase transition-colors lg:text-xs"
-            to="/targets/new"
+            to={isPublicMode ? "/auth" : "/targets/new"}
           >
             Register Target
           </Link>
           <Link
             className="pixel-corner border border-[#00e639]/30 px-3 py-2 font-mono text-[10px] text-[#00e639] uppercase transition-colors hover:bg-[#00e639]/10 lg:text-xs"
-            to="/guardian/reports"
+            to={isPublicMode ? "/auth" : "/guardian/reports"}
           >
             Open Reports
           </Link>
@@ -97,7 +100,7 @@ export function OpenBreachDashboard() {
                 </h2>
                 <Link
                   className="text-primary/70 hover:text-primary font-mono text-[10px] uppercase"
-                  to="/guardian/validations"
+                  to={isPublicMode ? "/auth" : "/guardian/validations"}
                 >
                   Review validations
                 </Link>
@@ -128,94 +131,96 @@ export function OpenBreachDashboard() {
             </div>
           </section>
 
-          <section className="border-primary/15 relative overflow-hidden border bg-[#2a2a2a] p-4">
-            <div className="scanlines absolute inset-0 opacity-20" />
-            <div className="relative z-10">
-              <div className="border-primary/10 mb-4 flex items-center justify-between gap-4 border-b pb-3">
-                <h2 className="font-display text-primary text-base uppercase lg:text-lg">
-                  Target Queue
-                </h2>
-                <Link
-                  className="text-primary/70 hover:text-primary font-mono text-[10px] uppercase"
-                  to="/targets"
-                >
-                  Open registry
-                </Link>
-              </div>
+          {!isPublicMode ? (
+            <section className="border-primary/15 relative overflow-hidden border bg-[#2a2a2a] p-4">
+              <div className="scanlines absolute inset-0 opacity-20" />
+              <div className="relative z-10">
+                <div className="border-primary/10 mb-4 flex items-center justify-between gap-4 border-b pb-3">
+                  <h2 className="font-display text-primary text-base uppercase lg:text-lg">
+                    Target Queue
+                  </h2>
+                  <Link
+                    className="text-primary/70 hover:text-primary font-mono text-[10px] uppercase"
+                    to="/targets"
+                  >
+                    Open registry
+                  </Link>
+                </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left font-mono text-[10px] lg:text-xs">
-                  <thead>
-                    <tr className="border-primary/10 border-b text-[#b9cacb]">
-                      <th className="px-2 py-2 font-normal">TARGET</th>
-                      <th className="border-primary/10 border-l px-2 py-2 font-normal">
-                        PHASE
-                      </th>
-                      <th className="border-primary/10 border-l px-2 py-2 font-normal">
-                        STATUS
-                      </th>
-                      <th className="border-primary/10 border-l px-2 py-2 font-normal">
-                        UPDATED
-                      </th>
-                      <th className="border-primary/10 border-l px-2 py-2 font-normal">
-                        ACTION
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {targets.length === 0 ? (
-                      <tr>
-                        <td className="px-2 py-3 text-[#b9cacb]" colSpan={5}>
-                          No targets available.
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left font-mono text-[10px] lg:text-xs">
+                    <thead>
+                      <tr className="border-primary/10 border-b text-[#b9cacb]">
+                        <th className="px-2 py-2 font-normal">TARGET</th>
+                        <th className="border-primary/10 border-l px-2 py-2 font-normal">
+                          PHASE
+                        </th>
+                        <th className="border-primary/10 border-l px-2 py-2 font-normal">
+                          STATUS
+                        </th>
+                        <th className="border-primary/10 border-l px-2 py-2 font-normal">
+                          UPDATED
+                        </th>
+                        <th className="border-primary/10 border-l px-2 py-2 font-normal">
+                          ACTION
+                        </th>
                       </tr>
-                    ) : (
-                      targets.slice(0, 6).map((target) => (
-                        <tr
-                          key={target.targetId}
-                          className="hover:bg-primary/5"
-                        >
-                          <td className="px-2 py-3 text-[#00dbe9]">
-                            <div className="flex flex-col gap-1">
-                              <span>{target.name}</span>
-                              <span className="text-[9px] text-[#b9cacb]">
-                                {target.targetId}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
-                            {formatWorkflowPhase(
-                              target.latestRun?.currentPhase,
-                            )}
-                          </td>
-                          <td className="border-primary/10 border-l px-2 py-3">
-                            <StatusPill
-                              label={formatWorkflowStatus(
-                                target.latestRun?.status,
-                              )}
-                              tone={getTargetStatusTone(target)}
-                            />
-                          </td>
-                          <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
-                            {getTargetLastUpdated(target)}
-                          </td>
-                          <td className="border-primary/10 border-l px-2 py-3">
-                            <Link
-                              className="text-primary hover:text-[#00e639]"
-                              to="/targets/$targetId"
-                              params={{ targetId: target.targetId }}
-                            >
-                              {target.nextActionLabel}
-                            </Link>
+                    </thead>
+                    <tbody>
+                      {targets.length === 0 ? (
+                        <tr>
+                          <td className="px-2 py-3 text-[#b9cacb]" colSpan={5}>
+                            No targets available.
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+                      ) : (
+                        targets.slice(0, 6).map((target) => (
+                          <tr
+                            key={target.targetId}
+                            className="hover:bg-primary/5"
+                          >
+                            <td className="px-2 py-3 text-[#00dbe9]">
+                              <div className="flex flex-col gap-1">
+                                <span>{target.name}</span>
+                                <span className="text-[9px] text-[#b9cacb]">
+                                  {target.targetId}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
+                              {formatWorkflowPhase(
+                                target.latestRun?.currentPhase,
+                              )}
+                            </td>
+                            <td className="border-primary/10 border-l px-2 py-3">
+                              <StatusPill
+                                label={formatWorkflowStatus(
+                                  target.latestRun?.status,
+                                )}
+                                tone={getTargetStatusTone(target)}
+                              />
+                            </td>
+                            <td className="border-primary/10 border-l px-2 py-3 text-[#b9cacb]">
+                              {getTargetLastUpdated(target)}
+                            </td>
+                            <td className="border-primary/10 border-l px-2 py-3">
+                              <Link
+                                className="text-primary hover:text-[#00e639]"
+                                to="/targets/$targetId"
+                                params={{ targetId: target.targetId }}
+                              >
+                                {target.nextActionLabel}
+                              </Link>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-4">
@@ -245,77 +250,82 @@ export function OpenBreachDashboard() {
             </div>
           </section>
 
-          <section className="border-primary/15 border bg-[#2a2a2a] p-4">
-            <div className="border-primary/10 mb-4 flex items-center justify-between gap-4 border-b pb-3">
-              <h2 className="font-display text-primary text-base uppercase lg:text-lg">
-                Recent Validations
-              </h2>
-              <Link
-                className="text-primary/70 hover:text-primary font-mono text-[10px] uppercase"
-                to="/guardian/validations"
-              >
-                Open queue
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {recentValidations.length === 0 ? (
-                <p className="font-mono text-[10px] text-[#b9cacb]">
-                  No validations available.
-                </p>
-              ) : (
-                recentValidations.slice(0, 4).map((validation) => (
-                  <div
-                    key={validation.id}
-                    className="border-primary/10 border bg-[#131313]/70 p-3"
+          {!isPublicMode ? (
+            <>
+              <section className="border-primary/15 border bg-[#2a2a2a] p-4">
+                <div className="border-primary/10 mb-4 flex items-center justify-between gap-4 border-b pb-3">
+                  <h2 className="font-display text-primary text-base uppercase lg:text-lg">
+                    Recent Validations
+                  </h2>
+                  <Link
+                    className="text-primary/70 hover:text-primary font-mono text-[10px] uppercase"
+                    to="/guardian/validations"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-mono text-[10px] text-[#00dbe9]">
-                          {validation.id}
-                        </p>
-                        <p className="mt-1 font-mono text-[10px] text-[#b9cacb]">
-                          {validation.target}
+                    Open queue
+                  </Link>
+                </div>
+                <div className="space-y-3">
+                  {recentValidations.length === 0 ? (
+                    <p className="font-mono text-[10px] text-[#b9cacb]">
+                      No validations available.
+                    </p>
+                  ) : (
+                    recentValidations.slice(0, 4).map((validation) => (
+                      <div
+                        key={validation.id}
+                        className="border-primary/10 border bg-[#131313]/70 p-3"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="font-mono text-[10px] text-[#00dbe9]">
+                              {validation.id}
+                            </p>
+                            <p className="mt-1 font-mono text-[10px] text-[#b9cacb]">
+                              {validation.target}
+                            </p>
+                          </div>
+                          <StatusPill
+                            label={validation.status}
+                            tone={validation.statusTone}
+                          />
+                        </div>
+                        <p className="mt-2 font-mono text-[10px] text-[#b9cacb]">
+                          Duration: {validation.duration}
                         </p>
                       </div>
-                      <StatusPill
-                        label={validation.status}
-                        tone={validation.statusTone}
-                      />
-                    </div>
-                    <p className="mt-2 font-mono text-[10px] text-[#b9cacb]">
-                      Duration: {validation.duration}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
+                    ))
+                  )}
+                </div>
+              </section>
 
-          <section className="border-primary/15 border bg-[#2a2a2a] p-4">
-            <div className="border-primary/10 mb-4 flex items-center justify-between gap-4 border-b pb-3">
-              <h2 className="font-display text-primary text-base uppercase lg:text-lg">
-                Report Downloads
-              </h2>
-              <Link
-                className="text-primary/70 hover:text-primary font-mono text-[10px] uppercase"
-                to="/guardian/reports"
-              >
-                View library
-              </Link>
-            </div>
-            <div className="space-y-3">
-              {reportDownloads.slice(0, 4).map((download) => (
-                <a
-                  key={download.id}
-                  className="border-primary/10 text-primary hover:bg-primary/10 flex items-center justify-between gap-3 border bg-[#131313]/70 px-3 py-3 font-mono text-[10px] transition-colors"
-                  href={download.href}
-                >
-                  <span>{download.label}</span>
-                  <MaterialSymbol className="text-sm" icon="download" />
-                </a>
-              ))}
-            </div>
-          </section>
+              <section className="border-primary/15 border bg-[#2a2a2a] p-4">
+                <div className="border-primary/10 mb-4 flex items-center justify-between gap-4 border-b pb-3">
+                  <h2 className="font-display text-primary text-base uppercase lg:text-lg">
+                    Report Downloads
+                  </h2>
+                  <Link
+                    className="text-primary/70 hover:text-primary font-mono text-[10px] uppercase"
+                    to="/guardian/reports"
+                  >
+                    View library
+                  </Link>
+                </div>
+                <div className="space-y-3">
+                  {reportDownloads.slice(0, 4).map((download) => (
+                    <a
+                      key={download.id}
+                      className="border-primary/10 text-primary hover:bg-primary/10 flex items-center justify-between gap-3 border bg-[#131313]/70 px-3 py-3 font-mono text-[10px] transition-colors"
+                      download={download.fileName}
+                      href={download.href}
+                    >
+                      <span>{download.label}</span>
+                      <MaterialSymbol className="text-sm" icon="download" />
+                    </a>
+                  ))}
+                </div>
+              </section>
+            </>
+          ) : null}
         </div>
       </div>
     </div>

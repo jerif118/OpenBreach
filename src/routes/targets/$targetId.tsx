@@ -281,6 +281,7 @@ function TargetDetailPage() {
                       <a
                         key={download.id}
                         className="border-primary/20 bg-surface-container-low text-primary pixel-corner hover:bg-primary/10 border px-4 py-3 font-mono text-[10px] tracking-[0.18em] uppercase transition"
+                        download={download.fileName}
                         href={download.href}
                       >
                         {download.label}

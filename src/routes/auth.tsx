@@ -1,11 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AuthShell, OpenBreachSignIn } from "../features/auth/auth-ui";
 
-export const Route = createFileRoute("/sign-in")({
-  component: SignInPage,
+export const Route = createFileRoute("/auth")({
+  component: AuthPage,
 });
 
-function SignInPage() {
+function AuthPage() {
   const navigate = useNavigate();
 
   return (

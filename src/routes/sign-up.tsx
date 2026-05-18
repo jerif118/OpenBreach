@@ -1,14 +1,28 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { SignUp } from "@clerk/tanstack-react-start";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { AuthShell, OpenBreachSignUp } from "../features/auth/auth-ui";
 
 export const Route = createFileRoute("/sign-up")({
   component: SignUpPage,
 });
 
 function SignUpPage() {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a]">
-      <SignUp />
-    </div>
+    <AuthShell
+      footer={
+        <p className="text-center font-mono text-xs text-[#b9cacb]">
+          Already have an account?{" "}
+          <button
+            onClick={() => navigate({ to: "/auth" })}
+            className="text-[#00e639] hover:underline"
+          >
+            Sign in
+          </button>
+        </p>
+      }
+    >
+      <OpenBreachSignUp />
+    </AuthShell>
   );
 }

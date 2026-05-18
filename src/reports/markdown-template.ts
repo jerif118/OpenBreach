@@ -133,6 +133,21 @@ function renderTemplate(template: string, context: TemplateContext) {
   return output;
 }
 
+export function renderReportMarkdownTemplate({
+  municipalityName,
+  report,
+  template,
+}: {
+  municipalityName: string;
+  report: RemediationReport;
+  template: string;
+}) {
+  return renderTemplate(
+    template,
+    buildTemplateContext({ municipalityName, report }),
+  );
+}
+
 export async function renderReportMarkdown({
   municipalityName,
   report,
@@ -145,8 +160,5 @@ export async function renderReportMarkdown({
     templateFileByVariant[report.variant],
   );
   const template = await readFile(templatePath, "utf8");
-  return renderTemplate(
-    template,
-    buildTemplateContext({ municipalityName, report }),
-  );
+  return renderReportMarkdownTemplate({ municipalityName, report, template });
 }
