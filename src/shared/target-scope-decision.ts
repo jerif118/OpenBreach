@@ -196,7 +196,7 @@ export function decideTargetScope(input: ScopeDecisionInput): ScopeDecision {
   if (isPrivateOrInternalHost(primaryAsset.host)) {
     return {
       status: "rejected",
-      reason: "Primary URL resolves to a private or internal host pattern.",
+      reason: "Primary URL matches a private or internal host pattern.",
       auditDecision: "rejected",
     };
   }
