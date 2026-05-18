@@ -123,7 +123,8 @@ function validateArtifacts(result: ReturnType<typeof runMvpOrchestrator>) {
     r.auditEvents.some(
       (e) =>
         e.eventType === "gate-rejected" &&
-        e.details?.reason === "active_validation_requires_approved_execution_gate",
+        e.details?.reason ===
+          "active_validation_requires_approved_execution_gate",
     ),
   );
   assert.notEqual(r.workflowRun.status, "completed");
