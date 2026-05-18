@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { SignInButton, UserButton, useUser } from "@clerk/tanstack-react-start";
-import { useMutation } from "convex/react";
+import { useConvexAuth, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api.js";
 import { MaterialSymbol } from "../../components/ui/MaterialSymbol";
 
@@ -167,7 +167,7 @@ function AuthWidget() {
 function AuthWidgetClerk() {
   const { isLoaded, isSignedIn, user } = useUser();
   useEnsureConvexProfile(
-    isLoaded && Boolean(isSignedIn) ? user ?? null : null,
+    isLoaded && Boolean(isSignedIn) ? (user ?? null) : null,
   );
 
   if (!isLoaded) {
@@ -289,12 +289,15 @@ function MobileAuthAffordanceClerk() {
 // to match against. Runs once per Clerk user id; the mutation is idempotent
 // and now backfills email/name from the Clerk session because the default
 // Convex JWT template only forwards `sub` and `iss`.
-function useEnsureConvexProfile(user: ReturnType<typeof useUser>["user"] | null) {
+function useEnsureConvexProfile(
+  user: ReturnType<typeof useUser>["user"] | null,
+) {
   const provision = useMutation(api.users.updateCurrentMetadata);
+  const { isAuthenticated: isConvexAuthenticated } = useConvexAuth();
   const ranForUserRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!user || !isConvexConfigured) {
+    if (!user || !isConvexConfigured || !isConvexAuthenticated) {
       return;
     }
     if (ranForUserRef.current === user.id) {
@@ -308,5 +311,5 @@ function useEnsureConvexProfile(user: ReturnType<typeof useUser>["user"] | null)
       console.warn("Failed to provision Convex user profile:", err);
       ranForUserRef.current = null;
     });
-  }, [user, provision]);
+  }, [user, provision, isConvexAuthenticated]);
 }
