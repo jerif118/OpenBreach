@@ -67,9 +67,7 @@ function main(): void {
     process.exit(0);
   }
 
-  process.stderr.write(
-    `Matched ${toDelete.length} profile(s) for deletion:\n`,
-  );
+  process.stderr.write(`Matched ${toDelete.length} profile(s) for deletion:\n`);
   printProfiles(toDelete);
 
   if (!opts.yes) {
