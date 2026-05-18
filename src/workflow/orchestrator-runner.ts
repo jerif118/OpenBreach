@@ -129,6 +129,12 @@ export type OrchestratorOutcome = {
   httpStatus: number | null;
   runId: string;
   targetId: string;
+  // Short machine-readable code from the validation runner
+  // (e.g. "validation_fetch_failed", "max_requests_exceeded").
+  validationSummary?: string;
+  // Underlying fetch/cause message, e.g. "fetch failed [ENOTFOUND]".
+  // Only populated when the live probe errored or was blocked.
+  validationErrorMessage?: string;
 };
 
 export type OrchestratorRunResult = {
@@ -332,6 +338,8 @@ export async function runOrchestratorForPipelineEntry(
       ? validationResult.metadata.httpStatus
       : null;
 
+  const metadataError = extractValidationErrorMessage(validationResult.metadata);
+
   return {
     artifact,
     outcome: {
@@ -340,6 +348,8 @@ export async function runOrchestratorForPipelineEntry(
       httpStatus,
       runId,
       targetId,
+      validationSummary: validationResult.summary,
+      validationErrorMessage: metadataError,
     },
   };
 }
@@ -383,6 +393,15 @@ function buildFindings(args: {
     reportReady: finding.severity === "critical" ? true : undefined,
     runId: args.runId,
   }));
+}
+
+function extractValidationErrorMessage(
+  metadata: Record<string, unknown> | undefined,
+): string | undefined {
+  if (!metadata) return undefined;
+  if (typeof metadata.error === "string") return metadata.error;
+  if (typeof metadata.blockedReason === "string") return metadata.blockedReason;
+  return undefined;
 }
 
 // Surface the underlying cause code (e.g. ENOTFOUND, ECONNREFUSED) in the

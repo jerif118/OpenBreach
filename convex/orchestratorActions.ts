@@ -39,6 +39,8 @@ export const runForTarget = action({
       | "inconclusive";
     requestCount: number;
     httpStatus: number | null;
+    validationSummary?: string;
+    validationErrorMessage?: string;
   }> => {
     // Read identity directly from the action context. Doing the auth check
     // here (instead of inside a runQuery) avoids any chance of an unauth'd
@@ -61,7 +63,11 @@ export const runForTarget = action({
       );
     }
 
-    if (!profile.roles.some((role) => ALLOWED_ROLES.includes(role as "operator" | "admin"))) {
+    if (
+      !profile.roles.some((role) =>
+        ALLOWED_ROLES.includes(role as "operator" | "admin"),
+      )
+    ) {
       throw new Error(
         `Insufficient permissions: roles=[${profile.roles.join(", ")}]. Need 'operator' or 'admin'. Run pnpm users:elevate-admin --email ${profile.email ?? "<your-email>"}.`,
       );
