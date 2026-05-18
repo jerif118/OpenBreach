@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { internalQuery, internalMutation } from "./_generated/server";
+import { internalQuery, internalMutation, query } from "./_generated/server";
 import type { Doc } from "./_generated/dataModel";
 import { requireOperatorOrAdmin } from "./auth";
 import type { WorkflowRunDto } from "./types/workflow";
@@ -7,6 +7,8 @@ import { validateWorkflowRunTransition } from "./lib/stateMachine";
 import { appendAuditEvent } from "./lib/audit";
 
 const MAX_LIST_LIMIT = 100;
+const RECENT_DEFAULT_LIMIT = 100;
+const RECENT_MAX_LIMIT = 200;
 
 // ============================================================================
 // DTO Mapper
@@ -73,6 +75,91 @@ export const get = internalQuery({
     return doc ? toWorkflowRunDto(doc) : null;
   },
 });
+
+// Cross-target recent runs feed for the Guardian "Runs" dashboard page.
+// Joins each workflowRun with its target's municipality name (when present)
+// and the latest validationResult on the same runId so the UI can render a
+// human-readable status pill without N+1 client roundtrips.
+export const listRecent = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = normalizeRecentLimit(args.limit);
+
+    const runs = await ctx.db
+      .query("workflowRuns")
+      .order("desc")
+      .take(limit);
+
+    const items: Array<{
+      run: WorkflowRunDto;
+      targetName: string | null;
+      municipalityExternalId: string | null;
+      validation: {
+        resultId: string;
+        status: Doc<"validationResults">["status"];
+        summary?: string;
+        httpStatus?: number;
+        requestCount?: number;
+        error?: string;
+      } | null;
+    }> = [];
+
+    for (const run of runs) {
+      const municipality = await ctx.db
+        .query("municipalities")
+        .withIndex("by_externalId", (q) =>
+          q.eq("externalId", run.targetId),
+        )
+        .unique();
+
+      const [validation] = await ctx.db
+        .query("validationResults")
+        .withIndex("by_targetId_and_runId", (q) =>
+          q.eq("targetId", run.targetId).eq("runId", run.runId),
+        )
+        .take(1);
+
+      items.push({
+        run: toWorkflowRunDto(run),
+        targetName: municipality?.name ?? null,
+        municipalityExternalId: municipality?.externalId ?? null,
+        validation: validation
+          ? {
+              resultId: validation.resultId,
+              status: validation.status,
+              summary: validation.summary,
+              httpStatus:
+                typeof validation.metadata?.httpStatus === "number"
+                  ? (validation.metadata.httpStatus as number)
+                  : undefined,
+              requestCount:
+                typeof validation.metadata?.requestCount === "number"
+                  ? (validation.metadata.requestCount as number)
+                  : undefined,
+              error:
+                typeof validation.metadata?.error === "string"
+                  ? (validation.metadata.error as string)
+                  : undefined,
+            }
+          : null,
+      });
+    }
+
+    return items;
+  },
+});
+
+function normalizeRecentLimit(limit: number | undefined) {
+  if (limit === undefined) {
+    return RECENT_DEFAULT_LIMIT;
+  }
+  if (!Number.isInteger(limit) || limit < 1 || limit > RECENT_MAX_LIMIT) {
+    throw new Error(
+      `workflowRuns.listRecent limit must be an integer from 1 to ${RECENT_MAX_LIMIT}.`,
+    );
+  }
+  return limit;
+}
 
 // ============================================================================
 // Mutations
