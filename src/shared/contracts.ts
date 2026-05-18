@@ -864,6 +864,8 @@ export const approvalGateSchema = z
     bypassJustification: nonEmptyStringSchema.optional(),
     linkedArtifactId: nonEmptyStringSchema.optional(),
     runId: nonEmptyStringSchema.optional(),
+    /** When set, an approved gate is treated as expired after this instant (ISO-8601). */
+    expiresAt: isoDateTimeSchema.optional(),
   })
   .superRefine((val, ctx) => {
     if (val.status === "approved" && (!val.approvedBy || !val.approvedAt)) {
@@ -1023,6 +1025,7 @@ export const auditEventSchema = z.object({
     "approval-reset",
     "gate-approved",
     "gate-rejected",
+    "gate-expired",
     "evidence-recorded",
     "finding-created",
     "finding-updated",
