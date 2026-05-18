@@ -9,14 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as GuardianRouteImport } from './routes/guardian'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TargetsIndexRouteImport } from './routes/targets/index'
+import { Route as SignUpIndexRouteImport } from './routes/sign-up/index'
+import { Route as SignInIndexRouteImport } from './routes/sign-in/index'
 import { Route as GuardianIndexRouteImport } from './routes/guardian/index'
 import { Route as TargetsNewRouteImport } from './routes/targets/new'
 import { Route as TargetsTargetIdRouteImport } from './routes/targets/$targetId'
+import { Route as SignUpSplatRouteImport } from './routes/sign-up/$'
+import { Route as SignInSplatRouteImport } from './routes/sign-in/$'
 import { Route as ReportsReportIdRouteImport } from './routes/reports/$reportId'
 import { Route as GuardianValidationsRouteImport } from './routes/guardian/validations'
 import { Route as GuardianThreatsRouteImport } from './routes/guardian/threats'
@@ -27,16 +29,6 @@ import { Route as GuardianLogsRouteImport } from './routes/guardian/logs'
 import { Route as GuardianEvidenceRouteImport } from './routes/guardian/evidence'
 import { Route as GuardianConfigRouteImport } from './routes/guardian/config'
 
-const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignInRoute = SignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const GuardianRoute = GuardianRouteImport.update({
   id: '/guardian',
   path: '/guardian',
@@ -52,6 +44,16 @@ const TargetsIndexRoute = TargetsIndexRouteImport.update({
   path: '/targets/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignUpIndexRoute = SignUpIndexRouteImport.update({
+  id: '/sign-up/',
+  path: '/sign-up/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInIndexRoute = SignInIndexRouteImport.update({
+  id: '/sign-in/',
+  path: '/sign-in/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuardianIndexRoute = GuardianIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -65,6 +67,16 @@ const TargetsNewRoute = TargetsNewRouteImport.update({
 const TargetsTargetIdRoute = TargetsTargetIdRouteImport.update({
   id: '/targets/$targetId',
   path: '/targets/$targetId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpSplatRoute = SignUpSplatRouteImport.update({
+  id: '/sign-up/$',
+  path: '/sign-up/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInSplatRoute = SignInSplatRouteImport.update({
+  id: '/sign-in/$',
+  path: '/sign-in/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsReportIdRoute = ReportsReportIdRouteImport.update({
@@ -116,8 +128,6 @@ const GuardianConfigRoute = GuardianConfigRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/guardian': typeof GuardianRouteWithChildren
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
   '/guardian/config': typeof GuardianConfigRoute
   '/guardian/evidence': typeof GuardianEvidenceRoute
   '/guardian/logs': typeof GuardianLogsRoute
@@ -127,15 +137,17 @@ export interface FileRoutesByFullPath {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian/': typeof GuardianIndexRoute
+  '/sign-in/': typeof SignInIndexRoute
+  '/sign-up/': typeof SignUpIndexRoute
   '/targets/': typeof TargetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
   '/guardian/config': typeof GuardianConfigRoute
   '/guardian/evidence': typeof GuardianEvidenceRoute
   '/guardian/logs': typeof GuardianLogsRoute
@@ -145,17 +157,19 @@ export interface FileRoutesByTo {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian': typeof GuardianIndexRoute
+  '/sign-in': typeof SignInIndexRoute
+  '/sign-up': typeof SignUpIndexRoute
   '/targets': typeof TargetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/guardian': typeof GuardianRouteWithChildren
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
   '/guardian/config': typeof GuardianConfigRoute
   '/guardian/evidence': typeof GuardianEvidenceRoute
   '/guardian/logs': typeof GuardianLogsRoute
@@ -165,9 +179,13 @@ export interface FileRoutesById {
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
   '/reports/$reportId': typeof ReportsReportIdRoute
+  '/sign-in/$': typeof SignInSplatRoute
+  '/sign-up/$': typeof SignUpSplatRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian/': typeof GuardianIndexRoute
+  '/sign-in/': typeof SignInIndexRoute
+  '/sign-up/': typeof SignUpIndexRoute
   '/targets/': typeof TargetsIndexRoute
 }
 export interface FileRouteTypes {
@@ -175,8 +193,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/guardian'
-    | '/sign-in'
-    | '/sign-up'
     | '/guardian/config'
     | '/guardian/evidence'
     | '/guardian/logs'
@@ -186,15 +202,17 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$reportId'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian/'
+    | '/sign-in/'
+    | '/sign-up/'
     | '/targets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/sign-in'
-    | '/sign-up'
     | '/guardian/config'
     | '/guardian/evidence'
     | '/guardian/logs'
@@ -204,16 +222,18 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$reportId'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian'
+    | '/sign-in'
+    | '/sign-up'
     | '/targets'
   id:
     | '__root__'
     | '/'
     | '/guardian'
-    | '/sign-in'
-    | '/sign-up'
     | '/guardian/config'
     | '/guardian/evidence'
     | '/guardian/logs'
@@ -223,39 +243,31 @@ export interface FileRouteTypes {
     | '/guardian/threats'
     | '/guardian/validations'
     | '/reports/$reportId'
+    | '/sign-in/$'
+    | '/sign-up/$'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian/'
+    | '/sign-in/'
+    | '/sign-up/'
     | '/targets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GuardianRoute: typeof GuardianRouteWithChildren
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
   ReportsReportIdRoute: typeof ReportsReportIdRoute
+  SignInSplatRoute: typeof SignInSplatRoute
+  SignUpSplatRoute: typeof SignUpSplatRoute
   TargetsTargetIdRoute: typeof TargetsTargetIdRoute
   TargetsNewRoute: typeof TargetsNewRoute
+  SignInIndexRoute: typeof SignInIndexRoute
+  SignUpIndexRoute: typeof SignUpIndexRoute
   TargetsIndexRoute: typeof TargetsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/guardian': {
       id: '/guardian'
       path: '/guardian'
@@ -277,6 +289,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TargetsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sign-up/': {
+      id: '/sign-up/'
+      path: '/sign-up'
+      fullPath: '/sign-up/'
+      preLoaderRoute: typeof SignUpIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in/': {
+      id: '/sign-in/'
+      path: '/sign-in'
+      fullPath: '/sign-in/'
+      preLoaderRoute: typeof SignInIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guardian/': {
       id: '/guardian/'
       path: '/'
@@ -296,6 +322,20 @@ declare module '@tanstack/react-router' {
       path: '/targets/$targetId'
       fullPath: '/targets/$targetId'
       preLoaderRoute: typeof TargetsTargetIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up/$': {
+      id: '/sign-up/$'
+      path: '/sign-up/$'
+      fullPath: '/sign-up/$'
+      preLoaderRoute: typeof SignUpSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in/$': {
+      id: '/sign-in/$'
+      path: '/sign-in/$'
+      fullPath: '/sign-in/$'
+      preLoaderRoute: typeof SignInSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports/$reportId': {
@@ -395,11 +435,13 @@ const GuardianRouteWithChildren = GuardianRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GuardianRoute: GuardianRouteWithChildren,
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
   ReportsReportIdRoute: ReportsReportIdRoute,
+  SignInSplatRoute: SignInSplatRoute,
+  SignUpSplatRoute: SignUpSplatRoute,
   TargetsTargetIdRoute: TargetsTargetIdRoute,
   TargetsNewRoute: TargetsNewRoute,
+  SignInIndexRoute: SignInIndexRoute,
+  SignUpIndexRoute: SignUpIndexRoute,
   TargetsIndexRoute: TargetsIndexRoute,
 }
 export const routeTree = rootRouteImport
