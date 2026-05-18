@@ -15,6 +15,9 @@
  *   --yes       actually delete the matched rows.
  *   --list      print every profile and exit without deleting.
  *
+ * With no arguments (or `--help`), prints usage and exits successfully so
+ * `pnpm users:cleanup-profiles` does not fail the lifecycle script.
+ *
  * Examples:
  *   pnpm users:cleanup-profiles --list
  *   pnpm users:cleanup-profiles --null-only            # preview
@@ -82,7 +85,7 @@ function main(): void {
 
 function parseArgs(argv: string[]): Options {
   if (argv.length === 0) {
-    usageAndExit();
+    usageAndExit(0);
   }
 
   const opts: Options = {
