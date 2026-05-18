@@ -110,6 +110,7 @@ export function toApprovalDto(doc: Doc<"approvalGates">): ApprovalGateDto {
     bypassJustification: doc.bypassJustification ?? undefined,
     linkedArtifactId: doc.linkedArtifactId ?? undefined,
     runId: doc.runId ?? undefined,
+    expiresAt: doc.expiresAt ?? undefined,
   };
 }
 

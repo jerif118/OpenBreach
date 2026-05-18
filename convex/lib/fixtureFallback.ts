@@ -263,6 +263,7 @@ export function mapFixtureToApprovalGateDto(fixture: unknown): ApprovalGateDto {
       ? String(f.linkedArtifactId)
       : undefined,
     runId: f.runId ? String(f.runId) : undefined,
+    expiresAt: f.expiresAt ? String(f.expiresAt) : undefined,
   };
 }
 
