@@ -17,7 +17,7 @@ import { Route as TargetsIndexRouteImport } from './routes/targets/index'
 import { Route as GuardianIndexRouteImport } from './routes/guardian/index'
 import { Route as TargetsNewRouteImport } from './routes/targets/new'
 import { Route as TargetsTargetIdRouteImport } from './routes/targets/$targetId'
-import { Route as ReportsFileNameRouteImport } from './routes/reports/$fileName'
+import { Route as ReportsReportIdRouteImport } from './routes/reports/$reportId'
 import { Route as GuardianValidationsRouteImport } from './routes/guardian/validations'
 import { Route as GuardianThreatsRouteImport } from './routes/guardian/threats'
 import { Route as GuardianReportsRouteImport } from './routes/guardian/reports'
@@ -66,9 +66,9 @@ const TargetsTargetIdRoute = TargetsTargetIdRouteImport.update({
   path: '/targets/$targetId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReportsFileNameRoute = ReportsFileNameRouteImport.update({
-  id: '/reports/$fileName',
-  path: '/reports/$fileName',
+const ReportsReportIdRoute = ReportsReportIdRouteImport.update({
+  id: '/reports/$reportId',
+  path: '/reports/$reportId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuardianValidationsRoute = GuardianValidationsRouteImport.update({
@@ -119,7 +119,7 @@ export interface FileRoutesByFullPath {
   '/guardian/reports': typeof GuardianReportsRoute
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
-  '/reports/$fileName': typeof ReportsFileNameRoute
+  '/reports/$reportId': typeof ReportsReportIdRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian/': typeof GuardianIndexRoute
@@ -136,7 +136,7 @@ export interface FileRoutesByTo {
   '/guardian/reports': typeof GuardianReportsRoute
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
-  '/reports/$fileName': typeof ReportsFileNameRoute
+  '/reports/$reportId': typeof ReportsReportIdRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian': typeof GuardianIndexRoute
@@ -155,7 +155,7 @@ export interface FileRoutesById {
   '/guardian/reports': typeof GuardianReportsRoute
   '/guardian/threats': typeof GuardianThreatsRoute
   '/guardian/validations': typeof GuardianValidationsRoute
-  '/reports/$fileName': typeof ReportsFileNameRoute
+  '/reports/$reportId': typeof ReportsReportIdRoute
   '/targets/$targetId': typeof TargetsTargetIdRoute
   '/targets/new': typeof TargetsNewRoute
   '/guardian/': typeof GuardianIndexRoute
@@ -175,7 +175,7 @@ export interface FileRouteTypes {
     | '/guardian/reports'
     | '/guardian/threats'
     | '/guardian/validations'
-    | '/reports/$fileName'
+    | '/reports/$reportId'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian/'
@@ -192,7 +192,7 @@ export interface FileRouteTypes {
     | '/guardian/reports'
     | '/guardian/threats'
     | '/guardian/validations'
-    | '/reports/$fileName'
+    | '/reports/$reportId'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian'
@@ -210,7 +210,7 @@ export interface FileRouteTypes {
     | '/guardian/reports'
     | '/guardian/threats'
     | '/guardian/validations'
-    | '/reports/$fileName'
+    | '/reports/$reportId'
     | '/targets/$targetId'
     | '/targets/new'
     | '/guardian/'
@@ -222,7 +222,7 @@ export interface RootRouteChildren {
   GuardianRoute: typeof GuardianRouteWithChildren
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
-  ReportsFileNameRoute: typeof ReportsFileNameRoute
+  ReportsReportIdRoute: typeof ReportsReportIdRoute
   TargetsTargetIdRoute: typeof TargetsTargetIdRoute
   TargetsNewRoute: typeof TargetsNewRoute
   TargetsIndexRoute: typeof TargetsIndexRoute
@@ -286,11 +286,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TargetsTargetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/reports/$fileName': {
-      id: '/reports/$fileName'
-      path: '/reports/$fileName'
-      fullPath: '/reports/$fileName'
-      preLoaderRoute: typeof ReportsFileNameRouteImport
+    '/reports/$reportId': {
+      id: '/reports/$reportId'
+      path: '/reports/$reportId'
+      fullPath: '/reports/$reportId'
+      preLoaderRoute: typeof ReportsReportIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/guardian/validations': {
@@ -376,7 +376,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuardianRoute: GuardianRouteWithChildren,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
-  ReportsFileNameRoute: ReportsFileNameRoute,
+  ReportsReportIdRoute: ReportsReportIdRoute,
   TargetsTargetIdRoute: TargetsTargetIdRoute,
   TargetsNewRoute: TargetsNewRoute,
   TargetsIndexRoute: TargetsIndexRoute,
