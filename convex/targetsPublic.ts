@@ -311,6 +311,23 @@ export const createFull = mutation({
     if (scopeDecision.status === "rejected") {
       const runId = crypto.randomUUID();
       const eventId = crypto.randomUUID();
+      const workflowRun: WorkflowRunDto = {
+        runId,
+        targetId: args.targetId,
+        status: "rejected",
+        startedAt: nowISO,
+        abortedAt: nowISO,
+        abortedReason: scopeDecision.reason,
+        currentPhase: "intake",
+        phases: [
+          {
+            phase: "intake",
+            enteredAt: nowISO,
+            exitedAt: nowISO,
+            rejectionReason: scopeDecision.reason,
+          },
+        ],
+      };
       const details = buildRejectedAuditDetails({
         reason: scopeDecision.reason,
         primaryUrl: args.primaryUrl,
@@ -319,6 +336,7 @@ export const createFull = mutation({
         deniedAssetCount: args.deniedAssets?.length ?? 0,
       });
 
+      await ctx.db.insert("workflowRuns", workflowRun);
       await appendAuditEvent(ctx, {
         targetId: args.targetId,
         eventType: "target-rejected",
@@ -340,23 +358,7 @@ export const createFull = mutation({
         currentPhase: "intake" as const,
         reason: scopeDecision.reason,
         authorizationScope: null,
-        workflowRun: {
-          runId,
-          targetId: args.targetId,
-          status: "rejected" as const,
-          startedAt: nowISO,
-          abortedAt: nowISO,
-          abortedReason: scopeDecision.reason,
-          currentPhase: "intake" as const,
-          phases: [
-            {
-              phase: "intake" as const,
-              enteredAt: nowISO,
-              exitedAt: nowISO,
-              rejectionReason: scopeDecision.reason,
-            },
-          ],
-        },
+        workflowRun,
         auditEvents: [
           buildAuditDto({
             eventId,
