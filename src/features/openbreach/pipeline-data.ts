@@ -872,25 +872,39 @@ export function buildMunicipalityRecord(
   const evidence = buildEvidenceFromScan(entry);
   const reportArtifact = buildReportArtifactFromReport(entry);
   const reportDownloads = buildReportDownloadsFromReport(entry);
-  const latestRun = buildRunFromEntry(entry);
-  const auditEvents = buildAuditFromEntry(entry);
+  const synthesizedRun = buildRunFromEntry(entry);
+  const synthesizedAudit = buildAuditFromEntry(entry);
   const createdAt =
     report?.generatedAt ?? scan?.scannedAt ?? new Date().toISOString();
 
-  const findings: FindingDto[] = report?.findings?.length
+  const orchestrator = entry.orchestrator;
+  const realRun = orchestrator?.latestRun
+    ? toRealWorkflowRun(orchestrator.latestRun)
+    : null;
+  const realValidation = orchestrator?.latestValidation
+    ? toRealValidation(orchestrator.latestValidation, orchestrator.findings.length)
+    : null;
+  const realAudit = (orchestrator?.auditEvents ?? []).map(toRealAuditEvent);
+  const realFindings = (orchestrator?.findings ?? []).map(toRealFinding);
+
+  const latestRun = realRun ?? synthesizedRun;
+  const auditEvents = realAudit.length > 0 ? realAudit : synthesizedAudit;
+
+  const synthesizedFindings: FindingDto[] = report?.findings?.length
     ? report.findings.map((finding) =>
         reportFindingToDto(finding, targetId, createdAt, true),
       )
     : (scan?.findings ?? []).map((finding) =>
         scanFindingToDto(finding, targetId, scan?.scannedAt ?? createdAt),
       );
+  const findings = realFindings.length > 0 ? realFindings : synthesizedFindings;
 
   const approvalStatus: PipelineTargetRecord["approvalStatus"] = "approved";
   const coverage = deriveCoverage({
     approvalStatus,
     evidence,
     testPlan: null,
-    validation: null,
+    validation: realValidation,
     reportArtifact,
   });
 
@@ -918,7 +932,8 @@ export function buildMunicipalityRecord(
     source: "convex",
     summary: buildSummary(entry),
     approvalStatus,
-    validationLevel: "passive",
+    validationLevel:
+      realValidation?.status === "passed" ? "controlled_validation" : "passive",
     rateLimit: 5,
     allowedAssets: [municipality.websiteUrl],
     deniedAssets: [],
@@ -927,7 +942,7 @@ export function buildMunicipalityRecord(
     hypothesis: null,
     testPlan: null,
     approvalGate: null,
-    validation: null,
+    validation: realValidation,
     findings,
     reportArtifact,
     reportDownloads,
@@ -937,6 +952,97 @@ export function buildMunicipalityRecord(
     nextActionLabel:
       reportArtifact?.status === "completed" ? "Open report" : "Open target",
     nextActionTo: `/targets/${targetId}`,
+  };
+}
+
+type OrchestratorJoin = NonNullable<MunicipalityPipelineEntry["orchestrator"]>;
+
+function toRealWorkflowRun(
+  run: NonNullable<OrchestratorJoin["latestRun"]>,
+): WorkflowRunDto {
+  const durationMs =
+    run.completedAt || run.abortedAt
+      ? Math.max(
+          0,
+          new Date(run.completedAt ?? run.abortedAt!).getTime() -
+            new Date(run.startedAt).getTime(),
+        )
+      : undefined;
+
+  return {
+    runId: run.runId,
+    targetId: run.targetId,
+    status: run.status,
+    startedAt: run.startedAt,
+    completedAt: run.completedAt ?? undefined,
+    abortedAt: run.abortedAt ?? undefined,
+    abortedReason: run.abortedReason ?? undefined,
+    currentPhase: run.currentPhase ?? undefined,
+    phases: run.phases?.map((phase) => ({
+      phase: phase.phase,
+      enteredAt: phase.enteredAt,
+      exitedAt: phase.exitedAt ?? undefined,
+      rejectionReason: phase.rejectionReason ?? undefined,
+    })),
+    durationMs,
+  };
+}
+
+function toRealValidation(
+  validation: NonNullable<OrchestratorJoin["latestValidation"]>,
+  findingCount: number,
+): ValidationResultDto {
+  return {
+    resultId: validation.resultId,
+    targetId: validation.targetId,
+    status: validation.status,
+    executedAt: validation.executedAt,
+    executedBy: validation.executedBy,
+    testPlanId: validation.testPlanId ?? undefined,
+    hypothesisId: validation.hypothesisId ?? undefined,
+    summary: validation.summary ?? undefined,
+    evidenceRefs: validation.evidenceRefs ?? undefined,
+    runId: validation.runId ?? undefined,
+    metadata: validation.metadata as Record<string, unknown> | undefined,
+    findingCount,
+  };
+}
+
+function toRealAuditEvent(
+  event: OrchestratorJoin["auditEvents"][number],
+): AuditEventDto {
+  return {
+    eventId: event.eventId,
+    targetId: event.targetId,
+    eventType: event.eventType,
+    actor: event.actor,
+    timestamp: event.timestamp,
+    runId: event.runId ?? undefined,
+    details: event.details ?? undefined,
+  };
+}
+
+function toRealFinding(
+  finding: OrchestratorJoin["findings"][number],
+): FindingDto {
+  return {
+    findingId: finding.findingId,
+    targetId: finding.targetId,
+    title: finding.title,
+    description: finding.description,
+    severity: finding.severity,
+    status: finding.status,
+    createdAt: finding.createdAt,
+    category: finding.category ?? undefined,
+    evidence: finding.evidence ?? undefined,
+    remediationHint: finding.remediationHint ?? undefined,
+    affectedAssets: finding.affectedAssets ?? undefined,
+    confidence: finding.confidence ?? undefined,
+    cweId: finding.cweId ?? undefined,
+    cvssScore: finding.cvssScore ?? undefined,
+    validationResultId: finding.validationResultId ?? undefined,
+    reportReady: finding.reportReady ?? undefined,
+    runId: finding.runId ?? undefined,
   };
 }
 
