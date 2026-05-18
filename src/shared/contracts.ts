@@ -90,7 +90,7 @@ export const scanResultSchema = z.object({
   errors: z
     .array(
       z.object({
-        stage: z.enum(["http", "tls", "cms", "admin-exposure"]),
+        stage: z.enum(["dns", "http", "tls", "cms", "admin-exposure"]),
         message: z.string().min(1),
       }),
     )
@@ -138,7 +138,7 @@ export const rawScanEvidenceSchema = z.object({
   ),
   errors: z.array(
     z.object({
-      stage: z.enum(["http", "tls", "cms", "admin-exposure"]),
+      stage: z.enum(["dns", "http", "tls", "cms", "admin-exposure"]),
       message: z.string().min(1),
     }),
   ),
@@ -652,7 +652,7 @@ export const adminExposureEntrySchema = z.object({
 export type AdminExposureEntry = z.infer<typeof adminExposureEntrySchema>;
 
 export const scanErrorSchema = z.object({
-  stage: z.enum(["http", "tls", "cms", "admin-exposure"]),
+  stage: z.enum(["dns", "http", "tls", "cms", "admin-exposure"]),
   message: nonEmptyStringSchema,
 });
 export type ScanError = z.infer<typeof scanErrorSchema>;
