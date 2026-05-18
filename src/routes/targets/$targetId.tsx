@@ -26,6 +26,8 @@ type OrchestratorRunOutcome = {
   validationStatus: "passed" | "blocked" | "error" | "failed" | "inconclusive";
   requestCount: number;
   httpStatus: number | null;
+  validationSummary?: string;
+  validationErrorMessage?: string;
 };
 
 type OrchestratorState =
@@ -573,6 +575,22 @@ function OrchestratorRunBanner({ state }: { state: OrchestratorState }) {
           <span>HTTP {outcome.httpStatus}</span>
         ) : null}
       </div>
+      {outcome.validationStatus !== "passed" &&
+      (outcome.validationSummary || outcome.validationErrorMessage) ? (
+        <p className="mt-2 text-xs opacity-90">
+          {outcome.validationSummary ? (
+            <span className="font-semibold uppercase tracking-[0.15em]">
+              {outcome.validationSummary}
+            </span>
+          ) : null}
+          {outcome.validationSummary && outcome.validationErrorMessage
+            ? " — "
+            : null}
+          {outcome.validationErrorMessage ? (
+            <span>{outcome.validationErrorMessage}</span>
+          ) : null}
+        </p>
+      ) : null}
       <p className="mt-1 text-xs opacity-80">
         Run persisted. See the Guardian → Workflow Runs page for full details.
       </p>
