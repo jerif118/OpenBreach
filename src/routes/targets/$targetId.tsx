@@ -181,6 +181,10 @@ function TargetDetailPage() {
                 )}
               />
             </dl>
+            <PhaseTimeline
+              phases={target.latestRun?.phases}
+              currentPhase={target.latestRun?.currentPhase}
+            />
           </section>
 
           <section className={PANEL_CLASS_NAME}>
@@ -221,13 +225,49 @@ function TargetDetailPage() {
             <SectionTitle title="Validation Result" />
             {target.validation ? (
               <div className="space-y-4">
-                <StatusBadge
-                  label={target.validation.status.toUpperCase()}
-                  tone={target.validation.status === "passed" ? "green" : "red"}
-                />
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge
+                    label={target.validation.status.toUpperCase()}
+                    tone={
+                      target.validation.status === "passed" ? "green" : "red"
+                    }
+                  />
+                  {getValidationCauseCode(target.validation.metadata) ? (
+                    <StatusBadge
+                      label={
+                        getValidationCauseCode(target.validation.metadata) ?? ""
+                      }
+                      tone="amber"
+                    />
+                  ) : null}
+                  {typeof target.validation.metadata?.httpStatus === "number"
+                    ? (
+                      <StatusBadge
+                        label={`HTTP ${target.validation.metadata.httpStatus}`}
+                        tone="cyan"
+                      />
+                    )
+                    : null}
+                  {typeof target.validation.metadata?.requestCount === "number"
+                    ? (
+                      <StatusBadge
+                        label={`${target.validation.metadata.requestCount}/2 REQUESTS`}
+                        tone="cyan"
+                      />
+                    )
+                    : null}
+                </div>
                 <p className="text-on-surface-variant font-mono text-sm">
                   {target.validation.summary ?? "Validation summary pending."}
                 </p>
+                {getValidationRawError(target.validation.metadata) ? (
+                  <DetailItem
+                    label="Underlying Cause"
+                    value={
+                      getValidationRawError(target.validation.metadata) ?? ""
+                    }
+                  />
+                ) : null}
                 <DetailItem
                   label="Executed"
                   value={formatTimestamp(target.validation.executedAt)}
@@ -415,4 +455,149 @@ function EmptyMessage({ message }: { message: string }) {
       {message}
     </div>
   );
+}
+
+type PhaseName =
+  | "intake"
+  | "passive-scan"
+  | "hypothesis"
+  | "test-planning"
+  | "approval"
+  | "execution"
+  | "validation"
+  | "reporting"
+  | "archived";
+
+const PHASE_SEQUENCE: PhaseName[] = [
+  "intake",
+  "passive-scan",
+  "hypothesis",
+  "test-planning",
+  "approval",
+  "validation",
+  "reporting",
+];
+
+const PHASE_SHORT_LABEL: Record<PhaseName, string> = {
+  "intake": "INTAKE",
+  "passive-scan": "PASSIVE",
+  "hypothesis": "HYPOTH",
+  "test-planning": "PLAN",
+  "approval": "APPROVE",
+  "execution": "EXECUTE",
+  "validation": "VALIDATE",
+  "reporting": "REPORT",
+  "archived": "ARCHIVE",
+};
+
+type PhaseEntry = {
+  phase: PhaseName;
+  enteredAt: string;
+  exitedAt?: string;
+  rejectionReason?: string;
+};
+
+function PhaseTimeline({
+  phases,
+  currentPhase,
+}: {
+  phases?: PhaseEntry[];
+  currentPhase?: PhaseName;
+}) {
+  if (!phases || phases.length === 0) {
+    return null;
+  }
+
+  const visited = new Map<PhaseName, PhaseEntry>();
+  for (const entry of phases) {
+    visited.set(entry.phase, entry);
+  }
+
+  const sequence = PHASE_SEQUENCE.includes(currentPhase as PhaseName)
+    ? PHASE_SEQUENCE
+    : Array.from(new Set([...PHASE_SEQUENCE, ...visited.keys()]));
+
+  return (
+    <div className="border-primary/10 mt-6 border-t pt-5">
+      <p className="text-primary mb-3 font-mono text-[10px] tracking-[0.22em] uppercase">
+        Phase Timeline
+      </p>
+      <ol className="flex flex-wrap items-stretch gap-1">
+        {sequence.map((phase, index) => {
+          const entry = visited.get(phase);
+          const isVisited = !!entry;
+          const isCurrent = currentPhase === phase && !entry?.exitedAt;
+          const isCompleted = !!entry?.exitedAt;
+          const isRejected = !!entry?.rejectionReason;
+
+          const toneClass = isRejected
+            ? "border-error/40 bg-error/10 text-error"
+            : isCurrent
+              ? "border-primary/50 bg-primary/15 text-primary"
+              : isCompleted
+                ? "border-secondary-fixed-dim/40 bg-secondary-fixed-dim/10 text-secondary-fixed-dim"
+                : isVisited
+                  ? "border-primary/30 bg-primary/10 text-primary"
+                  : "border-outline/30 bg-surface text-on-surface-variant/60";
+
+          return (
+            <li
+              key={phase}
+              className={`pixel-corner flex min-w-[6.5rem] flex-1 flex-col gap-1 border px-3 py-2 ${toneClass}`}
+              title={
+                entry
+                  ? `${phase}\nEntered: ${formatTimestamp(entry.enteredAt)}${
+                    entry.exitedAt
+                      ? `\nExited: ${formatTimestamp(entry.exitedAt)}`
+                      : "\n(active)"
+                  }${
+                    entry.rejectionReason
+                      ? `\nRejected: ${entry.rejectionReason}`
+                      : ""
+                  }`
+                  : `${phase} (not entered)`
+              }
+            >
+              <span className="font-mono text-[9px] tracking-[0.18em] opacity-70">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="font-display text-xs uppercase">
+                {PHASE_SHORT_LABEL[phase]}
+              </span>
+              <span className="font-mono text-[9px] uppercase opacity-80">
+                {isRejected
+                  ? "REJECTED"
+                  : isCompleted
+                    ? "DONE"
+                    : isCurrent
+                      ? "ACTIVE"
+                      : isVisited
+                        ? "SEEN"
+                        : "PENDING"}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+function getValidationCauseCode(
+  metadata: Record<string, unknown> | undefined,
+): string | null {
+  if (!metadata || typeof metadata.error !== "string") {
+    return null;
+  }
+  const match = metadata.error.match(/\[([^\]]+)\]/);
+  return match ? match[1] : null;
+}
+
+function getValidationRawError(
+  metadata: Record<string, unknown> | undefined,
+): string | null {
+  if (!metadata) return null;
+  if (typeof metadata.error === "string") return metadata.error;
+  if (typeof metadata.blockedReason === "string") return metadata.blockedReason;
+  return null;
 }
