@@ -11,6 +11,7 @@ export type ApprovalGateDto = {
   bypassJustification?: string;
   linkedArtifactId?: string;
   runId?: string;
+  expiresAt?: string;
 };
 
 export type ApprovalGateStatus =

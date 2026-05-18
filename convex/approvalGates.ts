@@ -27,6 +27,7 @@ function toApprovalGateDto(doc: Doc<"approvalGates">): ApprovalGateDto {
     bypassJustification: doc.bypassJustification ?? undefined,
     linkedArtifactId: doc.linkedArtifactId ?? undefined,
     runId: doc.runId ?? undefined,
+    expiresAt: doc.expiresAt ?? undefined,
   };
 }
 
@@ -91,6 +92,7 @@ export const create = internalMutation({
     bypassJustification: v.optional(v.string()),
     linkedArtifactId: v.optional(v.string()),
     runId: v.optional(v.string()),
+    expiresAt: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const actor = await requireOperatorOrAdmin(ctx);
@@ -117,6 +119,7 @@ export const create = internalMutation({
       bypassJustification: args.bypassJustification,
       linkedArtifactId: args.linkedArtifactId,
       runId: args.runId,
+      expiresAt: args.expiresAt,
     });
 
     await appendAuditEvent(ctx, {

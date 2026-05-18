@@ -273,6 +273,7 @@ const auditEventType = v.union(
   v.literal("approval-reset"),
   v.literal("gate-approved"),
   v.literal("gate-rejected"),
+  v.literal("gate-expired"),
   v.literal("finding-created"),
   v.literal("finding-updated"),
   v.literal("validation-recorded"),
@@ -600,6 +601,7 @@ export default defineSchema({
     bypassJustification: v.optional(v.string()),
     linkedArtifactId: v.optional(v.string()),
     runId: v.optional(v.string()),
+    expiresAt: v.optional(v.string()),
   })
     .index("by_targetId", ["targetId"])
     .index("by_targetId_and_status", ["targetId", "status"])
