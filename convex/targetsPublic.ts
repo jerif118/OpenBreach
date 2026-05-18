@@ -98,6 +98,16 @@ function toTargetListItemDto(doc: Doc<"targets">): TargetListItemDto {
     primaryUrl: doc.primaryUrl,
     riskTier: doc.riskTier,
     classification: doc.classification,
+    geography: doc.geography
+      ? {
+          country: doc.geography.country,
+          region: doc.geography.region,
+          city: doc.geography.city,
+        }
+      : undefined,
+    population: doc.population ?? undefined,
+    latitude: doc.latitude ?? undefined,
+    longitude: doc.longitude ?? undefined,
     metadata: doc.metadata ?? undefined,
   };
 }
@@ -172,6 +182,10 @@ export const list = query({
           primaryUrl: dto.primaryUrl,
           riskTier: dto.riskTier,
           classification: dto.classification,
+          geography: dto.geography,
+          population: dto.population,
+          latitude: dto.latitude,
+          longitude: dto.longitude,
         };
         return [item];
       } catch {

@@ -84,7 +84,7 @@ export function OpenBreachDashboard() {
         />
       </section>
 
-      <ThreatMapPanel />
+      <ThreatMapPanel targets={targets} />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.7fr_1fr]">
         <div className="flex flex-col gap-4">

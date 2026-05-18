@@ -68,6 +68,10 @@ export type StoredDemoTarget = {
   primaryUrl: string;
   classification: TargetListItemDto["classification"];
   riskTier: TargetListItemDto["riskTier"];
+  geography?: TargetListItemDto["geography"];
+  population?: number;
+  latitude?: number;
+  longitude?: number;
   createdAt: string;
   runId: string;
   status: WorkflowRunDto["status"];
@@ -385,6 +389,10 @@ function buildSessionRecord(target: StoredDemoTarget): PipelineTargetRecord {
     primaryUrl: target.primaryUrl,
     riskTier: target.riskTier,
     classification: target.classification,
+    geography: target.geography,
+    population: target.population,
+    latitude: target.latitude,
+    longitude: target.longitude,
     source: "session",
     summary:
       approvalStatus === "rejected"

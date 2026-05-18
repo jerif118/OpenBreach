@@ -262,7 +262,7 @@ export function ThreatGeoMap({
   }, [selectedEntryId, isMapLoaded]);
 
   return (
-    <div className="border-primary/20 pixel-corner relative h-[calc(100vh-260px)] min-h-[520px] w-full overflow-hidden border bg-[#05090b]">
+    <div className="border-primary/20 pixel-corner relative h-[clamp(420px,56vh,620px)] w-full overflow-hidden border bg-[#05090b]">
       <div ref={containerRef} className="h-full w-full" />
       {!isMapLoaded && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#05090b]/85">
