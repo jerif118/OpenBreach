@@ -33,6 +33,9 @@ export type PassiveScannerOptions = {
   now?: () => string;
 };
 
+type ScannableMunicipality = Pick<Municipality, "id" | "websiteUrl"> &
+  Partial<Omit<Municipality, "id" | "websiteUrl">>;
+
 export const DEFAULT_SCANNER_CONTROLS = {
   timeoutMs: 5000,
   retries: 1,
@@ -65,7 +68,7 @@ export async function scanMunicipalities(
 }
 
 export async function scanWebsite(
-  municipality: Municipality,
+  municipality: ScannableMunicipality,
   options: PassiveScannerOptions = {},
 ): Promise<RawScanEvidence> {
   const controls = resolveScannerControls(options.controls);
