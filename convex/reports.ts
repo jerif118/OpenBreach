@@ -85,6 +85,78 @@ export const getForMunicipality = query({
   },
 });
 
+// Read-side composition of a single remediation report joined with the
+// municipality and the scan that produced it. The printable
+// `/reports/$reportId` route consumes this view to render a self-contained
+// report page that can be exported to PDF via the browser print dialog.
+export const getDetail = query({
+  args: { externalId: v.string() },
+  handler: async (ctx, args) => {
+    const report = await ctx.db
+      .query("remediationReports")
+      .withIndex("by_externalId", (q) => q.eq("externalId", args.externalId))
+      .unique();
+
+    if (!report) {
+      return null;
+    }
+
+    const municipality = await ctx.db.get(report.municipalityId);
+    if (!municipality) {
+      return null;
+    }
+
+    const scan = report.scanResultId
+      ? await ctx.db.get(report.scanResultId)
+      : null;
+
+    return {
+      report: {
+        externalId: report.externalId,
+        status: report.status,
+        generatedAt: report.generatedAt,
+        updatedAt: report.updatedAt,
+        summary: report.summary,
+        priorityActions: report.priorityActions,
+        findings: report.findings,
+        generatedBy: report.generatedBy,
+        pdf: report.pdf,
+        artifacts: report.artifacts,
+        error: report.error,
+      },
+      municipality: {
+        id: municipality.externalId,
+        name: municipality.name,
+        state: municipality.state,
+        websiteUrl: municipality.websiteUrl,
+        population: municipality.population,
+        latitude: municipality.latitude,
+        longitude: municipality.longitude,
+        sourceUrl: municipality.sourceUrl,
+        riskTier: municipality.riskTier,
+      },
+      scan: scan
+        ? {
+            externalId: scan.externalId,
+            scannedAt: scan.scannedAt,
+            requestedUrl: scan.requestedUrl,
+            finalUrl: scan.finalUrl,
+            reachable: scan.reachable,
+            httpStatus: scan.httpStatus,
+            headers: scan.headers,
+            tls: scan.tls,
+            cms: scan.cms,
+            adminExposure: scan.adminExposure,
+            errors: scan.errors,
+            riskScore: scan.riskScore,
+            riskLevel: scan.riskLevel,
+            findings: scan.findings,
+          }
+        : null,
+    };
+  },
+});
+
 export const persistGenerated = mutation({
   args: {
     municipalityId: v.id("municipalities"),
