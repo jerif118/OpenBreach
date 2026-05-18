@@ -152,12 +152,7 @@ export function buildBoundedTestPlan(params: {
     hypothesisIds: picked.map((h) => h.hypothesisId),
     runId: params.runId,
     metadata: {
-      allowedActions: [
-        "GET",
-        "HEAD",
-        "tls_inspection",
-        "timing_safe_probe",
-      ],
+      allowedActions: ["GET", "HEAD", "tls_inspection", "timing_safe_probe"],
       forbiddenActions: [
         "exploit",
         "credential_stuffing",
@@ -236,7 +231,11 @@ export function runMvpOrchestrator(
     audit("workflow-rejected", { reason: "scope_not_approved" });
     exitLastPhase(phases, input.now);
     phases.push(
-      phaseEntry("intake", input.now, input.scopeRejectionReason ?? "scope_denied"),
+      phaseEntry(
+        "intake",
+        input.now,
+        input.scopeRejectionReason ?? "scope_denied",
+      ),
     );
     const workflowRun: WorkflowRun = {
       runId: input.runId,
