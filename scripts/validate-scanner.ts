@@ -18,6 +18,7 @@ import {
 
 const scannedAt = "2026-01-01T00:00:00.000Z";
 const allowedAdminPaths = new Set<string>(ADMIN_EXPOSURE_PATHS);
+const resolvePublicHostname = async () => ["93.184.216.34"];
 
 assert.deepEqual(DEFAULT_SCANNER_CONTROLS, {
   timeoutMs: 5000,
@@ -75,6 +76,7 @@ const evidence = await scanWebsite(
   },
   {
     now: () => scannedAt,
+    resolveHostname: resolvePublicHostname,
     fetch: async (input, init) => {
       fetchCalls += 1;
       const requestUrl = new URL(
@@ -219,6 +221,7 @@ const notFoundEvidence = await scanWebsite(
   },
   {
     now: () => scannedAt,
+    resolveHostname: resolvePublicHostname,
     fetch: async () => makeResponse("not found", { status: 404 }),
     getTlsCertificate: async () => ({ valid: true }),
     delay: async () => undefined,
@@ -243,6 +246,7 @@ const failureEvidence = await scanWebsite(
   },
   {
     now: () => scannedAt,
+    resolveHostname: resolvePublicHostname,
     fetch: async () => {
       retryAttempts += 1;
       throw new Error("network unavailable");
@@ -277,11 +281,52 @@ assert.equal(retryAttempts, 18);
 assert.equal(tlsRetryAttempts, 3);
 assert.equal(retryDelayCalls, 14);
 
+let blockedFetchCalls = 0;
+let blockedTlsCalls = 0;
+const privateResolutionEvidence = await scanWebsite(
+  {
+    id: "mx-private-resolution",
+    name: "Private Resolution",
+    state: "Test",
+    websiteUrl: "https://public-looking.example.test",
+    riskTier: "high",
+  },
+  {
+    now: () => scannedAt,
+    resolveHostname: async () => ["10.0.0.1"],
+    fetch: async () => {
+      blockedFetchCalls += 1;
+      return makeResponse("should not fetch");
+    },
+    getTlsCertificate: async () => {
+      blockedTlsCalls += 1;
+      return { valid: true };
+    },
+    delay: async () => undefined,
+    controls: { timeoutMs: 100, retries: 0, delayMs: 1 },
+  },
+);
+
+rawScanEvidenceSchema.parse(privateResolutionEvidence);
+assert.equal(privateResolutionEvidence.reachable, false);
+assert.equal(blockedFetchCalls, 0);
+assert.equal(blockedTlsCalls, 0);
+assert.deepEqual(privateResolutionEvidence.adminExposure, []);
+assert.equal(
+  privateResolutionEvidence.errors.some(
+    (error) =>
+      error.stage === "dns" &&
+      error.message.includes("private or internal address"),
+  ),
+  true,
+);
+
 const fixtureMunicipalities = municipalitySchema
   .array()
   .parse(municipalities.slice(0, 10));
 const batchResults = await scanMunicipalities(fixtureMunicipalities, {
   now: () => scannedAt,
+  resolveHostname: resolvePublicHostname,
   fetch: async () => makeResponse("<html><body>plain site</body></html>"),
   getTlsCertificate: async () => ({ valid: true }),
   delay: async () => undefined,
