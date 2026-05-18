@@ -43,6 +43,9 @@ export function TargetSuccessCard({ target }: TargetSuccessCardProps) {
   const deniedActions = constraintValues(constraints, "denied-action:");
   const rateLimit = constraintValue(constraints, "rate-limit:");
   const approvalRequired = constraintValue(constraints, "approval-required:");
+  const auditEventTypes = target.auditEvents
+    .map((event) => event.eventType)
+    .join(", ");
 
   return (
     <div className={`${CARD_SUCCESS} animate-terminal-glow`}>
@@ -194,7 +197,7 @@ export function TargetSuccessCard({ target }: TargetSuccessCardProps) {
           <div className="flex justify-between gap-4">
             <dt className="text-on-surface-variant font-mono">Audit Events</dt>
             <dd className="text-on-surface font-mono">
-              {target.auditEvents.map((event) => event.eventType).join(", ")}
+              {auditEventTypes || "No audit events"}
             </dd>
           </div>
         </dl>
