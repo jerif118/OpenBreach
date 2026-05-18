@@ -1,6 +1,6 @@
 {
   "id": "latest-report-generation",
-  "generatedAt": "2026-05-17T00:00:00.000Z",
+  "generatedAt": "2026-01-01T00:00:00.000Z",
   "provider": "deterministic-fallback",
   "selected": [
     {
@@ -37,7 +37,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -138,7 +141,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 1
     },
     {
@@ -175,7 +178,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -276,7 +282,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 2
     },
     {
@@ -313,7 +319,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -414,7 +423,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 3
     },
     {
@@ -451,7 +460,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -552,7 +564,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 4
     },
     {
@@ -589,7 +601,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -690,7 +705,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 5
     },
     {
@@ -727,7 +742,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -828,7 +846,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 6
     },
     {
@@ -865,7 +883,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -966,7 +987,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 7
     },
     {
@@ -1003,7 +1024,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -1104,7 +1128,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 8
     },
     {
@@ -1141,7 +1165,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -1242,7 +1269,7 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 9
     },
     {
@@ -1279,7 +1306,10 @@
           "name": "wordpress",
           "version": "6.4",
           "confidence": 0.8,
-          "evidence": ["generator:WordPress 6.4", "marker:wordpress"]
+          "evidence": [
+            "generator:WordPress 6.4",
+            "marker:wordpress"
+          ]
         },
         "adminExposure": [
           {
@@ -1380,13 +1410,13 @@
         "score": 83
       },
       "source": "fixture",
-      "selectedAt": "2026-05-17T00:00:00.000Z",
+      "selectedAt": "2026-01-01T00:00:00.000Z",
       "rank": 10
     }
   ],
   "batch": {
     "id": "latest-report-generation",
-    "generatedAt": "2026-05-17T00:00:00.000Z",
+    "generatedAt": "2026-01-01T00:00:00.000Z",
     "provider": "deterministic-fallback",
     "summary": {
       "requested": 10,
@@ -1403,7 +1433,7 @@
             "id": "report-technical-mx-cdmx-alvaro-obregon",
             "municipalityId": "mx-cdmx-alvaro-obregon",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Alvaro Obregon",
             "summary": "Alvaro Obregon is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -1695,7 +1725,7 @@
               "id": "report-technical-mx-cdmx-alvaro-obregon",
               "municipalityId": "mx-cdmx-alvaro-obregon",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Alvaro Obregon",
               "summary": "Alvaro Obregon is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -1986,7 +2016,7 @@
               "id": "report-friendly-mx-cdmx-alvaro-obregon",
               "municipalityId": "mx-cdmx-alvaro-obregon",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Alvaro Obregon",
               "summary": "Alvaro Obregon shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -2277,13 +2307,13 @@
           "metadata": {
             "reportId": "report-technical-mx-cdmx-alvaro-obregon",
             "municipalityId": "mx-cdmx-alvaro-obregon",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-alvaro-obregon-technical.pdf",
               "fileName": "mx-cdmx-alvaro-obregon-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 38712
             },
             "artifacts": {
@@ -2294,7 +2324,7 @@
                   "storagePath": "data/reports/mx-cdmx-alvaro-obregon-technical.pdf",
                   "fileName": "mx-cdmx-alvaro-obregon-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
                   "sizeBytes": 38712
                 }
               },
@@ -2305,8 +2335,8 @@
                   "storagePath": "data/reports/mx-cdmx-alvaro-obregon-friendly.pdf",
                   "fileName": "mx-cdmx-alvaro-obregon-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40426
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40424
                 }
               }
             },
@@ -2323,7 +2353,7 @@
             "id": "report-technical-mx-cdmx-coyoacan",
             "municipalityId": "mx-cdmx-coyoacan",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Coyoacan",
             "summary": "Coyoacan is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -2615,7 +2645,7 @@
               "id": "report-technical-mx-cdmx-coyoacan",
               "municipalityId": "mx-cdmx-coyoacan",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Coyoacan",
               "summary": "Coyoacan is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -2906,7 +2936,7 @@
               "id": "report-friendly-mx-cdmx-coyoacan",
               "municipalityId": "mx-cdmx-coyoacan",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Coyoacan",
               "summary": "Coyoacan shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -3197,13 +3227,13 @@
           "metadata": {
             "reportId": "report-technical-mx-cdmx-coyoacan",
             "municipalityId": "mx-cdmx-coyoacan",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-coyoacan-technical.pdf",
               "fileName": "mx-cdmx-coyoacan-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 38548
             },
             "artifacts": {
@@ -3214,7 +3244,7 @@
                   "storagePath": "data/reports/mx-cdmx-coyoacan-technical.pdf",
                   "fileName": "mx-cdmx-coyoacan-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
                   "sizeBytes": 38548
                 }
               },
@@ -3225,8 +3255,8 @@
                   "storagePath": "data/reports/mx-cdmx-coyoacan-friendly.pdf",
                   "fileName": "mx-cdmx-coyoacan-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40304
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40302
                 }
               }
             },
@@ -3243,7 +3273,7 @@
             "id": "report-technical-mx-cdmx-cuauhtemoc",
             "municipalityId": "mx-cdmx-cuauhtemoc",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Cuauhtemoc",
             "summary": "Cuauhtemoc is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -3535,7 +3565,7 @@
               "id": "report-technical-mx-cdmx-cuauhtemoc",
               "municipalityId": "mx-cdmx-cuauhtemoc",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Cuauhtemoc",
               "summary": "Cuauhtemoc is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -3826,7 +3856,7 @@
               "id": "report-friendly-mx-cdmx-cuauhtemoc",
               "municipalityId": "mx-cdmx-cuauhtemoc",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Cuauhtemoc",
               "summary": "Cuauhtemoc shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -4117,13 +4147,13 @@
           "metadata": {
             "reportId": "report-technical-mx-cdmx-cuauhtemoc",
             "municipalityId": "mx-cdmx-cuauhtemoc",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-cuauhtemoc-technical.pdf",
               "fileName": "mx-cdmx-cuauhtemoc-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 38649
             },
             "artifacts": {
@@ -4134,7 +4164,7 @@
                   "storagePath": "data/reports/mx-cdmx-cuauhtemoc-technical.pdf",
                   "fileName": "mx-cdmx-cuauhtemoc-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
                   "sizeBytes": 38649
                 }
               },
@@ -4145,8 +4175,8 @@
                   "storagePath": "data/reports/mx-cdmx-cuauhtemoc-friendly.pdf",
                   "fileName": "mx-cdmx-cuauhtemoc-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40324
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40322
                 }
               }
             },
@@ -4163,7 +4193,7 @@
             "id": "report-technical-mx-cdmx-gustavo-a-madero",
             "municipalityId": "mx-cdmx-gustavo-a-madero",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Gustavo A. Madero",
             "summary": "Gustavo A. Madero is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -4455,7 +4485,7 @@
               "id": "report-technical-mx-cdmx-gustavo-a-madero",
               "municipalityId": "mx-cdmx-gustavo-a-madero",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Gustavo A. Madero",
               "summary": "Gustavo A. Madero is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -4746,7 +4776,7 @@
               "id": "report-friendly-mx-cdmx-gustavo-a-madero",
               "municipalityId": "mx-cdmx-gustavo-a-madero",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Gustavo A. Madero",
               "summary": "Gustavo A. Madero shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -5037,13 +5067,13 @@
           "metadata": {
             "reportId": "report-technical-mx-cdmx-gustavo-a-madero",
             "municipalityId": "mx-cdmx-gustavo-a-madero",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-gustavo-a-madero-technical.pdf",
               "fileName": "mx-cdmx-gustavo-a-madero-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 38740
             },
             "artifacts": {
@@ -5054,7 +5084,7 @@
                   "storagePath": "data/reports/mx-cdmx-gustavo-a-madero-technical.pdf",
                   "fileName": "mx-cdmx-gustavo-a-madero-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
                   "sizeBytes": 38740
                 }
               },
@@ -5065,8 +5095,8 @@
                   "storagePath": "data/reports/mx-cdmx-gustavo-a-madero-friendly.pdf",
                   "fileName": "mx-cdmx-gustavo-a-madero-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40483
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40480
                 }
               }
             },
@@ -5083,7 +5113,7 @@
             "id": "report-technical-mx-cdmx-iztapalapa",
             "municipalityId": "mx-cdmx-iztapalapa",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Iztapalapa",
             "summary": "Iztapalapa is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -5375,7 +5405,7 @@
               "id": "report-technical-mx-cdmx-iztapalapa",
               "municipalityId": "mx-cdmx-iztapalapa",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Iztapalapa",
               "summary": "Iztapalapa is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -5666,7 +5696,7 @@
               "id": "report-friendly-mx-cdmx-iztapalapa",
               "municipalityId": "mx-cdmx-iztapalapa",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Iztapalapa",
               "summary": "Iztapalapa shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -5957,14 +5987,14 @@
           "metadata": {
             "reportId": "report-technical-mx-cdmx-iztapalapa",
             "municipalityId": "mx-cdmx-iztapalapa",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-iztapalapa-technical.pdf",
               "fileName": "mx-cdmx-iztapalapa-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
-              "sizeBytes": 38601
+              "generatedAt": "2026-01-01T00:00:00.000Z",
+              "sizeBytes": 38599
             },
             "artifacts": {
               "technical": {
@@ -5974,8 +6004,8 @@
                   "storagePath": "data/reports/mx-cdmx-iztapalapa-technical.pdf",
                   "fileName": "mx-cdmx-iztapalapa-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 38601
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 38599
                 }
               },
               "friendly": {
@@ -5985,8 +6015,8 @@
                   "storagePath": "data/reports/mx-cdmx-iztapalapa-friendly.pdf",
                   "fileName": "mx-cdmx-iztapalapa-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40334
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40332
                 }
               }
             },
@@ -6003,7 +6033,7 @@
             "id": "report-technical-mx-cdmx-tlalpan",
             "municipalityId": "mx-cdmx-tlalpan",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Tlalpan",
             "summary": "Tlalpan is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -6295,7 +6325,7 @@
               "id": "report-technical-mx-cdmx-tlalpan",
               "municipalityId": "mx-cdmx-tlalpan",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Tlalpan",
               "summary": "Tlalpan is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -6586,7 +6616,7 @@
               "id": "report-friendly-mx-cdmx-tlalpan",
               "municipalityId": "mx-cdmx-tlalpan",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Tlalpan",
               "summary": "Tlalpan shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -6877,13 +6907,13 @@
           "metadata": {
             "reportId": "report-technical-mx-cdmx-tlalpan",
             "municipalityId": "mx-cdmx-tlalpan",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-cdmx-tlalpan-technical.pdf",
               "fileName": "mx-cdmx-tlalpan-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 38557
             },
             "artifacts": {
@@ -6894,7 +6924,7 @@
                   "storagePath": "data/reports/mx-cdmx-tlalpan-technical.pdf",
                   "fileName": "mx-cdmx-tlalpan-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
                   "sizeBytes": 38557
                 }
               },
@@ -6905,8 +6935,8 @@
                   "storagePath": "data/reports/mx-cdmx-tlalpan-friendly.pdf",
                   "fileName": "mx-cdmx-tlalpan-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40294
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40291
                 }
               }
             },
@@ -6923,7 +6953,7 @@
             "id": "report-technical-mx-chiapas-tuxtla-gutierrez",
             "municipalityId": "mx-chiapas-tuxtla-gutierrez",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Tuxtla Gutierrez",
             "summary": "Tuxtla Gutierrez is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -7215,7 +7245,7 @@
               "id": "report-technical-mx-chiapas-tuxtla-gutierrez",
               "municipalityId": "mx-chiapas-tuxtla-gutierrez",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Tuxtla Gutierrez",
               "summary": "Tuxtla Gutierrez is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -7506,7 +7536,7 @@
               "id": "report-friendly-mx-chiapas-tuxtla-gutierrez",
               "municipalityId": "mx-chiapas-tuxtla-gutierrez",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Tuxtla Gutierrez",
               "summary": "Tuxtla Gutierrez shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -7797,14 +7827,14 @@
           "metadata": {
             "reportId": "report-technical-mx-chiapas-tuxtla-gutierrez",
             "municipalityId": "mx-chiapas-tuxtla-gutierrez",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-chiapas-tuxtla-gutierrez-technical.pdf",
               "fileName": "mx-chiapas-tuxtla-gutierrez-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
-              "sizeBytes": 38709
+              "generatedAt": "2026-01-01T00:00:00.000Z",
+              "sizeBytes": 38708
             },
             "artifacts": {
               "technical": {
@@ -7814,8 +7844,8 @@
                   "storagePath": "data/reports/mx-chiapas-tuxtla-gutierrez-technical.pdf",
                   "fileName": "mx-chiapas-tuxtla-gutierrez-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 38709
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 38708
                 }
               },
               "friendly": {
@@ -7825,8 +7855,8 @@
                   "storagePath": "data/reports/mx-chiapas-tuxtla-gutierrez-friendly.pdf",
                   "fileName": "mx-chiapas-tuxtla-gutierrez-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40435
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40433
                 }
               }
             },
@@ -7843,7 +7873,7 @@
             "id": "report-technical-mx-chihuahua-chihuahua",
             "municipalityId": "mx-chihuahua-chihuahua",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Chihuahua",
             "summary": "Chihuahua is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -8135,7 +8165,7 @@
               "id": "report-technical-mx-chihuahua-chihuahua",
               "municipalityId": "mx-chihuahua-chihuahua",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Chihuahua",
               "summary": "Chihuahua is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -8426,7 +8456,7 @@
               "id": "report-friendly-mx-chihuahua-chihuahua",
               "municipalityId": "mx-chihuahua-chihuahua",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Chihuahua",
               "summary": "Chihuahua shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -8717,14 +8747,14 @@
           "metadata": {
             "reportId": "report-technical-mx-chihuahua-chihuahua",
             "municipalityId": "mx-chihuahua-chihuahua",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-chihuahua-chihuahua-technical.pdf",
               "fileName": "mx-chihuahua-chihuahua-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
-              "sizeBytes": 38566
+              "generatedAt": "2026-01-01T00:00:00.000Z",
+              "sizeBytes": 38565
             },
             "artifacts": {
               "technical": {
@@ -8734,8 +8764,8 @@
                   "storagePath": "data/reports/mx-chihuahua-chihuahua-technical.pdf",
                   "fileName": "mx-chihuahua-chihuahua-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 38566
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 38565
                 }
               },
               "friendly": {
@@ -8745,8 +8775,8 @@
                   "storagePath": "data/reports/mx-chihuahua-chihuahua-friendly.pdf",
                   "fileName": "mx-chihuahua-chihuahua-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40327
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40324
                 }
               }
             },
@@ -8763,7 +8793,7 @@
             "id": "report-technical-mx-chihuahua-juarez",
             "municipalityId": "mx-chihuahua-juarez",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Juarez",
             "summary": "Juarez is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -9055,7 +9085,7 @@
               "id": "report-technical-mx-chihuahua-juarez",
               "municipalityId": "mx-chihuahua-juarez",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Juarez",
               "summary": "Juarez is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -9346,7 +9376,7 @@
               "id": "report-friendly-mx-chihuahua-juarez",
               "municipalityId": "mx-chihuahua-juarez",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Juarez",
               "summary": "Juarez shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -9637,13 +9667,13 @@
           "metadata": {
             "reportId": "report-technical-mx-chihuahua-juarez",
             "municipalityId": "mx-chihuahua-juarez",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-chihuahua-juarez-technical.pdf",
               "fileName": "mx-chihuahua-juarez-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "sizeBytes": 38526
             },
             "artifacts": {
@@ -9654,7 +9684,7 @@
                   "storagePath": "data/reports/mx-chihuahua-juarez-technical.pdf",
                   "fileName": "mx-chihuahua-juarez-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
                   "sizeBytes": 38526
                 }
               },
@@ -9665,8 +9695,8 @@
                   "storagePath": "data/reports/mx-chihuahua-juarez-friendly.pdf",
                   "fileName": "mx-chihuahua-juarez-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40255
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40253
                 }
               }
             },
@@ -9683,7 +9713,7 @@
             "id": "report-technical-mx-coahuila-saltillo",
             "municipalityId": "mx-coahuila-saltillo",
             "variant": "technical",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "title": "Technical Remediation Report for Saltillo",
             "summary": "Saltillo is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
             "priorityActions": [
@@ -9975,7 +10005,7 @@
               "id": "report-technical-mx-coahuila-saltillo",
               "municipalityId": "mx-coahuila-saltillo",
               "variant": "technical",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Technical Remediation Report for Saltillo",
               "summary": "Saltillo is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
               "priorityActions": [
@@ -10266,7 +10296,7 @@
               "id": "report-friendly-mx-coahuila-saltillo",
               "municipalityId": "mx-coahuila-saltillo",
               "variant": "friendly",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
+              "generatedAt": "2026-01-01T00:00:00.000Z",
               "title": "Friendly Remediation Report for Saltillo",
               "summary": "Saltillo shows a critical level of risk with score 83/100 based on 6 main issue(s). This version explains the situation in simpler language, keeps the uncertainty visible, and highlights the most important next actions first.",
               "priorityActions": [
@@ -10557,14 +10587,14 @@
           "metadata": {
             "reportId": "report-technical-mx-coahuila-saltillo",
             "municipalityId": "mx-coahuila-saltillo",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "updatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "updatedAt": "2026-01-01T00:00:00.000Z",
             "pdf": {
               "storagePath": "data/reports/mx-coahuila-saltillo-technical.pdf",
               "fileName": "mx-coahuila-saltillo-technical.pdf",
               "contentType": "application/pdf",
-              "generatedAt": "2026-05-17T00:00:00.000Z",
-              "sizeBytes": 38563
+              "generatedAt": "2026-01-01T00:00:00.000Z",
+              "sizeBytes": 38562
             },
             "artifacts": {
               "technical": {
@@ -10574,8 +10604,8 @@
                   "storagePath": "data/reports/mx-coahuila-saltillo-technical.pdf",
                   "fileName": "mx-coahuila-saltillo-technical.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 38563
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 38562
                 }
               },
               "friendly": {
@@ -10585,8 +10615,8 @@
                   "storagePath": "data/reports/mx-coahuila-saltillo-friendly.pdf",
                   "fileName": "mx-coahuila-saltillo-friendly.pdf",
                   "contentType": "application/pdf",
-                  "generatedAt": "2026-05-17T00:00:00.000Z",
-                  "sizeBytes": 40281
+                  "generatedAt": "2026-01-01T00:00:00.000Z",
+                  "sizeBytes": 40279
                 }
               }
             },
@@ -10602,7 +10632,7 @@
       "municipalityExternalId": "mx-cdmx-alvaro-obregon",
       "scanResultExternalId": "scan-mx-cdmx-alvaro-obregon-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Alvaro Obregon is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -10744,7 +10774,7 @@
         "storagePath": "data/reports/mx-cdmx-alvaro-obregon-technical.pdf",
         "fileName": "mx-cdmx-alvaro-obregon-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 38712
       },
       "artifacts": {
@@ -10755,7 +10785,7 @@
             "storagePath": "data/reports/mx-cdmx-alvaro-obregon-technical.pdf",
             "fileName": "mx-cdmx-alvaro-obregon-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "sizeBytes": 38712
           }
         },
@@ -10766,8 +10796,8 @@
             "storagePath": "data/reports/mx-cdmx-alvaro-obregon-friendly.pdf",
             "fileName": "mx-cdmx-alvaro-obregon-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40426
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40424
           }
         }
       }
@@ -10777,7 +10807,7 @@
       "municipalityExternalId": "mx-cdmx-coyoacan",
       "scanResultExternalId": "scan-mx-cdmx-coyoacan-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Coyoacan is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -10919,7 +10949,7 @@
         "storagePath": "data/reports/mx-cdmx-coyoacan-technical.pdf",
         "fileName": "mx-cdmx-coyoacan-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 38548
       },
       "artifacts": {
@@ -10930,7 +10960,7 @@
             "storagePath": "data/reports/mx-cdmx-coyoacan-technical.pdf",
             "fileName": "mx-cdmx-coyoacan-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "sizeBytes": 38548
           }
         },
@@ -10941,8 +10971,8 @@
             "storagePath": "data/reports/mx-cdmx-coyoacan-friendly.pdf",
             "fileName": "mx-cdmx-coyoacan-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40304
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40302
           }
         }
       }
@@ -10952,7 +10982,7 @@
       "municipalityExternalId": "mx-cdmx-cuauhtemoc",
       "scanResultExternalId": "scan-mx-cdmx-cuauhtemoc-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Cuauhtemoc is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -11094,7 +11124,7 @@
         "storagePath": "data/reports/mx-cdmx-cuauhtemoc-technical.pdf",
         "fileName": "mx-cdmx-cuauhtemoc-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 38649
       },
       "artifacts": {
@@ -11105,7 +11135,7 @@
             "storagePath": "data/reports/mx-cdmx-cuauhtemoc-technical.pdf",
             "fileName": "mx-cdmx-cuauhtemoc-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "sizeBytes": 38649
           }
         },
@@ -11116,8 +11146,8 @@
             "storagePath": "data/reports/mx-cdmx-cuauhtemoc-friendly.pdf",
             "fileName": "mx-cdmx-cuauhtemoc-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40324
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40322
           }
         }
       }
@@ -11127,7 +11157,7 @@
       "municipalityExternalId": "mx-cdmx-gustavo-a-madero",
       "scanResultExternalId": "scan-mx-cdmx-gustavo-a-madero-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Gustavo A. Madero is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -11269,7 +11299,7 @@
         "storagePath": "data/reports/mx-cdmx-gustavo-a-madero-technical.pdf",
         "fileName": "mx-cdmx-gustavo-a-madero-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 38740
       },
       "artifacts": {
@@ -11280,7 +11310,7 @@
             "storagePath": "data/reports/mx-cdmx-gustavo-a-madero-technical.pdf",
             "fileName": "mx-cdmx-gustavo-a-madero-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "sizeBytes": 38740
           }
         },
@@ -11291,8 +11321,8 @@
             "storagePath": "data/reports/mx-cdmx-gustavo-a-madero-friendly.pdf",
             "fileName": "mx-cdmx-gustavo-a-madero-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40483
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40480
           }
         }
       }
@@ -11302,7 +11332,7 @@
       "municipalityExternalId": "mx-cdmx-iztapalapa",
       "scanResultExternalId": "scan-mx-cdmx-iztapalapa-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Iztapalapa is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -11444,8 +11474,8 @@
         "storagePath": "data/reports/mx-cdmx-iztapalapa-technical.pdf",
         "fileName": "mx-cdmx-iztapalapa-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
-        "sizeBytes": 38601
+        "generatedAt": "2026-01-01T00:00:00.000Z",
+        "sizeBytes": 38599
       },
       "artifacts": {
         "technical": {
@@ -11455,8 +11485,8 @@
             "storagePath": "data/reports/mx-cdmx-iztapalapa-technical.pdf",
             "fileName": "mx-cdmx-iztapalapa-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 38601
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 38599
           }
         },
         "friendly": {
@@ -11466,8 +11496,8 @@
             "storagePath": "data/reports/mx-cdmx-iztapalapa-friendly.pdf",
             "fileName": "mx-cdmx-iztapalapa-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40334
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40332
           }
         }
       }
@@ -11477,7 +11507,7 @@
       "municipalityExternalId": "mx-cdmx-tlalpan",
       "scanResultExternalId": "scan-mx-cdmx-tlalpan-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Tlalpan is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -11619,7 +11649,7 @@
         "storagePath": "data/reports/mx-cdmx-tlalpan-technical.pdf",
         "fileName": "mx-cdmx-tlalpan-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 38557
       },
       "artifacts": {
@@ -11630,7 +11660,7 @@
             "storagePath": "data/reports/mx-cdmx-tlalpan-technical.pdf",
             "fileName": "mx-cdmx-tlalpan-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "sizeBytes": 38557
           }
         },
@@ -11641,8 +11671,8 @@
             "storagePath": "data/reports/mx-cdmx-tlalpan-friendly.pdf",
             "fileName": "mx-cdmx-tlalpan-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40294
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40291
           }
         }
       }
@@ -11652,7 +11682,7 @@
       "municipalityExternalId": "mx-chiapas-tuxtla-gutierrez",
       "scanResultExternalId": "scan-mx-chiapas-tuxtla-gutierrez-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Tuxtla Gutierrez is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -11794,8 +11824,8 @@
         "storagePath": "data/reports/mx-chiapas-tuxtla-gutierrez-technical.pdf",
         "fileName": "mx-chiapas-tuxtla-gutierrez-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
-        "sizeBytes": 38709
+        "generatedAt": "2026-01-01T00:00:00.000Z",
+        "sizeBytes": 38708
       },
       "artifacts": {
         "technical": {
@@ -11805,8 +11835,8 @@
             "storagePath": "data/reports/mx-chiapas-tuxtla-gutierrez-technical.pdf",
             "fileName": "mx-chiapas-tuxtla-gutierrez-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 38709
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 38708
           }
         },
         "friendly": {
@@ -11816,8 +11846,8 @@
             "storagePath": "data/reports/mx-chiapas-tuxtla-gutierrez-friendly.pdf",
             "fileName": "mx-chiapas-tuxtla-gutierrez-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40435
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40433
           }
         }
       }
@@ -11827,7 +11857,7 @@
       "municipalityExternalId": "mx-chihuahua-chihuahua",
       "scanResultExternalId": "scan-mx-chihuahua-chihuahua-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Chihuahua is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -11969,8 +11999,8 @@
         "storagePath": "data/reports/mx-chihuahua-chihuahua-technical.pdf",
         "fileName": "mx-chihuahua-chihuahua-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
-        "sizeBytes": 38566
+        "generatedAt": "2026-01-01T00:00:00.000Z",
+        "sizeBytes": 38565
       },
       "artifacts": {
         "technical": {
@@ -11980,8 +12010,8 @@
             "storagePath": "data/reports/mx-chihuahua-chihuahua-technical.pdf",
             "fileName": "mx-chihuahua-chihuahua-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 38566
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 38565
           }
         },
         "friendly": {
@@ -11991,8 +12021,8 @@
             "storagePath": "data/reports/mx-chihuahua-chihuahua-friendly.pdf",
             "fileName": "mx-chihuahua-chihuahua-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40327
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40324
           }
         }
       }
@@ -12002,7 +12032,7 @@
       "municipalityExternalId": "mx-chihuahua-juarez",
       "scanResultExternalId": "scan-mx-chihuahua-juarez-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Juarez is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -12144,7 +12174,7 @@
         "storagePath": "data/reports/mx-chihuahua-juarez-technical.pdf",
         "fileName": "mx-chihuahua-juarez-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
+        "generatedAt": "2026-01-01T00:00:00.000Z",
         "sizeBytes": 38526
       },
       "artifacts": {
@@ -12155,7 +12185,7 @@
             "storagePath": "data/reports/mx-chihuahua-juarez-technical.pdf",
             "fileName": "mx-chihuahua-juarez-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
+            "generatedAt": "2026-01-01T00:00:00.000Z",
             "sizeBytes": 38526
           }
         },
@@ -12166,8 +12196,8 @@
             "storagePath": "data/reports/mx-chihuahua-juarez-friendly.pdf",
             "fileName": "mx-chihuahua-juarez-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40255
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40253
           }
         }
       }
@@ -12177,7 +12207,7 @@
       "municipalityExternalId": "mx-coahuila-saltillo",
       "scanResultExternalId": "scan-mx-coahuila-saltillo-2026-01-01",
       "status": "completed",
-      "generatedAt": "2026-05-17T00:00:00.000Z",
+      "generatedAt": "2026-01-01T00:00:00.000Z",
       "summary": "Saltillo is currently assessed at critical risk with score 83/100 based on 6 normalized reportable finding(s). This technical report preserves uncertainty, distinguishes evidence from inference, and orders remediation work by severity, evidence clarity, and verification readiness.",
       "priorityActions": [
         "Priority 1: Confirm the WordPress core and plugin patch level, then upgrade to the latest supported release. Verification: Re-run the same bounded check after the mitigation is applied.",
@@ -12319,8 +12349,8 @@
         "storagePath": "data/reports/mx-coahuila-saltillo-technical.pdf",
         "fileName": "mx-coahuila-saltillo-technical.pdf",
         "contentType": "application/pdf",
-        "generatedAt": "2026-05-17T00:00:00.000Z",
-        "sizeBytes": 38563
+        "generatedAt": "2026-01-01T00:00:00.000Z",
+        "sizeBytes": 38562
       },
       "artifacts": {
         "technical": {
@@ -12330,8 +12360,8 @@
             "storagePath": "data/reports/mx-coahuila-saltillo-technical.pdf",
             "fileName": "mx-coahuila-saltillo-technical.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 38563
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 38562
           }
         },
         "friendly": {
@@ -12341,8 +12371,8 @@
             "storagePath": "data/reports/mx-coahuila-saltillo-friendly.pdf",
             "fileName": "mx-coahuila-saltillo-friendly.pdf",
             "contentType": "application/pdf",
-            "generatedAt": "2026-05-17T00:00:00.000Z",
-            "sizeBytes": 40281
+            "generatedAt": "2026-01-01T00:00:00.000Z",
+            "sizeBytes": 40279
           }
         }
       }
