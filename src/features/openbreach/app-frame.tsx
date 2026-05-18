@@ -76,10 +76,10 @@ function SideNavBar() {
           to="/targets/new"
         >
           <MaterialSymbol
-            className="group-hover:animate-pulse shrink-0"
+            className="shrink-0 group-hover:animate-pulse"
             icon="add_circle"
           />
-          <span className="min-w-0 whitespace-normal break-words leading-tight">
+          <span className="min-w-0 leading-tight break-words whitespace-normal">
             REGISTER_TARGET
           </span>
         </Link>
@@ -88,7 +88,7 @@ function SideNavBar() {
           to="/guardian/reports"
         >
           <MaterialSymbol className="shrink-0" icon="download" />
-          <span className="min-w-0 whitespace-normal break-words leading-tight">
+          <span className="min-w-0 leading-tight break-words whitespace-normal">
             OPEN_REPORTS
           </span>
         </Link>
@@ -119,7 +119,7 @@ function NavItem({
       to={to}
     >
       <MaterialSymbol className="mt-0.5 shrink-0" icon={icon} />
-      <span className="min-w-0 flex-1 whitespace-normal break-words leading-tight">
+      <span className="min-w-0 flex-1 leading-tight break-words whitespace-normal">
         {label}
       </span>
     </Link>
