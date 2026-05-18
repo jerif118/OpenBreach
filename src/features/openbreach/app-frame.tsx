@@ -166,7 +166,9 @@ function AuthWidget() {
 
 function AuthWidgetClerk() {
   const { isLoaded, isSignedIn, user } = useUser();
-  useEnsureConvexProfile(isLoaded && Boolean(isSignedIn));
+  useEnsureConvexProfile(
+    isLoaded && Boolean(isSignedIn) ? user ?? null : null,
+  );
 
   if (!isLoaded) {
     return (
@@ -284,20 +286,27 @@ function MobileAuthAffordanceClerk() {
 
 // Ensures a `userProfiles` row exists for the signed-in Clerk user. Without
 // this the back-end role checks (and the admin-elevation script) have nothing
-// to match against. Runs once per signed-in session; errors are swallowed
-// because this is best-effort bootstrap and the mutation is idempotent.
-function useEnsureConvexProfile(active: boolean) {
+// to match against. Runs once per Clerk user id; the mutation is idempotent
+// and now backfills email/name from the Clerk session because the default
+// Convex JWT template only forwards `sub` and `iss`.
+function useEnsureConvexProfile(user: ReturnType<typeof useUser>["user"] | null) {
   const provision = useMutation(api.users.updateCurrentMetadata);
-  const ranRef = useRef(false);
+  const ranForUserRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!active || !isConvexConfigured || ranRef.current) {
+    if (!user || !isConvexConfigured) {
       return;
     }
-    ranRef.current = true;
-    provision({}).catch((err) => {
+    if (ranForUserRef.current === user.id) {
+      return;
+    }
+    ranForUserRef.current = user.id;
+    provision({
+      email: user.primaryEmailAddress?.emailAddress,
+      name: user.fullName ?? user.username ?? undefined,
+    }).catch((err) => {
       console.warn("Failed to provision Convex user profile:", err);
-      ranRef.current = false;
+      ranForUserRef.current = null;
     });
-  }, [active, provision]);
+  }, [user, provision]);
 }
