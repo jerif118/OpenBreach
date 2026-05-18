@@ -112,6 +112,88 @@ export async function collectAdminExposure(
   return { adminExposure, errors };
 }
 
+/** Semi-active (bounded) paths: safe GET-only fetches with truncated bodies. */
+export type BoundedArtifactKind = "robots-txt" | "sitemap-xml" | "fixed-path";
+
+export type BoundedArtifact = {
+  kind: BoundedArtifactKind;
+  path: string;
+  method: "GET";
+  httpStatus?: number;
+  reachable: boolean;
+  finalUrl?: string;
+  snippet?: string;
+};
+
+const MAX_BOUNDED_BODY_CHARS = 4096;
+
+function boundedKindForPath(path: string): BoundedArtifactKind {
+  if (path === "/robots.txt") {
+    return "robots-txt";
+  }
+  if (path === "/sitemap.xml") {
+    return "sitemap-xml";
+  }
+  return "fixed-path";
+}
+
+export async function collectBoundedArtifacts(
+  baseUrl: URL,
+  paths: readonly string[],
+  controls: Required<ScannerControls>,
+  options: PassiveScannerOptions,
+): Promise<{
+  artifacts: BoundedArtifact[];
+  errors: RawScanEvidence["errors"];
+}> {
+  const fetchImpl = options.fetch ?? fetch;
+  const errors: RawScanEvidence["errors"] = [];
+  const artifacts: BoundedArtifact[] = [];
+
+  for (const path of paths) {
+    if (!path.startsWith("/") || path.startsWith("//")) {
+      errors.push({
+        stage: "http",
+        message: `Bounded artifact path must be root-relative: ${path}`,
+      });
+      continue;
+    }
+
+    const checkUrl = new URL(path, baseUrl.origin);
+    try {
+      const response = await withRetries(
+        () => fetchWithTimeout(fetchImpl, checkUrl, controls.timeoutMs, "GET"),
+        controls,
+        options.delay ?? delay,
+      );
+      const text = await response.text();
+      const snippet =
+        text.length > MAX_BOUNDED_BODY_CHARS
+          ? `${text.slice(0, MAX_BOUNDED_BODY_CHARS)}…`
+          : text;
+      artifacts.push({
+        kind: boundedKindForPath(path),
+        path,
+        method: "GET",
+        httpStatus: response.status,
+        reachable: response.status >= 200 && response.status < 400,
+        finalUrl: response.url || checkUrl.toString(),
+        snippet,
+      });
+    } catch (error) {
+      errors.push(toError("http", error));
+      artifacts.push({
+        kind: boundedKindForPath(path),
+        path,
+        method: "GET",
+        reachable: false,
+      });
+    }
+  }
+
+  return { artifacts, errors };
+}
+
 export async function collectTlsEvidence(
   url: URL,
   controls: Required<ScannerControls>,
