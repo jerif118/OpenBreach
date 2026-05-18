@@ -233,7 +233,10 @@ export async function runControlledValidation(
     if (msg === "max_requests_exceeded") {
       return blocked("max_requests_exceeded", { maxRequests });
     }
-    if (msg.startsWith("forbidden_action:") || msg.startsWith("method_not_allowed:")) {
+    if (
+      msg.startsWith("forbidden_action:") ||
+      msg.startsWith("method_not_allowed:")
+    ) {
       return blocked("unsafe_or_disallowed_http_method", { detail: msg });
     }
     const resultId = `${req.runId}-vr-error`;
