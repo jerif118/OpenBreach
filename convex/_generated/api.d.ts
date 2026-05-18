@@ -47,6 +47,7 @@ import type * as types_workflow from "../types/workflow.js";
 import type * as users from "../users.js";
 import type * as validationResults from "../validationResults.js";
 import type * as vulnerabilityHypotheses from "../vulnerabilityHypotheses.js";
+import type * as workflow from "../workflow.js";
 import type * as workflowRuns from "../workflowRuns.js";
 
 import type {
@@ -95,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   users: typeof users;
   validationResults: typeof validationResults;
   vulnerabilityHypotheses: typeof vulnerabilityHypotheses;
+  workflow: typeof workflow;
   workflowRuns: typeof workflowRuns;
 }>;
 
