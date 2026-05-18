@@ -137,6 +137,7 @@ export const upsert = internalMutation({
       v.array(
         v.object({
           stage: v.union(
+            v.literal("dns"),
             v.literal("http"),
             v.literal("tls"),
             v.literal("cms"),

@@ -33,6 +33,7 @@ const rawScanAdminExposure = v.object({
 
 const rawScanError = v.object({
   stage: v.union(
+    v.literal("dns"),
     v.literal("http"),
     v.literal("tls"),
     v.literal("cms"),

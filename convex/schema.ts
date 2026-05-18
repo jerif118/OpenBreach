@@ -91,6 +91,7 @@ const rawScanAdminExposure = v.object({
 
 const rawScanError = v.object({
   stage: v.union(
+    v.literal("dns"),
     v.literal("http"),
     v.literal("tls"),
     v.literal("cms"),
@@ -329,6 +330,7 @@ const evidenceAdminExposure = v.object({
 
 const evidenceError = v.object({
   stage: v.union(
+    v.literal("dns"),
     v.literal("http"),
     v.literal("tls"),
     v.literal("cms"),
