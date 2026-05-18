@@ -59,9 +59,9 @@
     "scanner:validate": "node scripts/validate-scanner.ts",
     "start": "node .output/server/index.mjs",
     "target:intake:validate": "node scripts/validate-target-intake-form.ts",
-    "validation:gate:validate": "node scripts/validate-approval-validation.ts",
     "test:analyzer": "npx tsx scripts/validate-analyzer.ts",
-    "typecheck": "tsc --build --pretty"
+    "typecheck": "tsc --build --pretty",
+    "validation:gate:validate": "node scripts/validate-approval-validation.ts"
   },
   "dependencies": {
     "@clerk/tanstack-react-start": "1.2.5",
