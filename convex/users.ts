@@ -97,31 +97,35 @@ export const elevateToAdmin = internalMutation({
       );
     }
 
-    let profile: Doc<"userProfiles"> | null = null;
+    let matches: Doc<"userProfiles">[] = [];
 
     if (args.profileId) {
-      profile = await ctx.db.get(args.profileId);
+      const single = await ctx.db.get(args.profileId);
+      if (single) matches = [single];
     } else if (args.tokenIdentifier) {
-      profile = await ctx.db
+      const single = await ctx.db
         .query("userProfiles")
         .withIndex("by_tokenIdentifier", (q) =>
           q.eq("tokenIdentifier", args.tokenIdentifier!),
         )
         .unique();
+      if (single) matches = [single];
     } else if (args.clerkUserId) {
       // No index for suffix match; userProfiles is small (one row per signed-in
       // operator), so a bounded scan is acceptable for this bootstrap tool.
       const candidates = await ctx.db.query("userProfiles").take(500);
-      profile =
-        candidates.find((p) =>
-          p.tokenIdentifier.endsWith(`|${args.clerkUserId!}`),
-        ) ?? null;
+      matches = candidates.filter((p) =>
+        p.tokenIdentifier.endsWith(`|${args.clerkUserId!}`),
+      );
     } else if (args.email) {
+      // Email is intentionally a many-match lookup: Clerk can create multiple
+      // user records per email (different sign-in methods that don't merge),
+      // so we elevate every row that shares the email rather than pick one.
       const candidates = await ctx.db.query("userProfiles").take(500);
-      profile = candidates.find((p) => p.email === args.email) ?? null;
+      matches = candidates.filter((p) => p.email === args.email);
     }
 
-    if (!profile) {
+    if (matches.length === 0) {
       if (args.createIfMissing && args.tokenIdentifier) {
         const id = await ctx.db.insert("userProfiles", {
           tokenIdentifier: args.tokenIdentifier,
@@ -131,11 +135,15 @@ export const elevateToAdmin = internalMutation({
         const created = await ctx.db.get(id);
         return {
           status: "created" as const,
-          profileId: id,
-          tokenIdentifier: created!.tokenIdentifier,
-          email: created!.email ?? null,
-          name: created!.name ?? null,
-          roles: created!.roles,
+          elevated: [
+            {
+              profileId: id,
+              tokenIdentifier: created!.tokenIdentifier,
+              email: created!.email ?? null,
+              name: created!.name ?? null,
+              roles: created!.roles,
+            },
+          ],
         };
       }
       throw new Error(
@@ -143,16 +151,32 @@ export const elevateToAdmin = internalMutation({
       );
     }
 
-    const nextRoles = Array.from(new Set([...profile.roles, ROLES.admin]));
-    await ctx.db.patch(profile._id, { roles: nextRoles });
+    const elevated = [] as Array<{
+      profileId: Doc<"userProfiles">["_id"];
+      tokenIdentifier: string;
+      email: string | null;
+      name: string | null;
+      roles: Doc<"userProfiles">["roles"];
+    }>;
+
+    for (const profile of matches) {
+      const nextRoles = Array.from(new Set([...profile.roles, ROLES.admin]));
+      await ctx.db.patch(profile._id, { roles: nextRoles });
+      elevated.push({
+        profileId: profile._id,
+        tokenIdentifier: profile.tokenIdentifier,
+        email: profile.email ?? null,
+        name: profile.name ?? null,
+        roles: nextRoles,
+      });
+    }
 
     return {
-      status: "elevated" as const,
-      profileId: profile._id,
-      tokenIdentifier: profile.tokenIdentifier,
-      email: profile.email ?? null,
-      name: profile.name ?? null,
-      roles: nextRoles,
+      status:
+        elevated.length === 1
+          ? ("elevated" as const)
+          : ("elevated-multiple" as const),
+      elevated,
     };
   },
 });
