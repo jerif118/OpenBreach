@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { buildStyledPdfDocument } from "../src/reports/pdf-layout.ts";
 
 const sampleMarkdown = `# Security Assessment Report
@@ -193,28 +193,23 @@ All fixes must be verified through:
 3. Staged deployment to production`;
 
 async function main() {
+  const outputDir = new URL("../tmp/pdf-previews/", import.meta.url);
+  await mkdir(outputDir, { recursive: true });
+
   console.log("Generating friendly report PDF...");
   const friendlyPdf = await buildStyledPdfDocument(sampleMarkdown, "friendly");
-  await writeFile(
-    "/Users/jerifcornejo/Downloads/friendly-report-preview.pdf",
-    friendlyPdf,
-  );
-  console.log(
-    "Saved to /Users/jerifcornejo/Downloads/friendly-report-preview.pdf",
-  );
+  const friendlyOutput = new URL("friendly-report-preview.pdf", outputDir);
+  await writeFile(friendlyOutput, friendlyPdf);
+  console.log(`Saved to ${friendlyOutput.pathname}`);
 
   console.log("Generating technical report PDF...");
   const technicalPdf = await buildStyledPdfDocument(
     technicalMarkdown,
     "technical",
   );
-  await writeFile(
-    "/Users/jerifcornejo/Downloads/technical-report-preview.pdf",
-    technicalPdf,
-  );
-  console.log(
-    "Saved to /Users/jerifcornejo/Downloads/technical-report-preview.pdf",
-  );
+  const technicalOutput = new URL("technical-report-preview.pdf", outputDir);
+  await writeFile(technicalOutput, technicalPdf);
+  console.log(`Saved to ${technicalOutput.pathname}`);
 }
 
 main().catch(console.error);
