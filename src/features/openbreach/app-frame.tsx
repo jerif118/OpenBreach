@@ -1,9 +1,13 @@
 import { Link } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 import { SignInButton, UserButton, useUser } from "@clerk/tanstack-react-start";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api.js";
 import { MaterialSymbol } from "../../components/ui/MaterialSymbol";
 
 const isClerkConfigured = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+const isConvexConfigured = Boolean(import.meta.env.VITE_CONVEX_URL);
 
 export function OpenBreachAppFrame({ children }: { children: ReactNode }) {
   return (
@@ -162,6 +166,7 @@ function AuthWidget() {
 
 function AuthWidgetClerk() {
   const { isLoaded, isSignedIn, user } = useUser();
+  useEnsureConvexProfile(isLoaded && Boolean(isSignedIn));
 
   if (!isLoaded) {
     return (
@@ -275,4 +280,24 @@ function MobileAuthAffordanceClerk() {
       Sign In
     </Link>
   );
+}
+
+// Ensures a `userProfiles` row exists for the signed-in Clerk user. Without
+// this the back-end role checks (and the admin-elevation script) have nothing
+// to match against. Runs once per signed-in session; errors are swallowed
+// because this is best-effort bootstrap and the mutation is idempotent.
+function useEnsureConvexProfile(active: boolean) {
+  const provision = useMutation(api.users.updateCurrentMetadata);
+  const ranRef = useRef(false);
+
+  useEffect(() => {
+    if (!active || !isConvexConfigured || ranRef.current) {
+      return;
+    }
+    ranRef.current = true;
+    provision({}).catch((err) => {
+      console.warn("Failed to provision Convex user profile:", err);
+      ranRef.current = false;
+    });
+  }, [active, provision]);
 }
