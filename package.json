@@ -31,6 +31,7 @@
     "municipalities:seed": "convex run municipalities:seed \"$(node scripts/municipality-seed-args.ts)\"",
     "municipalities:seed:args": "node scripts/municipality-seed-args.ts",
     "municipalities:validate": "node scripts/validate-municipality-seed.ts",
+    "orchestrate:run": "node scripts/orchestrate-municipality.ts",
     "orchestrator:validate": "node scripts/validate-mvp-orchestrator.ts",
     "pivot:smoke": "node scripts/smoke-test-convex.ts",
     "pivot:validate": "run-s typecheck contracts:test fixtures:validate auth:writes:validate pivot:smoke target:intake:validate recon:validate orchestrator:validate validation:gate:validate",
