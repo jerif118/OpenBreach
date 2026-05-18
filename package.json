@@ -33,7 +33,7 @@
     "municipalities:validate": "node scripts/validate-municipality-seed.ts",
     "orchestrator:validate": "node scripts/validate-mvp-orchestrator.ts",
     "pivot:smoke": "node scripts/smoke-test-convex.ts",
-    "pivot:validate": "run-s typecheck contracts:test fixtures:validate auth:writes:validate pivot:smoke target:intake:validate recon:validate orchestrator:validate",
+    "pivot:validate": "run-s typecheck contracts:test fixtures:validate auth:writes:validate pivot:smoke target:intake:validate recon:validate orchestrator:validate validation:gate:validate",
     "preview": "vite preview",
     "recon:validate": "node scripts/validate-recon-agent.ts",
     "report:ai-provider": "node scripts/validate-report-ai-provider.ts",
@@ -58,7 +58,7 @@
     "scanner:persistence:validate": "node scripts/validate-scan-persistence.ts",
     "scanner:validate": "node scripts/validate-scanner.ts",
     "start": "node .output/server/index.mjs",
-    "target:intake:validate": "node scripts/validate-target-intake-form.ts",
+    "validation:gate:validate": "node scripts/validate-approval-validation.ts",
     "test:analyzer": "npx tsx scripts/validate-analyzer.ts",
     "typecheck": "tsc --build --pretty"
   },
