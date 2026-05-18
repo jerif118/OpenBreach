@@ -252,12 +252,15 @@ export const listPipeline = query({
         .order("desc")
         .take(1);
 
+      const orchestrator = await loadOrchestratorJoin(ctx, municipality.externalId);
+
       entries.push({
         municipality: toMunicipalityContract(municipality),
         scan: toScanResultContract(municipality, latestScan ?? null),
         report: toPipelineReportContract(municipality, latestReport ?? null),
         scannedAtFallback: latestScan?._creationTime ?? null,
         reportedAtFallback: latestReport?._creationTime ?? null,
+        orchestrator,
       });
     }
 
@@ -271,7 +274,157 @@ type PipelineEntry = {
   report: ReturnType<typeof toPipelineReportContract>;
   scannedAtFallback: number | null;
   reportedAtFallback: number | null;
+  orchestrator: OrchestratorJoin;
 };
+
+type OrchestratorJoin = {
+  latestRun:
+    | (Pick<
+        Doc<"workflowRuns">,
+        | "runId"
+        | "targetId"
+        | "status"
+        | "startedAt"
+        | "completedAt"
+        | "abortedAt"
+        | "abortedReason"
+        | "currentPhase"
+        | "phases"
+      >)
+    | null;
+  latestValidation:
+    | Pick<
+        Doc<"validationResults">,
+        | "resultId"
+        | "targetId"
+        | "status"
+        | "executedAt"
+        | "executedBy"
+        | "testPlanId"
+        | "hypothesisId"
+        | "summary"
+        | "evidenceRefs"
+        | "runId"
+        | "metadata"
+      >
+    | null;
+  auditEvents: Array<
+    Pick<
+      Doc<"auditEvents">,
+      "eventId" | "targetId" | "eventType" | "actor" | "timestamp" | "runId" | "details"
+    >
+  >;
+  findings: Array<
+    Pick<
+      Doc<"findings">,
+      | "findingId"
+      | "targetId"
+      | "title"
+      | "description"
+      | "severity"
+      | "status"
+      | "createdAt"
+      | "category"
+      | "evidence"
+      | "remediationHint"
+      | "affectedAssets"
+      | "confidence"
+      | "cweId"
+      | "cvssScore"
+      | "validationResultId"
+      | "reportReady"
+      | "runId"
+    >
+  >;
+};
+
+async function loadOrchestratorJoin(
+  ctx: { db: import("./_generated/server").QueryCtx["db"] },
+  targetId: string,
+): Promise<OrchestratorJoin> {
+  const [latestRun] = await ctx.db
+    .query("workflowRuns")
+    .withIndex("by_targetId", (q) => q.eq("targetId", targetId))
+    .order("desc")
+    .take(1);
+
+  const [latestValidation] = await ctx.db
+    .query("validationResults")
+    .withIndex("by_targetId", (q) => q.eq("targetId", targetId))
+    .order("desc")
+    .take(1);
+
+  const auditEvents = await ctx.db
+    .query("auditEvents")
+    .withIndex("by_targetId_and_timestamp", (q) => q.eq("targetId", targetId))
+    .order("desc")
+    .take(20);
+
+  const findings = await ctx.db
+    .query("findings")
+    .withIndex("by_targetId", (q) => q.eq("targetId", targetId))
+    .order("desc")
+    .take(50);
+
+  return {
+    latestRun: latestRun
+      ? {
+          runId: latestRun.runId,
+          targetId: latestRun.targetId,
+          status: latestRun.status,
+          startedAt: latestRun.startedAt,
+          completedAt: latestRun.completedAt,
+          abortedAt: latestRun.abortedAt,
+          abortedReason: latestRun.abortedReason,
+          currentPhase: latestRun.currentPhase,
+          phases: latestRun.phases,
+        }
+      : null,
+    latestValidation: latestValidation
+      ? {
+          resultId: latestValidation.resultId,
+          targetId: latestValidation.targetId,
+          status: latestValidation.status,
+          executedAt: latestValidation.executedAt,
+          executedBy: latestValidation.executedBy,
+          testPlanId: latestValidation.testPlanId,
+          hypothesisId: latestValidation.hypothesisId,
+          summary: latestValidation.summary,
+          evidenceRefs: latestValidation.evidenceRefs,
+          runId: latestValidation.runId,
+          metadata: latestValidation.metadata,
+        }
+      : null,
+    auditEvents: auditEvents.map((ev) => ({
+      eventId: ev.eventId,
+      targetId: ev.targetId,
+      eventType: ev.eventType,
+      actor: ev.actor,
+      timestamp: ev.timestamp,
+      runId: ev.runId,
+      details: ev.details,
+    })),
+    findings: findings.map((f) => ({
+      findingId: f.findingId,
+      targetId: f.targetId,
+      title: f.title,
+      description: f.description,
+      severity: f.severity,
+      status: f.status,
+      createdAt: f.createdAt,
+      category: f.category,
+      evidence: f.evidence,
+      remediationHint: f.remediationHint,
+      affectedAssets: f.affectedAssets,
+      confidence: f.confidence,
+      cweId: f.cweId,
+      cvssScore: f.cvssScore,
+      validationResultId: f.validationResultId,
+      reportReady: f.reportReady,
+      runId: f.runId,
+    })),
+  };
+}
 
 function normalizePipelineLimit(limit: number | undefined) {
   if (limit === undefined) {
