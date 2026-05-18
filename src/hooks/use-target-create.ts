@@ -187,8 +187,7 @@ function shouldUseDemoFallback(error: unknown) {
     message.includes("Authentication required") ||
     message.includes("not authenticated") ||
     message.includes("Connection refused") ||
-    message.includes("WebSocket") ||
-    message.includes("Convex")
+    message.includes("WebSocket")
   );
 }
 
