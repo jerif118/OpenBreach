@@ -29,7 +29,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey}>
+    <ClerkProvider
+      publishableKey={clerkPublishableKey}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      afterSignOutUrl="/sign-in"
+    >
       <ConvexAuthProvider>{children}</ConvexAuthProvider>
     </ClerkProvider>
   );

@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { SignInButton, UserButton, useUser } from "@clerk/tanstack-react-start";
 import { MaterialSymbol } from "../../components/ui/MaterialSymbol";
+
+const isClerkConfigured = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 export function OpenBreachAppFrame({ children }: { children: ReactNode }) {
   return (
@@ -44,19 +47,7 @@ function SideNavBar() {
           <br />
           BREACH
         </div>
-        <div className="border-primary/10 bg-surface-container-low pixel-corner mt-5 flex w-full items-center gap-3 border px-3 py-3">
-          <div className="border-primary/20 bg-surface pixel-corner flex h-10 w-10 items-center justify-center border">
-            <MaterialSymbol className="text-primary" icon="verified_user" />
-          </div>
-          <div>
-            <p className="font-display text-primary text-sm uppercase">
-              OPERATOR_01
-            </p>
-            <p className="text-secondary-fixed-dim mt-1 font-mono text-[10px] uppercase">
-              STATUS: ENCRYPTED
-            </p>
-          </div>
-        </div>
+        <AuthWidget />
       </div>
 
       <div className="flex flex-grow flex-col gap-1 overflow-y-auto pb-4">
@@ -138,7 +129,7 @@ function TopNavBarMobile() {
           Control Plane
         </p>
       </div>
-      <div className="flex gap-4">
+      <div className="flex items-center gap-4">
         <Link className="hover:text-primary text-[#b9cacb]" to="/targets">
           <MaterialSymbol icon="security" />
         </Link>
@@ -154,7 +145,134 @@ function TopNavBarMobile() {
         >
           <MaterialSymbol icon="terminal" />
         </Link>
+        <MobileAuthAffordance />
       </div>
     </nav>
+  );
+}
+
+// Sidebar identity / sign-in widget. Branches on whether Clerk is configured
+// so we never call Clerk hooks without a provider above us.
+function AuthWidget() {
+  if (!isClerkConfigured) {
+    return <AuthWidgetUnconfigured />;
+  }
+  return <AuthWidgetClerk />;
+}
+
+function AuthWidgetClerk() {
+  const { isLoaded, isSignedIn, user } = useUser();
+
+  if (!isLoaded) {
+    return (
+      <div className="border-primary/10 bg-surface-container-low pixel-corner mt-5 flex w-full items-center gap-3 border px-3 py-3">
+        <div className="border-primary/20 bg-surface pixel-corner h-10 w-10 animate-pulse border" />
+        <div className="flex-1">
+          <div className="bg-surface-container-high h-3 w-24 animate-pulse" />
+          <div className="bg-surface-container-high mt-2 h-2 w-16 animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="border-primary/20 bg-surface-container-low pixel-corner mt-5 flex w-full flex-col gap-3 border px-3 py-3">
+        <div className="flex items-center gap-3">
+          <div className="border-primary/20 bg-surface pixel-corner flex h-10 w-10 items-center justify-center border">
+            <MaterialSymbol className="text-primary" icon="lock" />
+          </div>
+          <div>
+            <p className="font-display text-primary text-sm uppercase">
+              SIGNED OUT
+            </p>
+            <p className="text-on-surface-variant mt-1 font-mono text-[10px] uppercase">
+              Authenticate to act
+            </p>
+          </div>
+        </div>
+        <SignInButton mode="modal" forceRedirectUrl="/guardian">
+          <button
+            type="button"
+            className="border-primary/40 bg-primary/10 text-primary hover:bg-primary/15 pixel-corner border px-3 py-2 font-mono text-[10px] tracking-[0.22em] uppercase transition-colors"
+          >
+            ▶ Sign In
+          </button>
+        </SignInButton>
+        <Link
+          to="/sign-in"
+          className="text-on-surface-variant hover:text-primary text-center font-mono text-[9px] tracking-[0.22em] uppercase"
+        >
+          Or open full sign-in page
+        </Link>
+      </div>
+    );
+  }
+
+  const displayName =
+    user.fullName ??
+    user.username ??
+    user.primaryEmailAddress?.emailAddress ??
+    "Operator";
+
+  return (
+    <div className="border-primary/10 bg-surface-container-low pixel-corner mt-5 flex w-full items-center gap-3 border px-3 py-3">
+      <UserButton appearance={{ elements: { avatarBox: "h-10 w-10" } }} />
+      <div className="min-w-0 flex-1">
+        <p className="font-display text-primary truncate text-sm uppercase">
+          {displayName}
+        </p>
+        <p className="text-secondary-fixed-dim mt-1 font-mono text-[10px] uppercase">
+          STATUS: AUTHENTICATED
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function AuthWidgetUnconfigured() {
+  return (
+    <div className="border-error/30 bg-error/5 pixel-corner mt-5 flex w-full flex-col gap-2 border px-3 py-3">
+      <div className="flex items-center gap-3">
+        <div className="border-error/30 bg-surface pixel-corner flex h-10 w-10 items-center justify-center border">
+          <MaterialSymbol className="text-error" icon="key_off" />
+        </div>
+        <div>
+          <p className="font-display text-error text-sm uppercase">
+            AUTH OFFLINE
+          </p>
+          <p className="text-on-surface-variant mt-1 font-mono text-[10px] uppercase">
+            Clerk not configured
+          </p>
+        </div>
+      </div>
+      <p className="text-on-surface-variant font-mono text-[10px] leading-tight">
+        Set VITE_CLERK_PUBLISHABLE_KEY in .env.local and restart the dev server
+        to enable sign-in.
+      </p>
+    </div>
+  );
+}
+
+function MobileAuthAffordance() {
+  if (!isClerkConfigured) {
+    return null;
+  }
+  return <MobileAuthAffordanceClerk />;
+}
+
+function MobileAuthAffordanceClerk() {
+  const { isLoaded, isSignedIn } = useUser();
+  if (!isLoaded) return null;
+  if (isSignedIn) {
+    return <UserButton appearance={{ elements: { avatarBox: "h-7 w-7" } }} />;
+  }
+  return (
+    <Link
+      to="/sign-in"
+      className="border-primary/40 bg-primary/10 text-primary pixel-corner hover:bg-primary/15 border px-2 py-1 font-mono text-[9px] tracking-[0.22em] uppercase"
+    >
+      Sign In
+    </Link>
   );
 }
