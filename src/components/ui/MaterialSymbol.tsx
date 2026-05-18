@@ -1,6 +1,9 @@
 import type { ComponentPropsWithoutRef } from "react";
 
-type MaterialSymbolProps = Omit<ComponentPropsWithoutRef<"span">, "children"> & {
+type MaterialSymbolProps = Omit<
+  ComponentPropsWithoutRef<"span">,
+  "children"
+> & {
   icon: string;
 };
 
