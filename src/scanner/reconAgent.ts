@@ -1,7 +1,6 @@
 import type {
   AuthorizationScope,
   EvidenceEnvelope,
-  Municipality,
   PassiveScanEvidence,
   RawScanEvidence,
 } from "../shared/contracts.ts";
@@ -42,19 +41,6 @@ export function isHostnameInAuthorizationScope(
   });
 }
 
-export function syntheticMunicipalityForRecon(
-  targetId: string,
-  websiteUrl: string,
-): Municipality {
-  return {
-    id: targetId,
-    name: targetId,
-    state: "scope",
-    websiteUrl,
-    riskTier: "medium",
-  };
-}
-
 export function rawScanEvidenceToPassiveScanEvidence(
   raw: RawScanEvidence,
   ids: {
@@ -85,7 +71,7 @@ export function rawScanEvidenceToPassiveScanEvidence(
   const passive: PassiveScanEvidence = {
     evidenceId: ids.evidenceId,
     targetId: ids.targetId,
-    source: raw.source === "fixture" ? "fixture" : "convex",
+    source: raw.source,
     collectedAt: raw.scannedAt,
     requestedUrl: raw.requestedUrl,
     reachable: raw.reachable,
@@ -173,17 +159,29 @@ export async function runScopedPassiveRecon(input: {
     };
   }
 
-  const municipality = syntheticMunicipalityForRecon(
-    input.authorization.targetId,
-    input.requestedUrl,
+  const raw = await scanWebsite(
+    { id: input.authorization.targetId, websiteUrl: input.requestedUrl },
+    input.options ?? {},
   );
 
-  const raw = await scanWebsite(municipality, input.options ?? {});
+  const artifactBaseUrl = new URL(raw.finalUrl ?? raw.requestedUrl);
+  if (
+    !isHostnameInAuthorizationScope(
+      artifactBaseUrl.hostname,
+      input.scopeDecision,
+    )
+  ) {
+    return {
+      status: "skipped",
+      reason:
+        "final URL hostname is outside the approved authorization scope assets",
+    };
+  }
 
   const controls = resolveScannerControls(input.options?.controls);
   const paths = input.semiactivePaths ?? [...DEFAULT_SEMIACTIVE_PATHS];
   const bounded = await collectBoundedArtifacts(
-    new URL(raw.finalUrl ?? raw.requestedUrl),
+    artifactBaseUrl,
     paths,
     controls,
     input.options ?? {},
