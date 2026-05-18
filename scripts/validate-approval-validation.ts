@@ -8,6 +8,8 @@ import {
   validationResultSchema,
 } from "../src/shared/contracts.ts";
 import { runControlledValidation } from "../src/workflow/controlled-validation-runner.ts";
+import { mapFixtureToApprovalGateDto } from "../convex/lib/fixtureFallback.ts";
+import { toApprovalDto } from "../convex/targets.dto.ts";
 
 const NOW = "2026-05-17T14:00:00.000Z";
 const TARGET = "tgt-validation-70";
@@ -45,7 +47,7 @@ function startFixtureServer(): Promise<{
   });
 }
 
-function approvedPlan(baseUrl: string) {
+function approvedPlan() {
   return testPlanSchema.parse({
     planId: `${RUN}-plan`,
     targetId: TARGET,
@@ -71,8 +73,8 @@ function approvedPlan(baseUrl: string) {
   });
 }
 
-function pendingPlan(baseUrl: string) {
-  const ap = approvedPlan(baseUrl);
+function pendingPlan() {
+  const ap = approvedPlan();
   return testPlanSchema.parse({
     ...ap,
     status: "pending-approval",
@@ -142,6 +144,17 @@ async function main() {
     const scope = scopeForOrigin(baseUrl);
     const origin = new URL(baseUrl).origin;
 
+    // 0) Approval DTO mappers preserve gate expiration metadata
+    {
+      const expiresAt = "2026-05-17T15:00:00.000Z";
+      const gate = execGateApproved(expiresAt);
+      assert.equal(
+        toApprovalDto(gate as Parameters<typeof toApprovalDto>[0]).expiresAt,
+        expiresAt,
+      );
+      assert.equal(mapFixtureToApprovalGateDto(gate).expiresAt, expiresAt);
+    }
+
     // 1) Pending test plan cannot run
     {
       const r = await runControlledValidation({
@@ -150,7 +163,7 @@ async function main() {
         actor: ACTOR,
         now: NOW,
         authorizationScope: scope,
-        testPlan: pendingPlan(baseUrl),
+        testPlan: pendingPlan(),
         approvalGate: execGateApproved(),
         validationBaseUrl: baseUrl,
         allowedOrigins: [origin],
@@ -168,11 +181,11 @@ async function main() {
     {
       const r = await runControlledValidation({
         targetId: TARGET,
-        runId: `${RUN}-b`,
+        runId: RUN,
         actor: ACTOR,
         now: NOW,
         authorizationScope: scope,
-        testPlan: approvedPlan(baseUrl),
+        testPlan: approvedPlan(),
         approvalGate: execGateRejected(),
         validationBaseUrl: baseUrl,
         allowedOrigins: [origin],
@@ -189,11 +202,11 @@ async function main() {
     {
       const r = await runControlledValidation({
         targetId: TARGET,
-        runId: `${RUN}-c`,
+        runId: RUN,
         actor: ACTOR,
         now: NOW,
         authorizationScope: scope,
-        testPlan: approvedPlan(baseUrl),
+        testPlan: approvedPlan(),
         approvalGate: execGateApproved("2026-01-01T00:00:00.000Z"),
         validationBaseUrl: baseUrl,
         allowedOrigins: [origin],
@@ -203,17 +216,44 @@ async function main() {
         r.auditTrail.some((e) => e.eventType === "gate-expired"),
         "expired gate audited",
       );
+      for (const ev of r.auditTrail) auditEventSchema.parse(ev);
     }
 
     // 4) validation URL origin not in AuthorizationScope allow-list
     {
+      const scopeWithDifferentOrigin = authorizationScopeSchema.parse({
+        ...scope,
+        constraints: ["allowed_origin:http://127.0.0.1:1"],
+        evidenceUrl: "http://127.0.0.1:1/",
+      });
       const r = await runControlledValidation({
         targetId: TARGET,
-        runId: `${RUN}-d`,
+        runId: RUN,
+        actor: ACTOR,
+        now: NOW,
+        authorizationScope: scopeWithDifferentOrigin,
+        testPlan: approvedPlan(),
+        approvalGate: execGateApproved(),
+        validationBaseUrl: baseUrl,
+        allowedOrigins: [origin],
+      });
+      assert.equal(r.validationResult.status, "blocked");
+      assert.equal(
+        (r.validationResult.metadata as { blockedReason?: string })
+          ?.blockedReason,
+        "authorization_scope_origin_not_allowed",
+      );
+    }
+
+    // 4b) caller allow-list still blocks origins outside the local allow-list
+    {
+      const r = await runControlledValidation({
+        targetId: TARGET,
+        runId: RUN,
         actor: ACTOR,
         now: NOW,
         authorizationScope: scope,
-        testPlan: approvedPlan(baseUrl),
+        testPlan: approvedPlan(),
         approvalGate: execGateApproved(),
         validationBaseUrl: baseUrl,
         allowedOrigins: ["http://127.0.0.1:1"],
@@ -226,20 +266,135 @@ async function main() {
       );
     }
 
+    // 4c) malformed allowed origins return a controlled block
+    {
+      const r = await runControlledValidation({
+        targetId: TARGET,
+        runId: RUN,
+        actor: ACTOR,
+        now: NOW,
+        authorizationScope: scope,
+        testPlan: approvedPlan(),
+        approvalGate: execGateApproved(),
+        validationBaseUrl: baseUrl,
+        allowedOrigins: ["not a url"],
+      });
+      assert.equal(r.validationResult.status, "blocked");
+      assert.equal(
+        (r.validationResult.metadata as { blockedReason?: string })
+          ?.blockedReason,
+        "invalid_allowed_origin",
+      );
+    }
+
+    // 4d) non-approved pending gates do not emit a rejected-gate audit event
+    {
+      const r = await runControlledValidation({
+        targetId: TARGET,
+        runId: RUN,
+        actor: ACTOR,
+        now: NOW,
+        authorizationScope: scope,
+        testPlan: approvedPlan(),
+        approvalGate: execGatePending(),
+        validationBaseUrl: baseUrl,
+        allowedOrigins: [origin],
+      });
+      assert.equal(r.validationResult.status, "blocked");
+      assert.equal(
+        r.auditTrail.some((e) => e.eventType === "gate-rejected"),
+        false,
+      );
+      for (const ev of r.auditTrail) auditEventSchema.parse(ev);
+    }
+
+    // 4e) gate type, target, linked plan, and run must match the request
+    for (const [name, approvalGate] of [
+      [
+        "wrong type",
+        approvalGateSchema.parse({
+          ...execGateApproved(),
+          gateType: "test-plan",
+        }),
+      ],
+      [
+        "wrong target",
+        approvalGateSchema.parse({
+          ...execGateApproved(),
+          targetId: `${TARGET}-other`,
+        }),
+      ],
+      [
+        "wrong linked plan",
+        approvalGateSchema.parse({
+          ...execGateApproved(),
+          linkedArtifactId: `${RUN}-other-plan`,
+        }),
+      ],
+      [
+        "wrong run",
+        approvalGateSchema.parse({
+          ...execGateApproved(),
+          runId: `${RUN}-other`,
+        }),
+      ],
+    ] as const) {
+      const r = await runControlledValidation({
+        targetId: TARGET,
+        runId: RUN,
+        actor: ACTOR,
+        now: NOW,
+        authorizationScope: scope,
+        testPlan: approvedPlan(),
+        approvalGate,
+        validationBaseUrl: baseUrl,
+        allowedOrigins: [origin],
+      });
+      assert.equal(r.validationResult.status, "blocked", name);
+      assert.equal(
+        (r.validationResult.metadata as { blockedReason?: string })
+          ?.blockedReason,
+        "approval_gate_mismatch",
+        name,
+      );
+    }
+
+    // 4f) request run must match the linked plan and execution gate
+    {
+      const r = await runControlledValidation({
+        targetId: TARGET,
+        runId: `${RUN}-other`,
+        actor: ACTOR,
+        now: NOW,
+        authorizationScope: scope,
+        testPlan: approvedPlan(),
+        approvalGate: execGateApproved(),
+        validationBaseUrl: baseUrl,
+        allowedOrigins: [origin],
+      });
+      assert.equal(r.validationResult.status, "blocked");
+      assert.equal(
+        (r.validationResult.metadata as { blockedReason?: string })
+          ?.blockedReason,
+        "test_plan_mismatch",
+      );
+    }
+
     // 5) Happy path
     {
       const r = await runControlledValidation({
         targetId: TARGET,
-        runId: `${RUN}-e`,
+        runId: RUN,
         actor: ACTOR,
         now: NOW,
         authorizationScope: scope,
-        testPlan: approvedPlan(baseUrl),
+        testPlan: approvedPlan(),
         approvalGate: execGateApproved(),
         validationBaseUrl: baseUrl,
         allowedOrigins: [origin],
       });
       assert.equal(r.validationResult.status, "passed");
+      assert.equal(r.evidenceEnvelope.source, "system");
       assert.ok(r.requestCount >= 1 && r.requestCount <= 2);
       assert.ok(
         r.auditTrail.some(
@@ -251,10 +406,30 @@ async function main() {
       for (const ev of r.auditTrail) auditEventSchema.parse(ev);
     }
 
+    // 5b) happy-path fetches receive a timeout signal
+    {
+      const r = await runControlledValidation({
+        targetId: TARGET,
+        runId: RUN,
+        actor: ACTOR,
+        now: NOW,
+        authorizationScope: scope,
+        testPlan: approvedPlan(),
+        approvalGate: execGateApproved(),
+        validationBaseUrl: baseUrl,
+        allowedOrigins: [origin],
+        fetchImpl: async (_input, init) => {
+          assert.ok(init?.signal instanceof AbortSignal);
+          return new Response(null, { status: 204 });
+        },
+      });
+      assert.equal(r.validationResult.status, "passed");
+    }
+
     // 6) Forbidden method in catalog blocks before network (HEAD disallowed, must not fall through to GET)
     {
       const badPlan = testPlanSchema.parse({
-        ...approvedPlan(baseUrl),
+        ...approvedPlan(),
         metadata: {
           allowedActions: ["GET"],
           forbiddenActions: ["HEAD", "POST"],
@@ -263,7 +438,7 @@ async function main() {
       });
       const r = await runControlledValidation({
         targetId: TARGET,
-        runId: `${RUN}-f`,
+        runId: RUN,
         actor: ACTOR,
         now: NOW,
         authorizationScope: scope,
@@ -274,6 +449,37 @@ async function main() {
       });
       assert.equal(r.validationResult.status, "blocked");
       assert.equal(r.requestCount, 0);
+    }
+
+    // 7) max request blocks preserve the already attempted request count
+    {
+      const oneRequestPlan = testPlanSchema.parse({
+        ...approvedPlan(),
+        metadata: {
+          allowedActions: ["HEAD", "GET"],
+          forbiddenActions: ["POST"],
+          maxRequestsTotal: 1,
+        },
+      });
+      const r = await runControlledValidation({
+        targetId: TARGET,
+        runId: RUN,
+        actor: ACTOR,
+        now: NOW,
+        authorizationScope: scope,
+        testPlan: oneRequestPlan,
+        approvalGate: execGateApproved(),
+        validationBaseUrl: baseUrl,
+        allowedOrigins: [origin],
+        fetchImpl: async () => new Response(null, { status: 405 }),
+      });
+      assert.equal(r.validationResult.status, "blocked");
+      assert.equal(
+        (r.validationResult.metadata as { blockedReason?: string })
+          ?.blockedReason,
+        "max_requests_exceeded",
+      );
+      assert.equal(r.requestCount, 1);
     }
 
     console.log("validate-approval-validation: all checks passed");
