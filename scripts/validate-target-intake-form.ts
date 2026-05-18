@@ -29,6 +29,15 @@ const helperSource = readFileSync(
   "src/shared/target-scope-decision.ts",
   "utf8",
 );
+const pdfRenderSource = readFileSync("scripts/test-pdf-render.ts", "utf8");
+
+function sourceBetween(sourceText: string, start: string, end: string) {
+  const startIndex = sourceText.indexOf(start);
+  assert.ok(startIndex >= 0, `Source block start not found: ${start}`);
+  const endIndex = sourceText.indexOf(end, startIndex);
+  assert.ok(endIndex >= 0, `Source block end not found: ${end}`);
+  return sourceText.slice(startIndex, endIndex);
+}
 
 if (source.includes('setGlobalError(\n            "[ERROR]')) {
   throw new Error(
@@ -274,11 +283,22 @@ assert.ok(
   decisionIndex < firstInsertIndex,
   "Convex createFull must decide/reject scope before any insert.",
 );
+const hookDecisionIndex = hookSource.indexOf(
+  "const scopeDecision = decideTargetScope",
+);
+const hookDemoWriteIndex = hookSource.indexOf(
+  "buildAndStoreDemoResult({ input: args, scopeDecision })",
+);
 assert.ok(
-  hookSource.indexOf("const scopeDecision = decideTargetScope") <
-    hookSource.indexOf(
-      "buildAndStoreDemoResult({ input: args, scopeDecision })",
-    ),
+  hookDecisionIndex >= 0,
+  "Session fallback must call decideTargetScope before writing demo target state.",
+);
+assert.ok(
+  hookDemoWriteIndex >= 0,
+  "Session fallback demo state write boundary not found.",
+);
+assert.ok(
+  hookDecisionIndex < hookDemoWriteIndex,
   "Session fallback must decide/reject scope before writing demo target state.",
 );
 
@@ -333,6 +353,52 @@ assert.ok(
     convexSource.includes("allowedAssetCount") &&
     convexSource.includes("deniedAssetCount"),
   "Convex rejected audit details must be scalar-safe instead of copying raw arrays.",
+);
+
+const rejectedBranchSource = sourceBetween(
+  convexSource,
+  'if (scopeDecision.status === "rejected")',
+  "// -----------------------------------------------------------------------\n    // 1. Duplicate check",
+);
+const rejectedWorkflowInsertIndex = rejectedBranchSource.indexOf(
+  'ctx.db.insert("workflowRuns"',
+);
+const rejectedAuditIndex = rejectedBranchSource.indexOf("appendAuditEvent");
+assert.ok(
+  rejectedWorkflowInsertIndex >= 0,
+  "Rejected Convex intake must persist a workflowRuns row before audit events reference the runId.",
+);
+assert.ok(
+  rejectedAuditIndex >= 0,
+  "Rejected Convex intake audit event boundary not found.",
+);
+assert.ok(
+  rejectedWorkflowInsertIndex < rejectedAuditIndex,
+  "Rejected Convex intake must persist workflowRuns before appending audit events with runId.",
+);
+
+assert.equal(
+  hookSource.includes('message.includes("Convex")'),
+  false,
+  "Demo fallback must not hide arbitrary Convex/server errors by matching the word Convex.",
+);
+assert.equal(
+  helperSource.includes("resolves to a private or internal host pattern"),
+  false,
+  "Pattern-only intake rejection copy must not claim DNS resolution happened.",
+);
+assert.ok(
+  helperSource.includes("matches a private or internal host pattern"),
+  "Pattern-only intake rejection copy must say the host matched a pattern.",
+);
+assert.equal(
+  pdfRenderSource.includes("/Users/"),
+  false,
+  "PDF render test script must not write to contributor-specific absolute paths.",
+);
+assert.ok(
+  successCardSource.includes("No audit events"),
+  "Target success card must render an explicit empty state for missing audit events.",
 );
 assert.ok(
   pipelineSource.includes("auditEvents?: AuditEventDto[]") &&
