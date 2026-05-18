@@ -58,6 +58,7 @@
     "scanner:persistence:validate": "node scripts/validate-scan-persistence.ts",
     "scanner:validate": "node scripts/validate-scanner.ts",
     "start": "node .output/server/index.mjs",
+    "target:intake:validate": "node scripts/validate-target-intake-form.ts",
     "validation:gate:validate": "node scripts/validate-approval-validation.ts",
     "test:analyzer": "npx tsx scripts/validate-analyzer.ts",
     "typecheck": "tsc --build --pretty"
