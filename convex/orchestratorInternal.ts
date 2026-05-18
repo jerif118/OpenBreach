@@ -6,27 +6,41 @@
  * - `loadPipelineEntry` returns the same `listPipeline` row the CLI uses,
  *   filtered to a single externalId so the action does not need to ship the
  *   full list back to the Node runtime.
- * - `requireOperatorOrAdminActor` performs the standard role check (the
- *   existing `requireOperatorOrAdmin` helper needs `ctx.db`, which actions
- *   don't have, so we expose it as an internal query the action calls).
+ * - `getProfileByTokenIdentifier` loads `userProfiles` by Convex identity token.
+ *   The Node action reads identity via `ctx.auth.getUserIdentity()` and passes
+ *   the token here so auth does not rely on nested-query identity propagation.
  */
 
 import { v } from "convex/values";
 
 import { internalQuery } from "./_generated/server";
-import { requireOperatorOrAdmin } from "./auth";
 
-export const requireOperatorOrAdminActor = internalQuery({
-  args: {},
-  handler: async (ctx) => {
-    const profile = await requireOperatorOrAdmin(ctx);
-    const identity = await ctx.auth.getUserIdentity();
-    const actor =
-      profile.name ??
-      identity?.email ??
-      identity?.tokenIdentifier ??
-      "operator";
-    return { actor };
+// Returns the userProfiles row for a given tokenIdentifier WITHOUT performing
+// an auth check. Auth is enforced by the calling action via
+// `ctx.auth.getUserIdentity()` so we don't depend on Convex propagating the
+// identity through `ctx.runQuery`, which can race with websocket reconnects
+// (especially right after a `convex dev` restart).
+export const getProfileByTokenIdentifier = internalQuery({
+  args: { tokenIdentifier: v.string() },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_tokenIdentifier", (q) =>
+        q.eq("tokenIdentifier", args.tokenIdentifier),
+      )
+      .unique();
+
+    if (!profile) {
+      return null;
+    }
+
+    return {
+      profileId: profile._id,
+      tokenIdentifier: profile.tokenIdentifier,
+      name: profile.name ?? null,
+      email: profile.email ?? null,
+      roles: profile.roles,
+    };
   },
 });
 

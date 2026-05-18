@@ -21,6 +21,8 @@ import { internal } from "./_generated/api";
 import { action } from "./_generated/server";
 import { runOrchestratorForPipelineEntry } from "../src/workflow/orchestrator-runner";
 
+const ALLOWED_ROLES = ["operator", "admin"] as const;
+
 export const runForTarget = action({
   args: { targetId: v.string() },
   handler: async (
@@ -38,10 +40,38 @@ export const runForTarget = action({
     requestCount: number;
     httpStatus: number | null;
   }> => {
-    const { actor } = await ctx.runQuery(
-      internal.orchestratorInternal.requireOperatorOrAdminActor,
-      {},
+    // Read identity directly from the action context. Doing the auth check
+    // here (instead of inside a runQuery) avoids any chance of an unauth'd
+    // sub-call during websocket reconnects after a `convex dev` restart.
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error(
+        "Not signed in. Please sign in (the Run button should be disabled until then).",
+      );
+    }
+
+    const profile = await ctx.runQuery(
+      internal.orchestratorInternal.getProfileByTokenIdentifier,
+      { tokenIdentifier: identity.tokenIdentifier },
     );
+
+    if (!profile) {
+      throw new Error(
+        "No Convex userProfiles row for the current user. Refresh the app so it can auto-provision your profile, then try again.",
+      );
+    }
+
+    if (!profile.roles.some((role) => ALLOWED_ROLES.includes(role as "operator" | "admin"))) {
+      throw new Error(
+        `Insufficient permissions: roles=[${profile.roles.join(", ")}]. Need 'operator' or 'admin'. Run pnpm users:elevate-admin --email ${profile.email ?? "<your-email>"}.`,
+      );
+    }
+
+    const actor =
+      profile.name ??
+      identity.email ??
+      profile.email ??
+      identity.tokenIdentifier;
 
     const entry = await ctx.runQuery(
       internal.orchestratorInternal.loadPipelineEntry,
