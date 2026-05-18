@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { MaterialSymbol } from "../../components/ui/MaterialSymbol";
 
 import { formatTimestamp } from "../../features/openbreach/pipeline-data";
 import {
@@ -123,7 +124,7 @@ function SecurityReports() {
                   <p className="uppercase">{download.label}</p>
                   <p className="mt-1 text-[#b9cacb]">{download.targetName}</p>
                 </div>
-                <span className="material-symbols-outlined">download</span>
+                <MaterialSymbol icon="download" />
               </a>
             ))}
           </div>

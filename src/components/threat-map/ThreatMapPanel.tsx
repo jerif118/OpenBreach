@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MaterialSymbol } from "../ui/MaterialSymbol";
 import { mockThreatEntries } from "./mockThreatEntries";
 import { ThreatGeoMap } from "./ThreatGeoMap";
 import { ThreatMapControls } from "./ThreatMapControls";
@@ -100,11 +101,10 @@ function ThreatZoneCard({
           type="button"
           onClick={onToggle}
         >
-          <span
-            className={`material-symbols-outlined text-lg transition-transform ${expanded ? "rotate-180" : ""}`}
-          >
-            expand_more
-          </span>
+          <MaterialSymbol
+            className={`text-lg transition-transform ${expanded ? "rotate-180" : ""}`}
+            icon="expand_more"
+          />
         </button>
       </div>
 
