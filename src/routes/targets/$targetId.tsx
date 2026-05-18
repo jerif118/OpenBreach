@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAction } from "convex/react";
+import { useUser } from "@clerk/tanstack-react-start";
 
 import { api } from "../../../convex/_generated/api.js";
 import { OpenBreachAppFrame } from "../../features/openbreach/app-frame";
@@ -129,9 +130,8 @@ function TargetDetailPage() {
               }
               className={`${ACTION_CLASS_NAME} border-[#00e639]/40 bg-[#00e639]/10 text-[#00e639] hover:bg-[#00e639]/15 focus:ring-[#00e639]/30 disabled:cursor-not-allowed disabled:opacity-40`}
               title={
-                orchestrator.canRun
-                  ? "Trigger a controlled validation pass against this target"
-                  : "Convex is not configured (set VITE_CONVEX_URL)"
+                orchestrator.disabledReason ??
+                "Trigger a controlled validation pass against this target"
               }
             >
               {orchestrator.state.status === "running"
@@ -495,19 +495,30 @@ function EmptyMessage({ message }: { message: string }) {
 }
 
 const isConvexConfigured = Boolean(import.meta.env.VITE_CONVEX_URL);
+const isClerkConfigured = Boolean(import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
 
 function useOrchestratorRun(targetId: string) {
   const [state, setState] = useState<OrchestratorState>({ status: "idle" });
-  // useAction hooks must be called unconditionally; the action is only
-  // safe to invoke when Convex is configured, so we guard at call time.
   const runForTargetAction = useAction(api.orchestratorActions.runForTarget);
+  // useUser must be called unconditionally per React hook rules. When Clerk
+  // isn't configured the hook reads from an empty provider and the values
+  // we use below are simply falsy / undefined.
+  const { isLoaded, isSignedIn } = useUser();
+
+  const authReady = isClerkConfigured ? isLoaded && Boolean(isSignedIn) : true;
+  const canRun = isConvexConfigured && authReady;
+
+  const disabledReason = !isConvexConfigured
+    ? "Convex is not configured (VITE_CONVEX_URL is missing)."
+    : !authReady
+      ? isClerkConfigured && isLoaded
+        ? "Sign in to run the orchestrator."
+        : "Waiting for authentication to finish loading…"
+      : null;
 
   const run = async () => {
-    if (!isConvexConfigured) {
-      setState({
-        status: "error",
-        message: "Convex is not configured (VITE_CONVEX_URL is missing).",
-      });
+    if (disabledReason) {
+      setState({ status: "error", message: disabledReason });
       return;
     }
     setState({ status: "running" });
@@ -521,7 +532,7 @@ function useOrchestratorRun(targetId: string) {
     }
   };
 
-  return { state, run, canRun: isConvexConfigured };
+  return { state, run, canRun, disabledReason };
 }
 
 function OrchestratorRunBanner({ state }: { state: OrchestratorState }) {
