@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { MaterialSymbol } from "../../components/ui/MaterialSymbol";
 
 import { ThreatMapPanel } from "../../components/threat-map/ThreatMapPanel";
 import {
@@ -28,9 +29,10 @@ export function OpenBreachDashboard() {
       <header className="border-primary/20 flex flex-col justify-between gap-4 border-b pb-4 lg:flex-row lg:items-end">
         <div>
           <h1 className="font-display flex items-center gap-3 text-xl tracking-[0.14em] text-[#00dbe9] uppercase lg:text-2xl">
-            <span className="material-symbols-outlined text-2xl lg:text-3xl">
-              travel_explore
-            </span>
+            <MaterialSymbol
+              className="text-2xl lg:text-3xl"
+              icon="travel_explore"
+            />
             Open Breach Control Plane
           </h1>
           <p className="mt-2 font-mono text-[10px] text-[#b9cacb] lg:text-xs">
@@ -220,7 +222,7 @@ export function OpenBreachDashboard() {
           <section className="relative overflow-hidden border border-[#ffb4ab]/40 bg-[#2a2a2a] p-4">
             <div className="absolute top-0 left-0 h-1 w-full bg-[#ffb4ab]/50" />
             <h2 className="font-display mb-4 flex items-center gap-2 text-base text-[#ffb4ab] uppercase lg:text-lg">
-              <span className="material-symbols-outlined">gpp_bad</span>
+              <MaterialSymbol icon="gpp_bad" />
               Live Alerts
             </h2>
             <div className="flex flex-col gap-3 font-mono text-[10px]">
@@ -309,9 +311,7 @@ export function OpenBreachDashboard() {
                   href={download.href}
                 >
                   <span>{download.label}</span>
-                  <span className="material-symbols-outlined text-sm">
-                    download
-                  </span>
+                  <MaterialSymbol className="text-sm" icon="download" />
                 </a>
               ))}
             </div>

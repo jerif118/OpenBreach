@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { MaterialSymbol } from "../../components/ui/MaterialSymbol";
 
 export function OpenBreachAppFrame({ children }: { children: ReactNode }) {
   return (
@@ -44,9 +45,7 @@ function SideNavBar() {
         </div>
         <div className="border-primary/10 bg-surface-container-low pixel-corner mt-5 flex w-full items-center gap-3 border px-3 py-3">
           <div className="border-primary/20 bg-surface pixel-corner flex h-10 w-10 items-center justify-center border">
-            <span className="material-symbols-outlined text-primary">
-              verified_user
-            </span>
+            <MaterialSymbol className="text-primary" icon="verified_user" />
           </div>
           <div>
             <p className="font-display text-primary text-sm uppercase">
@@ -73,20 +72,25 @@ function SideNavBar() {
 
       <div className="space-y-3 p-6">
         <Link
-          className="group border-primary/30 bg-surface text-primary pixel-corner hover:bg-primary/10 flex w-full items-center justify-center gap-2 border px-3 py-3 font-mono text-[10px] tracking-[0.22em] uppercase transition-colors"
+          className="group border-primary/30 bg-surface text-primary pixel-corner hover:bg-primary/10 flex w-full items-center justify-center gap-2 border px-3 py-3 text-center font-mono text-[10px] tracking-[0.22em] uppercase transition-colors"
           to="/targets/new"
         >
-          <span className="material-symbols-outlined group-hover:animate-pulse">
-            add_circle
+          <MaterialSymbol
+            className="group-hover:animate-pulse shrink-0"
+            icon="add_circle"
+          />
+          <span className="min-w-0 whitespace-normal break-words leading-tight">
+            REGISTER_TARGET
           </span>
-          REGISTER_TARGET
         </Link>
         <Link
-          className="group border-secondary-fixed-dim/40 bg-secondary-fixed-dim/5 text-secondary-fixed-dim pixel-corner hover:bg-secondary-fixed-dim/10 flex w-full items-center justify-center gap-2 border px-3 py-3 font-mono text-[10px] tracking-[0.22em] uppercase transition-colors"
+          className="group border-secondary-fixed-dim/40 bg-secondary-fixed-dim/5 text-secondary-fixed-dim pixel-corner hover:bg-secondary-fixed-dim/10 flex w-full items-center justify-center gap-2 border px-3 py-3 text-center font-mono text-[10px] tracking-[0.22em] uppercase transition-colors"
           to="/guardian/reports"
         >
-          <span className="material-symbols-outlined">download</span>
-          OPEN_REPORTS
+          <MaterialSymbol className="shrink-0" icon="download" />
+          <span className="min-w-0 whitespace-normal break-words leading-tight">
+            OPEN_REPORTS
+          </span>
         </Link>
       </div>
     </nav>
@@ -109,13 +113,15 @@ function NavItem({
       activeOptions={{ exact }}
       activeProps={{
         className:
-          "flex items-center gap-4 border-l-4 border-secondary-fixed-dim bg-secondary-container/10 px-4 py-3 font-mono text-[10px] tracking-[0.22em] text-secondary-fixed-dim uppercase transition-all sm:text-xs",
+          "flex w-full min-w-0 items-start gap-4 border-l-4 border-secondary-fixed-dim bg-secondary-container/10 px-4 py-3 font-mono text-[10px] tracking-[0.22em] text-secondary-fixed-dim uppercase transition-all sm:text-xs",
       }}
-      className="text-on-surface-variant hover:bg-primary/5 hover:text-primary flex items-center gap-4 px-4 py-3 font-mono text-[10px] tracking-[0.22em] uppercase transition-all sm:text-xs"
+      className="text-on-surface-variant hover:bg-primary/5 hover:text-primary flex w-full min-w-0 items-start gap-4 px-4 py-3 font-mono text-[10px] tracking-[0.22em] uppercase transition-all sm:text-xs"
       to={to}
     >
-      <span className="material-symbols-outlined">{icon}</span>
-      {label}
+      <MaterialSymbol className="mt-0.5 shrink-0" icon={icon} />
+      <span className="min-w-0 flex-1 whitespace-normal break-words leading-tight">
+        {label}
+      </span>
     </Link>
   );
 }
@@ -133,19 +139,19 @@ function TopNavBarMobile() {
       </div>
       <div className="flex gap-4">
         <Link className="hover:text-primary text-[#b9cacb]" to="/targets">
-          <span className="material-symbols-outlined">security</span>
+          <MaterialSymbol icon="security" />
         </Link>
         <Link
           className="hover:text-primary text-[#b9cacb]"
           to="/guardian/validations"
         >
-          <span className="material-symbols-outlined">sensors</span>
+          <MaterialSymbol icon="sensors" />
         </Link>
         <Link
           className="hover:text-primary text-[#b9cacb]"
           to="/guardian/reports"
         >
-          <span className="material-symbols-outlined">terminal</span>
+          <MaterialSymbol icon="terminal" />
         </Link>
       </div>
     </nav>
