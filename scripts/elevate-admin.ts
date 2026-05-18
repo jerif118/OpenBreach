@@ -108,7 +108,9 @@ function parseArgs(argv: string[]): Mode {
   }
 
   if (args.createIfMissing && !args.tokenIdentifier) {
-    process.stderr.write("--create only works with --token <tokenIdentifier>\n\n");
+    process.stderr.write(
+      "--create only works with --token <tokenIdentifier>\n\n",
+    );
     usageAndExit(1);
   }
 
