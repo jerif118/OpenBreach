@@ -1,3 +1,6 @@
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
+
 import {
   rawScanEvidenceSchema,
   type Municipality,
@@ -25,6 +28,7 @@ export type PassiveScannerOptions = {
   controls?: ScannerControls;
   fetch?: typeof fetch;
   getTlsCertificate?: (url: URL, timeoutMs: number) => Promise<TlsEvidence>;
+  resolveHostname?: (hostname: string) => Promise<readonly string[]>;
   delay?: (milliseconds: number) => Promise<void>;
   now?: () => string;
 };
@@ -82,6 +86,22 @@ export async function scanWebsite(
     url = new URL(requestedUrl);
   } catch (error) {
     baseEvidence.errors.push(toError("http", error));
+    return rawScanEvidenceSchema.parse(baseEvidence);
+  }
+
+  const resolvedPrivateAddress = await resolvePrivateAddress(
+    url.hostname,
+    options.resolveHostname ?? resolveHostname,
+  );
+  if (resolvedPrivateAddress) {
+    baseEvidence.errors.push(
+      toError(
+        "dns",
+        new Error(
+          `Resolved hostname ${url.hostname} to private or internal address ${resolvedPrivateAddress}`,
+        ),
+      ),
+    );
     return rawScanEvidenceSchema.parse(baseEvidence);
   }
 
@@ -158,4 +178,59 @@ function resolveNonnegativeInteger(
 
 async function delay(milliseconds: number): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+async function resolveHostname(hostname: string): Promise<readonly string[]> {
+  const records = await lookup(hostname, { all: true, verbatim: true });
+  return records.map((record) => record.address);
+}
+
+async function resolvePrivateAddress(
+  hostname: string,
+  resolveHostnameImpl: (hostname: string) => Promise<readonly string[]>,
+): Promise<string | undefined> {
+  const addresses = await resolveHostnameImpl(hostname);
+  return addresses.find(isPrivateOrInternalAddress);
+}
+
+function isPrivateOrInternalAddress(address: string): boolean {
+  const normalized = address.toLowerCase().replace(/^\[|\]$/g, "");
+  if (isIP(normalized) === 4) {
+    return isPrivateOrInternalIpv4(normalized);
+  }
+
+  return isPrivateOrInternalIpv6(normalized);
+}
+
+function isPrivateOrInternalIpv4(address: string): boolean {
+  const octets = address.split(".").map((part) => Number(part));
+  if (
+    octets.length !== 4 ||
+    octets.some((part) => !Number.isInteger(part) || part < 0 || part > 255)
+  ) {
+    return false;
+  }
+
+  const [first, second] = octets;
+  return (
+    first === 0 ||
+    first === 10 ||
+    first === 127 ||
+    (first === 100 && second >= 64 && second <= 127) ||
+    (first === 169 && second === 254) ||
+    (first === 172 && second >= 16 && second <= 31) ||
+    (first === 192 && second === 168)
+  );
+}
+
+function isPrivateOrInternalIpv6(address: string): boolean {
+  return (
+    address === "::1" ||
+    address.startsWith("fc") ||
+    address.startsWith("fd") ||
+    address.startsWith("fe8") ||
+    address.startsWith("fe9") ||
+    address.startsWith("fea") ||
+    address.startsWith("feb")
+  );
 }
