@@ -27,7 +27,7 @@ export type PassiveScanEvidenceDto = {
     finalUrl?: string;
   }[];
   errors?: {
-    stage: "http" | "tls" | "cms" | "admin-exposure";
+    stage: "dns" | "http" | "tls" | "cms" | "admin-exposure";
     message: string;
   }[];
   runId?: string;
