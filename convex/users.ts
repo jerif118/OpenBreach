@@ -22,17 +22,24 @@ export const current = query({
   },
 });
 
+// The Convex auth identity often lacks `email` / `name` because Clerk's
+// default "convex" JWT template only includes `sub` and `iss`. Accept
+// client-provided values (sourced from Clerk's `useUser`) so the row stays
+// searchable by email for tools like the admin-elevation script.
 export const updateCurrentMetadata = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    email: v.optional(v.string()),
+    name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
     const currentUser = await getCurrentUserProfile(ctx);
     if (!currentUser) {
       throw new Error("Authentication required.");
     }
 
     const metadata = {
-      email: currentUser.identity.email,
-      name: currentUser.identity.name,
+      email: args.email ?? currentUser.identity.email,
+      name: args.name ?? currentUser.identity.name,
     };
 
     if (currentUser.profile) {
