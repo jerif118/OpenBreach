@@ -87,6 +87,16 @@ function TargetDetailPage() {
             >
               ← Target List
             </Link>
+            {target.reportArtifact?.status === "completed" ? (
+              <Link
+                to="/reports/$reportId"
+                params={{ reportId: target.reportArtifact.artifactId }}
+                search={{ variant: "technical" }}
+                className={`${ACTION_CLASS_NAME} border-secondary-fixed-dim/50 bg-secondary-fixed-dim/10 text-secondary-fixed-dim hover:bg-secondary-fixed-dim/15 focus:ring-secondary-fixed-dim/30`}
+              >
+                Open Report
+              </Link>
+            ) : null}
             <Link
               to="/guardian/reports"
               className={`${ACTION_CLASS_NAME} border-primary/30 bg-primary/10 text-primary hover:bg-primary/15 focus:ring-primary/30`}
