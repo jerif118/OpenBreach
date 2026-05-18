@@ -199,6 +199,17 @@ function pendingExecutionGate(
   };
 }
 
+function bypassedExecutionGate(
+  base: Omit<ApprovalGate, "status" | "approvedBy" | "approvedAt">,
+  bypassJustification: string,
+): ApprovalGate {
+  return {
+    ...base,
+    status: "bypassed",
+    bypassJustification,
+  };
+}
+
 /**
  * Derives orchestrator outputs from a single fixture snapshot.
  */
@@ -379,8 +390,10 @@ export function runMvpOrchestrator(
   let activeValidationDenied = false;
 
   if (input.completeWithPassiveReporting) {
-    audit("gate-approved", { mode: "passive_reporting_short_circuit" });
-    approvalGate = approvedExecutionGate(gateBase, input.now, input.actor);
+    approvalGate = bypassedExecutionGate(
+      gateBase,
+      "Passive-only reporting completed without active validation",
+    );
     audit("phase-changed", { from: "approval", to: "reporting" });
     exitLastPhase(phases, input.now);
     pushPhase(phases, "reporting", input.now);
