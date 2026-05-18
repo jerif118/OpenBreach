@@ -197,3 +197,28 @@ export const listProfiles = internalQuery({
     }));
   },
 });
+
+// Delete one or more userProfiles rows by id. Used by the cleanup script to
+// remove stale / duplicate profiles. Internal-only — never exposed publicly.
+export const deleteProfiles = internalMutation({
+  args: { profileIds: v.array(v.id("userProfiles")) },
+  handler: async (ctx, args) => {
+    if (args.profileIds.length === 0) {
+      return { deleted: 0, missing: 0, ids: [] as string[] };
+    }
+    let deleted = 0;
+    let missing = 0;
+    const ids: string[] = [];
+    for (const id of args.profileIds) {
+      const existing = await ctx.db.get(id);
+      if (!existing) {
+        missing += 1;
+        continue;
+      }
+      await ctx.db.delete(id);
+      deleted += 1;
+      ids.push(id);
+    }
+    return { deleted, missing, ids };
+  },
+});
