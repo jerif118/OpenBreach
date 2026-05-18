@@ -113,6 +113,19 @@ function validateArtifacts(result: ReturnType<typeof runMvpOrchestrator>) {
   assert.equal(r.mvpState, "COMPLETE");
   assert.equal(r.workflowRun.status, "completed");
   assert.ok(r.workflowRun.completedAt);
+  assert.equal(r.approvalGate?.status, "bypassed");
+  assert.equal(
+    r.approvalGate?.bypassJustification,
+    "Passive-only reporting completed without active validation",
+  );
+  assert.ok(
+    r.auditEvents.some((e) => e.eventType === "report-completed"),
+    "passive-only reporting completion must be audited",
+  );
+  assert.ok(
+    !r.auditEvents.some((e) => e.eventType === "gate-approved"),
+    "passive-only reporting must not audit execution gate approval",
+  );
 }
 
 // 5. Active validation denied without approved execution gate
