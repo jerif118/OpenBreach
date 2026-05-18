@@ -228,15 +228,11 @@ export function runMvpOrchestrator(
   const phases: WorkflowPhase[] = [phaseEntry("intake", input.now)];
 
   if (!input.scopeApproved) {
+    const rejectionReason = input.scopeRejectionReason ?? "scope_denied";
     audit("workflow-rejected", { reason: "scope_not_approved" });
+    const intakePhase = phases.at(-1);
+    if (intakePhase) intakePhase.rejectionReason = rejectionReason;
     exitLastPhase(phases, input.now);
-    phases.push(
-      phaseEntry(
-        "intake",
-        input.now,
-        input.scopeRejectionReason ?? "scope_denied",
-      ),
-    );
     const workflowRun: WorkflowRun = {
       runId: input.runId,
       targetId: input.targetId,
