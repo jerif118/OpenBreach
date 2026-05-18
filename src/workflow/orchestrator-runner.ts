@@ -402,7 +402,7 @@ async function enrichedFetch(
     const causeMessage = cause instanceof Error ? cause.message : undefined;
     const baseMessage = error instanceof Error ? error.message : String(error);
     const message =
-      causeCode ?? causeMessage
+      (causeCode ?? causeMessage)
         ? `${baseMessage} [${causeCode ?? causeMessage}]`
         : baseMessage;
     throw new Error(message);
