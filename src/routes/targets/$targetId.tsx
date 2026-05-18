@@ -1,5 +1,8 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { useAction } from "convex/react";
 
+import { api } from "../../../convex/_generated/api.js";
 import { OpenBreachAppFrame } from "../../features/openbreach/app-frame";
 import {
   formatClassification,
@@ -16,6 +19,25 @@ export const Route = createFileRoute("/targets/$targetId")({
   component: TargetDetailPage,
 });
 
+type OrchestratorRunOutcome = {
+  runId: string;
+  targetId: string;
+  validationStatus:
+    | "passed"
+    | "blocked"
+    | "error"
+    | "failed"
+    | "inconclusive";
+  requestCount: number;
+  httpStatus: number | null;
+};
+
+type OrchestratorState =
+  | { status: "idle" }
+  | { status: "running" }
+  | { status: "success"; outcome: OrchestratorRunOutcome }
+  | { status: "error"; message: string };
+
 const PANEL_CLASS_NAME =
   "relative overflow-hidden border border-primary/15 bg-surface-container-low p-6 pixel-corner";
 const INSET_CLASS_NAME = "border border-primary/10 bg-surface px-4 py-4";
@@ -26,6 +48,7 @@ function TargetDetailPage() {
   const { targetId } = Route.useParams();
   const { isLoading, targets } = useOpenBreachPipeline();
   const target = targets.find((entry) => entry.targetId === targetId) ?? null;
+  const orchestrator = useOrchestratorRun(targetId);
 
   if (isLoading) {
     return (
@@ -103,8 +126,27 @@ function TargetDetailPage() {
             >
               Reports
             </Link>
+            <button
+              type="button"
+              onClick={orchestrator.run}
+              disabled={!orchestrator.canRun || orchestrator.state.status === "running"}
+              className={`${ACTION_CLASS_NAME} border-[#00e639]/40 bg-[#00e639]/10 text-[#00e639] hover:bg-[#00e639]/15 focus:ring-[#00e639]/30 disabled:cursor-not-allowed disabled:opacity-40`}
+              title={
+                orchestrator.canRun
+                  ? "Trigger a controlled validation pass against this target"
+                  : "Convex is not configured (set VITE_CONVEX_URL)"
+              }
+            >
+              {orchestrator.state.status === "running"
+                ? "Running…"
+                : "▶ Run Orchestrator"}
+            </button>
           </div>
         </header>
+
+        {orchestrator.state.status !== "idle" ? (
+          <OrchestratorRunBanner state={orchestrator.state} />
+        ) : null}
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <MetricCard
@@ -453,6 +495,81 @@ function EmptyMessage({ message }: { message: string }) {
   return (
     <div className="border-primary/10 bg-surface text-on-surface-variant pixel-corner border border-dashed px-4 py-4 font-mono text-sm">
       {message}
+    </div>
+  );
+}
+
+const isConvexConfigured = Boolean(import.meta.env.VITE_CONVEX_URL);
+
+function useOrchestratorRun(targetId: string) {
+  const [state, setState] = useState<OrchestratorState>({ status: "idle" });
+  // useAction hooks must be called unconditionally; the action is only
+  // safe to invoke when Convex is configured, so we guard at call time.
+  const runForTargetAction = useAction(api.orchestratorActions.runForTarget);
+
+  const run = async () => {
+    if (!isConvexConfigured) {
+      setState({
+        status: "error",
+        message: "Convex is not configured (VITE_CONVEX_URL is missing).",
+      });
+      return;
+    }
+    setState({ status: "running" });
+    try {
+      const outcome = await runForTargetAction({ targetId });
+      setState({ status: "success", outcome });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Orchestrator run failed.";
+      setState({ status: "error", message });
+    }
+  };
+
+  return { state, run, canRun: isConvexConfigured };
+}
+
+function OrchestratorRunBanner({ state }: { state: OrchestratorState }) {
+  if (state.status === "idle") return null;
+  if (state.status === "running") {
+    return (
+      <div className="border-primary/30 bg-primary/10 text-primary pixel-corner mt-6 border px-4 py-3 font-mono text-sm">
+        Orchestrator run in progress — driving state machine and bounded HTTP
+        probe…
+      </div>
+    );
+  }
+  if (state.status === "error") {
+    return (
+      <div className="border-error/30 bg-error/10 text-error pixel-corner mt-6 border px-4 py-3 font-mono text-sm">
+        Orchestrator run failed: {state.message}
+      </div>
+    );
+  }
+  const { outcome } = state;
+  const tone =
+    outcome.validationStatus === "passed"
+      ? "border-secondary-fixed-dim/30 bg-secondary-fixed-dim/10 text-secondary-fixed-dim"
+      : outcome.validationStatus === "blocked"
+        ? "border-[#ffd166]/30 bg-[#ffd166]/10 text-[#ffd166]"
+        : "border-error/30 bg-error/10 text-error";
+  return (
+    <div
+      className={`pixel-corner mt-6 border px-4 py-3 font-mono text-sm ${tone}`}
+    >
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="font-display text-base uppercase">
+          Orchestrator: {outcome.validationStatus}
+        </span>
+        <span>run {outcome.runId}</span>
+        <span>requests {outcome.requestCount}/2</span>
+        {outcome.httpStatus !== null ? (
+          <span>HTTP {outcome.httpStatus}</span>
+        ) : null}
+      </div>
+      <p className="mt-1 text-xs opacity-80">
+        Run persisted. See the Guardian → Workflow Runs page for full details.
+      </p>
     </div>
   );
 }
