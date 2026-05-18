@@ -1,3 +1,6 @@
+import type { FunctionReturnType } from "convex/server";
+
+import type { api } from "../../../convex/_generated/api.js";
 import type {
   ApprovalGateDto,
   AuditEventDto,
@@ -504,6 +507,437 @@ function buildConvexRecord(target: TargetListItemDto): PipelineTargetRecord {
   };
 }
 
+export type MunicipalityPipelineEntry = FunctionReturnType<
+  typeof api.municipalities.listPipeline
+>[number];
+
+type MunicipalityFindingSource = NonNullable<
+  MunicipalityPipelineEntry["report"]
+>["findings"] extends ReadonlyArray<infer R> | undefined
+  ? R
+  : never;
+
+type MunicipalityScanFinding = NonNullable<
+  MunicipalityPipelineEntry["scan"]
+>["findings"][number];
+
+function classifySeverity(value: string | undefined): FindingDto["severity"] {
+  switch (value) {
+    case "critical":
+    case "high":
+    case "medium":
+    case "low":
+    case "info":
+      return value;
+    default:
+      return "info";
+  }
+}
+
+function classifyFindingStatus(
+  value: string | undefined,
+): FindingDto["status"] {
+  switch (value) {
+    case "observed":
+    case "confirmed":
+    case "likely":
+    case "skipped":
+    case "unresolved":
+    case "false-positive":
+      return value;
+    default:
+      return "observed";
+  }
+}
+
+function classifyFindingCategory(
+  value: string | undefined,
+): FindingDto["category"] | undefined {
+  switch (value) {
+    case "tls":
+    case "headers":
+    case "cms":
+    case "exposure":
+    case "admin-exposure":
+    case "availability":
+    case "known-vulnerability":
+    case "configuration":
+    case "logic":
+      return value;
+    default:
+      return undefined;
+  }
+}
+
+function classifyConfidence(
+  value: string | undefined,
+): FindingDto["confidence"] | undefined {
+  switch (value) {
+    case "low":
+    case "medium":
+    case "high":
+      return value;
+    default:
+      return undefined;
+  }
+}
+
+function reportFindingToDto(
+  finding: MunicipalityFindingSource,
+  targetId: string,
+  createdAt: string,
+  reportReady: boolean,
+): FindingDto {
+  return {
+    findingId: finding.id,
+    targetId,
+    title: finding.title,
+    description: finding.description,
+    severity: classifySeverity(finding.severity),
+    status: classifyFindingStatus(finding.status),
+    createdAt,
+    category: classifyFindingCategory(finding.category),
+    evidence: finding.evidence,
+    remediationHint: finding.remediationHint,
+    affectedAssets: finding.affectedAssets,
+    confidence: classifyConfidence(finding.confidence),
+    reportReady,
+  };
+}
+
+function scanFindingToDto(
+  finding: MunicipalityScanFinding,
+  targetId: string,
+  createdAt: string,
+): FindingDto {
+  return {
+    findingId: finding.id,
+    targetId,
+    title: finding.title,
+    description: finding.description,
+    severity: classifySeverity(finding.severity),
+    status: "observed",
+    createdAt,
+    category: classifyFindingCategory(finding.category),
+    evidence: finding.evidence,
+    remediationHint: finding.remediationHint,
+    reportReady: false,
+  };
+}
+
+function buildEvidenceFromScan(
+  entry: MunicipalityPipelineEntry,
+): PassiveScanEvidenceDto | null {
+  const { scan, municipality } = entry;
+  if (!scan) {
+    return null;
+  }
+
+  return {
+    evidenceId: `evidence-${municipality.id}`,
+    targetId: municipality.id,
+    source: "convex-scanner",
+    collectedAt: scan.scannedAt,
+    requestedUrl: scan.requestedUrl ?? municipality.websiteUrl,
+    reachable: scan.reachable ?? false,
+    finalUrl: scan.finalUrl,
+    httpStatus: scan.httpStatus,
+    headers: scan.headers,
+    tls: scan.tls,
+    cms: scan.cms,
+    adminExposure: scan.adminExposure,
+    errors: scan.errors,
+    envelopeSource: "convex",
+    envelopeRecordedAt: scan.scannedAt,
+    envelopeHash: scan.id,
+    envelopeCollectedBy: "scanner-persist",
+  };
+}
+
+function buildReportArtifactFromReport(
+  entry: MunicipalityPipelineEntry,
+): ReportArtifactDto | null {
+  const { report, municipality } = entry;
+  if (!report) {
+    return null;
+  }
+
+  const status: ReportArtifactDto["status"] =
+    report.status === "completed"
+      ? "completed"
+      : report.status === "failed"
+        ? "failed"
+        : "pending";
+  const generatedBy: ReportArtifactDto["generatedBy"] =
+    report.generatedBy === "ai-provider"
+      ? "ai-provider"
+      : "deterministic-fallback";
+
+  return {
+    artifactId: report.externalId,
+    targetId: municipality.id,
+    variant: "technical",
+    title: `Remediation report — ${municipality.name}`,
+    generatedAt: report.generatedAt,
+    status,
+    findings: (report.findings ?? []).map((finding) => finding.id),
+    pdf: report.pdf,
+    generatedBy,
+  };
+}
+
+function buildReportDownloadsFromReport(
+  entry: MunicipalityPipelineEntry,
+): ReportDownloadEntry[] {
+  const { report, municipality } = entry;
+  if (!report || report.status !== "completed") {
+    return [];
+  }
+
+  const downloads: ReportDownloadEntry[] = [];
+  const technical = report.artifacts?.technical;
+  const friendly = report.artifacts?.friendly;
+  const upperName = municipality.name.toUpperCase().replaceAll(/\s+/g, "_");
+
+  if (technical?.pdf) {
+    downloads.push({
+      id: `${report.externalId}-technical`,
+      fileName: technical.pdf.fileName,
+      href: `/reports/${technical.pdf.fileName}`,
+      label: `${upperName}_TECHNICAL`,
+      targetName: municipality.name,
+      variant: "technical",
+    });
+  }
+
+  if (friendly?.pdf) {
+    downloads.push({
+      id: `${report.externalId}-friendly`,
+      fileName: friendly.pdf.fileName,
+      href: `/reports/${friendly.pdf.fileName}`,
+      label: `${upperName}_FRIENDLY`,
+      targetName: municipality.name,
+      variant: "friendly",
+    });
+  }
+
+  if (downloads.length === 0 && report.pdf) {
+    downloads.push({
+      id: `${report.externalId}-pdf`,
+      fileName: report.pdf.fileName,
+      href: `/reports/${report.pdf.fileName}`,
+      label: `${upperName}_REPORT`,
+      targetName: municipality.name,
+      variant: "technical",
+    });
+  }
+
+  return downloads;
+}
+
+function buildRunFromEntry(
+  entry: MunicipalityPipelineEntry,
+): WorkflowRunDto | null {
+  const { scan, report, municipality } = entry;
+  if (!scan && !report) {
+    return null;
+  }
+
+  const startedAt =
+    scan?.scannedAt ?? report?.generatedAt ?? new Date().toISOString();
+  const completedAt =
+    report?.status === "completed" ? report.generatedAt : undefined;
+  const status: WorkflowRunDto["status"] =
+    report?.status === "completed"
+      ? "completed"
+      : report?.status === "failed"
+        ? "failed"
+        : scan
+          ? "running"
+          : "pending";
+  const currentPhase: WorkflowPhaseName =
+    report?.status === "completed"
+      ? "reporting"
+      : scan
+        ? "passive-scan"
+        : "intake";
+
+  let durationMs: number | undefined;
+  if (scan && report?.status === "completed") {
+    const start = Date.parse(scan.scannedAt);
+    const end = Date.parse(report.generatedAt);
+    if (Number.isFinite(start) && Number.isFinite(end) && end >= start) {
+      durationMs = end - start;
+    }
+  }
+
+  return {
+    runId: `run-${municipality.id}`,
+    targetId: municipality.id,
+    status,
+    startedAt,
+    completedAt,
+    currentPhase,
+    durationMs,
+  };
+}
+
+function buildAuditFromEntry(
+  entry: MunicipalityPipelineEntry,
+): AuditEventDto[] {
+  const events: AuditEventDto[] = [];
+  const { municipality, scan, report } = entry;
+  const runId = `run-${municipality.id}`;
+
+  events.push({
+    eventId: `${municipality.id}-created`,
+    targetId: municipality.id,
+    eventType: "target-created",
+    actor: "municipality-seed",
+    timestamp:
+      scan?.scannedAt ?? report?.generatedAt ?? new Date().toISOString(),
+    runId,
+    details: {
+      state: municipality.state,
+      websiteUrl: municipality.websiteUrl,
+    },
+  });
+
+  if (scan) {
+    events.push({
+      eventId: `${municipality.id}-scan`,
+      targetId: municipality.id,
+      eventType: "evidence-recorded",
+      actor: "scanner-persist",
+      timestamp: scan.scannedAt,
+      runId,
+      details: {
+        riskScore: scan.riskScore,
+        riskLevel: scan.riskLevel,
+        findings: scan.findings.length,
+      },
+    });
+  }
+
+  if (report) {
+    events.push({
+      eventId: `${municipality.id}-report`,
+      targetId: municipality.id,
+      eventType:
+        report.status === "completed" ? "report-completed" : "report-generated",
+      actor: report.generatedBy ?? "report-generator",
+      timestamp: report.generatedAt,
+      runId,
+      details: {
+        reportId: report.externalId,
+        status: report.status,
+      },
+    });
+  }
+
+  return events;
+}
+
+function buildSummary(entry: MunicipalityPipelineEntry): string {
+  if (entry.report?.status === "completed") {
+    const count = entry.report.findings?.length ?? 0;
+    const suffix =
+      count > 0
+        ? `${count} remediation item${count === 1 ? "" : "s"} ready for review.`
+        : "No reportable items detected in the latest run.";
+    return `Live passive scan and remediation report are available. ${suffix}`;
+  }
+
+  if (entry.report?.status === "failed") {
+    return `Report generation failed: ${entry.report.error ?? "unknown error"}.`;
+  }
+
+  if (entry.scan) {
+    const findings = entry.scan.findings.length;
+    return findings > 0
+      ? `Passive evidence collected with ${findings} finding${findings === 1 ? "" : "s"}; report generation pending.`
+      : "Passive evidence collected; no reportable findings detected.";
+  }
+
+  return "Municipality registered. Passive scan and report pending.";
+}
+
+export function buildMunicipalityRecord(
+  entry: MunicipalityPipelineEntry,
+): PipelineTargetRecord {
+  const { municipality, scan, report } = entry;
+  const targetId = municipality.id;
+  const evidence = buildEvidenceFromScan(entry);
+  const reportArtifact = buildReportArtifactFromReport(entry);
+  const reportDownloads = buildReportDownloadsFromReport(entry);
+  const latestRun = buildRunFromEntry(entry);
+  const auditEvents = buildAuditFromEntry(entry);
+  const createdAt =
+    report?.generatedAt ?? scan?.scannedAt ?? new Date().toISOString();
+
+  const findings: FindingDto[] = report?.findings?.length
+    ? report.findings.map((finding) =>
+        reportFindingToDto(finding, targetId, createdAt, true),
+      )
+    : (scan?.findings ?? []).map((finding) =>
+        scanFindingToDto(finding, targetId, scan?.scannedAt ?? createdAt),
+      );
+
+  const approvalStatus: PipelineTargetRecord["approvalStatus"] = "approved";
+  const coverage = deriveCoverage({
+    approvalStatus,
+    evidence,
+    testPlan: null,
+    validation: null,
+    reportArtifact,
+  });
+
+  const riskTier = (scan?.riskLevel ??
+    municipality.riskTier) as PipelineTargetRecord["riskTier"];
+
+  return {
+    targetId,
+    name: municipality.name,
+    primaryUrl: municipality.websiteUrl,
+    riskTier,
+    classification: "public-sector",
+    geography: {
+      country: "Mexico",
+      region: municipality.state,
+      city: municipality.name,
+    },
+    population: municipality.population,
+    latitude: municipality.latitude,
+    longitude: municipality.longitude,
+    metadata: {
+      sourceUrl: municipality.sourceUrl,
+      riskScore: scan?.riskScore,
+    },
+    source: "convex",
+    summary: buildSummary(entry),
+    approvalStatus,
+    validationLevel: "passive",
+    rateLimit: 5,
+    allowedAssets: [municipality.websiteUrl],
+    deniedAssets: [],
+    latestRun,
+    evidence,
+    hypothesis: null,
+    testPlan: null,
+    approvalGate: null,
+    validation: null,
+    findings,
+    reportArtifact,
+    reportDownloads,
+    auditEvents,
+    coverage,
+    alerts: findings.length > 0 ? 1 : 0,
+    nextActionLabel:
+      reportArtifact?.status === "completed" ? "Open report" : "Open target",
+    nextActionTo: `/targets/${targetId}`,
+  };
+}
+
 export function getFixturePipelineRecords(): PipelineTargetRecord[] {
   return [buildApprovedFixtureRecord(), buildRejectedFixtureRecord()];
 }
@@ -557,15 +991,22 @@ export function writeStoredDemoTarget(target: StoredDemoTarget) {
 }
 
 export function buildPipelineRecords(options: {
-  source: "fixture" | "convex";
+  source: "fixture" | "convex" | "convex-municipalities";
   targets?: TargetListItemDto[];
   storedTargets?: StoredDemoTarget[];
+  municipalityEntries?: MunicipalityPipelineEntry[];
 }): PipelineTargetRecord[] {
   if (options.source === "fixture") {
     return [
       ...getFixturePipelineRecords(),
       ...(options.storedTargets ?? []).map(buildSessionRecord),
     ].sort(comparePipelineTargets);
+  }
+
+  if (options.source === "convex-municipalities") {
+    return (options.municipalityEntries ?? [])
+      .map(buildMunicipalityRecord)
+      .sort(comparePipelineTargets);
   }
 
   return (options.targets ?? [])

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 
 import { api } from "../../convex/_generated/api.js";
-import type { FindingDto, TargetListItemDto } from "../../convex/types.js";
+import type { FindingDto } from "../../convex/types.js";
 import {
   buildPipelineAlerts,
   buildPipelineRecords,
@@ -11,6 +11,7 @@ import {
   getPipelineReportDownloads,
   getWorkflowTone,
   readStoredDemoTargets,
+  type MunicipalityPipelineEntry,
   type PipelineTargetRecord,
   type ReportDownloadEntry,
   type StoredDemoTarget,
@@ -216,8 +217,8 @@ function buildFindings(targets: PipelineTargetRecord[]) {
 
 export function useOpenBreachPipeline(): OpenBreachPipelineData {
   const [storedTargets, setStoredTargets] = useState<StoredDemoTarget[]>([]);
-  const targetsResult = isConvexConfigured
-    ? useQuery(api.targetsPublic.list, { limit: 100 })
+  const municipalityPipelineResult = isConvexConfigured
+    ? useQuery(api.municipalities.listPipeline, { limit: 200 })
     : undefined;
 
   useEffect(() => {
@@ -244,11 +245,13 @@ export function useOpenBreachPipeline(): OpenBreachPipelineData {
     };
   }, []);
 
-  const isLoading = isConvexConfigured && targetsResult === undefined;
+  const isLoading =
+    isConvexConfigured && municipalityPipelineResult === undefined;
   const targets = isConvexConfigured
     ? buildPipelineRecords({
-        source: "convex",
-        targets: (targetsResult ?? []) as TargetListItemDto[],
+        source: "convex-municipalities",
+        municipalityEntries: (municipalityPipelineResult ??
+          []) as MunicipalityPipelineEntry[],
       })
     : buildPipelineRecords({
         source: "fixture",
