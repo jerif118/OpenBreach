@@ -219,6 +219,126 @@ export const get = query({
   },
 });
 
+const PIPELINE_MAX_LIMIT = 200;
+const PIPELINE_DEFAULT_LIMIT = 100;
+
+// Joined view of the municipality pipeline used by the Open Breach dashboard.
+// Returns each municipality with its latest passive scan and latest remediation
+// report so the client can render evidence, findings, and report artifacts in
+// one fetch without per-target round trips.
+export const listPipeline = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const limit = normalizePipelineLimit(args.limit);
+    const municipalities = await ctx.db
+      .query("municipalities")
+      .take(PIPELINE_MAX_LIMIT);
+    const entries: PipelineEntry[] = [];
+
+    for (const municipality of municipalities) {
+      const [latestScan] = await ctx.db
+        .query("scanResults")
+        .withIndex("by_municipalityId_and_scannedAt", (q) =>
+          q.eq("municipalityId", municipality._id),
+        )
+        .order("desc")
+        .take(1);
+
+      const [latestReport] = await ctx.db
+        .query("remediationReports")
+        .withIndex("by_municipalityId_and_generatedAt", (q) =>
+          q.eq("municipalityId", municipality._id),
+        )
+        .order("desc")
+        .take(1);
+
+      entries.push({
+        municipality: toMunicipalityContract(municipality),
+        scan: toScanResultContract(municipality, latestScan ?? null),
+        report: toPipelineReportContract(municipality, latestReport ?? null),
+        scannedAtFallback: latestScan?._creationTime ?? null,
+        reportedAtFallback: latestReport?._creationTime ?? null,
+      });
+    }
+
+    return entries.sort(comparePipelineEntries).slice(0, limit);
+  },
+});
+
+type PipelineEntry = {
+  municipality: ReturnType<typeof toMunicipalityContract>;
+  scan: ReturnType<typeof toScanResultContract>;
+  report: ReturnType<typeof toPipelineReportContract>;
+  scannedAtFallback: number | null;
+  reportedAtFallback: number | null;
+};
+
+function normalizePipelineLimit(limit: number | undefined) {
+  if (limit === undefined) {
+    return PIPELINE_DEFAULT_LIMIT;
+  }
+
+  if (!Number.isInteger(limit) || limit < 1 || limit > PIPELINE_MAX_LIMIT) {
+    throw new Error(
+      `municipalities.listPipeline limit must be an integer from 1 to ${PIPELINE_MAX_LIMIT}.`,
+    );
+  }
+
+  return limit;
+}
+
+function toPipelineReportContract(
+  municipality: Doc<"municipalities">,
+  report: Doc<"remediationReports"> | null,
+) {
+  if (report === null) {
+    return null;
+  }
+
+  return {
+    externalId: report.externalId,
+    municipalityId: municipality.externalId,
+    status: report.status,
+    generatedAt: report.generatedAt,
+    updatedAt: report.updatedAt,
+    summary: report.summary,
+    priorityActions: report.priorityActions,
+    findings: report.findings,
+    generatedBy: report.generatedBy,
+    pdf: report.pdf,
+    artifacts: report.artifacts,
+    error: report.error,
+  };
+}
+
+function comparePipelineEntries(left: PipelineEntry, right: PipelineEntry) {
+  const reportRank = pipelineReportRank(right) - pipelineReportRank(left);
+  if (reportRank !== 0) {
+    return reportRank;
+  }
+
+  const riskLeft = left.scan?.riskScore ?? 0;
+  const riskRight = right.scan?.riskScore ?? 0;
+  if (riskRight !== riskLeft) {
+    return riskRight - riskLeft;
+  }
+
+  return left.municipality.name.localeCompare(right.municipality.name);
+}
+
+function pipelineReportRank(entry: PipelineEntry) {
+  if (entry.report?.status === "completed") {
+    return 3;
+  }
+  if (entry.report) {
+    return 2;
+  }
+  if (entry.scan) {
+    return 1;
+  }
+  return 0;
+}
+
 // Internal seed function: callable only from `npx convex run` or other Convex
 // functions, not exposed to the app's public API. App-level admin checks are
 // unnecessary here because internal functions can't be reached from the client.
